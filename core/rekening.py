@@ -1,0 +1,122 @@
+import datetime
+
+class Rekening:
+    def __init__(self,norek,pin,pemilik,limit:int|None = 5000000,bunga=0.03,biaya_admin=2000,pajak=2000,level=1,minimum=500000):
+        self.norek               = norek
+        self.level               = level
+        self.__saldo             = 0
+        self.__pin               = pin
+        self. limit_harian       = limit
+        self.limit_sisa          = limit
+        self.bunga               = bunga
+        self.dapat_bunga         = datetime.date.today()
+        self.biaya_admin         = biaya_admin
+        self.pajak               = pajak
+        self.reset               = datetime.date.today()
+        self.riwayat             = []
+        self.pemilik             = pemilik
+        self.waktu_bayar_admin   = datetime.date.today()
+        self.status              = "aktif"
+        self.saldosetor_min      = minimum
+        self.penutupan           = None
+        self.alasan_blokir       = None
+#------------------------------------------------------------------------------------------------------------------------------
+    def ke_dict(self): # pengonversi objek ke dict buat disimpan di JSON
+        return {"norek"  :self.norek,
+                "pin"    :self.__pin,
+                "saldo"  :self.__saldo,
+                "limit"  :self.limit_sisa,
+                "riwayat":self.riwayat,
+                "status" :self.status,
+                "level"  :self.level
+                }
+    # ------------------------------------------------------------------------------------------------------------------------------
+    @classmethod
+    def dari_dict(cls,data): # pengonversi file JSON ke objek kembali
+
+
+        rekening = cls(norek  =data["norek"],
+                       pin    =data["pin"],
+                       pemilik=None,
+                       )
+        rekening.set_saldo(data["saldo"])
+        rekening.limit_sisa     = data["limit"]
+        rekening.riwayat        = data["riwayat"]
+        rekening.status         = data["status"]
+
+
+        return rekening
+   # ------------------------------------------------------------------------------------------------------------------------------
+    def cek_saldo(self):
+        rupiah = f"{self.__saldo:,}".replace(",",".")
+        return rupiah
+   # ------------------------------------------------------------------------------------------------------------------------------
+    @property
+    def pin(self):
+        return self.__pin
+    # ------------------------------------------------------------------------------------------------------------------------------
+    @property
+    def saldo(self):
+        return self.__saldo
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def cek_pin(self,pin):
+        return self.__pin == pin
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def kurangi_saldo(self,jumlah):
+        self.__saldo -= jumlah
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def tambah_saldo(self,jumlah):
+        self.__saldo += jumlah
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def set_saldo(self,nominal):
+        if nominal >= 0:
+            self.__saldo = nominal
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def simpan_riwayat(self,log):
+            self.riwayat.append(log)
+    # ------------------------------------------------------------------------------------------------------------------------------
+    def ganti_pin(self,pin):
+        self.__pin = pin
+#------------------------------------------------------------------------------------------------------------------------------
+    @property
+    def jenis(self):
+        return {
+            1: "Reguler",
+            2: "Prioritas",
+            3: "Gold",
+            4: "Platinum"
+        }[self.level]
+
+class RekeningReguler(Rekening):
+    pass
+#------------------------------------------------------------------------------------------------------------------------------
+class RekeningPrioritas(Rekening):
+    def __init__(self,norek,pin,pemilik):
+        self.saldo_min = 3_000_000
+        self.limit = 15_000_000
+        self.bunga = 0.05
+        super().__init__(norek,pin,pemilik,limit=self.limit,bunga=self.bunga,biaya_admin=5000,pajak=0,level=2,minimum=self.saldo_min)
+#------------------------------------------------------------------------------------------------------------------------------
+class RekeningGold(Rekening):
+    def __init__(self,norek,pin,pemilik):
+        self.saldo_min = 50_000_000
+        self.limit = 200_000_000
+        self.bunga = 0.07
+        super().__init__(norek,pin,pemilik,limit=self.limit,bunga=self.bunga,biaya_admin=10000,pajak=0,level=3,minimum=self.saldo_min)
+#------------------------------------------------------------------------------------------------------------------------------
+
+class RekeningPlatinum(Rekening):
+    SALDO_MIN = 200_000_000
+    LIMIT = None
+    BUNGA = 0.1
+    def __init__(self,norek,pin,pemilik):
+        super().__init__(norek,pin,pemilik,limit=self.LIMIT,bunga=self.BUNGA,biaya_admin=20000,pajak=0,level=4,minimum=self.SALDO_MIN)
+#------------------------------------------------------------------------------------------------------------------------------
+
+
+
+kelas_rekening = {
+            "Reguler"  : RekeningReguler,
+            "Prioritas": RekeningPrioritas,
+            "Gold"     : RekeningGold,
+            "Platinum" : RekeningPlatinum}

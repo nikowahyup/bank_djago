@@ -1,0 +1,238 @@
+{
+    "2001818882328101": {
+        "norek": "2001818882328101",
+        "pin": "123321",
+        "saldo": 965927170,
+        "limit": null,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T09:01:04.568741",
+                "log": "SETOR AWAL | Jumlah Rp250.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "upgrade",
+                "waktu": "2026-08-03T09:01:23.094649",
+                "log": "Upgrade Rekening Gold ke Platinum"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "upgrade",
+                "waktu": "2026-08-03T09:15:47.253494",
+                "log": "Turun Rekening Platinum ke Reguler"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "upgrade",
+                "waktu": "2026-08-03T09:18:54.865216",
+                "log": "Upgrade Rekening Reguler ke Platinum"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "upgrade",
+                "waktu": "2026-08-03T09:20:34.177707",
+                "log": "Turun Rekening Platinum ke Gold"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T10:05:10.591120",
+                "log": "SETOR TUNAI | Jumlah Rp100.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:08:00.162474",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp20.416.670"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:08:00.162501",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:17:49.588297",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp21.601.810"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:17:49.588315",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:18:01.498668",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp22.856.080"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:18:01.498695",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:25:44.084197",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp24.183.520"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:25:44.084217",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-03T10:28:18.724464",
+                "log": "Turun Rekening Gold ke Prioritas"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-03T10:33:51.118930",
+                "log": "TERIMA SALDO | Dari Gojo Satoru | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:42:59.346908",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp18.319.090"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:42:59.346934",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-03T10:43:21.993403",
+                "log": "TARIK TUNAI | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-03T10:55:35.493888",
+                "log": "TERIMA SALDO | Dari Aoi Todo | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-03T10:59:53.661977",
+                "log": "Upgrade Rekening Prioritas ke Platinum"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-03T11:02:37.958744",
+                "log": "TARIK TUNAI | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T21:59:17.933391",
+                "log": "SETOR TUNAI | Jumlah Rp500.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 4
+    },
+    "1001459575832760": {
+        "norek": "1001459575832760",
+        "pin": "111111",
+        "saldo": 269550000,
+        "limit": null,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T10:32:40.650720",
+                "log": "SETOR AWAL | Jumlah Rp250.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-03T10:33:51.118971",
+                "log": "TRANSFER SALDO | Penerima Niko Wahyu Pratama | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-03T10:42:59.346959",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp20.750.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-03T10:42:59.346972",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 4
+    },
+    "2001333025915187": {
+        "norek": "2001333025915187",
+        "pin": "111111",
+        "saldo": 990000000,
+        "limit": 190000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T10:54:19.042886",
+                "log": "SETOR AWAL | Jumlah Rp1.000.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-03T10:55:35.493921",
+                "log": "TRANSFER SALDO | Penerima Niko Wahyu Pratama | Jumlah Rp10.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 3
+    },
+    "2001743023402145": {
+        "norek": "2001743023402145",
+        "pin": "111111",
+        "saldo": 100000000,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T21:40:14.819569",
+                "log": "SETOR AWAL | Jumlah Rp100.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 3
+    },
+    "2001642528517163": {
+        "norek": "2001642528517163",
+        "pin": "111111",
+        "saldo": 100000000,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-03T21:44:34.517867",
+                "log": "SETOR AWAL | Jumlah Rp100.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 3
+    }
+}

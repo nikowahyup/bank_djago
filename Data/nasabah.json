@@ -1,0 +1,42 @@
+{
+    "3510152602082002": {
+        "nama": "Niko Wahyu Pratama",
+        "alamat": "jln.perk kalibendo",
+        "nik": "3510152602082002",
+        "rekening": [
+            "2001818882328101"
+        ]
+    },
+    "3150152602082002": {
+        "nama": "Gojo Satoru",
+        "alamat": "jln.shinjuku",
+        "nik": "3150152602082002",
+        "rekening": [
+            "1001459575832760"
+        ]
+    },
+    "3150152082602002": {
+        "nama": "Aoi Todo",
+        "alamat": "jln.kyoto",
+        "nik": "3150152082602002",
+        "rekening": [
+            "2001333025915187"
+        ]
+    },
+    "3150152602062002": {
+        "nama": "Wendy",
+        "alamat": "jln.korea",
+        "nik": "3150152602062002",
+        "rekening": [
+            "2001743023402145"
+        ]
+    },
+    "3510152002602001": {
+        "nama": "Quin",
+        "alamat": "jln.queens",
+        "nik": "3510152002602001",
+        "rekening": [
+            "2001642528517163"
+        ]
+    }
+}

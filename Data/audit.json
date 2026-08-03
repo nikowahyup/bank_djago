@@ -1,0 +1,55 @@
+[
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-03T21:40:14.819606",
+        "jenis": "setor uang",
+        "log": "SETOR AWAL |  Rp100.000.000",
+        "NIK": "3150152602062002",
+        "nama": "Wendy",
+        "Rekening": "2001743023402145"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-03T21:40:14.819621",
+        "jenis": "buka rekening",
+        "log": "Buka Rekening Pertama"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-03T21:40:14.820765",
+        "jenis": "daftar",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-03T21:44:34.517902",
+        "jenis": "setor uang",
+        "log": "SETOR AWAL |  Rp100.000.000",
+        "NIK": "3510152002602001",
+        "nama": "Quin",
+        "Rekening": "2001642528517163"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-03T21:44:34.517917",
+        "jenis": "buka rekening",
+        "log": "Buka Rekening Pertama"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-03T21:44:34.518891",
+        "jenis": "daftar",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "NIK": "3510152002602001",
+        "nama": "Quin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-03T21:59:17.933465",
+        "jenis": "setor uang",
+        "log": "Rp500.000.000",
+        "NIK": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "Rekening": "2001818882328101"
+    }
+]
