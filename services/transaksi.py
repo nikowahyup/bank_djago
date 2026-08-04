@@ -1,6 +1,7 @@
 import datetime,time
 from ..utils.utililty import Utilitas
 from bank_djago.services.limit import LimitService
+from bank_djago.utils.ui import UI
 
 
 
@@ -24,7 +25,7 @@ class TransaksiService:
             jumlah = int(input("Masukkan nominal setor: "))
             TransaksiService.animasi()
             if jumlah <= 0:
-                print("❌ Nominal harus lebih dari 0\n")
+                UI.gagal("Nominal harus lebih dari 0\n")
                 return
 
             rekening.tambah_saldo(jumlah)
@@ -32,7 +33,7 @@ class TransaksiService:
             rekening.simpan_riwayat(log)
 
             rupiah = Utilitas.format_rupiah(jumlah)
-            print(f"✅ Rp{rupiah} berhasil masuk ke rekening Anda!")
+            UI.sukses(f"Rp{rupiah} berhasil masuk ke rekening Anda!")
             bank.tambah_audit(kategori="transaksi",jenis="setor uang",log=f"Rp{Utilitas.format_rupiah(jumlah)}",nama=f"{rekening.pemilik.nama}",nik=f"{rekening.pemilik.NIK}",norek=f"{rekening.norek}")
 
 
@@ -46,12 +47,12 @@ class TransaksiService:
             jumlah = int(input("Masukkan nominal tarik: "))
             TransaksiService.animasi()
             if jumlah <= 0:
-                print("❌ Penarikan ditolak")
-                print("❌ Nominal harus lebih dari 0\n")
+                UI.gagal("Penarikan ditolak")
+                print("Nominal harus lebih dari 0\n")
                 return
 
             if rekening.saldo - jumlah < rekening.saldosetor_min:
-                print("❌ Penarikan ditolak")
+                UI.gagal("Penarikan ditolak")
                 print(f"Saldo minimum yang harus tetap di rekening adalah Rp{Utilitas.format_rupiah(rekening.saldosetor_min)}")
                 return
 
@@ -60,7 +61,8 @@ class TransaksiService:
             rekening.simpan_riwayat(log)
 
             Utilitas.format_rupiah(jumlah)
-            print(f"✅ Tarik Tunai Berhasil! Rp{Utilitas.format_rupiah(jumlah)} telah dipotong dari rekening Anda")
+            print(f"✅ Tarik Tunai Berhasil!")
+            print(f"Rp{Utilitas.format_rupiah(jumlah)} telah dipotong dari rekening Anda")
             bank.tambah_audit(kategori="transaksi",jenis="tarik uang",log=f"Rp{Utilitas.format_rupiah(jumlah)}",nama=f"{rekening.pemilik.nama}",nik=f"{rekening.pemilik.NIK}",norek=f"{rekening.norek}")
 
         except ValueError:
@@ -72,20 +74,20 @@ class TransaksiService:
             jumlah = int(input("Masukkan nominal transfer: "))
             TransaksiService.animasi()
             if jumlah <= 0:
-                print("❌ Transfer Gagal!")
-                print("❌ Nominal harus lebih dari 0\n")
+                UI.gagal("Transfer Gagal!")
+                print("Nominal harus lebih dari 0\n")
                 return
 
             LimitService.reset_limit(pengirim)
             if pengirim.limit_harian is not None:
                 if pengirim.limit_sisa < jumlah:
-                    print("❌ Transfer Gagal!")
-                    print("❌ Nominal transfer melebihi limit")
+                    UI.gagal("Transfer Gagal!")
+                    print("Nominal transfer melebihi limit")
                     return
 
             total = jumlah + pengirim.pajak
             if pengirim.saldo - total < pengirim.saldosetor_min:
-                print("❌ Transfer Gagal!")
+                UI.gagal("Transfer Gagal!")
                 print(f"Saldo minimum yang harus tetap di rekening adalah Rp{Utilitas.format_rupiah(pengirim.saldosetor_min)}")
                 return
 
@@ -100,7 +102,8 @@ class TransaksiService:
             penerima.simpan_riwayat(log_terima)
 
             rupiah = Utilitas.format_rupiah(jumlah)
-            print(f"✅ Transfer berhasil! Rp{rupiah} masuk ke rekening {penerima.pemilik.nama}")
+            UI.sukses(" Transfer berhasil!")
+            print(f'Rp{rupiah} masuk ke rekening {penerima.pemilik.nama}')
             bank.tambah_audit(kategori="transaksi",jenis="transfer saldo",log=f"Penerima {penerima.pemilik.nama} Rp{rupiah}",nama=f"{pengirim.pemilik.nama}",nik=f"{pengirim.pemilik.NIK}",norek=f"{pengirim.pemilik.norek}")
             bank.tambah_audit(kategori="transaksi",jenis="terima saldo",log=f"Dari {pengirim.pemilik.nama} Rp{rupiah}",nama=f"{penerima.pemilik.nama}",nik=f"{penerima.pemilik.NIK}",norek=f"{penerima.pemilik.norek}")
         except ValueError:

@@ -2,7 +2,7 @@
     "2001818882328101": {
         "norek": "2001818882328101",
         "pin": "123321",
-        "saldo": 1265927170,
+        "saldo": 1372304430,
         "limit": null,
         "riwayat": [
             {
@@ -160,6 +160,24 @@
                 "jenis": "setor uang",
                 "waktu": "2026-08-04T07:37:35.828717",
                 "log": "SETOR TUNAI | Jumlah Rp300.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-04T10:24:34.570370",
+                "log": "SETOR TUNAI | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-04T14:52:21.396383",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp105.577.260"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-04T14:52:21.396413",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
             }
         ],
         "status": "aktif",
@@ -168,7 +186,7 @@
     "1001459575832760": {
         "norek": "1001459575832760",
         "pin": "111111",
-        "saldo": 269550000,
+        "saldo": 291812500,
         "limit": null,
         "riwayat": [
             {
@@ -194,6 +212,18 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-03T10:42:59.346972",
                 "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-04T14:52:21.396436",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp22.462.500"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-04T14:52:21.396451",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
             }
         ],
         "status": "aktif",
@@ -202,7 +232,7 @@
     "2001333025915187": {
         "norek": "2001333025915187",
         "pin": "111111",
-        "saldo": 990000000,
+        "saldo": 1047650000,
         "limit": 190000000,
         "riwayat": [
             {
@@ -216,6 +246,18 @@
                 "jenis": "transfer saldo",
                 "waktu": "2026-08-03T10:55:35.493921",
                 "log": "TRANSFER SALDO | Penerima Niko Wahyu Pratama | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-04T14:52:21.396466",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp57.750.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-04T14:52:21.396478",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -224,7 +266,7 @@
     "2001743023402145": {
         "norek": "2001743023402145",
         "pin": "111111",
-        "saldo": 100000000,
+        "saldo": 105733330,
         "limit": 200000000,
         "riwayat": [
             {
@@ -232,6 +274,18 @@
                 "jenis": "setor uang",
                 "waktu": "2026-08-03T21:40:14.819569",
                 "log": "SETOR AWAL | Jumlah Rp100.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-04T14:52:21.396493",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp5.833.330"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-04T14:52:21.396504",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -240,7 +294,7 @@
     "2001642528517163": {
         "norek": "2001642528517163",
         "pin": "111111",
-        "saldo": 100000000,
+        "saldo": 105733330,
         "limit": 200000000,
         "riwayat": [
             {
@@ -248,6 +302,18 @@
                 "jenis": "setor uang",
                 "waktu": "2026-08-03T21:44:34.517867",
                 "log": "SETOR AWAL | Jumlah Rp100.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-04T14:52:21.396517",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp5.833.330"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-04T14:52:21.396529",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",

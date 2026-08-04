@@ -1,5 +1,6 @@
 from bank_djago.services.transaksi import RiwayatService
 from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.ui import UI
 import time
 
 class LayananNasabah:
@@ -17,7 +18,7 @@ class LayananNasabah:
         print(f"👋 Halo {nasabah.nama}!")
         while True:
             try:
-                print("="*20,"MENU LAYANAN","="*20)
+                UI.header("MENU LAYANAN")
                 print()
                 print("1. Lihat Biodata")
                 print("2. Lihat Rekening")
@@ -56,11 +57,11 @@ class LayananNasabah:
                 elif pilihan == 11:
                     break
             except ValueError:
-                print("❌ Tolong masukkan pilihan yang valid")
+                UI.peringatan("Tolong masukkan pilihan yang valid")
 
     @staticmethod
     def biodata(nasabah):
-        print('=' * 15, "BIODATA", '=' * 15)
+        UI.header("BIODATA")
         print(f"NAMA   : {nasabah.nama}")
         print(f"NIK    : {nasabah.NIK}")
         print(f"ALAMAT : {nasabah.alamat}")
@@ -68,7 +69,7 @@ class LayananNasabah:
 
     @staticmethod
     def daftar_rekening(nasabah):
-        print('=' * 15, "DAFTAR REKENING", '=' * 15)
+        UI.header("DAFTAR REKENING")
         for i,rek in enumerate(nasabah.rekening,1):
             print(f"{i}. {rek.jenis}")
             print(f"💳 Nomor Rekening : {rek.norek}")
@@ -77,124 +78,122 @@ class LayananNasabah:
 
     @staticmethod
     def ganti_alamat(nasabah):
-        print('=' * 15, "GANTI ALAMAT", '=' * 15)
+        UI.header("GANTI ALAMAT")
 
         alamat_lama = input("Masukkan alamat lama Anda: ")
         if alamat_lama != nasabah.alamat:
-            print("❌ Alamat tidak cocok")
+            UI.gagal("Alamat tidak cocok")
             return
 
         alamat_baru = input("Masukkan alamat baru Anda: ")
         nasabah.alamat = alamat_baru
-        print("✅ Alamat berhasil diubah!\n")
+        UI.sukses("Alamat berhasil diubah!\n")
 
 
     @staticmethod
     def ganti_pin(bank,nasabah):
-        print('=' * 15, "GANTI PIN", '=' * 15)
+        UI.header("GANTI PIN")
 
         norek = input("Masukkan nomor rekening yang ingin Anda ganti pin: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
-            print("❌ Nomor rekening tidak terdaftar")
+            UI.gagal("Nomor rekening tidak terdaftar")
             return
 
         if rekening not in nasabah.rekening:
-            print("❌ Maaf,rekening tidak terdaftar di akun Anda!")
+            UI.gagal("Maaf,rekening tidak terdaftar di akun Anda!")
             return
 
         pin_lama = input("Masukkan PIN lama: ")
         if not rekening.cek_pin(pin_lama):
-            print("❌ PIN salah. Akses tidak diberikan")
+            UI.gagal("PIN salah. Akses tidak diberikan")
             return
 
         pin_baru = input("Masukkan PIN baru: ")
         rekening.ganti_pin(pin_baru)
         LayananNasabah.animasi()
-        print("✅ PIN berhasil diganti!\n")
+        UI.sukses("PIN berhasil diganti!\n")
 
 
 
 
     @staticmethod
     def buka_rekening(bank,nasabah):
-        print('='*24,"BUKA REKENING",'='*24)
+        UI.header("BUKA REKENING")
         Utilitas.keuntungan_rekening()
         try:
             print()
             pilihan = int(input("Masukkan pilihan Anda: "))
             if pilihan not in bank.jenis_rekening:
-                print("❌ Masukkan pilihan yang valid!")
+                UI.peringatan("Masukkan pilihan yang valid!")
                 return
 
             pin = input("Silahkan buat PIN 6 digit: ")
 
             if len(pin) != 6 or not pin.isdigit():
-                print("❌ PIN tidak valid\n")
+                UI.gagal("PIN tidak valid\n")
                 return
 
             rek_baru = bank.buka_rekening(nasabah,pilihan,pin)
             print()
             LayananNasabah.animasi()
-            print(f"✅ Rekening Baru Berhasil Dibuat!")
+            UI.sukses("Rekening Baru Berhasil Dibuat!")
             print(f"💳 Nomor Rekening : {rek_baru.norek[0:4]}-{rek_baru.norek[4:8]}-{rek_baru.norek[8:12]}-{rek_baru.norek[12:16]}\n")
             bank.tambah_audit(kategori="rekening",jenis="buka rekening",log=f"{nasabah.nama } membuuka rekening lain",nik=nasabah.NIK,norek=rek_baru.norek)
 
         except ValueError:
-            print("Tolong pilih menggunakan angka")
+            UI.peringatan("Tolong pilih menggunakan angka")
 
     @staticmethod
     def tutup_rekening(bank,nasabah):
-        print('='*15,"TUTUP REKENING",'='*15)
+        UI.header("TUTUP REKENING")
         print()
-        print("    ==============INFORMASI===============")
-        print("""       Sebelum Anda membekukan rekening
+
+        UI.header('''                   INFORMASI
+        Sebelum Anda membekukan rekening
       Harap pastikan saldo dalam rekening 
-        telah kosong. Terima Kasih""")
+        telah kosong. Terima Kasih''')
         print()
         norek = input("Masukkan nomor rekening yang ingin Anda tutup: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
-            print("❌ Nomor rekening tidak terdaftar\n")
+            UI.gagal("Nomor rekening tidak terdaftar\n")
             return
 
         if rekening not in nasabah.rekening:
-            print("❌ Nomor rekening tidak terdaftar di akun Anda!\n")
+            UI.gagal("Nomor rekening tidak terdaftar di akun Anda!\n")
             return
 
         if rekening.saldo > 0:
             print(f'❌ Rekening masih memiliki Rp{Utilitas.format_rupiah(rekening.saldo)}')
             print(f'Silahkan tarik atau transfer terlebih dahulu\n')
 
-        print("="*15,"PILIHAN PENGOSONGAN","="*15)
+        UI.header("PILIHAN PENGOSONGAN")
         print('1. Transfer Saldo')
         print('2. Tarik Tunai')
         pilihan = input("Masukkan pilihan Anda(ketik cancel untuk pembatalan): ").lower()
         print()
         if bank.tutup_rekening(rekening,pilihan):
             LayananNasabah.animasi()
-            print("✅ Rekening telah ditutup")
+            UI.sukses("✅ Rekening telah ditutup")
             print("🙏 Terima kasih telah mempercayai Bank Djago!")
         bank.tambah_audit(kategori="rekening",jenis="tutup rekening",log=f"{nasabah.nama} menutup rekening",nik=nasabah.NIK,norek=rekening.norek)
 
     @staticmethod
     def upgrade_rekening(bank,nasabah):
-        print("="*15,"TINGKATKAN REKENING","="*15)
+        UI.header("TINGKATKAN REKENING")
         info = bank.jenis_rekening
         norek = input("Masukkan nomor rekening yang ingin Anda tingkatkan: ")
         print()
         rekening = bank.cari_rekening(norek)
         if not rekening:
-            print("Nomor rekening tidak terdaftar")
+            UI.gagal("Nomor rekening tidak terdaftar")
             return
         if rekening not in nasabah.rekening:
-            print("Nomor rekening tidak terdaftar di akun Anda")
+            UI.gagal("Rekening tidak terdaftar di akun Anda!")
             return
-        print("✅ Rekening Ditemukan!")
-        print(f"💎 Rekening {rekening.jenis}")
-        print(f"💳 Nomor rekening {rekening.norek}")
-        print(f"💰 Saldo Rp{rekening.cek_saldo()}\n")
-
+        UI.sukses("Rekening ditemukan!")
+        UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
         if rekening.level == 4:
             print("Rekening Anda sudah platinum!")
             return
@@ -213,17 +212,17 @@ class LayananNasabah:
                 LayananNasabah.animasi()
                 if bank.upgrade_rekening(nasabah,rekening,level_up):
 
-                    print("✅ Peningkatan Berhasil!")
+                    UI.sukses("Peningkatan Berhasil!")
                     print(f"Rekening telah ditingkatkan ke {info[rekening.level+upgrade]["nama"]}!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
                     bank.tambah_audit(kategori="rekening",jenis="upgrade rekening",log=f"{nasabah.nama} meningkatkan rekening{info[rekening.level]["nama"]} ke {info[rekening.level+upgrade]["nama"]}",nik=nasabah.NIK)
 
                 else:
-                    print("❌ Peningkatan Gagal!")
+                    UI.gagal("Peningkatan Gagal!")
                     print(f"Saldo akun Anda tidak mencukupi saldo minimum rekening {info[rekening.level+upgrade]["nama"]}")
                     rupiah = info[rekening.level+upgrade]["minimal_upgrade"]
-                    print(f"⚠️ Minimum saldo Rp{Utilitas.format_rupiah(rupiah)}")
+                    UI.peringatan(f"Minimum saldo Rp{Utilitas.format_rupiah(rupiah)}")
 
 
         elif rekening.level == 2:
@@ -237,7 +236,7 @@ class LayananNasabah:
             if konfirmasi in ('y','ya','iya'):
                 LayananNasabah.animasi()
                 if bank.upgrade_rekening(nasabah,rekening,level_up):
-                    print("✅ Peningkatan Berhasil!")
+                    UI.sukses("Peningkatan Berhasil!")
                     print(f"Rekening telah ditingkatkan ke {info[rekening.level+upgrade]["nama"]}!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
@@ -245,7 +244,7 @@ class LayananNasabah:
                                       log=f"{nasabah.nama} meningkatkan rekening{info[rekening.level]["nama"]} ke {info[rekening.level + upgrade]["nama"]}",
                                       nik=nasabah.NIK)
                 else:
-                    print("❌ Peningkatan Gagal!")
+                    UI.gagal("Peningtkatan Gagal!")
                     print(f"Saldo akun Anda tidak mencukupi saldo minimum rekening {info[rekening.level+upgrade]["nama"]}")
                     rupiah = info[rekening.level+upgrade]["minimal_upgrade"]
                     print(f"⚠️ Minimum saldo Rp{Utilitas.format_rupiah(rupiah)}")
@@ -258,7 +257,7 @@ class LayananNasabah:
                 level_up = rekening.level + upgrade
                 LayananNasabah.animasi()
                 if bank.upgrade_rekening(nasabah,rekening,level_up):
-                    print("✅ Peningkatan Berhasil!")
+                    UI.sukses("Peningkatan Berhasil!")
                     print(f"Rekening telah ditingkatkan ke platinum!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
@@ -266,7 +265,7 @@ class LayananNasabah:
                                       log=f"{nasabah.nama} meningkatkan rekening Gold ke Platinum",
                                       nik=nasabah.NIK)
                 else:
-                    print("❌ Peningkatan Gagal!")
+                    UI.gagal("Peningkatan Gagal!")
                     print(
                             f"Saldo akun Anda tidak mencukupi saldo minimum rekening platinum")
                     rupiah = info[rekening.level + upgrade]["minimal_upgrade"]
@@ -274,47 +273,48 @@ class LayananNasabah:
 
     @staticmethod
     def blokir_rekening(bank,nasabah):
-        print("="*15,"BLOKIR REKENING","="*15)
+        UI.header("BLOKIR REKENING")
         norek = input("Masukkan nomor rekening yang ingin Anda blokir: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
-            print("Nomor rekening tidak terdaftar!")
+            UI.gagal("Nomor rekening tidak terdaftar")
             return
         if rekening not in nasabah.rekening:
-            print("Nomor rekening tidak terdaftar di akun Anda")
+            UI.gagal("Nomor rekening tidak terdaftar di akun Anda")
             return
         alasan = input("Masukkan alasan pemblokiran rekening: ")
         if bank.blokir_rekening(rekening,alasan):
             LayananNasabah.animasi()
-            print(f"✅ Rekening dengan nomor {rekening.norek} berhasil diblokir!")
+            UI.sukses(f"✅ Rekening dengan nomor {rekening.norek} berhasil diblokir!")
         bank.tambah_audit(kategori="rekening",jenis="blokir rekening",log=f"{nasabah.nama} memblokir rekening",nik=nasabah.NIK,norek=rekening.norek)
 
     @staticmethod
     def verifikasi_identitas(bank):
+        UI.header("VERIFIKASI IDENTITAS")
         nik = input("Masukkan NIK Anda: ")
         if nik not in bank.data_nasabah:
-            print("❌ Maaf,Anda tidak terdaftar dalam nasabah")
+            UI.gagal("Maaf,Anda tidak terdaftar dalam nasabah")
             return
         nasabah = bank.data_nasabah[nik]
         nama = input("Masukkan nama lengkap Anda: ").title()
         if nasabah.nama != nama:
-            print("❌ Nama tidak cocok dengan NIK yang terdaftar")
+            UI.gagal("Nama tidak cocok dengan NIK yang terdaftar")
             return
         print(f"👋 Halo,{nama}!")
         norek = input("Masukkan nomor rekening Anda: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
-            print("❌ Nomor rekening tidak terdaftar!")
+            UI.gagal("Nomor rekening tidak terdaftar!")
             return
         if rekening not in nasabah.rekening:
-            print("❌ Nomor rekening ini tidak terdaftar di akun Anda")
+            UI.gagal("Nomor rekening ini tidak terdaftar di akun Anda")
             return
         pin = input("Masukkan PIN lama Anda: ")
         if not rekening.cek_pin(pin):
-            print("❌ PIN salah")
+            UI.gagal("PIN salah")
             return
         print()
-        print("✅ Rekening ditemukan!")
+        UI.sukses("Rekening ditemukan!")
         print(f"💳 Nomor rekening : {rekening.norek}")
         print(f"📃 Status         : {rekening.status}")
         print(f"⚠️ Alasan         : {rekening.alasan_blokir}")
@@ -327,7 +327,7 @@ class LayananNasabah:
             rekening.status = "aktif"
             print()
             LayananNasabah.animasi()
-            print("✅ Rekening telah diaktifkan kembali!")
+            UI.sukses("Rekening telah diaktifkan kembali!")
             print("Jaga rekening Anda dengan baik ya")
             return
         elif buka in ("t",'no','tidak'):
@@ -339,7 +339,7 @@ class LayananNasabah:
 
     @staticmethod
     def downgrade_rekening(bank,nasabah):
-        print("="*15,"TURUNKAN REKENING","="*15)
+        UI.header("TURUNKAN REKENING")
 
         info = bank.jenis_rekening
         norek = input("Masukkan nomor rekening yang ingin Anda turunkan: ")
@@ -351,11 +351,8 @@ class LayananNasabah:
         if rekening not in nasabah.rekening:
             print("Nomor rekening tidak terdaftar di akun Anda")
             return
-        print("✅ Rekening Ditemukan!")
-        print(f"💎 Rekening {rekening.jenis}")
-        print(f"💳 Nomor rekening {rekening.norek}")
-        print(f"💰 Saldo Rp{rekening.cek_saldo()}\n")
-
+        UI.sukses("Rekening Ditemukan!")
+        UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
         if rekening.level == 1:
             print("Saat ini rekening Anda sudah reguler!")
             return
@@ -372,7 +369,7 @@ class LayananNasabah:
             if konfirmasi in ('y','ya','iya'):
                 LayananNasabah.animasi()
                 if bank.downgrade_rekening(nasabah,rekening,turun):
-                    print("✅ Penurunan Berhasil!")
+                    UI.sukses("Penurunan Berhasil!")
                     print(f"Rekening telah diturunkan ke {info[rekening.level-downgrade]["nama"]}!")
                     log = RiwayatService.downgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level-downgrade]["nama"])
                     rekening.simpan_riwayat(log)
@@ -389,7 +386,7 @@ class LayananNasabah:
             if konfirmasi in ('y', 'ya', 'iya'):
                 LayananNasabah.animasi()
                 if bank.downgrade_rekening(nasabah, rekening, turun):
-                    print("✅ Penurunan Berhasil!")
+                    UI.sukses("Penurunan Berhasil!")
                     print(f"Rekening telah diturunkan ke {info[rekening.level - downgrade]["nama"]}!")
                     log = RiwayatService.downgrade_rekening(sebelum=info[rekening.level]["nama"],
                                                             sesudah=info[rekening.level - downgrade]["nama"])
@@ -402,7 +399,7 @@ class LayananNasabah:
                 LayananNasabah.animasi()
                 turun = 1
                 if bank.downgrade_rekening(nasabah, rekening, turun):
-                    print("✅ Penurunan Berhasil!")
+                    UI.sukses("Penurunan Berhasil!")
                     print(f"Rekening telah diturunkan ke {info[rekening.level - turun]["nama"]}!")
                     log = RiwayatService.downgrade_rekening(sebelum=info[rekening.level]["nama"],
                                                             sesudah=info[rekening.level - turun]["nama"])

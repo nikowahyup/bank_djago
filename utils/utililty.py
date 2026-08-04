@@ -1,4 +1,5 @@
 from datetime import datetime
+from bank_djago.utils.ui import UI
 class Utilitas:
 
     @staticmethod
@@ -24,7 +25,7 @@ class Utilitas:
     @staticmethod
     def pilihan_menu():
         print("=" * 60)
-        print("=" * 15, "SELAMAT DATANG DI BANK DJAGO", '=' * 15)
+        print("=" * 15,UI.info("SELAMAT DATANG DI BANK DJAGO") , '=' * 15)
         print("=" * 60)
         print("PILIHAN MENU".center(60))
         print()

@@ -9,6 +9,7 @@ from bank_djago.utils.utililty import Utilitas
 from ..services.scheduler import Scheduler
 from bank_djago.utils.validator import Validator
 from bank_djago.services.admin import AdminService
+from bank_djago.utils.ui import UI
 kelas_rekening = {
             "Reguler"  : RekeningReguler,
             "Prioritas": RekeningPrioritas,
@@ -91,7 +92,7 @@ class Bank:
 
     # ------------------------------------------------------------------------------------------------------------------------------
     def daftar_nasabah(self):
-        print("="*20,"DAFTAR JADI NASABAH",'='*20)
+        UI.header("DAFTAR JADI NASABAH")
 
         nama   = input("Masukkan nama lengkap Anda: ")
         nik    = input("Masukkan NIK Anda: ")
@@ -138,27 +139,27 @@ class Bank:
         return self.rekening_index.get(rekening,None)
 
     def cek_saldo(self):
-        print("="*15,"INFO REKENING","="*15)
+        UI.header('CEK SALDO')
         nasabah = self.autentikasi_rekening()
         if not nasabah:
             return
     # ------------------------------------------------------------------------------------------------------------------------------
     def setor_tunai(self):
-        print('='*15,"SETOR TUNAI","="*15)
+        UI.header('SETOR TUNAI')
         nasabah = self.autentikasi_rekening()
         if not nasabah:
             return
         TransaksiService.setor_tunai(self,nasabah)
     # ------------------------------------------------------------------------------------------------------------------------------
     def tarik_tunai(self):
-        print('='*15,"TARIK TUNAI","="*15)
+        UI.header("TARIK TUNAI")
         nasabah = self.autentikasi_rekening()
         if not nasabah:
             return
         TransaksiService.tarik_tunai(self,nasabah)
     # ------------------------------------------------------------------------------------------------------------------------------
     def transfer(self):
-        print('='*15,"TRANSFER SALDO","="*15)
+        UI.header("TRANSFER SALDO")
         pengirim = self.autentikasi_rekening()
         if not pengirim:
             return
@@ -168,7 +169,7 @@ class Bank:
         TransaksiService.transfer(self,pengirim,penerima)
     # ------------------------------------------------------------------------------------------------------------------------------
     def lihat_riwayat(self):
-        print('='*15,"RIWAYAT TRANSAKSI","="*15)
+        UI.header("RIWAYAT TRANSAKSI")
         nasabah = self.autentikasi_rekening()
         if not nasabah:
             return
@@ -190,25 +191,25 @@ class Bank:
         norek = input("Masukkan nomor rekening Anda: ")
         rekening = self.cari_rekening(norek)
         if not rekening:
-            print("❌ Nomor rekening tidak terdaftar\n")
+            UI.gagal("Nomor rekening tidak terdaftar\n")
             return
         if rekening.status != "aktif":
-            print(f"⚠️ Rekening telah di{rekening.status}!")
+            UI.peringatan(f"Rekening telah di{rekening.status}!")
             return
         percobaan = 0
         while percobaan < 3:
             pin = input("Masukkan PIN Anda: ")
             if rekening.cek_pin(pin):
                 print()
-                print("Rekening Ditemukan!")
-                Utilitas.info_rekening(rekening)
+                UI.sukses("Rekening Ditemukan!")
+                UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
                 print()
                 return rekening
 
             percobaan += 1
-            print("❌ PIN salah. Coba lagi")
+            UI.gagal("PIN salah. Coba lagi")
 
-        print("Anda telah salah input PIN 3x. Anda akan diblokir!")
+        UI.peringatan("Anda telah salah input PIN 3x. Anda akan diblokir!")
         rekening.status = "blokir"
         rekening.alasan_blokir = "Salah input PIN 3x"
         log = RiwayatService.alasan_blokir(rekening.alasan_blokir)
@@ -225,13 +226,13 @@ class Bank:
         rekening = input("Masukkan nomor rekening penerima: ")
         penerima = self.cari_rekening(rekening)
         if not penerima:
-            print("❌ Nomor rekening penerima tidak terdaftar\n")
+            UI.gagal("Nomor rekening penerima tidak terdaftar\n")
             return
         if penerima == pengirim:
-            print("❌ Tidak dapat melakukan transfer ke rekening sendiri!\n")
+            UI.gagal("Tidak dapat transfer ke nomor rekening sendiri\n")
             return
         if penerima.status != "aktif":
-            print(f"Rekening penerima telah di{penerima.status}!")
+            UI.gagal(f"Rekening penerima telah di{penerima.status}!")
             return
         return penerima
     # ------------------------------------------------------------------------------------------------------------------------------
@@ -251,10 +252,10 @@ class Bank:
 
         norek = self.buat_norek(prefix)
         rekening_baru = kelas_rek(norek,pin,nasabah)
-        print("️⚠️ Anda wajib menyetorkan uang setoran awal")
+        UI.peringatan("Anda wajbi menyetorkan setoran awal")
         setor_awal = int(input("Masukkan setoran awal Anda: "))
         if setor_awal < rekening_baru.saldosetor_min:
-            print("Setor awal belum memenuhi syarat minimal")
+            UI.gagal("Setor awal belum memenuhi syarat minimal")
             return
         rekening_baru.tambah_saldo(setor_awal)
         simpan = {
@@ -406,14 +407,14 @@ class Bank:
     def tambah_audit(self,kategori,jenis,log,nama=None,nik=None,norek=None):
         audit = {"kategori":kategori,
                  "waktu":Utilitas.waktu_sekarang(),
-                 "jenis":jenis,
+                 "jenis":jenis.upper(),
                  "log":log}
         if nik is not None:
-            audit["NIK"] = nik
+            audit["nik"] = nik
         if nama is not None:
             audit["nama"] = nama
         if norek is not None:
-            audit["Rekening"] = norek
+            audit["rekening"] = norek
         self.audit_log.append(audit)
 
     def cari_kategori_audit(self,kategori):
