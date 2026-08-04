@@ -36,7 +36,8 @@ class Utilitas:
         print("5. Transfer Saldo")
         print("6. Lihat Riwayat")
         print("7. Layanan Nasabah")
-        print("8. Simpan dan Keluar")
+        print("8. Layanan Admin")
+        print("9. Simpan dan Keluar")
 
         print()
 
@@ -119,3 +120,28 @@ class Utilitas:
     @staticmethod
     def waktu_sekarang():
         return datetime.now().isoformat()
+
+    @staticmethod
+    def menu_admin():
+        UI.header("MENU ADMIN")
+        print()
+        print('1. Lihat Rekap Umum')
+        print('2. Lihat Rekap Rekening')
+        print('3. Lihat Rekap Status Rekening')
+        print('4. Lihat Rekap Total Saldo')
+        print('5. Lihat Rekap Saldo Terbesar')
+        print('6. Lihat Rekap Saldo Terkecil')
+        print("7. Menu Audit")
+        print("8. Keluar")
+        print()
+
+    @staticmethod
+    def menu_audit():
+        print()
+        UI.header('PILIHAN AUDIT')
+        print()
+        print('1. Semua Aktivitas')
+        print('2. Aktivitas Transaksi')
+        print('3. Aktivitas Rekening')
+        print('4. Aktivitas Nasabah')
+        print('5. Keluar\n')

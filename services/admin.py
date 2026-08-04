@@ -1,5 +1,5 @@
 import datetime
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utililty import Utilitas,UI
 class BiayaAdminService:
 
 
@@ -35,21 +35,30 @@ class BiayaAdminService:
         rekening.simpan_riwayat(simpan)
 
 
-class AdminService:
+
+
+
+
+
+
+
+
+
+
+
+
+class MenuAdmin:
 
     @staticmethod
-    def rekap_bank(bank):
+    def menu(bank):
+        password = input("Masukkan password: ")
+        if not bank.verifikasi_admin(password):
+            print("Password salah")
+            return
+
+
         while True:
-            print("="*15,"MENU ADMIN","="*15)
-            print()
-            print('1. Lihat Rekap Umum')
-            print('2. Lihat Rekap Rekening')
-            print('3. Lihat Rekap Status Rekening')
-            print('4. Lihat Rekap Total Saldo')
-            print('5. Lihat Rekap Saldo Terbesar')
-            print('6. Lihat Rekap Saldo Terkecil')
-            print("7. Keluar")
-            print()
+            Utilitas.menu_admin()
             pilihan = input("Pilihan Kamu: ")
 
             if pilihan == "1":
@@ -65,13 +74,15 @@ class AdminService:
             elif pilihan =="6":
                 bank.saldo_terkecil()
             elif pilihan == "7":
+                MenuAdmin.menu_tampilkan_audit(bank)
+            elif pilihan == "8":
                 break
 
 
     @staticmethod
     def umum(total_nasabah,total_rekening,total_saldo):
 
-        print("="*20,"REKAP UMUM","="*20)
+        UI.header('REKAP UMUM')
         print(f"👤 Total Nasabah  : {total_nasabah}")
         print(f"💳 Total Rekening : {total_rekening}")
         print(f"💰 Total Saldo    : Rp{Utilitas.format_rupiah(total_saldo)}")
@@ -90,14 +101,14 @@ class AdminService:
     @staticmethod
     def rekap_status(aktif,blokir,tutup):
 
-        print("="*20,"REKAP STATUS REKENING","="*20)
+        UI.header('REKAP STATUS REKENING')
         print(f"✅ Rekening Aktif  : {aktif}")
         print(f"⚠️ Rekening Blokir : {blokir}")
         print(f"❌ Rekening Tutup  : {tutup}")
 
     @staticmethod
     def total_saldo_tiap_rekening(reguler,prioritas,gold,platinum):
-        print("="*20,"REKAP SALDO TIAP REKENING","="*20)
+        UI.header("REKAP SALDO TIAP REKENING")
         print(f"Rekening Reguler   : Rp{Utilitas.format_rupiah(reguler)}")
         print(f"Rekening Prioritas : Rp{Utilitas.format_rupiah(prioritas)}")
         print(f"Rekening Gold      : Rp{Utilitas.format_rupiah(gold)}")
@@ -105,7 +116,7 @@ class AdminService:
 
     @staticmethod
     def saldo_terbesar(rekening_terbesar):
-        print("="*20,"PEMILIK SALDO TERBESAR","="*20)
+        UI.header("PEMILIK SALDO TERBESAR")
         print(f'{rekening_terbesar.pemilik.nama}')
         print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terbesar.saldo)}")
 
@@ -113,7 +124,7 @@ class AdminService:
 
     @staticmethod
     def saldo_terkecil(rekening_terkecil):
-        print("="*20,"PEMILIK SALDO TERKECIL","="*20)
+        UI.header('PEMILIK SALDO TERKECIL')
         print(f'{rekening_terkecil.pemilik.nama}')
         print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terkecil.saldo)}")
 
@@ -135,29 +146,22 @@ class AdminService:
     @staticmethod
     def menu_tampilkan_audit(bank):
         while  True:
-            print()
-            print("="*20,"PILIHAN AUDIT",'='*20)
-            print()
-            print('1. Semua Aktivitas')
-            print('2. Aktivitas Transaksi')
-            print('3. Aktivitas Rekening')
-            print('4. Aktivitas Nasabah')
-            print('5. Keluar\n')
+            Utilitas.menu_audit()
             pilihan = input('Masukkan pilihan: ')
             if pilihan == "1":
                 print('='*25,"SEMUA AKTIVITAS","="*25)
-                AdminService.tampilkan_audit(bank.audit_log)
+                MenuAdmin.tampilkan_audit(bank.audit_log)
             elif pilihan == "2":
                 print('='*25,"AKTIVITAS TRANSAKSI","="*25)
                 log_audit = bank.cari_kategori_audit("transaksi")
-                AdminService.tampilkan_audit(log_audit)
+                MenuAdmin.tampilkan_audit(log_audit)
             elif pilihan == "3":
                 print('='*25,"AKTIVITAS REKENING","="*25)
                 log_audit = bank.cari_kategori_audit("rekening")
-                AdminService.tampilkan_audit(log_audit)
+                MenuAdmin.tampilkan_audit(log_audit)
             elif pilihan == "4":
                 print('='*25,"AKTIVITAS NASABAH","="*25)
                 log_audit = bank.cari_kategori_audit("nasabah")
-                AdminService.tampilkan_audit(log_audit)
+                MenuAdmin.tampilkan_audit(log_audit)
             elif pilihan == "5":
                 break

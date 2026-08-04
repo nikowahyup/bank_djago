@@ -8,7 +8,7 @@ from bank_djago.services.layanan_nasabah import LayananNasabah
 from bank_djago.utils.utililty import Utilitas
 from ..services.scheduler import Scheduler
 from bank_djago.utils.validator import Validator
-from bank_djago.services.admin import AdminService
+from bank_djago.services.admin import MenuAdmin
 from bank_djago.utils.ui import UI
 kelas_rekening = {
             "Reguler"  : RekeningReguler,
@@ -18,11 +18,12 @@ kelas_rekening = {
 
 class Bank:
     def __init__(self,nama,data_audit,data_rekening=None,data_nasabah=None):
-        self.nama           = nama
-        self.rekening_index = {}
-        self.data_nasabah   = {}
+        self.nama            = nama
+        self._password_admin = "admin123"
+        self.rekening_index  = {}
+        self.data_nasabah    = {}
         self.audit_log = data_audit
-        self.jenis_rekening = {
+        self.jenis_rekening  = {
             1: {
                 "prefix": "4001",
                 "kelas": RekeningReguler,
@@ -334,7 +335,7 @@ class Bank:
         return True
 
     def rekap(self):
-        AdminService.rekap_bank(self)
+        MenuAdmin.menu(self)
 
     def rekap_umum(self):
         total_nasabah  = len(self.data_nasabah)
@@ -343,7 +344,7 @@ class Bank:
         for rekening in self.rekening_index.values():
             saldo = rekening.saldo
             total_saldo+=saldo
-        AdminService.umum(total_nasabah,total_rekening,total_saldo)
+        MenuAdmin.umum(total_nasabah,total_rekening,total_saldo)
 
     def rekap_jumlah_rekening(self):
         reguler = prioritas = gold = platinum = 0
@@ -358,7 +359,7 @@ class Bank:
             elif rekening.level == 4:
                 platinum  += 1
 
-        AdminService.rekap_rekening(reguler,prioritas,gold,platinum)
+        MenuAdmin.rekap_rekening(reguler,prioritas,gold,platinum)
 
     def rekap_status_rekening(self):
         aktif = blokir = tutup = 0
@@ -371,7 +372,7 @@ class Bank:
             elif rekening.status == "tutup":
                 tutup  += 1
 
-        AdminService.rekap_status(aktif,blokir,tutup)
+        MenuAdmin.rekap_status(aktif,blokir,tutup)
 
 
 
@@ -391,16 +392,16 @@ class Bank:
 
             elif rekening.level == 4:
                 platinum += rekening.saldo
-        AdminService.total_saldo_tiap_rekening(reguler, prioritas, gold, platinum)
+        MenuAdmin.total_saldo_tiap_rekening(reguler, prioritas, gold, platinum)
 
 
     def saldo_terbesar(self):
         rekening_besar = max(self.rekening_index.values(),key=lambda r:r.saldo)
-        AdminService.saldo_terbesar(rekening_besar)
+        MenuAdmin.saldo_terbesar(rekening_besar)
 
     def saldo_terkecil(self):
         rekening_kecil = min(self.rekening_index.values(),key=lambda r:r.saldo)
-        AdminService.saldo_terkecil(rekening_kecil)
+        MenuAdmin.saldo_terkecil(rekening_kecil)
 
 
 
@@ -422,4 +423,7 @@ class Bank:
                 if item["kategori"] == kategori]
 
     def lihat_audit(self):
-        AdminService.menu_tampilkan_audit(self)
+        MenuAdmin.menu_tampilkan_audit(self)
+
+    def verifikasi_admin(self,password):
+        return password == self._password_admin

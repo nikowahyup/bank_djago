@@ -1,5 +1,6 @@
 from penyimpanan.storage import JSOnbase
 from bank_djago.utils.utililty import Utilitas
+from bank_djago.services.admin import MenuAdmin
 
 
 
@@ -27,6 +28,7 @@ def menu():
 
         elif pilihan == 4:
             bank.tarik_tunai()
+
         elif pilihan == 5:
             bank.transfer()
 
@@ -37,13 +39,13 @@ def menu():
             bank.layanan_nasabah()
 
         elif pilihan == 8:
+            MenuAdmin.menu(bank)
+
+        elif pilihan == 9:
             JSOnbase.simpan_bank(bank)
             print("🙏 Terima Kasih Telah Mengunjungi Bank Djago!")
             break
-        elif pilihan == 9:
-            bank.rekap()
-        elif pilihan == 10:
-            bank.lihat_audit()
+
 
 if __name__ == '__main__':
     menu()
