@@ -51,5 +51,29 @@
         "NIK": "3510152602082002",
         "nama": "Niko Wahyu Pratama",
         "Rekening": "2001818882328101"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-04T07:33:09.679427",
+        "jenis": "downgrdae rekening",
+        "log": "Niko Wahyu Pratama menurunkan rekening Platinum ke Gold",
+        "NIK": "3510152602082002",
+        "Rekening": "2001818882328101"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-04T07:36:36.955524",
+        "jenis": "upgrade rekening",
+        "log": "Niko Wahyu Pratama meningkatkan rekening Gold ke Platinum",
+        "NIK": "3510152602082002"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-04T07:37:35.828789",
+        "jenis": "setor uang",
+        "log": "Rp300.000.000",
+        "NIK": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "Rekening": "2001818882328101"
     }
 ]

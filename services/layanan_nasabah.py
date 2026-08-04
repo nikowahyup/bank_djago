@@ -115,6 +115,7 @@ class LayananNasabah:
 
 
 
+
     @staticmethod
     def buka_rekening(bank,nasabah):
         print('='*24,"BUKA REKENING",'='*24)
@@ -137,6 +138,7 @@ class LayananNasabah:
             LayananNasabah.animasi()
             print(f"✅ Rekening Baru Berhasil Dibuat!")
             print(f"💳 Nomor Rekening : {rek_baru.norek[0:4]}-{rek_baru.norek[4:8]}-{rek_baru.norek[8:12]}-{rek_baru.norek[12:16]}\n")
+            bank.tambah_audit(kategori="rekening",jenis="buka rekening",log=f"{nasabah.nama } membuuka rekening lain",nik=nasabah.NIK,norek=rek_baru.norek)
 
         except ValueError:
             print("Tolong pilih menggunakan angka")
@@ -173,6 +175,7 @@ class LayananNasabah:
             LayananNasabah.animasi()
             print("✅ Rekening telah ditutup")
             print("🙏 Terima kasih telah mempercayai Bank Djago!")
+        bank.tambah_audit(kategori="rekening",jenis="tutup rekening",log=f"{nasabah.nama} menutup rekening",nik=nasabah.NIK,norek=rekening.norek)
 
     @staticmethod
     def upgrade_rekening(bank,nasabah):
@@ -204,6 +207,7 @@ class LayananNasabah:
             upgrade = int(input("Masukkan pilihan Anda: "))
             konfirmasi = input("Konfirmasi perubahan rekening(ya/tidak): ").lower()
 
+
             level_up = rekening.level + upgrade
             if konfirmasi in ('y','ya','iya'):
                 LayananNasabah.animasi()
@@ -213,6 +217,8 @@ class LayananNasabah:
                     print(f"Rekening telah ditingkatkan ke {info[rekening.level+upgrade]["nama"]}!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
+                    bank.tambah_audit(kategori="rekening",jenis="upgrade rekening",log=f"{nasabah.nama} meningkatkan rekening{info[rekening.level]["nama"]} ke {info[rekening.level+upgrade]["nama"]}",nik=nasabah.NIK)
+
                 else:
                     print("❌ Peningkatan Gagal!")
                     print(f"Saldo akun Anda tidak mencukupi saldo minimum rekening {info[rekening.level+upgrade]["nama"]}")
@@ -235,6 +241,9 @@ class LayananNasabah:
                     print(f"Rekening telah ditingkatkan ke {info[rekening.level+upgrade]["nama"]}!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
+                    bank.tambah_audit(kategori="rekening", jenis="upgrade rekening",
+                                      log=f"{nasabah.nama} meningkatkan rekening{info[rekening.level]["nama"]} ke {info[rekening.level + upgrade]["nama"]}",
+                                      nik=nasabah.NIK)
                 else:
                     print("❌ Peningkatan Gagal!")
                     print(f"Saldo akun Anda tidak mencukupi saldo minimum rekening {info[rekening.level+upgrade]["nama"]}")
@@ -253,6 +262,9 @@ class LayananNasabah:
                     print(f"Rekening telah ditingkatkan ke platinum!")
                     log = RiwayatService.upgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level+upgrade]["nama"])
                     rekening.simpan_riwayat(log)
+                    bank.tambah_audit(kategori="rekening", jenis="upgrade rekening",
+                                      log=f"{nasabah.nama} meningkatkan rekening Gold ke Platinum",
+                                      nik=nasabah.NIK)
                 else:
                     print("❌ Peningkatan Gagal!")
                     print(
@@ -275,6 +287,7 @@ class LayananNasabah:
         if bank.blokir_rekening(rekening,alasan):
             LayananNasabah.animasi()
             print(f"✅ Rekening dengan nomor {rekening.norek} berhasil diblokir!")
+        bank.tambah_audit(kategori="rekening",jenis="blokir rekening",log=f"{nasabah.nama} memblokir rekening",nik=nasabah.NIK,norek=rekening.norek)
 
     @staticmethod
     def verifikasi_identitas(bank):
@@ -317,12 +330,12 @@ class LayananNasabah:
             print("✅ Rekening telah diaktifkan kembali!")
             print("Jaga rekening Anda dengan baik ya")
             return
-
         elif buka in ("t",'no','tidak'):
             return
 
         else:
             print("Tolong pilih ya atau tidak")
+        bank.tambah_audit(kategori="rekening",jenis="buka blokir rekening",log=f"{nasabah.nama} membuka blokir rekening",nik=nasabah.NIK,norek=rekening.norek)
 
     @staticmethod
     def downgrade_rekening(bank,nasabah):
@@ -363,6 +376,7 @@ class LayananNasabah:
                     print(f"Rekening telah diturunkan ke {info[rekening.level-downgrade]["nama"]}!")
                     log = RiwayatService.downgrade_rekening(sebelum=info[rekening.level]["nama"],sesudah=info[rekening.level-downgrade]["nama"])
                     rekening.simpan_riwayat(log)
+                    bank.tambah_audit(kategori="rekening",jenis="downgrade rekening",log=f"{nasabah.nama} menurunkan rekening {info[rekening.level]["nama"]} ke {info[rekening.level-downgrade]["nama"]}",nik=nasabah.NIK,norek=rekening.norek)
 
         if rekening.level == 3:
             print(f"Mau turunkan rekening Anda ke rekening mana? ")
@@ -380,7 +394,7 @@ class LayananNasabah:
                     log = RiwayatService.downgrade_rekening(sebelum=info[rekening.level]["nama"],
                                                             sesudah=info[rekening.level - downgrade]["nama"])
                     rekening.simpan_riwayat(log)
-
+                    bank.tambah_audit(kategori="rekening",jenis="downgrade rekening",log=f"{nasabah.nama} menurunkan rekening {info[rekening.level]["nama"]} ke {info[rekening.level-downgrade]["nama"]}",nik=nasabah.NIK,norek=rekening.norek)
         if rekening.level == 2:
             print("Mau turunkan ke reguler?")
             konfirmasi = input("Konfirmasi perubahan rekening(ya/tidak): ").lower()
@@ -394,7 +408,7 @@ class LayananNasabah:
                                                             sesudah=info[rekening.level - turun]["nama"])
                     rekening.simpan_riwayat(log)
 
-
+                    bank.tambah_audit(kategori="rekening",jenis="downgrade rekening",log=f"{nasabah.nama} menurunkan rekening Prioritas ke Reguler",nik=nasabah.NIK,norek=rekening.norek)
 
 
 

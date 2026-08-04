@@ -39,4 +39,5 @@ class BungaService:
         }
         rekening.simpan_riwayat(simpan)
 
+
         return bunga_total

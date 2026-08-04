@@ -126,7 +126,7 @@ class Bank:
             nasabah = Nasabahh(nama,alamat,nik)
             self.data_nasabah[nik] = nasabah
             rekening_baru = self.buka_rekening(nasabah,pilihan,pin)
-            self.tambah_audit(kategori="rekening",jenis="buka rekening",log="Buka Rekening Pertama")
+            self.tambah_audit(kategori="rekening",jenis="buka rekening",log=f"{nasabah.nama} membuka rekening pertama",nik=nasabah.NIK,norek=rekening_baru.norek)
             Utilitas.sapaan(nasabah,rekening_baru)
             self.tambah_audit(kategori="nasabah",jenis="daftar",log="Pendaftaran Menjadi Nasabah Bank Djago",nama=nasabah.nama,nik=nasabah.NIK)
 
@@ -415,3 +415,10 @@ class Bank:
         if norek is not None:
             audit["Rekening"] = norek
         self.audit_log.append(audit)
+
+    def cari_kategori_audit(self,kategori):
+        return [item for item in self.audit_log
+                if item["kategori"] == kategori]
+
+    def lihat_audit(self):
+        AdminService.menu_tampilkan_audit(self)

@@ -42,7 +42,8 @@ def menu():
             break
         elif pilihan == 9:
             bank.rekap()
-
+        elif pilihan == 10:
+            bank.lihat_audit()
 
 if __name__ == '__main__':
     menu()

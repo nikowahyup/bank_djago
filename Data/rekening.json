@@ -2,7 +2,7 @@
     "2001818882328101": {
         "norek": "2001818882328101",
         "pin": "123321",
-        "saldo": 965927170,
+        "saldo": 1265927170,
         "limit": null,
         "riwayat": [
             {
@@ -142,6 +142,24 @@
                 "jenis": "setor uang",
                 "waktu": "2026-08-03T21:59:17.933391",
                 "log": "SETOR TUNAI | Jumlah Rp500.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-04T07:33:09.679388",
+                "log": "Turun Rekening Platinum ke Gold"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-04T07:36:36.955428",
+                "log": "Upgrade Rekening Gold ke Platinum"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-04T07:37:35.828717",
+                "log": "SETOR TUNAI | Jumlah Rp300.000.000"
             }
         ],
         "status": "aktif",

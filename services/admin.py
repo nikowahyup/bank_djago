@@ -48,6 +48,7 @@ class AdminService:
             print('4. Lihat Rekap Total Saldo')
             print('5. Lihat Rekap Saldo Terbesar')
             print('6. Lihat Rekap Saldo Terkecil')
+            print("7. Keluar")
             print()
             pilihan = input("Pilihan Kamu: ")
 
@@ -115,3 +116,48 @@ class AdminService:
         print("="*20,"PEMILIK SALDO TERKECIL","="*20)
         print(f'{rekening_terkecil.pemilik.nama}')
         print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terkecil.saldo)}")
+
+
+    #--------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod #method template
+    def tampilkan_audit(log_audit):
+        for item in log_audit:
+            print("-"*80)
+            print(Utilitas.format_waktu(item["waktu"]), "|",item["jenis"],"|",item["log"])
+            if "nama" in item:
+                print("Nama     :",item["nama"])
+            if "NIK" in item:
+                print("NIK      :",item["NIK"])
+            if "Rekening" in item:
+                print("Rekening :",item["Rekening"])
+
+    @staticmethod
+    def menu_tampilkan_audit(bank):
+        while  True:
+            print()
+            print("="*20,"PILIHAN AUDIT",'='*20)
+            print()
+            print('1. Semua Aktivitas')
+            print('2. Aktivitas Transaksi')
+            print('3. Aktivitas Rekening')
+            print('4. Aktivitas Nasabah')
+            print('5. Keluar\n')
+            pilihan = input('Masukkan pilihan: ')
+            if pilihan == "1":
+                print('='*25,"SEMUA AKTIVITAS","="*25)
+                AdminService.tampilkan_audit(bank.audit_log)
+            elif pilihan == "2":
+                print('='*25,"AKTIVITAS TRANSAKSI","="*25)
+                log_audit = bank.cari_kategori_audit("transaksi")
+                AdminService.tampilkan_audit(log_audit)
+            elif pilihan == "3":
+                print('='*25,"AKTIVITAS REKENING","="*25)
+                log_audit = bank.cari_kategori_audit("rekening")
+                AdminService.tampilkan_audit(log_audit)
+            elif pilihan == "4":
+                print('='*25,"AKTIVITAS NASABAH","="*25)
+                log_audit = bank.cari_kategori_audit("nasabah")
+                AdminService.tampilkan_audit(log_audit)
+            elif pilihan == "5":
+                break
