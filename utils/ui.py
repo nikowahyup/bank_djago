@@ -28,8 +28,18 @@ class UI:
     @staticmethod
     def header(judul):
         print("╔" + "═" * 50 + "╗")
-        print(f"║{judul.center(50)}║")
+
+        judul = judul.center(50)
+
+        print(f"║{Fore.CYAN}{judul}{Style.RESET_ALL}║")
+
         print("╚" + "═" * 50 + "╝")
+
+
+    @staticmethod
+    def info(teks):
+        return Fore.CYAN + teks + Style.RESET_ALL
+
 
     @staticmethod
     def wadah_info(nama,norek,saldo):
@@ -52,6 +62,7 @@ class UI:
     def peringatan(pesan):
         print(Fore.YELLOW + f"⚠ {pesan}")
 
-    @staticmethod
-    def info(teks):
-        return Fore.CYAN + teks + Style.RESET_ALL
+    kelas = {1:"🥉",
+             2:"🥈",
+             3:"🥇",
+             4:"💎"}

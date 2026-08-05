@@ -253,7 +253,7 @@ class Bank:
 
         norek = self.buat_norek(prefix)
         rekening_baru = kelas_rek(norek,pin,nasabah)
-        UI.peringatan("Anda wajbi menyetorkan setoran awal")
+        UI.peringatan("Anda wajib menyetorkan setoran awal")
         setor_awal = int(input("Masukkan setoran awal Anda: "))
         if setor_awal < rekening_baru.saldosetor_min:
             UI.gagal("Setor awal belum memenuhi syarat minimal")
@@ -340,11 +340,9 @@ class Bank:
     def rekap_umum(self):
         total_nasabah  = len(self.data_nasabah)
         total_rekening = len(self.rekening_index)
-        total_saldo = 0
-        for rekening in self.rekening_index.values():
-            saldo = rekening.saldo
-            total_saldo+=saldo
-        MenuAdmin.umum(total_nasabah,total_rekening,total_saldo)
+        total_saldo = sum(rekening.saldo for rekening in self.rekening_index.values())
+
+        return total_nasabah,total_rekening,total_saldo
 
     def rekap_jumlah_rekening(self):
         reguler = prioritas = gold = platinum = 0
@@ -359,7 +357,7 @@ class Bank:
             elif rekening.level == 4:
                 platinum  += 1
 
-        MenuAdmin.rekap_rekening(reguler,prioritas,gold,platinum)
+        return reguler,prioritas,gold,platinum
 
     def rekap_status_rekening(self):
         aktif = blokir = tutup = 0
@@ -372,7 +370,7 @@ class Bank:
             elif rekening.status == "tutup":
                 tutup  += 1
 
-        MenuAdmin.rekap_status(aktif,blokir,tutup)
+        return aktif,blokir,tutup
 
 
 
@@ -392,16 +390,16 @@ class Bank:
 
             elif rekening.level == 4:
                 platinum += rekening.saldo
-        MenuAdmin.total_saldo_tiap_rekening(reguler, prioritas, gold, platinum)
+        return reguler, prioritas, gold, platinum
 
 
     def saldo_terbesar(self):
         rekening_besar = max(self.rekening_index.values(),key=lambda r:r.saldo)
-        MenuAdmin.saldo_terbesar(rekening_besar)
+        return rekening_besar
 
     def saldo_terkecil(self):
         rekening_kecil = min(self.rekening_index.values(),key=lambda r:r.saldo)
-        MenuAdmin.saldo_terkecil(rekening_kecil)
+        return rekening_kecil
 
 
 

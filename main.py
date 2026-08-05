@@ -2,10 +2,7 @@ from penyimpanan.storage import JSOnbase
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.services.admin import MenuAdmin
 
-
-
 def menu():
-
 
     bank = JSOnbase.muat_bank()
     # bank.debug_bunga(10)
@@ -45,7 +42,6 @@ def menu():
             JSOnbase.simpan_bank(bank)
             print("🙏 Terima Kasih Telah Mengunjungi Bank Djago!")
             break
-
 
 if __name__ == '__main__':
     menu()

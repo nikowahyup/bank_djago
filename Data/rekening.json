@@ -318,5 +318,21 @@
         ],
         "status": "aktif",
         "level": 3
+    },
+    "4001215327903178": {
+        "norek": "4001215327903178",
+        "pin": "111111",
+        "saldo": 20000000,
+        "limit": 5000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-05T09:08:57.542514",
+                "log": "SETOR AWAL | Jumlah Rp20.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 1
     }
 }

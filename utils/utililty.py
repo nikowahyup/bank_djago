@@ -24,10 +24,10 @@ class Utilitas:
 
     @staticmethod
     def pilihan_menu():
-        print("=" * 60)
-        print("=" * 15,UI.info("SELAMAT DATANG DI BANK DJAGO") , '=' * 15)
-        print("=" * 60)
-        print("PILIHAN MENU".center(60))
+
+        UI.header("SELAMAT DATANG DI BANK DJAGO")
+
+        print("PILIHAN MENU".center(47))
         print()
         print("1. Daftar dan Buka Rekening Pertama")
         print("2. Cek Saldo")
@@ -36,7 +36,7 @@ class Utilitas:
         print("5. Transfer Saldo")
         print("6. Lihat Riwayat")
         print("7. Layanan Nasabah")
-        print("8. Layanan Admin")
+        print("8. Menu Admin")
         print("9. Simpan dan Keluar")
 
         print()
@@ -123,7 +123,7 @@ class Utilitas:
 
     @staticmethod
     def menu_admin():
-        UI.header("MENU ADMIN")
+        UI.header("MENU REKAP")
         print()
         print('1. Lihat Rekap Umum')
         print('2. Lihat Rekap Rekening')
@@ -131,14 +131,14 @@ class Utilitas:
         print('4. Lihat Rekap Total Saldo')
         print('5. Lihat Rekap Saldo Terbesar')
         print('6. Lihat Rekap Saldo Terkecil')
-        print("7. Menu Audit")
-        print("8. Keluar")
+        print("7. Keluar")
+
         print()
 
     @staticmethod
     def menu_audit():
         print()
-        UI.header('PILIHAN AUDIT')
+        UI.header('MENU AUDIT')
         print()
         print('1. Semua Aktivitas')
         print('2. Aktivitas Transaksi')
