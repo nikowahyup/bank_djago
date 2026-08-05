@@ -1,9 +1,6 @@
 from bank_djago.utils.utililty import Utilitas
 import datetime
 
-
-
-
 class BungaService:
 
     @staticmethod

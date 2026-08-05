@@ -1,6 +1,6 @@
 from penyimpanan.storage import JSOnbase
 from bank_djago.utils.utililty import Utilitas
-from bank_djago.services.admin import MenuAdmin
+from bank_djago.services.admin.menu_admin import MenuAdmin
 
 def menu():
 

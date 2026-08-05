@@ -145,3 +145,8 @@ class Utilitas:
         print('3. Aktivitas Rekening')
         print('4. Aktivitas Nasabah')
         print('5. Keluar\n')
+
+    level = {1: 'Reguler',
+             2: 'Prioritas',
+             3: 'Gold',
+             4: 'Platinum'}

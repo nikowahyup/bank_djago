@@ -6,10 +6,11 @@ from .nasabah import Nasabahh
 from bank_djago.services.transaksi import TransaksiService,RiwayatService
 from bank_djago.services.layanan_nasabah import LayananNasabah
 from bank_djago.utils.utililty import Utilitas
+from ..services.admin.admin_audit import Audit
 from ..services.scheduler import Scheduler
-from bank_djago.utils.validator import Validator
-from bank_djago.services.admin import MenuAdmin
+from bank_djago.services.admin.menu_admin import MenuAdmin
 from bank_djago.utils.ui import UI
+
 kelas_rekening = {
             "Reguler"  : RekeningReguler,
             "Prioritas": RekeningPrioritas,
@@ -92,49 +93,22 @@ class Bank:
         return norek
 
     # ------------------------------------------------------------------------------------------------------------------------------
-    def daftar_nasabah(self):
-        UI.header("DAFTAR JADI NASABAH")
-
-        nama   = input("Masukkan nama lengkap Anda: ")
-        nik    = input("Masukkan NIK Anda: ")
-        alamat = input("Masukkan alamat Anda: ")
-        pin    = input("Buat PIN 6 digit angka: ")
-        try:
-            Validator.validasi_nasabah(nama,nik,alamat,pin)
-        except ValueError as e:
-            for pesan in e.args[0]:
-                print(f"❌",pesan)
-            return
-        if nik in self.data_nasabah:
-            buka_rekening = input("⚠️ NIK sudah terdaftar. Apakah Anda mau membuka rekening lain(ya/tidak): ").lower()
-            if buka_rekening in ("ya","y","iya"):
-                LayananNasabah.buka_rekening(self,self.data_nasabah[nik])
-                return
-            elif buka_rekening in ('t','tidak','no'):
-                print("🙏 Anda bisa melihat info nasabah di menu Layanan Nasabah")
-                return
-
+    def daftar_nasabah(self,nama,nik,alamat,pin):
         print('='*29,"PILIHAN REKENING","="*30)
         Utilitas.keuntungan_rekening()
         print('='*77)
         print()
-
         try:
             pilihan = int(input("Masukkan pilihan Anda: "))
             if pilihan not in self.jenis_rekening:
                 print("❌ Masukkan pilihan yang valid!")
                 return
-
             nasabah = Nasabahh(nama,alamat,nik)
             self.data_nasabah[nik] = nasabah
             rekening_baru = self.buka_rekening(nasabah,pilihan,pin)
-            self.tambah_audit(kategori="rekening",jenis="buka rekening",log=f"{nasabah.nama} membuka rekening pertama",nik=nasabah.NIK,norek=rekening_baru.norek)
-            Utilitas.sapaan(nasabah,rekening_baru)
-            self.tambah_audit(kategori="nasabah",jenis="daftar",log="Pendaftaran Menjadi Nasabah Bank Djago",nama=nasabah.nama,nik=nasabah.NIK)
-
+            return nasabah,rekening_baru
         except ValueError:
             print("Tolong pilih menggunakan angka")
-
     # ------------------------------------------------------------------------------------------------------------------------------
     def cari_rekening(self,rekening):
         return self.rekening_index.get(rekening,None)
@@ -291,7 +265,7 @@ class Bank:
         for rekening in self.rekening_index.values():
             rekening.waktu_bayar_admin -= datetime.timedelta(days=bulan * 31)
 
-    def upgrade_rekening(self, nasabah, rekening_lama, target_level):
+    def upgrade_rekening(self,rekening_lama, target_level):
 
         info = self.jenis_rekening[target_level]
         kelas_tujuan = info["minimal_upgrade"]
@@ -308,11 +282,10 @@ class Bank:
         rekening_baru.set_saldo(rekening_lama.saldo)
         rekening_baru.riwayat = rekening_lama.riwayat
         self.rekening_index[rekening_baru.norek] = rekening_baru
-        index = nasabah.rekening.index(rekening_lama)
-        nasabah.rekening[index] = rekening_baru
+        index = rekening_lama.pemilik.rekening.index(rekening_lama)
+        rekening_lama.pemilik.rekening[index] = rekening_baru
 
-
-        return True
+        return rekening_baru
 
     def downgrade_rekening(self,nasabah,rekening_lama,target_level):
         info = self.jenis_rekening[target_level]
@@ -330,8 +303,16 @@ class Bank:
         return True
 
     def blokir_rekening(self,rekening,alasan):
+        if rekening.status == "tutup":
+            return False
         rekening.alasan_blokir = alasan
         rekening.status = "blokir"
+
+        return True
+    def buka_blokir(self,rekening):
+        if rekening.status == "tutup":
+            return False
+        rekening.status = "aktif"
         return True
 
     def rekap(self):
@@ -421,7 +402,12 @@ class Bank:
                 if item["kategori"] == kategori]
 
     def lihat_audit(self):
-        MenuAdmin.menu_tampilkan_audit(self)
+        Audit.menu_tampilkan_audit(self)
 
     def verifikasi_admin(self,password):
         return password == self._password_admin
+
+
+    def reset_pin(self,rekening,pin_baru):
+        rekening.ganti_pin(pin_baru)
+        return True

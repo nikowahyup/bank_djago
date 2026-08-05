@@ -122,6 +122,7 @@ class TransaksiService:
         print(f"✅ Rp{Utilitas.format_rupiah(jumlah)} telah masuk ke rekening {penerima.pemilik.nama}")
         rekening.penutupan = datetime.date.today()
 
+
     @staticmethod
     def tarik_semua_saldo(bank,rekening):
         jumlah = rekening.saldo
