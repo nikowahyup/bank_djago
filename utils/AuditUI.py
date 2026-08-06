@@ -1,5 +1,7 @@
+from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.utils.utililty import Utilitas
-class Audit:
+class AuditUI:
+
     @staticmethod #method template
     def tampilkan_audit(log_audit):
         for item in log_audit:
@@ -19,22 +21,22 @@ class Audit:
             pilihan = input('Masukkan pilihan: ')
             if pilihan == "1":
                 print('='*25,"SEMUA AKTIVITAS","="*25)
-                Audit.tampilkan_audit(bank.audit_log)
+                AuditUI.tampilkan_audit(bank.audit_log)
                 print()
             elif pilihan == "2":
                 print('='*25,"AKTIVITAS TRANSAKSI","="*25)
-                log_audit = bank.cari_kategori_audit("transaksi")
-                Audit.tampilkan_audit(log_audit)
+                log_audit = AuditService.cari_kategori_audit(bank,"transaksi")
+                AuditUI.tampilkan_audit(log_audit)
                 print()
             elif pilihan == "3":
                 print('='*25,"AKTIVITAS REKENING","="*25)
-                log_audit = bank.cari_kategori_audit("rekening")
-                Audit.tampilkan_audit(log_audit)
+                log_audit = AuditService.cari_kategori_audit(bank,"rekening")
+                AuditUI.tampilkan_audit(log_audit)
                 print()
             elif pilihan == "4":
                 print('='*25,"AKTIVITAS NASABAH","="*25)
-                log_audit = bank.cari_kategori_audit("nasabah")
-                Audit.tampilkan_audit(log_audit)
+                log_audit = AuditService.cari_kategori_audit(bank,"nasabah")
+                AuditUI.tampilkan_audit(log_audit)
                 print()
             elif pilihan == "5":
                 break

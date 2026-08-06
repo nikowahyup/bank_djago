@@ -1,6 +1,9 @@
 from penyimpanan.storage import JSOnbase
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.services.admin.menu_admin import MenuAdmin
+from bank_djago.services.admin.admin_teller import AdminTeller
+from bank_djago.services.admin.admin_cs import AdminCs
+
 
 def menu():
 
@@ -15,25 +18,25 @@ def menu():
         pilihan = int(input("Masukkan pilihan Anda: "))
 
         if pilihan == 1:
-            bank.daftar_nasabah()
+            AdminCs.buka_rekening(bank)
 
         elif pilihan == 2:
             bank.cek_saldo()
 
         elif pilihan == 3:
-            bank.setor_tunai()
+            AdminTeller.setor_tunai(bank)
 
         elif pilihan == 4:
-            bank.tarik_tunai()
+            AdminTeller.tarik_tunai(bank)
 
         elif pilihan == 5:
-            bank.transfer()
+            AdminTeller.transfer(bank)
 
         elif pilihan == 6:
             bank.lihat_riwayat()
 
         elif pilihan == 7:
-            bank.layanan_nasabah()
+            AdminCs.layanan_nasabah(bank)
 
         elif pilihan == 8:
             MenuAdmin.menu(bank)

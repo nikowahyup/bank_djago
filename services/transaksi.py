@@ -1,7 +1,7 @@
 import datetime,time
 from ..utils.utililty import Utilitas
 from bank_djago.services.limit import LimitService
-from bank_djago.utils.ui import UI
+
 
 
 
@@ -20,94 +20,39 @@ class TransaksiService:
         print()
 
     @staticmethod
-    def setor_tunai(bank,rekening):
-        try:
-            jumlah = int(input("Masukkan nominal setor: "))
-            TransaksiService.animasi()
-            if jumlah <= 0:
-                UI.gagal("Nominal harus lebih dari 0\n")
-                return
+    def setor_tunai(rekening,nominal):
+        if nominal < 10000:
+            raise ValueError("Minimal setor adalah Rp10.0000")
+        rekening.tambah_saldo(nominal)
 
-            rekening.tambah_saldo(jumlah)
-            log = RiwayatService.setor_uang(jumlah)
-            rekening.simpan_riwayat(log)
-
-            rupiah = Utilitas.format_rupiah(jumlah)
-            UI.sukses(f"Rp{rupiah} berhasil masuk ke rekening Anda!")
-            bank.tambah_audit(kategori="transaksi",jenis="setor uang",log=f"Rp{Utilitas.format_rupiah(jumlah)}",nama=f"{rekening.pemilik.nama}",nik=f"{rekening.pemilik.NIK}",norek=f"{rekening.norek}")
-
-
-        except ValueError:
-            print("Tolong masukkan angka yang valid")
 
 
     @staticmethod
-    def tarik_tunai(bank,rekening):
-        try:
-            jumlah = int(input("Masukkan nominal tarik: "))
-            TransaksiService.animasi()
-            if jumlah <= 0:
-                UI.gagal("Penarikan ditolak")
-                print("Nominal harus lebih dari 0\n")
-                return
-
-            if rekening.saldo - jumlah < rekening.saldosetor_min:
-                UI.gagal("Penarikan ditolak")
-                print(f"Saldo minimum yang harus tetap di rekening adalah Rp{Utilitas.format_rupiah(rekening.saldosetor_min)}")
-                return
-
-            rekening.kurangi_saldo(jumlah)
-            log = RiwayatService.tarik_uang(jumlah)
-            rekening.simpan_riwayat(log)
-
-            Utilitas.format_rupiah(jumlah)
-            print(f"✅ Tarik Tunai Berhasil!")
-            print(f"Rp{Utilitas.format_rupiah(jumlah)} telah dipotong dari rekening Anda")
-            bank.tambah_audit(kategori="transaksi",jenis="tarik uang",log=f"Rp{Utilitas.format_rupiah(jumlah)}",nama=f"{rekening.pemilik.nama}",nik=f"{rekening.pemilik.NIK}",norek=f"{rekening.norek}")
-
-        except ValueError:
-            print("Tolong masukkan angka yang valid")
+    def tarik_tunai(rekening,nominal):
+        if nominal < 10000:
+            raise ValueError("Minimal tari adalah Rp10.000")
+        if rekening.saldo - nominal < rekening.saldosetor_min:
+            raise ValueError(f"Saldo tidak memenuhi saldo minimum jika Anda menarik sebesar Rp{Utilitas.format_rupiah(nominal)}")
+        rekening.kurangi_saldo(nominal)
 
     @staticmethod
-    def transfer(bank,pengirim,penerima):
-        try:
-            jumlah = int(input("Masukkan nominal transfer: "))
-            TransaksiService.animasi()
-            if jumlah <= 0:
-                UI.gagal("Transfer Gagal!")
-                print("Nominal harus lebih dari 0\n")
-                return
+    def transfer(pengirim,penerima,nominal):
+        if nominal < 10000:
+            raise ValueError("Minimal transfer adalah Rp10.0000")
+        LimitService.reset_limit(pengirim)
+        total = nominal + pengirim.pajak
+        if pengirim.limit_harian is not None:
+            if pengirim.limit_sisa < nominal:
+                raise ValueError("Limit harian telah tercapai")
 
-            LimitService.reset_limit(pengirim)
-            if pengirim.limit_harian is not None:
-                if pengirim.limit_sisa < jumlah:
-                    UI.gagal("Transfer Gagal!")
-                    print("Nominal transfer melebihi limit")
-                    return
+        if pengirim.saldo - total < pengirim.saldosetor_min:
+            raise ValueError(f"Saldo tidak memenuhi saldo minimum jika transfer Rp{Utilitas.format_rupiah(nominal)}")
 
-            total = jumlah + pengirim.pajak
-            if pengirim.saldo - total < pengirim.saldosetor_min:
-                UI.gagal("Transfer Gagal!")
-                print(f"Saldo minimum yang harus tetap di rekening adalah Rp{Utilitas.format_rupiah(pengirim.saldosetor_min)}")
-                return
+        pengirim.kurangi_saldo(total)
+        penerima.tambah_saldo(nominal)
+        if pengirim.limit_harian is not None:
+            pengirim.limit_sisa -= nominal
 
-            if pengirim.limit_harian is not None:
-                pengirim.limit_sisa -= jumlah
-            pengirim.kurangi_saldo(total)
-            penerima.tambah_saldo(jumlah)
-
-            log_terima = RiwayatService.transfer_terima(jumlah,pengirim)
-            log_kirim  = RiwayatService.transfer_kirim(jumlah,penerima)
-            pengirim.simpan_riwayat(log_kirim)
-            penerima.simpan_riwayat(log_terima)
-
-            rupiah = Utilitas.format_rupiah(jumlah)
-            UI.sukses(" Transfer berhasil!")
-            print(f'Rp{rupiah} masuk ke rekening {penerima.pemilik.nama}')
-            bank.tambah_audit(kategori="transaksi",jenis="transfer saldo",log=f"Penerima {penerima.pemilik.nama} Rp{rupiah}",nama=f"{pengirim.pemilik.nama}",nik=f"{pengirim.pemilik.NIK}",norek=f"{pengirim.pemilik.norek}")
-            bank.tambah_audit(kategori="transaksi",jenis="terima saldo",log=f"Dari {pengirim.pemilik.nama} Rp{rupiah}",nama=f"{penerima.pemilik.nama}",nik=f"{penerima.pemilik.NIK}",norek=f"{penerima.pemilik.norek}")
-        except ValueError:
-            print("Tolong masukkan angka yang valid")
 
     @staticmethod
     def transfer_semua_saldo(bank,rekening):

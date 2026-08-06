@@ -29,7 +29,7 @@ class Utilitas:
 
         print("PILIHAN MENU".center(47))
         print()
-        print("1. Daftar dan Buka Rekening Pertama")
+        print("1. Daftar atau Buka Rekening")
         print("2. Cek Saldo")
         print("3. Setor Tunai")
         print("4. Tarik Tunai")
@@ -150,3 +150,14 @@ class Utilitas:
              2: 'Prioritas',
              3: 'Gold',
              4: 'Platinum'}
+
+    @staticmethod
+    def menu_cs():
+        print("1. Buka Rekening")
+        print("2. Tingkatkan Rekening")
+        print("3. Turunkan Rekening")
+        print("4. Blokir Rekening")
+        print("5. Buka Blokir Rekening")
+        print("6. Reset PIN")
+        print("7. Tutup Rekening")
+        print("8. Keluar")

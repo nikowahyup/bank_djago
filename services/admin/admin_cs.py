@@ -15,15 +15,7 @@ class AdminCs:
         while True:
             UI.header("MENU CUSTOMER SERVICE")
             print()
-
-            print("1. Buka Rekening")
-            print("2. Tingkatkan Rekening")
-            print("3. Turunkan Rekening")
-            print("4. Blokir Rekening")
-            print("5. Buka Blokir Rekening")
-            print("6. Reset PIN")
-            print("7. Tutup Rekening")
-            print("8. Keluar")
+            Utilitas.menu_cs()
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
                 AdminCs.buka_rekening(bank)
@@ -170,7 +162,7 @@ class AdminCs:
         pin = input("Masukkan PIN baru: ")
         if pin == rekening.pin:
             return
-        bank.reset_pin(pin)
+        rekening.reset_pin()
         UI.sukses("PIN berhasil direset dan diganti")
         bank.tambah_audit(kategori="rekening",jenis="reset pin",log=f"{nasabah.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
     @staticmethod
@@ -219,32 +211,29 @@ class AdminCs:
         while True:
             UI.header("MENU CUSTOMER SERVICE")
             print()
-            print("1. Tingkatkan Rekening")
-            print("2. Turunkan Rekening")
-            print("3. Blokir Rekening")
-            print("4. Buka Blokir Rekening")
-            print("5. Reset PIN")
-            print("6. Tutup Rekening")
-            print("7. Keluar")
+            Utilitas.menu_cs()
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                AdminCs.template_surat("Tingkatkan Rekening",["KTP","Kartu ATM",'Buku Tabungan'])
+                AdminCs.template_surat("Buka Rekening",["KTP","Kartu ATM",'Buku Tabungan'])
             elif pilihan == "2":
-                AdminCs.template_surat("Turunkan Rekening",["KTP","Kartu ATM",'Buku Tabungan'])
+                AdminCs.template_surat("Tingkatkan Rekening",["KTP","Kartu ATM",'Buku Tabungan'])
             elif pilihan == "3":
-                AdminCs.template_surat("Blokir Rekening",["KTP","Nomor Hp"])
+                AdminCs.template_surat("Turunkan Rekening",["KTP","Kartu ATM",'Buku Tabungan'])
             elif pilihan == "4":
-                AdminCs.template_surat("Buka Blokir",["KTP","Buku Tabungan","Kartu ATM","Nomor Hp"])
+                AdminCs.template_surat("Blokir Rekening",["KTP","Nomor Hp"])
             elif pilihan == "5":
-                AdminCs.template_surat("Reset PIN",["KTP","Kartu ATM"])
+                AdminCs.template_surat("Buka Blokir",["KTP","Buku Tabungan","Kartu ATM","Nomor Hp"])
             elif pilihan == "6":
+                AdminCs.template_surat("Reset PIN",["KTP","Kartu ATM"])
+            elif pilihan == "8":
                 AdminCs.template_surat("Tutup Rekening",["KTP","Buku Tabungan","Saldo Rekening Harus Rp0","Kartu ATM"])
             elif pilihan == "7":
                 break
 
     @staticmethod
     def buka_rekening(bank):
+        UI.header("SIAPA ANDA?")
         while True:
             print()
             print("1. Nasabah Baru")
@@ -293,10 +282,9 @@ class AdminCs:
                 nik = input("Masukkan NIK Anda: ")
                 nasabah = bank.cari_nasabah(nik)
                 if not nasabah:
-                    UI.gagal("NIK tidak terdaftar")
+                    UI.gagal("NIK tidak terdaftar. Silahkan pilih Opsi nasabah baru")
                     return
                 print(f"Halo,{nasabah.nama}!")
-
                 Utilitas.keuntungan_rekening()
                 try:
                     print()
@@ -330,3 +318,13 @@ class AdminCs:
 
             else:
                 UI.gagal("Pilih opsi yang valid!")
+
+    @staticmethod
+    def layanan_nasabah(bank):
+        from bank_djago.services.layanan_nasabah import LayananNasabah
+        nik = input("Masukkan NIK Anda: ")
+        nasabah = bank.cari_nasabah(nik)
+        if not nasabah:
+            UI.gagal("NIK tidak terdaftar")
+            return
+        LayananNasabah.menu_layanan(bank,nasabah)

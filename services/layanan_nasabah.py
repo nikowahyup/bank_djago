@@ -1,5 +1,3 @@
-from bank_djago.services.transaksi import RiwayatService
-from bank_djago.utils.utililty import Utilitas
 from bank_djago.utils.ui import UI
 from bank_djago.services.admin.admin_cs import AdminCs
 import time
@@ -16,7 +14,7 @@ class LayananNasabah:
     @staticmethod
     def menu_layanan(bank,nasabah):
         print()
-        print(f"👋 Halo {nasabah.nama}!")
+
         while True:
             try:
                 UI.header("MENU LAYANAN")
@@ -100,33 +98,10 @@ class LayananNasabah:
 
 
 
-
     @staticmethod
-    def buka_rekening(bank,nasabah):
-        UI.header("BUKA REKENING")
-        Utilitas.keuntungan_rekening()
-        try:
-            print()
-            pilihan = int(input("Masukkan pilihan Anda: "))
-            if pilihan not in bank.jenis_rekening:
-                UI.peringatan("Masukkan pilihan yang valid!")
-                return
+    def lihat_riwayat(bank,nasabah):
+        pass
 
-            pin = input("Silahkan buat PIN 6 digit: ")
-
-            if len(pin) != 6 or not pin.isdigit():
-                UI.gagal("PIN tidak valid\n")
-                return
-
-            rek_baru = bank.buka_rekening(nasabah,pilihan,pin)
-            print()
-            LayananNasabah.animasi()
-            UI.sukses("Rekening Baru Berhasil Dibuat!")
-            print(f"💳 Nomor Rekening : {rek_baru.norek[0:4]}-{rek_baru.norek[4:8]}-{rek_baru.norek[8:12]}-{rek_baru.norek[12:16]}\n")
-            bank.tambah_audit(kategori="rekening",jenis="buka rekening",log=f"{nasabah.nama } membuuka rekening lain",nik=nasabah.NIK,norek=rek_baru.norek)
-
-        except ValueError:
-            UI.peringatan("Tolong pilih menggunakan angka")
 
 
 
