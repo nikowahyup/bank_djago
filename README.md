@@ -78,6 +78,8 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*):
 
 (05/08/2026)
 - Memisahkan menu admin
+(06/08/2026)
+- Memisahkan semua service dari bank ke admin
 
 # Catatan Desain
 1. Mengapa rekening dibuat sebagai objek baru saat diupgrade atau downgrade?
