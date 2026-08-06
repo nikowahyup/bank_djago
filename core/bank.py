@@ -3,13 +3,12 @@ import datetime
 
 from .rekening import RekeningGold,RekeningReguler,RekeningPrioritas,RekeningPlatinum
 from .nasabah import Nasabahh
-from bank_djago.services.transaksi import TransaksiService,RiwayatService
-from bank_djago.services.layanan_nasabah import LayananNasabah
+from bank_djago.services.transaksi import TransaksiService
 from bank_djago.utils.utililty import Utilitas
 from ..services.admin.admin_audit import Audit
 from ..services.scheduler import Scheduler
 from bank_djago.services.admin.menu_admin import MenuAdmin
-from bank_djago.utils.ui import UI
+
 
 kelas_rekening = {
             "Reguler"  : RekeningReguler,
@@ -93,62 +92,42 @@ class Bank:
         return norek
 
     # ------------------------------------------------------------------------------------------------------------------------------
-    def daftar_nasabah(self,nama,nik,alamat,pin):
-        print('='*29,"PILIHAN REKENING","="*30)
-        Utilitas.keuntungan_rekening()
-        print('='*77)
-        print()
-        try:
-            pilihan = int(input("Masukkan pilihan Anda: "))
-            if pilihan not in self.jenis_rekening:
-                print("❌ Masukkan pilihan yang valid!")
-                return
-            nasabah = Nasabahh(nama,alamat,nik)
-            self.data_nasabah[nik] = nasabah
-            rekening_baru = self.buka_rekening(nasabah,pilihan,pin)
-            return nasabah,rekening_baru
-        except ValueError:
-            print("Tolong pilih menggunakan angka")
+    def daftar_nasabah(self,nama,nik,alamat,pin,pilihan,setor_awal):
+        nasabah_baru  = Nasabahh(nama,alamat,nik)
+        rekening_baru = self.buka_rekening(nasabah_baru,pilihan,pin,setor_awal)
+        self.data_nasabah[nik] = nasabah_baru
+        return nasabah_baru,rekening_baru
+
     # ------------------------------------------------------------------------------------------------------------------------------
-    def cari_rekening(self,rekening):
+    def cari_rekening(self,rekening:str):
         return self.rekening_index.get(rekening,None)
 
-    def cek_saldo(self):
-        UI.header('CEK SALDO')
-        nasabah = self.autentikasi_rekening()
-        if not nasabah:
-            return
+    def cek_saldo(self,norek:str,pin:str):
+        rekening = self.autentikasi_rekening(norek,pin)
+        return rekening
+
+
+
     # ------------------------------------------------------------------------------------------------------------------------------
-    def setor_tunai(self):
-        UI.header('SETOR TUNAI')
-        nasabah = self.autentikasi_rekening()
-        if not nasabah:
-            return
-        TransaksiService.setor_tunai(self,nasabah)
+    def setor_tunai(self,norek:str,pin:str):
+        rekening = self.autentikasi_rekening(norek,pin)
+        return rekening
     # ------------------------------------------------------------------------------------------------------------------------------
-    def tarik_tunai(self):
-        UI.header("TARIK TUNAI")
-        nasabah = self.autentikasi_rekening()
-        if not nasabah:
-            return
-        TransaksiService.tarik_tunai(self,nasabah)
+    def tarik_tunai(self,norek:str,pin:str):
+        rekening = self.autentikasi_rekening(norek,pin)
+        return rekening
     # ------------------------------------------------------------------------------------------------------------------------------
-    def transfer(self):
-        UI.header("TRANSFER SALDO")
-        pengirim = self.autentikasi_rekening()
-        if not pengirim:
-            return
-        penerima = self.cari_penerima(pengirim)
-        if not penerima:
-            return
-        TransaksiService.transfer(self,pengirim,penerima)
+    def transfer(self,norek_pengirim:str,pin:str,norek_penerima:str):
+        pengirim = self.autentikasi_rekening(norek_pengirim,pin)
+        penerima = self.cari_penerima(pengirim, norek_penerima)
+        TransaksiService.transfer(self,pengirim, penerima)
+
     # ------------------------------------------------------------------------------------------------------------------------------
-    def lihat_riwayat(self):
-        UI.header("RIWAYAT TRANSAKSI")
-        nasabah = self.autentikasi_rekening()
-        if not nasabah:
-            return
-        RiwayatService.lihat_riwayat(nasabah)
+    def lihat_riwayat(self,norek):
+        rekening = self.cari_rekening(norek)
+        if not rekening:
+            raise ValueError("Nomor rekening tidak terdaftar")
+        return rekening
     # ------------------------------------------------------------------------------------------------------------------------------
     def data_rekening_dict(self):
         return {
@@ -162,87 +141,52 @@ class Bank:
             for nik, nasabah in self.data_nasabah.items()
         }
     # ------------------------------------------------------------------------------------------------------------------------------
-    def autentikasi_rekening(self):
-        norek = input("Masukkan nomor rekening Anda: ")
+    def autentikasi_rekening(self,norek,pin):
         rekening = self.cari_rekening(norek)
         if not rekening:
-            UI.gagal("Nomor rekening tidak terdaftar\n")
-            return
+            raise ValueError("Nomor rekening tidak terdaftar")
         if rekening.status != "aktif":
-            UI.peringatan(f"Rekening telah di{rekening.status}!")
-            return
-        percobaan = 0
-        while percobaan < 3:
-            pin = input("Masukkan PIN Anda: ")
-            if rekening.cek_pin(pin):
-                print()
-                UI.sukses("Rekening Ditemukan!")
-                UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
-                print()
-                return rekening
+            raise ValueError(f"Rekening telah di{rekening.status}")
 
-            percobaan += 1
-            UI.gagal("PIN salah. Coba lagi")
+        if not rekening.cek_pin(pin):
+            raise ValueError("PIN salah")
 
-        UI.peringatan("Anda telah salah input PIN 3x. Anda akan diblokir!")
-        rekening.status = "blokir"
-        rekening.alasan_blokir = "Salah input PIN 3x"
-        log = RiwayatService.alasan_blokir(rekening.alasan_blokir)
-        rekening.simpan_riwayat(log)
-        return None
+        return rekening
 
 
-
-
-
+    def cari_nasabah(self,nik):
+        return self.data_nasabah.get(nik,None)
 
     # ------------------------------------------------------------------------------------------------------------------------------
-    def cari_penerima(self,pengirim):
-        rekening = input("Masukkan nomor rekening penerima: ")
-        penerima = self.cari_rekening(rekening)
+    def cari_penerima(self,pengirim,norek_penerima):
+        penerima = self.cari_rekening(norek_penerima)
         if not penerima:
-            UI.gagal("Nomor rekening penerima tidak terdaftar\n")
-            return
+            raise ValueError("Penerima tidak terdaftar")
         if penerima == pengirim:
-            UI.gagal("Tidak dapat transfer ke nomor rekening sendiri\n")
-            return
-        if penerima.status != "aktif":
-            UI.gagal(f"Rekening penerima telah di{penerima.status}!")
-            return
+            raise ValueError("Tidak dapat transfer ke akun sendiri")
         return penerima
     # ------------------------------------------------------------------------------------------------------------------------------
-    def layanan_nasabah(self):
-        nik = input("Masukkan NIK Anda: ")
-        if nik not in self.data_nasabah:
-            print("Maaf,NIK tidak terdaftar")
-            return
+    def layanan_nasabah(self,nik_nasabah):
+        nasabah = self.cari_nasabah(nik_nasabah)
+        if not nasabah:
+            raise ValueError("NIK tidak terdaftar")
 
-        nasabah = self.data_nasabah[nik]
-        LayananNasabah.menu_layanan(self,nasabah)
+        return nasabah
     # ------------------------------------------------------------------------------------------------------------------------------
-    def buka_rekening(self,nasabah,pilihan,pin):
-        info = self.jenis_rekening[pilihan]
-        prefix = info["prefix"]
+    def buka_rekening(self,nasabah,pilihan,pin,setor_awal):
+        info      = self.jenis_rekening[pilihan]
+        prefix    = info["prefix"]
         kelas_rek = info["kelas"]
 
-        norek = self.buat_norek(prefix)
+        norek         = self.buat_norek(prefix)
         rekening_baru = kelas_rek(norek,pin,nasabah)
-        UI.peringatan("Anda wajib menyetorkan setoran awal")
-        setor_awal = int(input("Masukkan setoran awal Anda: "))
+
         if setor_awal < rekening_baru.saldosetor_min:
-            UI.gagal("Setor awal belum memenuhi syarat minimal")
-            return
+            raise ValueError("Saldo awal tidak memenuhi saldo setor minimum")
+
         rekening_baru.tambah_saldo(setor_awal)
-        simpan = {
-            "kategori":"transaksi",
-            "jenis": "setor uang",
-            "waktu": datetime.datetime.now().isoformat(),
-            "log": f"SETOR AWAL | Jumlah Rp{setor_awal:,}".replace(",", ".")
-        }
-        self.tambah_audit(kategori="transaksi",jenis="setor uang",log=f"SETOR AWAL |  Rp{setor_awal:,}".replace(",", "."),nama=nasabah.nama,nik=nasabah.NIK,norek=rekening_baru.norek)
-        rekening_baru.simpan_riwayat(simpan)
-        nasabah.rekening.append(rekening_baru)
         self.rekening_index[norek] = rekening_baru
+        nasabah.rekening.append(rekening_baru)
 
         return rekening_baru
     # ------------------------------------------------------------------------------------------------------------------------------

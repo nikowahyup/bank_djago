@@ -1,7 +1,7 @@
 from bank_djago.services.transaksi import RiwayatService
 from bank_djago.utils.ui import UI
-from bank_djago.utils.validator import Validator
 from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.validator import Validator
 
 
 
@@ -15,27 +15,31 @@ class AdminCs:
         while True:
             UI.header("MENU CUSTOMER SERVICE")
             print()
-            print("1. Tingkatkan Rekening")
-            print("2. Turunkan Rekening")
-            print("3. Blokir Rekening")
-            print("4. Buka Blokir Rekening")
-            print("5. Reset PIN")
-            print("6. Tutup Rekening")
-            print("7. Keluar")
+
+            print("1. Buka Rekening")
+            print("2. Tingkatkan Rekening")
+            print("3. Turunkan Rekening")
+            print("4. Blokir Rekening")
+            print("5. Buka Blokir Rekening")
+            print("6. Reset PIN")
+            print("7. Tutup Rekening")
+            print("8. Keluar")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                AdminCs.upgrade_rekening(bank)
+                AdminCs.buka_rekening(bank)
             elif pilihan == "2":
-                AdminCs.downgrade_rekening(bank)
+                AdminCs.upgrade_rekening(bank)
             elif pilihan == "3":
-                AdminCs.blokir_rekening(bank)
+                AdminCs.downgrade_rekening(bank)
             elif pilihan == "4":
-                AdminCs.buka_blokir(bank)
+                AdminCs.blokir_rekening(bank)
             elif pilihan == "5":
-                AdminCs.reset_pin(bank)
+                AdminCs.buka_blokir(bank)
             elif pilihan == "6":
-                AdminCs.tutup_rekening(bank)
+                AdminCs.reset_pin(bank)
             elif pilihan == "7":
+                AdminCs.tutup_rekening(bank)
+            elif pilihan == "8":
                 break
 
 
@@ -245,7 +249,7 @@ class AdminCs:
             print()
             print("1. Nasabah Baru")
             print("2. Nasabah Lama")
-            print("3. Kembali")
+            print("3. Kembali\n")
 
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
@@ -259,33 +263,70 @@ class AdminCs:
                     for pesan in e.args[0]:
                         print(f"❌", pesan)
                     return
-                nasabah_baru,rekening_baru = bank.daftar_nasabah(nama,nik,alamat,pin)
-                if nasabah_baru and rekening_baru:
+
+                Utilitas.keuntungan_rekening()
+                try:
+                    print()
+                    pilihan = int(input("Masukkan pilihan Anda: "))
+                    if pilihan not in(1,2,3,4):
+                        UI.gagal("Tolong pilih pilihan yang tersedia")
+                        return
+
+                    UI.peringatan("Anda wajib menyetorkan uang setoran awal")
+                    setor_awal = int(input("Masukkan nominal: "))
+
+                except ValueError:
+                    UI.gagal("Masukkan angka yang valid.")
+                    return
+
+                try:
+                    nasabah_baru,rekening_baru = bank.daftar_nasabah(nama,nik,alamat,pin,pilihan,setor_awal)
                     Utilitas.sapaan(nasabah_baru,rekening_baru)
                     bank.tambah_audit(kategori="rekening", jenis="buka rekening",log=f"{nasabah_baru.nama} membuka rekening pertama", nik=nasabah_baru.NIK,norek=rekening_baru.norek)
                     bank.tambah_audit(kategori="nasabah", jenis="daftar", log="Pendaftaran Menjadi Nasabah Bank Djago",nama=nasabah_baru.nama, nik=nasabah_baru.NIK)
+                except ValueError as e:
+                    UI.gagal(str(e))
+
 
             elif pilihan == "2":
+
                 nik = input("Masukkan NIK Anda: ")
-                nasabah = bank.data_nasabah[nik]
+                nasabah = bank.cari_nasabah(nik)
                 if not nasabah:
+                    UI.gagal("NIK tidak terdaftar")
                     return
                 print(f"Halo,{nasabah.nama}!")
+
                 Utilitas.keuntungan_rekening()
-                pilihan = int(input("Masukkan pilihan Anda:"))
-                pin = input("Silahkan buat PIN 6 digit: ")
-                if not len(pin) == 6 or not pin.isdigit():
-                    print("PIN tidak valid")
+                try:
+                    print()
+                    pilihan = int(input("Masukkan pilihan Anda: "))
+                    if pilihan not in(1,2,3,4):
+                        UI.gagal("Tolong pilih pilihan yang tersedia")
+                        return
+                    pin = input("Silahkan buat PIN 6 digit angka: ")
+                    try:
+                        Validator.validasi_pin(pin)
+                    except ValueError as e:
+                        UI.gagal(str(e))
+                        return
+
+                    UI.peringatan("Anda wajib menyetorkan uang setoran awal")
+                    setor_awal = int(input("Masukkan nominal: "))
+
+                except ValueError:
+                    UI.gagal("Masukkan angka yang valid.")
                     return
-                rekening_baru = bank.buka_rekening(nasabah,pilihan,pin)
-                if rekening_baru:
+
+                try:
+                    rekening_baru = bank.buka_rekening(nasabah,pilihan,pin,setor_awal)
                     print(f"Selamat! Rekening dengan nomor {rekening_baru.norek} telah dibuka!")
-                    bank.tambah_audit(kategori="rekening",jenis="buka",log=f"{nasabah.nama} membuka rekening lain",norek=rekening_baru.norek)
-                else:
-                    print("Gagal membuka rekening baru")
+                    bank.tambah_audit(kategori="rekening",jenis="buka",log=f"{nasabah.nama} membuka rekening lain",nik=nasabah.NIK,norek=rekening_baru.norek)
+                except ValueError as e:
+                    UI.gagal(str(e))
 
             elif pilihan == "3":
                 break
 
             else:
-                print("Pilih opsi yang valid!")
+                UI.gagal("Pilih opsi yang valid!")

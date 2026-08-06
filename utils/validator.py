@@ -19,3 +19,10 @@ class Validator:
 
         if error:
             raise ValueError(error)
+
+    @staticmethod
+    def validasi_pin(pin):
+        if not len(pin) == 6:
+            raise  ValueError("Jumlah PIN harus 6 digit")
+        if not pin.isdigit():
+            raise  ValueError("PIN harus berupa angka semua")
