@@ -24,20 +24,15 @@ class Utilitas:
 
     @staticmethod
     def pilihan_menu():
-
-        UI.header("SELAMAT DATANG DI BANK DJAGO")
+        UI.header("SELAMAT DATANG DI BANK DJAGO", warna=UI.HIJAU)
 
         print("PILIHAN MENU".center(47))
         print()
         print("1. Daftar atau Buka Rekening")
-        print("2. Cek Saldo")
-        print("3. Setor Tunai")
-        print("4. Tarik Tunai")
-        print("5. Transfer Saldo")
-        print("6. Lihat Riwayat")
-        print("7. Layanan Nasabah")
-        print("8. Menu Admin")
-        print("9. Simpan dan Keluar")
+        print("2. Menu Transaksi")
+        print("3. Layanan Nasabah")
+        print("4. Menu Admin")
+        print("5. Simpan dan Keluar")
 
         print()
 
@@ -123,7 +118,7 @@ class Utilitas:
 
     @staticmethod
     def menu_admin():
-        UI.header("MENU REKAP")
+        UI.header("MENU REKAP",UI.KUNING)
         print()
         print('1. Lihat Rekap Umum')
         print('2. Lihat Rekap Rekening')
@@ -138,7 +133,7 @@ class Utilitas:
     @staticmethod
     def menu_audit():
         print()
-        UI.header('MENU AUDIT')
+        UI.header('MENU AUDIT',UI.KUNING)
         print()
         print('1. Semua Aktivitas')
         print('2. Aktivitas Transaksi')
@@ -161,3 +156,14 @@ class Utilitas:
         print("6. Reset PIN")
         print("7. Tutup Rekening")
         print("8. Keluar")
+
+    @staticmethod
+    def tambah_bulan(tanggal,bulan):
+        import datetime
+        import calendar
+        bulan_baru = tanggal.month + bulan
+
+        tahun = tanggal.year + (bulan_baru-1)//12
+        bulan = (bulan_baru - 1)%12 + 1
+        hari = min(tanggal.day,calendar.monthrange(tahun,bulan)[1])
+        return datetime.date(tahun,bulan,hari)

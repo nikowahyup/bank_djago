@@ -4,6 +4,7 @@ class Nasabahh:
         self.alamat   = alamat
         self.NIK      = nik
         self.rekening = []
+        self.deposito = []
 
     def ke_dict(self): # pengonversi objek nasabah ke dictionary agar bisa disimpan ke JSON
         return {
@@ -13,7 +14,9 @@ class Nasabahh:
             "rekening": [
                 rekening.norek
                 for rekening in self.rekening
-            ]
+
+            ],
+            "deposito":[]
         }
     @classmethod
     def dari_dict(cls,data): # pengonversi file JSON ke objek nasabah kembali

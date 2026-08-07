@@ -40,7 +40,7 @@ class RekapUI:
     @staticmethod
     def rekap_umum(total_nasabah,total_rekening,total_saldo):
 
-        print("="*18,"REKAP UMUM","="*18)
+        UI.header("REKAP UMUM",UI.MERAH)
         print()
         print(f"👤 Total Nasabah  : {total_nasabah}")
         print(f"💳 Total Rekening : {total_rekening}")
@@ -49,7 +49,7 @@ class RekapUI:
 
     @staticmethod
     def rekap_rekening(reguler,prioritas,gold,platinum):
-        print("="*15,"REKAP REKENING","="*15)
+        UI.header("REKAP REKENING",UI.MERAH)
         print()
         print(f"{UI.kelas[1]} Rekening Reguler   : {reguler}")
         print(f"{UI.kelas[2]} Rekening Prioritas : {prioritas}")
@@ -59,7 +59,7 @@ class RekapUI:
 
     @staticmethod
     def rekap_status(aktif,blokir,tutup):
-        print("="*12,"REKAP STATUS REKENING","="*12)
+        UI.header("REKAP STATUS REKENING",UI.MERAH)
         print()
         print(f"✅ Rekening Aktif  : {aktif}")
         print(f"⚠️ Rekening Blokir : {blokir}")
@@ -67,7 +67,7 @@ class RekapUI:
 
     @staticmethod
     def total_saldo_tiap_rekening(reguler,prioritas,gold,platinum):
-        print("="*12,"REKAP SALDO TIAP REKENING","="*12)
+        UI.header("REKAP SALDO TIAP REKENING",UI.MERAH)
         print()
         print(f"{UI.kelas[1]} Rekening Reguler   : Rp{Utilitas.format_rupiah(reguler)}")
         print(f"{UI.kelas[2]} Rekening Prioritas : Rp{Utilitas.format_rupiah(prioritas)}")
@@ -76,14 +76,14 @@ class RekapUI:
 
     @staticmethod
     def saldo_besar(rekening_terbesar):
-        print("="*12,"PEMILIK SALDO TERBESAR","="*12)
+        UI.header("PEMILIK SALDO TERBESAR")
         print()
         print(f'{rekening_terbesar.pemilik.nama}')
         print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terbesar.saldo)}\n")
 
     @staticmethod
     def saldo_kecil(rekening_terkecil):
-        print("="*12,"PEMILIK SALDO TERKECIL","="*12)
+        UI.header("PEMILIK SALDO TERKECIL")
         print()
         print(f'{rekening_terkecil.pemilik.nama}')
         print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terkecil.saldo)}\n")

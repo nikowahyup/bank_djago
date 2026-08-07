@@ -19,21 +19,29 @@ class UI:
         "kunci": "🔒"
     }
 
+    BIRU   = "\033[94m"
+    CYAN   = "\033[96m"
+    PUTIH  = "\033[97m"
+    HIJAU  = "\033[92m"
+    KUNING = "\033[93m"
+    MERAH  = "\033[91m"
+
+    RESET = "\033[0m"
 
 
+    @staticmethod
+    def header(judul,warna=None):
+        if warna is None:
+            warna = UI.BIRU
+
+
+        print(warna + "╔" + "═" * 50 + "╗")
+        print(f"║{judul.center(50)}║")
+        print( warna + "╚" + "═" * 50 + "╝")
+        print(UI.RESET)
     @staticmethod
     def garis():
         print("─" * 40)
-
-    @staticmethod
-    def header(judul):
-        print("╔" + "═" * 50 + "╗")
-
-        judul = judul.center(50)
-
-        print(f"║{Fore.CYAN}{judul}{Style.RESET_ALL}║")
-
-        print("╚" + "═" * 50 + "╝")
 
 
     @staticmethod

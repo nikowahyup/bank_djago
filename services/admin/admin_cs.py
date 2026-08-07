@@ -14,7 +14,7 @@ class AdminCs:
     @staticmethod
     def menu(bank):
         while True:
-            UI.header("MENU CUSTOMER SERVICE")
+            UI.header("MENU CUSTOMER SERVICE",UI.KUNING)
             print()
             Utilitas.menu_cs()
             pilihan = input("Masukkan pilihan Anda: ")
@@ -39,6 +39,8 @@ class AdminCs:
 
     @staticmethod
     def upgrade_rekening(bank):
+        UI.header("TINGKATKAN REKENING",UI.MERAH)
+        print()
         norek    = input("Masukkan nomor rekening: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
@@ -49,7 +51,7 @@ class AdminCs:
             print("Rekening sudah platinum")
             return
 
-        print("Mau Upgrade ke mana: ")
+        print("Mau tingkatkan ke mana: ")
         opsi = list(range(rekening.level+1,5))
         for i in opsi:
             print(f"{i}. {AdminCs.level[i]}")
@@ -77,6 +79,8 @@ class AdminCs:
 
     @staticmethod
     def downgrade_rekening(bank):
+        UI.header("TURUNKAN REKENING",UI.MERAH)
+        print()
         norek    = input("Masukkan nomor rekening: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
@@ -87,7 +91,7 @@ class AdminCs:
             print("Rekening sudah reguler")
             return
 
-        print("Mau downgrade ke mana: ")
+        print("Mau turunkan ke mana: ")
         opsi = list(range(1,rekening.level))
         for i in opsi:
             print(f"{i}. {AdminCs.level[i]}")
@@ -111,6 +115,8 @@ class AdminCs:
 
     @staticmethod
     def blokir_rekening(bank):
+        UI.header("BLOKIR REKENING",UI.MERAH)
+        print()
         norek = input("Masukkan nomor rekening: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
@@ -126,6 +132,8 @@ class AdminCs:
 
     @staticmethod
     def buka_blokir(bank):
+        UI.header("BUKA BLOKIR REKENING",UI.MERAH)
+        print()
         nik = input("Masukkan NIK nasabah: ")
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
@@ -146,6 +154,8 @@ class AdminCs:
 
     @staticmethod
     def reset_pin(bank):
+        UI.header("RESET PIN REKENING",UI.MERAH)
+        print()
         nik = input("Masukkan NIK nasabah: ")
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
@@ -166,6 +176,8 @@ class AdminCs:
         AuditService.tambah_audit(bank,"rekening",jenis="reset pin",log=f"{nasabah.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
     @staticmethod
     def tutup_rekening(bank):
+        UI.header("TUTUP REKENING",UI.MERAH)
+        print()
         nik = input("Masukkan NIK Nasabah: ")
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
@@ -208,9 +220,10 @@ class AdminCs:
     @staticmethod
     def menu_layanan():
         while True:
-            UI.header("MENU CUSTOMER SERVICE")
+            UI.header("MENU CUSTOMER SERVICE",UI.KUNING)
             print()
             Utilitas.menu_cs()
+            print()
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
@@ -225,15 +238,16 @@ class AdminCs:
                 AdminCs.template_surat("Buka Blokir",["KTP","Buku Tabungan","Kartu ATM","Nomor Hp"])
             elif pilihan == "6":
                 AdminCs.template_surat("Reset PIN",["KTP","Kartu ATM"])
-            elif pilihan == "8":
-                AdminCs.template_surat("Tutup Rekening",["KTP","Buku Tabungan","Saldo Rekening Harus Rp0","Kartu ATM"])
             elif pilihan == "7":
+                AdminCs.template_surat("Tutup Rekening",["KTP","Buku Tabungan","Saldo Rekening Harus Rp0","Kartu ATM"])
+            elif pilihan == "8":
                 break
 
     @staticmethod
     def buka_rekening(bank):
-        UI.header("SIAPA ANDA?")
         while True:
+            print()
+            UI.header("SIAPA ANDA?")
             print()
             print("1. Nasabah Baru")
             print("2. Nasabah Lama")

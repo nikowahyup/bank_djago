@@ -7,6 +7,7 @@ class RiwayatUI:
     @staticmethod
     def menu_riwayat(rekening):
             while True:
+                print()
                 UI.header("MENU LIHAT RIWAYAT")
                 print()
                 print("1. Semua transaksi".title())
@@ -45,7 +46,7 @@ class RiwayatUI:
                         print(Utilitas.format_waktu(item["waktu"]), '|', item["log"])
                 elif pilihan == "7":
                     break
-                elif pilihan == "7":
+                elif pilihan == "8":
                     pass
-                elif pilihan == "7":
+                elif pilihan == "9":
                     pass

@@ -17,7 +17,8 @@ class LayananNasabah:
 
         while True:
             try:
-                UI.header("MENU LAYANAN")
+                print(f"👋 Halo,{nasabah.nama}!")
+                UI.header("MENU LAYANAN",UI.KUNING)
                 print()
                 print("1. Lihat Biodata")
                 print("2. Lihat Rekening")
@@ -43,7 +44,9 @@ class LayananNasabah:
 
     @staticmethod
     def biodata(nasabah):
-        UI.header("BIODATA")
+        UI.header("BIODATA ANDA",UI.MERAH)
+        print()
+        print('='*39,)
         print(f"NAMA   : {nasabah.nama}")
         print(f"NIK    : {nasabah.NIK}")
         print(f"ALAMAT : {nasabah.alamat}")
@@ -51,7 +54,8 @@ class LayananNasabah:
 
     @staticmethod
     def daftar_rekening(nasabah):
-        UI.header("DAFTAR REKENING")
+        UI.header("DAFTAR REKENING ANDA",UI.MERAH)
+        print()
         for i,rek in enumerate(nasabah.rekening,1):
             print(f"{i}. {rek.jenis}")
             print(f"💳 Nomor Rekening : {rek.norek}")
@@ -60,8 +64,8 @@ class LayananNasabah:
 
     @staticmethod
     def ganti_alamat(nasabah):
-        UI.header("GANTI ALAMAT")
-
+        UI.header("GANTI ALAMAT",UI.MERAH)
+        print()
         alamat_lama = input("Masukkan alamat lama Anda: ")
         if alamat_lama != nasabah.alamat:
             UI.gagal("Alamat tidak cocok")
@@ -74,8 +78,8 @@ class LayananNasabah:
 
     @staticmethod
     def ganti_pin(bank,nasabah):
-        UI.header("GANTI PIN")
-
+        UI.header("GANTI PIN",UI.MERAH)
+        print()
         norek = input("Masukkan nomor rekening yang ingin Anda ganti pin: ")
         rekening = bank.cari_rekening(norek)
         if not rekening:
@@ -98,9 +102,6 @@ class LayananNasabah:
 
 
 
-    @staticmethod
-    def lihat_riwayat(bank,nasabah):
-        pass
 
 
 
