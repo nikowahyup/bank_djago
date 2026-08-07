@@ -139,11 +139,9 @@ masing-masing.
 
 2. Mengapa logika transaksi dipindahkan dari file transaksi ke admin teller?
 
-Jawaban: Agar transaksi fokus pada logika transaksi yang sudah ditetapkan bank seperti nominal harus lebih dari Rp10.000 dll.
-Selain itu agar file transaksi tidak terlalu bengkak dan secara logika saya sudah sewajarnya admin bertanya data-data nasabah 
-dan transaksi mengeksekusi.
+Jawaban: Agar file transaksi fokus pada logika transaksi yang sudah ditetapkan bank
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
 - Menambahkan menu informasi untuk nasabah
-- Memisahkan input data transaksi dari file transaksi itu sendiri(file transaksi fokus pada logika saja,tidak ada input dari nasabah)
+- Memisahkan logika transaksi dari inputan data nasabah
