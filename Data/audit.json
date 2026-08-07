@@ -927,5 +927,155 @@
         "log": "Pendaftaran Menjadi Nasabah Bank Djago",
         "nik": "3510152612082002",
         "nama": "Niko"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346602",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346614",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346631",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346655",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346661",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346672",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346695",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346700",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346709",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346722",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346727",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346736",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346752",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346756",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346767",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346781",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346785",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346795",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:48.346809",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346813",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-07T07:13:48.346822",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-07T07:13:56.616600",
+        "jenis": "SETOR UANG",
+        "log": "Niko Wahyu Pratama Setor Uang Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "4001215327903178"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-07T07:16:44.114607",
+        "jenis": "BUKA REKENING",
+        "log": "Yhwach membuka rekening pertama",
+        "nik": "3510151001012002",
+        "rekening": "3001877015748075"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-07T07:16:44.114618",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510151001012002",
+        "nama": "Yhwach"
     }
 ]

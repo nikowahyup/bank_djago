@@ -1,7 +1,7 @@
 from bank_djago.services.admin.admin_payroll import BiayaAdminService
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.bunga import BungaService
-from bank_djago.services.limit import LimitService
+from bank_djago.services.transaksi.limit import LimitService
 
 class Scheduler:
 

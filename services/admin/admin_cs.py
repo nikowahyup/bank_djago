@@ -1,4 +1,5 @@
-from bank_djago.services.transaksi import RiwayatService
+from bank_djago.services.admin.rekap_audit import AuditService
+from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.utils.validator import Validator
@@ -64,10 +65,10 @@ class AdminCs:
         rek_tujuan    = AdminCs.level[pilihan]
         rekening_baru = bank.upgrade_rekening(rekening,pilihan)
         if rekening_baru:
-            log = RiwayatService.upgrade_rekening(sebelum=rek_awal,sesudah=rek_tujuan)
+            log = RiwayatTemplate.upgrade_rekening(sebelum=rek_awal,sesudah=rek_tujuan)
             UI.sukses('Peningkatan Sukses!')
             print(f"Rekening telah ditingkatkan ke {AdminCs.level[pilihan]}")
-            bank.tambah_audit(kategori="rekening",jenis="upgrade",log=f"{rekening.pemilik.nama} mengubah rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
+            AuditService.tambah_audit(bank,"rekening",jenis="upgrade",log=f"{rekening.pemilik.nama} mengubah rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
             rekening_baru.simpan_riwayat(log)
         else:
             UI.gagal("Upgrade Gagal!")
@@ -102,10 +103,10 @@ class AdminCs:
         rek_tujuan    = AdminCs.level[pilihan]
         rekening_baru = bank.upgrade_rekening(rekening,pilihan)
         if rekening_baru:
-            log = RiwayatService.upgrade_rekening(sebelum=rek_awal,sesudah=rek_tujuan)
+            log = RiwayatTemplate.upgrade_rekening(sebelum=rek_awal,sesudah=rek_tujuan)
             UI.sukses('Penurunan Sukses!')
             print(f"Rekening telah diturunkan ke {AdminCs.level[pilihan]}")
-            bank.tambah_audit(kategori="rekening",jenis="downgrade",log=f"{rekening.pemilik.nama} mengubah rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
+            AuditService.tambah_audit(bank,kategori="rekening",jenis="downgrade",log=f"{rekening.pemilik.nama} mengubah rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
             rekening_baru.simpan_riwayat(log)
 
     @staticmethod
@@ -119,9 +120,7 @@ class AdminCs:
         alasan = input("Masukkan alasan pemblokiran: ")
         if bank.blokir_rekening(rekening,alasan):
             print(f"Rekening dengan nomor {rekening.norek} berhasil diblokir")
-            bank.tambah_audit(kategori="rekening", jenis="blokir",
-                          log=f"{rekening.pemilik.nama} meminta memblokir rekeningnya",
-                          norek=rekening.norek)
+            AuditService.tambah_audit(bank,kategori="rekening", jenis="blokir",log=f"{rekening.pemilik.nama} meminta memblokir rekeningnya",norek=rekening.norek)
         else:
             UI.gagal("Rekening ini telah ditutup!")
 
@@ -141,7 +140,7 @@ class AdminCs:
         UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
         if bank.buka_blokir(rekening):
             print(f"Rekening dengan nomor {rekening.norek} berhasil dibuka kembali")
-            bank.tambah_audit(kategori="rekening",jenis="buka blokir",log=f"Rekening milik {nasabah.nama} dibuka kembali",norek=rekening.norek)
+            AuditService.tambah_audit(bank,kategori="rekening",jenis="buka blokir",log=f"Rekening milik {nasabah.nama} dibuka kembali",norek=rekening.norek)
         else:
             UI.gagal("Rekening ini telah ditutup!")
 
@@ -164,7 +163,7 @@ class AdminCs:
             return
         rekening.reset_pin()
         UI.sukses("PIN berhasil direset dan diganti")
-        bank.tambah_audit(kategori="rekening",jenis="reset pin",log=f"{nasabah.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
+        AuditService.tambah_audit(bank,"rekening",jenis="reset pin",log=f"{nasabah.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
     @staticmethod
     def tutup_rekening(bank):
         nik = input("Masukkan NIK Nasabah: ")
@@ -187,7 +186,7 @@ class AdminCs:
             pilihan = input("Pilihan: ")
             bank.tutup_rekening(rekening,pilihan)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} telah ditutup!")
-            bank.tambah_audit(kategori="rekening",jenis="tutup",log=f"Rekening bernomor {rekening.norek} milik {nasabah.nama} telah ditutup")
+            AuditService.tambah_audit(bank,kategori="rekening",jenis="tutup",log=f"Rekening bernomor {rekening.norek} milik {nasabah.nama} telah ditutup")
 
     @staticmethod
     def template_surat(jenis,syarat):
@@ -271,8 +270,11 @@ class AdminCs:
                 try:
                     nasabah_baru,rekening_baru = bank.daftar_nasabah(nama,nik,alamat,pin,pilihan,setor_awal)
                     Utilitas.sapaan(nasabah_baru,rekening_baru)
-                    bank.tambah_audit(kategori="rekening", jenis="buka rekening",log=f"{nasabah_baru.nama} membuka rekening pertama", nik=nasabah_baru.NIK,norek=rekening_baru.norek)
-                    bank.tambah_audit(kategori="nasabah", jenis="daftar", log="Pendaftaran Menjadi Nasabah Bank Djago",nama=nasabah_baru.nama, nik=nasabah_baru.NIK)
+                    log = RiwayatTemplate.setor_uang(setor_awal)
+                    rekening_baru.simpan_riwayat(log)
+                    AuditService.tambah_audit(bank,kategori="rekening", jenis="buka rekening",log=f"{nasabah_baru.nama} membuka rekening pertama", nik=nasabah_baru.NIK,norek=rekening_baru.norek)
+                    AuditService.tambah_audit(bank,kategori="nasabah", jenis="daftar", log="Pendaftaran Menjadi Nasabah Bank Djago",nama=nasabah_baru.nama,nik=nasabah_baru.NIK)
+
                 except ValueError as e:
                     UI.gagal(str(e))
 
@@ -309,7 +311,7 @@ class AdminCs:
                 try:
                     rekening_baru = bank.buka_rekening(nasabah,pilihan,pin,setor_awal)
                     print(f"Selamat! Rekening dengan nomor {rekening_baru.norek} telah dibuka!")
-                    bank.tambah_audit(kategori="rekening",jenis="buka",log=f"{nasabah.nama} membuka rekening lain",nik=nasabah.NIK,norek=rekening_baru.norek)
+                    AuditService.tambah_audit(bank,kategori="rekening",jenis="buka",log=f"{nasabah.nama} membuka rekening lain",nik=nasabah.NIK,norek=rekening_baru.norek)
                 except ValueError as e:
                     UI.gagal(str(e))
 

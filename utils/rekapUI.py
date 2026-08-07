@@ -30,7 +30,7 @@ class RekapUI:
                 RekapUI.saldo_besar(saldo_terbesar)
 
             elif pilihan == "6":
-                saldo_terkecil = bank.saldo_terkecil()
+                saldo_terkecil = RekapService.saldo_terkecil(bank)
                 RekapUI.saldo_kecil(saldo_terkecil)
 
             elif pilihan == "7":

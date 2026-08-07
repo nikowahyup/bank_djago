@@ -8,8 +8,8 @@ from bank_djago.services.admin.admin_cs import AdminCs
 def menu():
 
     bank = JSOnbase.muat_bank()
-    # bank.debug_bunga(10)
-    # bank.debug_admin(10)
+    bank.debug_bunga(10)
+    bank.debug_admin(10)
     bank.proses_harian()
     while True:
         print()
@@ -33,7 +33,7 @@ def menu():
             AdminTeller.transfer(bank)
 
         elif pilihan == 6:
-            bank.lihat_riwayat()
+            AdminTeller.lihat_riwayat(bank)
 
         elif pilihan == 7:
             AdminCs.layanan_nasabah(bank)

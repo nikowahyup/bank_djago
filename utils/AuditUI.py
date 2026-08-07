@@ -9,10 +9,10 @@ class AuditUI:
             print(Utilitas.format_waktu(item["waktu"]), "|",item["jenis"],"|",item["log"])
             if "nama" in item:
                 print("Nama     :",item["nama"])
-            if "NIK" in item:
-                print("NIK      :",item["NIK"])
-            if "Rekening" in item:
-                print("Rekening :",item["Rekening"])
+            if "nik" in item:
+                print("NIK      :",item["nik"])
+            if "rekening" in item:
+                print("Rekening :",item["rekening"])
 
     @staticmethod
     def menu_tampilkan_audit(bank):

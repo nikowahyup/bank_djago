@@ -22,7 +22,8 @@ Masukkan sembarang simbol untuk keluar""")
             print("1. Menu Rekap Bank")
             print("2. Menu Audit")
             print("3. Customer Service")
-            print("3. Keluar\n")
+            print("4. Keluar\n")
+
             pilihan = input("Pilihan Kamu: ")
 
             if pilihan == "1":
