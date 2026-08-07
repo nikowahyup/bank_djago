@@ -82,7 +82,6 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - **Rekapitulasi:** Penyajian laporan administrasi.
 
 ## 🚧 Sedang & Akan Dikembangkan (Roadmap)
--  **Sisi Admin:** Fitur manajemen seluruh nasabah dan laporan *audit log*.
 -  **Fitur Deposito & Pinjaman:** Perhitungan bunga, tenor, denda pencairan awal, dan skema cicilan.
 -  *Integrasi Database:** Bermigrasi dari simpanan JSON ke database relasional `SQLite`.
 -  *Web Interface:** Mengembangkan antarmuka berbasis web menggunakan *framework* `Django`.
