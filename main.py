@@ -7,8 +7,9 @@ from bank_djago.services.admin.admin_cs import AdminCs
 def menu():
 
     bank = JSOnbase.muat_bank()
-    bank.debug_bunga(10)
-    bank.debug_admin(10)
+    # bank.debug_bunga(10)
+    # bank.debug_admin(10)
+    bank.debug_depo(12)
     bank.proses_harian()
 
     while True:

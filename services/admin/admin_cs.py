@@ -42,6 +42,7 @@ class AdminCs:
         UI.header("TINGKATKAN REKENING",UI.MERAH)
         print()
         norek    = input("Masukkan nomor rekening: ")
+        Utilitas.animasi("Mencari rekening")
         rekening = bank.cari_rekening(norek)
         if not rekening:
             return
@@ -63,6 +64,7 @@ class AdminCs:
         if pilihan not in opsi:
             print("Pilihan tidak valid")
             return
+        Utilitas.animasi("Proses")
         rek_awal      = AdminCs.level[rekening.level]
         rek_tujuan    = AdminCs.level[pilihan]
         rekening_baru = bank.upgrade_rekening(rekening,pilihan)
@@ -82,6 +84,7 @@ class AdminCs:
         UI.header("TURUNKAN REKENING",UI.MERAH)
         print()
         norek    = input("Masukkan nomor rekening: ")
+        Utilitas.animasi("Mencari rekening")
         rekening = bank.cari_rekening(norek)
         if not rekening:
             return
@@ -103,6 +106,7 @@ class AdminCs:
         if pilihan not in opsi:
             print("Pilihan tidak valid")
             return
+        Utilitas.animasi("Proses")
         rek_awal      = AdminCs.level[rekening.level]
         rek_tujuan    = AdminCs.level[pilihan]
         rekening_baru = bank.upgrade_rekening(rekening,pilihan)
@@ -118,12 +122,14 @@ class AdminCs:
         UI.header("BLOKIR REKENING",UI.MERAH)
         print()
         norek = input("Masukkan nomor rekening: ")
+        Utilitas.animasi("Mencari rekening")
         rekening = bank.cari_rekening(norek)
         if not rekening:
             return
         UI.sukses("Rekening Ditemukan!")
         UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
         alasan = input("Masukkan alasan pemblokiran: ")
+        Utilitas.animasi("Proses")
         if bank.blokir_rekening(rekening,alasan):
             print(f"Rekening dengan nomor {rekening.norek} berhasil diblokir")
             AuditService.tambah_audit(bank,kategori="rekening", jenis="blokir",log=f"{rekening.pemilik.nama} meminta memblokir rekeningnya",norek=rekening.norek)
@@ -135,17 +141,20 @@ class AdminCs:
         UI.header("BUKA BLOKIR REKENING",UI.MERAH)
         print()
         nik = input("Masukkan NIK nasabah: ")
+        Utilitas.animasi("Mencari nasabah")
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
             print("NIK tidak terdaftar")
             return
         norek = input("Masukkan nomor rekening: ")
+        Utilitas.animasi("Mencari rekeing")
         rekening = bank.cari_rekening(norek)
         if not rekening:
             print("Rekening tidak ada")
             return
         UI.sukses("Rekening Ditemukan!")
         UI.wadah_info(rekening.pemilik.nama,rekening.norek,rekening.cek_saldo())
+        Utilitas.animasi("Proses")
         if bank.buka_blokir(rekening):
             print(f"Rekening dengan nomor {rekening.norek} berhasil dibuka kembali")
             AuditService.tambah_audit(bank,kategori="rekening",jenis="buka blokir",log=f"Rekening milik {nasabah.nama} dibuka kembali",norek=rekening.norek)
@@ -157,11 +166,13 @@ class AdminCs:
         UI.header("RESET PIN REKENING",UI.MERAH)
         print()
         nik = input("Masukkan NIK nasabah: ")
+        Utilitas.animasi("Mencari nasabah")
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
             print("NIK tidak terdaftar")
             return
         norek = input("Masukkan nomor rekening: ")
+        Utilitas.animasi("Mencari rekening")
         rekening = bank.cari_rekening(norek)
         if not rekening:
             print("Rekening tidak ada")
@@ -169,21 +180,25 @@ class AdminCs:
         if rekening not in nasabah.rekening:
             return
         pin = input("Masukkan PIN baru: ")
+        Utilitas.animasi('Proses')
         if pin == rekening.pin:
             return
         rekening.reset_pin()
         UI.sukses("PIN berhasil direset dan diganti")
         AuditService.tambah_audit(bank,"rekening",jenis="reset pin",log=f"{nasabah.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
+
     @staticmethod
     def tutup_rekening(bank):
         UI.header("TUTUP REKENING",UI.MERAH)
         print()
         nik = input("Masukkan NIK Nasabah: ")
+        Utilitas.animasi('Mencari nasabah')
         nasabah = bank.data_nasabah(nik)
         if not nasabah:
             print("NIK tidak terdaftar")
             return
         norek = input("Masukkan nomor rekening: ")
+        Utilitas.animasi('Mencari rekening')
         rekening = bank.cari_rekening(norek)
         if not  rekening:
             print("Rekening tidak ada")
@@ -196,6 +211,7 @@ class AdminCs:
             print("1. Transfer ke rekening lain")
             print("2. Tarik seluruh saldo")
             pilihan = input("Pilihan: ")
+            Utilitas.animasi("Proses")
             bank.tutup_rekening(rekening,pilihan)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} telah ditutup!")
             AuditService.tambah_audit(bank,kategori="rekening",jenis="tutup",log=f"Rekening bernomor {rekening.norek} milik {nasabah.nama} telah ditutup")
@@ -259,6 +275,7 @@ class AdminCs:
                 nik    = input("Masukkan NIK Anda: ")
                 alamat = input("Masukkan alamat Anda: ")
                 pin    = input("Silahkah Buat PIN 6 digit: ")
+                Utilitas.animasi("Memeriksa data")
                 try:
                     Validator.validasi_nasabah(nama,nik,alamat, pin)
                 except ValueError as e:
@@ -276,6 +293,7 @@ class AdminCs:
 
                     UI.peringatan("Anda wajib menyetorkan uang setoran awal")
                     setor_awal = int(input("Masukkan nominal: "))
+                    Utilitas.animasi('Proses')
 
                 except ValueError:
                     UI.gagal("Masukkan angka yang valid.")
@@ -296,6 +314,7 @@ class AdminCs:
             elif pilihan == "2":
 
                 nik = input("Masukkan NIK Anda: ")
+                Utilitas.animasi("Mencari nasabah")
                 nasabah = bank.cari_nasabah(nik)
                 if not nasabah:
                     UI.gagal("NIK tidak terdaftar. Silahkan pilih Opsi nasabah baru")
@@ -317,6 +336,7 @@ class AdminCs:
 
                     UI.peringatan("Anda wajib menyetorkan uang setoran awal")
                     setor_awal = int(input("Masukkan nominal: "))
+                    Utilitas.animasi("Proses")
 
                 except ValueError:
                     UI.gagal("Masukkan angka yang valid.")
@@ -339,6 +359,7 @@ class AdminCs:
     def layanan_nasabah(bank):
         from bank_djago.services.layanan_nasabah import LayananNasabah
         nik = input("Masukkan NIK Anda: ")
+        Utilitas.animasi('Mencari nasabah')
         nasabah = bank.cari_nasabah(nik)
         if not nasabah:
             UI.gagal("NIK tidak terdaftar")

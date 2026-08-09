@@ -8,6 +8,7 @@ class RiwayatUI:
     def menu_riwayat(rekening):
             while True:
                 print()
+                print(f"👋 Halo,{rekening.pemilik.nama}!")
                 UI.header("MENU LIHAT RIWAYAT")
                 print()
                 print("1. Semua transaksi".title())
@@ -17,13 +18,13 @@ class RiwayatUI:
                 print("5. Transfer Masuk  saja".title())
                 print("6. Lihat Upgrade atau Downgrade saja".title())
                 print("7. Keluar".title())
-
+                print()
                 pilihan = input("Masukkan pilihan Anda: ")
-
                 if pilihan == "1":
-                   riwayat = RiwayatService.ambil_riwayat(rekening)
+                   riwayat = rekening.riwayat
                    for item in riwayat:
-                       print(Utilitas.format_waktu(item["waktu"]),'|',item["log"])
+                       if item["kategori"] == "transaksi":
+                        print(Utilitas.format_waktu(item["waktu"]),'|',item["log"])
                 elif pilihan == "2":
                     riwayat = RiwayatService.ambil_riwayat(rekening,"setor tunai".title())
                     for item in riwayat:

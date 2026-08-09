@@ -1,4 +1,3 @@
-import time
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utililty import Utilitas
@@ -6,13 +5,7 @@ from bank_djago.utils.utililty import Utilitas
 
 class TellerUI:
 
-    @staticmethod
-    def animasi(pencarian):
-        print(f"{pencarian}", end="")
-        for _ in range(3):
-            print(".", end="", flush=True)
-            time.sleep(1)
-        print()
+
 
     @staticmethod
     def menu_transaksi(bank):
@@ -48,7 +41,7 @@ class TellerUI:
             print()
             norek    = input("Masukkan nomor rekening Anda: ")
             pin      = input("Masukkan PIN Anda: ")
-            TellerUI.animasi("Mencari rekening")
+            Utilitas.animasi("Mencari rekening")
             rekening = bank.autentikasi_rekening(norek,pin)
             UI.wadah_info(nama=rekening.pemilik.nama,norek=norek,saldo=rekening.cek_saldo())
         except ValueError as e:
@@ -63,8 +56,9 @@ class TellerUI:
             print()
             norek    = input("Masukkan nomor rekening Anda: ")
             pin      = input("Masukkan PIN Anda: ")
-            TellerUI.animasi("Mencari rekening")
+            Utilitas.animasi("Mencari rekening")
             rekening = bank.autentikasi_rekening(norek,pin)
+
             print()
             UI.sukses("Rekening ditemukan")
             UI.wadah_info(nama=rekening.pemilik.nama,norek=norek,saldo=rekening.cek_saldo())
@@ -76,7 +70,7 @@ class TellerUI:
         try:
              print()
              nominal  = int(input("Masukkan nominal setor: "))
-             TellerUI.animasi("proses")
+             Utilitas.animasi("proses")
              TransaksiService.setor_tunai(bank,rekening, nominal)
              UI.sukses(f"Setor tunai berhasil! Rp{Utilitas.format_rupiah(nominal)} telah ditambahkan ke rekening Anda")
 
@@ -92,7 +86,7 @@ class TellerUI:
             print()
             norek    = input("Masukkan nomor rekening Anda: ")
             pin      = input("Masukkan PIN Anda: ")
-            TellerUI.animasi("Mencari rekening")
+            Utilitas.animasi("Mencari rekening")
             rekening = bank.autentikasi_rekening(norek,pin)
             print()
             UI.sukses("Rekening ditemukan")
@@ -104,7 +98,7 @@ class TellerUI:
         try:
             print()
             nominal  = int(input("Masukkan nominal tarik: "))
-            TellerUI.animasi("proses")
+            Utilitas.animasi("proses")
             TransaksiService.tarik_tunai(bank,rekening,nominal)
             UI.sukses(f"Tarik tunai berhasil! Rp{Utilitas.format_rupiah(nominal)} telah dipotong dari rekening Anda")
         except ValueError as e:
@@ -118,7 +112,7 @@ class TellerUI:
             print()
             norek        = input("Masukkan nomor rekening Anda: ")
             pin          = input("Masukkan PIN Anda: ")
-            TellerUI.animasi("Mencari rekening")
+            Utilitas.animasi("Mencari rekening")
             rekening = bank.autentikasi_rekening(norek,pin)
             print()
             UI.sukses("Rekening ditemukan")
@@ -128,8 +122,12 @@ class TellerUI:
             return
 
         try:
+            print()
             rek_penerima = input("Masukkan nomor rekening penerima: ")
+            Utilitas.animasi("Mencari penerima")
             penerima     = bank.cari_penerima(rekening,rek_penerima)
+            UI.sukses("Rekening ditemukan")
+            UI.wadah_info(penerima.pemilik.nama,rek_penerima)
         except ValueError as e:
             UI.gagal(str(e))
             return
@@ -137,7 +135,7 @@ class TellerUI:
         try:
             print()
             nominal = int(input("Masukkan nominal transfer: "))
-            TellerUI.animasi("proses")
+            Utilitas.animasi("proses")
             TransaksiService.transfer(bank,rekening,penerima,nominal)
             UI.sukses(f"Transfer berhasil! Rp{Utilitas.format_rupiah(nominal)} telah masuk ke rekening {penerima.pemilik.nama}")
 
@@ -148,9 +146,9 @@ class TellerUI:
     @staticmethod
     def lihat_riwayat(bank):
         from bank_djago.services.transaksi.riwayat.ui import RiwayatUI
+        UI.header("LIHAT RIWAYAT",UI.MERAH)
         print()
         try:
-            print()
             norek        = input("Masukkan nomor rekening Anda: ")
             pin          = input("Masukkan PIN Anda: ")
             rekening     = bank.autentikasi_rekening(norek,pin)

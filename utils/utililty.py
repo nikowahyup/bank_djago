@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from bank_djago.utils.ui import UI
 class Utilitas:
 
@@ -166,4 +167,21 @@ class Utilitas:
         tahun = tanggal.year + (bulan_baru-1)//12
         bulan = (bulan_baru - 1)%12 + 1
         hari = min(tanggal.day,calendar.monthrange(tahun,bulan)[1])
+
         return datetime.date(tahun,bulan,hari)
+
+    @staticmethod
+    def animasi(pencarian):
+        print(f"{pencarian}", end="")
+        for _ in range(3):
+            print(".", end="", flush=True)
+            time.sleep(1)
+        print()
+
+class JenisAro:
+    TIDAK = "tidak"
+    POKOK = "pokok"
+    POKOK_BUNGA = "pokok_bunga"
+
+
+

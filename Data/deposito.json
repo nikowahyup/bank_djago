@@ -1,0 +1,138 @@
+{
+    "3150152602082002": {
+        "1": {
+            "norek": "1001459575832760",
+            "nominal": 10000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2019-06-16",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "2": {
+            "norek": "1001459575832760",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2021-06-29",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "3": {
+            "norek": "1001459575832760",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2021-06-29",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "4": {
+            "norek": "1001459575832760",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2022-07-06",
+            "status": "selesai",
+            "jenis_aro": "pokok_bunga",
+            "lama_aro": 6
+        },
+        "5": {
+            "norek": "1001459575832760",
+            "nominal": 104500000.0,
+            "bunga": 0.04,
+            "lama_bulan": 6,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2023-01-13",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "6": {
+            "norek": "1001459575832760",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2023-07-13",
+            "status": "selesai",
+            "jenis_aro": "pokok_bunga",
+            "lama_aro": 12
+        },
+        "7": {
+            "norek": "1001459575832760",
+            "nominal": 104500000.0,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2025-01-21",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        }
+    },
+    "3510152602082002": {
+        "1": {
+            "norek": "1001943459674793",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2026-08-02",
+            "status": "selesai",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "2": {
+            "norek": "1001943459674793",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2026-08-02",
+            "status": "selesai",
+            "jenis_aro": "pokok",
+            "lama_aro": 12
+        },
+        "3": {
+            "norek": "1001943459674793",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2026-08-02",
+            "status": "selesai",
+            "jenis_aro": "pokok_bunga",
+            "lama_aro": 12
+        },
+        "4": {
+            "norek": "1001943459674793",
+            "nominal": 100000000,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2027-08-09",
+            "status": "aktif",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "5": {
+            "norek": "1001943459674793",
+            "nominal": 104500000.0,
+            "bunga": 0.045,
+            "lama_bulan": 12,
+            "tanggal_buka": "2026-08-09",
+            "jatuh_tempo": "2027-08-09",
+            "status": "aktif",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        }
+    }
+}

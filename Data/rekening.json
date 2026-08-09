@@ -2,7 +2,7 @@
     "2001818882328101": {
         "norek": "2001818882328101",
         "pin": "123321",
-        "saldo": 1270760640,
+        "saldo": 1154953860,
         "limit": null,
         "riwayat": [
             {
@@ -214,6 +214,138 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744224",
                 "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519298",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp105.896.720"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519331",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880396",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp114.704.780"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880428",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-08T08:36:14.390136",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 3.0% | Lama 1 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515750",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp115.913.510"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515777",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-08T13:15:28.903380",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 3.0% | Lama 1 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032560",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp117.222.970"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032589",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T07:58:01.584615",
+                "log": "DEPOSITO | Rp200.000.000 |Bunga 4.0% | Lama 6 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908504",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp110.308.220"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908531",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T08:04:27.126313",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.0% | Lama 6 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508191",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp111.150.570"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508220",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272651",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp120.396.450"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272697",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T08:24:22.094613",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 3.0% | Lama 1 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T08:32:43.732573",
+                "log": "DEPOSITO | Rp200.000.000 |Bunga 3.0% | Lama 1 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T08:41:13.843043",
+                "log": "DEPOSITO | Rp10.000.000 |Bunga 3.0% | Lama 1 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T08:47:11.464804",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.0% | Lama 6 bulan| "
             }
         ],
         "status": "aktif",
@@ -222,7 +354,7 @@
     "1001459575832760": {
         "norek": "1001459575832760",
         "pin": "111111",
-        "saldo": 370362540,
+        "saldo": 672017000.0,
         "limit": null,
         "riwayat": [
             {
@@ -296,6 +428,168 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744261",
                 "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519351",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp30.863.540"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519364",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880449",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp33.418.840"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880464",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515796",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp36.187.080"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515809",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032607",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp39.186.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032620",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908550",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp42.434.830"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908562",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508239",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp45.954.400"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508255",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272726",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp49.767.270"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272741",
+                "log": "BIAYA ADMIN | Jumlah Rp200.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T09:07:53.074906",
+                "log": "DEPOSITO | Rp10.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T14:15:27.211099",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T14:23:17.117729",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T14:23:39.146733",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T14:23:39.146789",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T18:52:48.319153",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T18:58:23.550920",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T18:58:23.554609",
+                "log": "DEPOSITO | Rp104.500.000.0 |Bunga 4.0% | Lama 6 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T18:59:11.866088",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:00:51.520625",
+                "log": "PENCAIRAN DEPOSITO | Rp106.590.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:00:51.520645",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:00:51.523925",
+                "log": "DEPOSITO | Rp104.500.000.0 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:07:37.974919",
+                "log": "PENCAIRAN DEPOSITO | Rp109.202.500.0"
             }
         ],
         "status": "aktif",
@@ -304,7 +598,7 @@
     "2001333025915187": {
         "norek": "2001333025915187",
         "pin": "111111",
-        "saldo": 1241573620,
+        "saldo": 1842771540,
         "limit": 190000000,
         "riwayat": [
             {
@@ -366,6 +660,96 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744286",
                 "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519377",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp72.425.130"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519388",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "kategori",
+                "jenis": "Tarik Uang",
+                "waktu": "2026-08-08T05:36:26.373521",
+                "log": "TARIK UANG | Jumlah Rp2.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880478",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp76.527.430"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880489",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515825",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp80.985.690"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515835",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032632",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp85.704.030"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032643",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908578",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp90.697.590"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908588",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508269",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp95.982.450"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508279",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272763",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp101.575.600"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272775",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -374,7 +758,7 @@
     "2001743023402145": {
         "norek": "2001743023402145",
         "pin": "111111",
-        "saldo": 123960840,
+        "saldo": 183514310,
         "limit": 200000000,
         "riwayat": [
             {
@@ -436,6 +820,90 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744310",
                 "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519399",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp7.231.050"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519410",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880501",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp7.647.030"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880511",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515846",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp8.087.270"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515855",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032660",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp8.553.190"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032677",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908598",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp9.046.300"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908607",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508290",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp9.568.160"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508300",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272786",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp10.120.470"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272796",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -444,7 +912,7 @@
     "2001642528517163": {
         "norek": "2001642528517163",
         "pin": "111111",
-        "saldo": 126204580,
+        "saldo": 186851120,
         "limit": 200000000,
         "riwayat": [
             {
@@ -500,6 +968,90 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744333",
                 "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519424",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp7.361.930"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519434",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880524",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp7.785.550"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880538",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515865",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp8.233.870"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515875",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032693",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp8.708.350"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032706",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908618",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp9.210.500"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908627",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508312",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp9.741.950"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508322",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272807",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp10.304.390"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272822",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -508,7 +1060,7 @@
     "4001215327903178": {
         "norek": "4001215327903178",
         "pin": "111111",
-        "saldo": 21447880,
+        "saldo": 25343840,
         "limit": 4000000,
         "riwayat": [
             {
@@ -558,6 +1110,90 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744356",
                 "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519444",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp536.200"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519454",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880549",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp549.100"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880562",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515885",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp562.330"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515893",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032722",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp575.890"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032736",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908637",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp589.780"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908646",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508336",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp604.030"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508346",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272843",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp618.630"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272859",
+                "log": "BIAYA ADMIN | Jumlah Rp20.000"
             }
         ],
         "status": "aktif",
@@ -566,7 +1202,7 @@
     "2001424788827431": {
         "norek": "2001424788827431",
         "pin": "123456",
-        "saldo": 82660630,
+        "saldo": 122094350,
         "limit": 200000000,
         "riwayat": [
             {
@@ -604,6 +1240,90 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744384",
                 "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519464",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp4.821.870"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519472",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880573",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp5.097.310"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880583",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515903",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp5.388.820"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515911",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032746",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp5.697.340"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032755",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908656",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp6.023.850"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908665",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508356",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp6.369.410"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508365",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272942",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp6.735.120"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272963",
+                "log": "BIAYA ADMIN | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -612,7 +1332,7 @@
     "3001877015748075": {
         "norek": "3001877015748075",
         "pin": "111111",
-        "saldo": 10748610,
+        "saldo": 13906960,
         "limit": 15000000,
         "riwayat": [
             {
@@ -644,9 +1364,157 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-07T21:35:01.744426",
                 "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T05:35:35.519481",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp447.860"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T05:35:35.519490",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T08:35:40.880597",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp464.440"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T08:35:40.880607",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-08T13:14:37.515923",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp481.700"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-08T13:14:37.515931",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T07:56:47.032765",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp499.690"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T07:56:47.032773",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:03:19.908675",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp518.430"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:03:19.908683",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:06:03.508377",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp537.950"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:06:03.508386",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-09T08:23:47.272979",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp558.280"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-09T08:23:47.272989",
+                "log": "BIAYA ADMIN | Jumlah Rp50.000"
             }
         ],
         "status": "aktif",
         "level": 2
+    },
+    "1001943459674793": {
+        "norek": "1001943459674793",
+        "pin": "111111",
+        "saldo": 809000000.0,
+        "limit": null,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-09T19:13:50.308577",
+                "log": "SETOR TUNAI | Jumlah Rp1.000.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:14:48.689860",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:15:31.435097",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:16:10.054947",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:20:55.612641",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:20:55.612660",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:20:55.617245",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:20:55.617281",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-09T19:20:55.617319",
+                "log": "DEPOSITO | Rp104.500.000.0 |Bunga 4.5% | Lama 12 bulan| "
+            }
+        ],
+        "status": "aktif",
+        "level": 4
     }
 }
