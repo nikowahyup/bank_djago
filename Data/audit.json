@@ -4653,5 +4653,1617 @@
         "log": "Niko Wahyu Pratama membuka deposito Rp104.500.000.0",
         "nik": "3510152602082002",
         "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993115",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993130",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993137",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993145",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993149",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993154",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993160",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993164",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993168",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993172",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993175",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993179",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993183",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993187",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993191",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993195",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993198",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993201",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993205",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993208",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993211",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993216",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993219",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993225",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993228",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993231",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:22:22.993235",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993277",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp104.500.000.0"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:22.993295",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp109.202.500.0"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:22:45.897001",
+        "jenis": "SETOR UANG",
+        "log": "Niko Wahyu Pratama Setor Uang Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140005",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140019",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140026",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140033",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140038",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140042",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140047",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140051",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140054",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140058",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140061",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140064",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140069",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140072",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140076",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140080",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140083",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140086",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140089",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140092",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140095",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140099",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140102",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140105",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:48:16.140109",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140112",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:48:16.140115",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:09.998075",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp100.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930468",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930484",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930492",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930499",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930503",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930508",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930513",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930517",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930520",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930524",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930527",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930531",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930536",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930539",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930543",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930547",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930551",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930554",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930558",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930561",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930568",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930572",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930575",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930579",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930582",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930585",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T09:50:39.930589",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930641",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp104.500.000.0"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T09:50:39.930676",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp104.500.000.0",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942204",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942228",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942240",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942251",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942257",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942265",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942274",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942279",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942285",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942296",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942301",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942306",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942316",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942321",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942327",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942333",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942339",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942345",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942351",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942356",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942362",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942369",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942377",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942383",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942388",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942393",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:45:38.942398",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:45:38.942466",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp109.202.500.0"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:09.624864",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp100.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842017",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842032",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842040",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842046",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842050",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842055",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842060",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842064",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842068",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842071",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842074",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842078",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842082",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842085",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842089",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842093",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842096",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842099",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842102",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842105",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842109",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842112",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842115",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842118",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842122",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842125",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:47:18.842128",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:47:18.842181",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp104.500.000.0",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331079",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331095",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331103",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331110",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331114",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331119",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331124",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331127",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331133",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331137",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331140",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331144",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331148",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331152",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331155",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331159",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331162",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331167",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331170",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331173",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331176",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331180",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331184",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331187",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331191",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331194",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T11:49:13.331197",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T11:49:13.331258",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp109.202.500.0",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198071",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198086",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198094",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198100",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198105",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198110",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198117",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198143",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198148",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198151",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198154",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198158",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198163",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198166",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198170",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198174",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198177",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198182",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198186",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198189",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198192",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198196",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198199",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198202",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198206",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198209",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:05:13.198212",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:13.198275",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp114.116.612.5",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:05:48.341635",
+        "jenis": "SETOR UANG",
+        "log": "Niko Wahyu Pratama Setor Uang Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471757",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471775",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471783",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471790",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471794",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471799",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471804",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471808",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471814",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471818",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471825",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471828",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471833",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471836",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471840",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471844",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471847",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471850",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471853",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471856",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471860",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471863",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471867",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471870",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.471873",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471876",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:26:08.471880",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:26:08.472469",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp119.251.860.0625",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-10T12:26:53.845691",
+        "jenis": "BUKA REKENING",
+        "log": "Yuda membuka rekening pertama",
+        "nik": "3510152202082002",
+        "rekening": "2001741025943181"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-10T12:26:53.845701",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510152202082002",
+        "nama": "Yuda"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:28:05.895800",
+        "jenis": "DEPOSITO",
+        "log": "Yuda membuka deposito Rp100.000.000",
+        "nik": "3510152202082002",
+        "rekening": "2001741025943181"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555674",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555694",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555702",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555709",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555714",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555719",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555724",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555728",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555731",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555735",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555740",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555744",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555749",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555752",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555756",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555761",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555765",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555768",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555771",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555774",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555778",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555781",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555784",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555788",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555791",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555794",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555798",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.555801",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555804",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-10T12:55:48.555807",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.556415",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp124.618.193.7653125",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-10T12:55:48.556526",
+        "jenis": "DEPOSITO",
+        "log": "Yuda memperpanjang deposito Rp104.500.000.0",
+        "nik": "3510152202082002",
+        "rekening": "2001741025943181"
     }
 ]

@@ -1456,7 +1456,7 @@
     "1001943459674793": {
         "norek": "1001943459674793",
         "pin": "111111",
-        "saldo": 809000000.0,
+        "saldo": 951905000.0,
         "limit": null,
         "riwayat": [
             {
@@ -1512,9 +1512,121 @@
                 "jenis": "Deposito",
                 "waktu": "2026-08-09T19:20:55.617319",
                 "log": "DEPOSITO | Rp104.500.000.0 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T09:22:22.993271",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T09:22:22.993290",
+                "log": "PENCAIRAN DEPOSITO | Rp109.202.500.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-10T09:22:45.896967",
+                "log": "SETOR TUNAI | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T09:50:09.998052",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T09:50:39.930632",
+                "log": "PENCAIRAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T09:50:39.930670",
+                "log": "DEPOSITO | Rp104.500.000.0 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T11:45:38.942456",
+                "log": "PENCAIRAN DEPOSITO | Rp109.202.500.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T11:47:09.624843",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T11:47:18.842174",
+                "log": "PERPANJANGAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T11:49:13.331248",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp109.202.500.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T12:05:13.198267",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp114.116.612.5"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-10T12:05:48.341601",
+                "log": "SETOR TUNAI | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T12:26:08.472441",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp119.251.860.0625"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T12:55:48.556385",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp124.618.193.7653125"
             }
         ],
         "status": "aktif",
         "level": 4
+    },
+    "2001741025943181": {
+        "norek": "2001741025943181",
+        "pin": "111111",
+        "saldo": 900000000.0,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-10T12:26:53.845665",
+                "log": "SETOR TUNAI | Jumlah Rp1.000.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T12:28:05.895712",
+                "log": "DEPOSITO | Rp100.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T12:55:48.556503",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp104.500.000.0"
+            }
+        ],
+        "status": "aktif",
+        "level": 3
     }
 }

@@ -1,39 +1,34 @@
+from bank_djago.services.NasabahMenu import NasabahMenu
+from bank_djago.services.admin.rekeningUI import RekeningUI
 from penyimpanan.storage import JSOnbase
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.services.admin.menu_admin import MenuAdmin
-from bank_djago.services.admin.AdminTeller.menu_teller import MenuTeller
-from bank_djago.services.admin.admin_cs import AdminCs
+
 
 def menu():
 
     bank = JSOnbase.muat_bank()
-    # bank.debug_bunga(10)
-    # bank.debug_admin(10)
-    bank.debug_depo(12)
+    bank.debug_depo(18)
     bank.proses_harian()
 
     while True:
         print()
-        Utilitas.pilihan_menu()
+        pilihan = Utilitas.pilihan_menu()
 
-        pilihan = int(input("Masukkan pilihan Anda: "))
+        if pilihan == "1":
+            RekeningUI.buka_rekening(bank)
 
-        if pilihan == 1:
-            AdminCs.buka_rekening(bank)
+        elif pilihan == "2":
+            nasabah,rekening = NasabahMenu.login(bank)
+            NasabahMenu.menu_utama(bank,nasabah,rekening)
 
-        elif pilihan == 2:
-            MenuTeller.menu(bank)
-
-        elif pilihan == 3:
-            AdminCs.layanan_nasabah(bank)
-
-        elif pilihan == 4:
-            MenuAdmin.menu(bank)
-
-        elif pilihan == 5:
+        elif pilihan == "3":
             JSOnbase.simpan_bank(bank)
             print("🙏 Terima Kasih Telah Mengunjungi Bank Djago!")
             break
+
+        elif pilihan == "0":
+            MenuAdmin.menu(bank)
 
 if __name__ == '__main__':
     menu()

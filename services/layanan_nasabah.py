@@ -1,46 +1,29 @@
 from bank_djago.utils.ui import UI
-from bank_djago.services.admin.admin_cs import AdminCs
-import time
+
 
 class LayananNasabah:
-    @staticmethod
-    def animasi():
-        print("Proses", end="")
-        for _ in range(3):
-            print(".", end="", flush=True)
-            time.sleep(1)
-        print()
+
+
 
     @staticmethod
-    def menu_layanan(bank,nasabah):
-        print()
-
+    def menu_profil(nasabah, rekening):
         while True:
-            try:
-                print(f"👋 Halo,{nasabah.nama}!")
-                UI.header("MENU LAYANAN",UI.KUNING)
+                UI.header("MENU PROFIL", UI.KUNING)
                 print()
                 print("1. Lihat Biodata")
-                print("2. Lihat Rekening")
-                print("3. Ganti PIN")
-                print("4. Customer Service")
-                print("5. Keluar")
-                print()
-
-                pilihan = int(input("Masukkan pilihan Anda: "))
-
-                if pilihan == 1:
+                print("2. Lihat Daftar Rekening")
+                print("3. Ubah PIN")
+                print("4. Keluar\n")
+                pilihan = input("Masukkan pilihan Anda: ")
+                if pilihan == "1":
                     LayananNasabah.biodata(nasabah)
-                elif pilihan == 2:
+                elif pilihan == "2":
                     LayananNasabah.daftar_rekening(nasabah)
-                elif pilihan == 3:
-                    LayananNasabah.ganti_pin(bank,nasabah)
-                elif pilihan == 4:
-                    AdminCs.menu_layanan()
-                elif pilihan == 5:
+                elif pilihan == "3":
+                    LayananNasabah.ganti_pin(rekening)
+                elif pilihan == "4":
                     break
-            except ValueError:
-                UI.peringatan("Tolong masukkan pilihan yang valid")
+
 
     @staticmethod
     def biodata(nasabah):
@@ -77,18 +60,9 @@ class LayananNasabah:
 
 
     @staticmethod
-    def ganti_pin(bank,nasabah):
+    def ganti_pin(rekening):
         UI.header("GANTI PIN",UI.MERAH)
-        print()
-        norek = input("Masukkan nomor rekening yang ingin Anda ganti pin: ")
-        rekening = bank.cari_rekening(norek)
-        if not rekening:
-            UI.gagal("Nomor rekening tidak terdaftar")
-            return
 
-        if rekening not in nasabah.rekening:
-            UI.gagal("Maaf,rekening tidak terdaftar di akun Anda!")
-            return
 
         pin_lama = input("Masukkan PIN lama: ")
         if not rekening.cek_pin(pin_lama):
@@ -97,7 +71,7 @@ class LayananNasabah:
 
         pin_baru = input("Masukkan PIN baru: ")
         rekening.ganti_pin(pin_baru)
-        LayananNasabah.animasi()
+
         UI.sukses("PIN berhasil diganti!\n")
 
 

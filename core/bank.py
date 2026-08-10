@@ -238,11 +238,17 @@ class Bank:
     # ------------------------------------------------------------------------------------------------------------------------------
 
     def cek_jatuh_tempo(self):
+        print(">>> CEK JATUH TEMPO DIPANGGIL")
         hari_ini = datetime.date.today()
 
         for nasabah in self.data_nasabah.values():
             for deposito in nasabah.deposito:
-
+                print(
+                    ">>> DEPOSITO:",
+                    deposito.ID,
+                    deposito.status,
+                    deposito.jatuh_tempo
+                )
 
                 if deposito.status != StatusDeposito.AKTIF:
                     continue
@@ -250,24 +256,21 @@ class Bank:
                 if deposito.jatuh_tempo > hari_ini:
                     continue
 
-
-
-                DepositoService.cairkan_deposito(self,deposito)
-                deposito.status = StatusDeposito.SELESAI
-
                 if deposito.jenis_aro == JenisAro.TIDAK:
-                    continue
+                    DepositoService.cairkan_deposito(self,deposito)
+                    deposito.status = StatusDeposito.SELESAI
 
-                if deposito.jenis_aro == JenisAro.POKOK:
-                    nominal_baru = deposito.nominal
+                else:
+                    DepositoService.perpanjangan(self,deposito)
+                    print(
+                        ">>> SETELAH PERPANJANGAN:",
+                        deposito.ID,
+                        deposito.status,
+                        deposito.jatuh_tempo
+                    )
 
 
-                elif deposito.jenis_aro == JenisAro.POKOK_BUNGA:
-                    nominal_baru = deposito.total_pencairan
 
-                lama_bulan = deposito.lama_aro
-
-                DepositoService.buka_deposito(self,deposito.rekening,nominal_baru,lama_bulan)
 
     def debug_depo(self, bulan=1):
         for nasabah in self.data_nasabah.values():

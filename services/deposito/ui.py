@@ -8,36 +8,34 @@ from bank_djago.utils.utililty import Utilitas
 
 class DepositoUI:
 
+
     @staticmethod
-    def menu(bank):
+    def menu_deposito(bank,nasabah,rekening):
         while True:
-            UI.header("DEPOSITO",UI.KUNING)
-            print("1. Lihat Deposito Anda")
+            UI.header("MENU DEPOSITO",UI.KUNING)
+            print()
+            print("1. Buka Deposito")
             print("2. Cairkan Deposito")
-            print("3. Buka Deposito")
-            print("4. Keluar\n")
+            print("3. Lihat Info Deposito")
+            print("4. Perpanjang")
+            print("5. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                DepositoUI.lihat_deposito(bank)
+                DepositoUI.buka_deposito(bank,rekening)
             elif pilihan == "2":
-                 DepositoUI.cairkan_deposito(bank)
+                DepositoUI.cairkan_deposito(bank,nasabah)
             elif pilihan == "3":
-                DepositoUI.buka_deposito(bank)
+                DepositoUI.lihat_deposito(nasabah)
             elif pilihan == "4":
+                pass
+            elif pilihan == "5":
                 break
 
 
-
     @staticmethod
-    def lihat_deposito(bank):
+    def lihat_deposito(nasabah):
             UI.header("LIHAT DEPOSITO ANDA", UI.MERAH)
-            print()
-            nik = input("Masukkan NIK Anda: ")
-            Utilitas.animasi("Mencari nasabah")
-            nasabah = bank.cari_nasabah(nik)
-            if not nasabah:
-                print("NIK tidak terdaftar")
-                return
+
 
             deposito = nasabah.deposito
 
@@ -70,15 +68,9 @@ class DepositoUI:
 
 
     @staticmethod
-    def cairkan_deposito(bank):
+    def cairkan_deposito(bank,nasabah):
         UI.header("CAIRKAN DEPOSITO", UI.MERAH)
-        print()
-        nik = input("Masukkan NIK Anda: ")
-        Utilitas.animasi("Mencari nasabah")
-        nasabah = bank.cari_nasabah(nik)
-        if not nasabah:
-            print("NIK tidak terdaftar")
-            return
+
 
         deposito = nasabah.deposito
 
@@ -113,28 +105,8 @@ class DepositoUI:
 
 
     @staticmethod
-    def buka_deposito(bank):
+    def buka_deposito(bank,rekening):
         UI.header("BUKA DEPOSITO", UI.MERAH)
-        print()
-        nik = input("Masukkan NIK Anda: ")
-        Utilitas.animasi("Mencari nasabah")
-        nasabah = bank.cari_nasabah(nik)
-        if not nasabah:
-            print("NIK tidak terdaftar")
-            return
-
-        try:
-            norek = input("Masukkan nomor rekening Anda: ")
-            pin = input("Masukkan PIN Anda: ")
-            Utilitas.animasi("Mencari rekening")
-            rekening = bank.autentikasi_rekening(norek,pin)
-            if rekening not in nasabah.rekening:
-                raise ValueError("Rekening ini bukan milik Anda")
-            UI.sukses("Rekening ditemukan")
-            UI.wadah_info(rekening.pemilik.nama,norek,rekening.cek_saldo())
-        except ValueError as e:
-            UI.gagal(str(e))
-            return
 
         print("Pilihan jangka waktu deposito:\n")
 

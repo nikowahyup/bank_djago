@@ -1,4 +1,3 @@
-from .admin_cs import AdminCs
 from bank_djago.utils.utililty import UI
 from bank_djago.utils.AuditUI import AuditUI
 from bank_djago.utils.rekapUI import RekapUI
@@ -31,6 +30,4 @@ Masukkan sembarang simbol untuk keluar""")
             elif pilihan == "2":
                 AuditUI.menu_tampilkan_audit(bank)
             elif pilihan == "3":
-                AdminCs.menu(bank)
-            elif pilihan == "4":
                 break

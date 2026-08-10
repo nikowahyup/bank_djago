@@ -1,6 +1,9 @@
 from datetime import datetime
 import time
 from bank_djago.utils.ui import UI
+
+
+
 class Utilitas:
 
     @staticmethod
@@ -25,15 +28,18 @@ class Utilitas:
 
     @staticmethod
     def pilihan_menu():
-        UI.header("SELAMAT DATANG DI BANK DJAGO", warna=UI.HIJAU)
+        while True:
+            UI.header("SIMULASI BANK DJAGO", warna=UI.HIJAU)
+            print()
+            print("1. Daftar dan Buka Rekening")
+            print("2. Login Nasabah")
+            print("0. Menu Admin")
+            print("3. Keluar\n")
+            pilihan = input("Masukkan pilihan Anda: ")
 
-        print("PILIHAN MENU".center(47))
-        print()
-        print("1. Daftar atau Buka Rekening")
-        print("2. Menu Transaksi")
-        print("3. Layanan Nasabah")
-        print("4. Menu Admin")
-        print("5. Simpan dan Keluar")
+            return pilihan
+
+
 
         print()
 

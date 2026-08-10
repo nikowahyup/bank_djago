@@ -1,4 +1,4 @@
-from bank_djago.services.admin.AdminTeller.teller_transaksi import TellerUI
+from bank_djago.services.admin.AdminTeller.transaksiUI import TransaksiUI
 from bank_djago.services.deposito.ui import DepositoUI
 from bank_djago.utils.ui import UI
 class MenuTeller:
@@ -15,7 +15,7 @@ class MenuTeller:
 
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                TellerUI.menu_transaksi(bank)
+                TransaksiUI.menu_transaksi(bank)
             elif pilihan == "2":
                 DepositoUI.menu(bank)
             elif pilihan == "3":
