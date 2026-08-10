@@ -238,17 +238,11 @@ class Bank:
     # ------------------------------------------------------------------------------------------------------------------------------
 
     def cek_jatuh_tempo(self):
-        print(">>> CEK JATUH TEMPO DIPANGGIL")
+
         hari_ini = datetime.date.today()
 
         for nasabah in self.data_nasabah.values():
             for deposito in nasabah.deposito:
-                print(
-                    ">>> DEPOSITO:",
-                    deposito.ID,
-                    deposito.status,
-                    deposito.jatuh_tempo
-                )
 
                 if deposito.status != StatusDeposito.AKTIF:
                     continue
@@ -262,12 +256,6 @@ class Bank:
 
                 else:
                     DepositoService.perpanjangan(self,deposito)
-                    print(
-                        ">>> SETELAH PERPANJANGAN:",
-                        deposito.ID,
-                        deposito.status,
-                        deposito.jatuh_tempo
-                    )
 
 
 

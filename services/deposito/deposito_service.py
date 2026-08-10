@@ -49,7 +49,7 @@ class DepositoService:
 
         nasabah.deposito.append(deposito_baru)
         log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"DEPOSITO | Rp{Utilitas.format_rupiah(nominal)} |Bunga {bunga:.1%} | Lama {lama_bulan} bulan| ")
-        print("SEBELUM SIMPAN:", log["waktu"])
+
         rekening.simpan_riwayat(log)
         AuditService.tambah_audit(bank,kategori="transaksi",jenis="deposito",log=f"{rekening.pemilik.nama} membuka deposito Rp{Utilitas.format_rupiah(nominal)}",nik=rekening.pemilik.NIK,norek=rekening.norek)
 
@@ -68,7 +68,7 @@ class DepositoService:
         deposito.status = StatusDeposito.DICAIRKAN
 
         log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"PENCAIRAN DEPOSITO | Rp{Utilitas.format_rupiah(total)}")
-        print("SEBELUM SIMPAN:", log["waktu"])
+
         deposito.rekening.simpan_riwayat(log)
 
         AuditService.tambah_audit(
@@ -130,7 +130,7 @@ class DepositoService:
             log=f"PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp{Utilitas.format_rupiah(nominal_baru)}"
 
         )
-        print("SEBELUM SIMPAN:", log["waktu"])
+
         deposito.rekening.simpan_riwayat(log)
 
         AuditService.tambah_audit(
