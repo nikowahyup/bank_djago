@@ -81,11 +81,6 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - **Audit Log:** Pemantauan aktivitas bank.
 - **Rekapitulasi:** Penyajian laporan administrasi.
 
-## 🚧 Sedang & Akan Dikembangkan (Roadmap)
--  **Fitur Deposito & Pinjaman:** Perhitungan bunga, tenor, denda pencairan awal, dan skema cicilan.
--  *Integrasi Database:** Bermigrasi dari simpanan JSON ke database relasional `SQLite`.
--  *Web Interface:** Mengembangkan antarmuka berbasis web menggunakan *framework* `Django`.
-
 ### `v0.7` - Deposito
 - **Struktur Deposito:** Membuat entitas deposito.
 - **Pembukaan Deposito:** Validasi nominal minimum, saldo minimum, tenor, dan bunga.
@@ -93,6 +88,13 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - **Riwayat & Audit:** Mencatat pembukaan deposito.
 - **Pencairan Deposito:** Pencairan saat jatuh tempo dan perhitungan hasil deposito.
 - **UI Deposito:** Menu dan alur input deposito.
+
+## 🚧 Sedang & Akan Dikembangkan (Roadmap)
+-  **Fitur Deposito & Pinjaman:** Perhitungan bunga, tenor, denda pencairan awal, dan skema cicilan.
+-  *Integrasi Database:** Bermigrasi dari simpanan JSON ke database relasional `SQLite`.
+-  *Web Interface:** Mengembangkan antarmuka berbasis web menggunakan *framework* `Django`.
+
+
 
 ### `v0.9` - Pinjaman
 - **Pengajuan Pinjaman**
@@ -128,6 +130,8 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - Memisahkan semua service dari bank ke admin
 (07/08/2026)
 - Refactor Transaksi dari admin teller
+(10/08/2026)
+- Refactor menu dan admin
 
 # Catatan Desain
 1. Mengapa rekening dibuat sebagai objek baru saat diupgrade atau downgrade?
@@ -145,3 +149,4 @@ Jawaban: Agar file transaksi fokus pada logika transaksi yang sudah ditetapkan b
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
 - Menambahkan menu informasi untuk nasabah
 - Memisahkan logika transaksi dari inputan data nasabah
+- Memisahkan UI nasabah dan admin
