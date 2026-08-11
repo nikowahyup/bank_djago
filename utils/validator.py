@@ -26,3 +26,8 @@ class Validator:
             raise  ValueError("Jumlah PIN harus 6 digit")
         if not pin.isdigit():
             raise  ValueError("PIN harus berupa angka semua")
+
+    @staticmethod
+    def amankan_rekening(rekening):
+        if rekening.status != "aktif":
+            raise  ValueError(f"Rekening Anda saat ini sedang di{rekening.status}")

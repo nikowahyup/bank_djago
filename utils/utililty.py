@@ -184,10 +184,47 @@ class Utilitas:
             time.sleep(1)
         print()
 
+
+    @staticmethod
+    def pilihan_rekening(nasabah):
+        if len(nasabah.rekening) == 1:
+            return nasabah.rekening[0]
+
+        norek = [rekening.norek for rekening in nasabah.rekening]
+
+        while True:
+            print("Pilih nomor rekening yang ingin Anda gunakan\n")
+
+            for i, rek in enumerate(norek, start=1):
+                print(f"{i}. {rek}")
+
+            try:
+                print()
+                pilihan = int(input("Masukkan pilihan Anda: "))
+
+                if pilihan < 1 or pilihan > len(nasabah.rekening):
+                    UI.gagal("Pilihan tidak valid")
+                    continue
+
+            except ValueError:
+                UI.gagal("Silakan masukkan angka")
+                continue
+
+            return nasabah.rekening[pilihan - 1]
+
+    @staticmethod
+    def format_tanggal_indonesia(tanggal):
+        bulan = [
+            "Januari", "Februari", "Maret", "April",
+            "Mei", "Juni", "Juli", "Agustus",
+            "September", "Oktober", "November", "Desember"
+        ]
+
+        return f"{tanggal.day} {bulan[tanggal.month - 1]} {tanggal.year}"
+
+
+
 class JenisAro:
         TIDAK = "tidak"
         POKOK = "pokok"
         POKOK_BUNGA = "pokok_bunga"
-
-
-

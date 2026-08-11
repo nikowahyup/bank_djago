@@ -354,7 +354,7 @@
     "1001459575832760": {
         "norek": "1001459575832760",
         "pin": "111111",
-        "saldo": 672017000.0,
+        "saldo": 638017000.0,
         "limit": null,
         "riwayat": [
             {
@@ -590,9 +590,81 @@
                 "jenis": "Deposito",
                 "waktu": "2026-08-09T19:07:37.974919",
                 "log": "PENCAIRAN DEPOSITO | Rp109.202.500.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T18:50:12.123521",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-11T18:50:19.212316",
+                "log": "TARIK UANG | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-11T18:50:59.823714",
+                "log": "TRANSFER SALDO | Penerima Gojo Satoru | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-11T18:52:19.549800",
+                "log": "TERIMA SALDO | dari Gojo Satoru | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T18:57:50.053274",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-11T18:57:57.910289",
+                "log": "TARIK UANG | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-11T18:58:32.766709",
+                "log": "TRANSFER SALDO | Penerima Gojo Satoru | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-11T18:59:47.518141",
+                "log": "TERIMA SALDO | dari Gojo Satoru | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-11T19:02:54.730342",
+                "log": "Turun Rekening Platinum ke Prioritas"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T19:05:17.643357",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T19:12:59.695557",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-11T19:30:31.396748",
+                "log": "Upgrade Rekening Prioritas ke Platinum"
             }
         ],
-        "status": "aktif",
+        "status": "blokir",
         "level": 4
     },
     "2001333025915187": {
@@ -1202,7 +1274,7 @@
     "2001424788827431": {
         "norek": "2001424788827431",
         "pin": "123456",
-        "saldo": 122094350,
+        "saldo": 122194350,
         "limit": 200000000,
         "riwayat": [
             {
@@ -1324,6 +1396,12 @@
                 "jenis": "biaya admin",
                 "waktu": "2026-08-09T08:23:47.272963",
                 "log": "BIAYA ADMIN | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-11T08:08:06.251406",
+                "log": "TERIMA SALDO | dari Gusti | Jumlah Rp100.000"
             }
         ],
         "status": "aktif",
@@ -1620,6 +1698,54 @@
                 "jenis": "Setor Uang",
                 "waktu": "2026-08-11T05:55:34.742864",
                 "log": "SETOR TUNAI | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:00:10.269591",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp148.609.514.04142556"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:04:49.376380",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp155.296.942"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:07:15.501990",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp162.285.304"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:09:34.782818",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp169.588.143"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:12:41.248624",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp177.219.609"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:22:33.424579",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp185.194.491"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:08:54.633987",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp193.528.243"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:09:42.297624",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp202.237.014"
             }
         ],
         "status": "aktif",
@@ -1666,6 +1792,54 @@
                 "jenis": "Deposito",
                 "waktu": "2026-08-11T05:54:14.179412",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp119.251.860.0625"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:00:10.269632",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp124.618.193.7653125"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:04:49.376425",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp130.226.012"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:07:15.502026",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp136.086.183"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:09:34.782856",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp142.210.061"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:12:41.248669",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp148.609.514"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:22:33.424614",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp155.296.942"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:08:54.634042",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp162.285.304"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:09:42.297677",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp169.588.143"
             }
         ],
         "status": "tutup",
@@ -1708,5 +1882,215 @@
         ],
         "status": "aktif",
         "level": 3
+    },
+    "3001562142687195": {
+        "norek": "3001562142687195",
+        "pin": "111111",
+        "saldo": 105900000,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T08:00:04.342662",
+                "log": "SETOR UANG | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T08:03:07.693896",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-11T08:03:17.231215",
+                "log": "TARIK UANG | Jumlah Rp5.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-11T08:08:06.251379",
+                "log": "TRANSFER SALDO | Penerima Niko | Jumlah Rp100.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T08:10:50.266400",
+                "log": "SETOR UANG | Jumlah Rp100.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-11T08:11:08.358664",
+                "log": "Upgrade Rekening Prioritas ke Gold"
+            }
+        ],
+        "status": "blokir",
+        "level": 3
+    },
+    "2001819668456896": {
+        "norek": "2001819668456896",
+        "pin": "111111",
+        "saldo": 118045000.0,
+        "limit": 15000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-11T18:50:59.823730",
+                "log": "TERIMA SALDO | dari Gojo Satoru | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T18:51:44.355668",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-11T18:51:52.492000",
+                "log": "TARIK UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-11T18:52:19.549779",
+                "log": "TRANSFER SALDO | Penerima Gojo Satoru | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "terima saldo",
+                "waktu": "2026-08-11T18:58:32.766730",
+                "log": "TERIMA SALDO | dari Gojo Satoru | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T18:59:16.733251",
+                "log": "SETOR UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "tarik uang",
+                "waktu": "2026-08-11T18:59:24.803454",
+                "log": "TARIK UANG | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "transfer saldo",
+                "waktu": "2026-08-11T18:59:47.518118",
+                "log": "TRANSFER SALDO | Penerima Gojo Satoru | Jumlah Rp1.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-11T19:02:02.828271",
+                "log": "Turun Rekening Gold ke Prioritas"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T20:47:54.299965",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan| "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:00:43.604256",
+                "log": "PENCAIRAN DEPOSITO | Rp1.045.000.0"
+            }
+        ],
+        "status": "aktif",
+        "level": 2
+    },
+    "4001963632735803": {
+        "norek": "4001963632735803",
+        "pin": "111111",
+        "saldo": 8135000,
+        "limit": 5000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-11T21:05:39.483974",
+                "log": "SETOR UANG | Jumlah Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:06:46.347550",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:08:02.912220",
+                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:11:02.597362",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:12:41.248690",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.045.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:22:33.424633",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.092.025"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T21:33:15.637025",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:08:54.634062",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.141.166"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga deposito",
+                "waktu": "2026-08-11T22:08:54.634074",
+                "log": "BUNGA DEPOSITO | Deposito 3 | Jumlah Rp45.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:08:54.634080",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:09:42.297699",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.192.518"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga deposito",
+                "waktu": "2026-08-11T22:09:42.297713",
+                "log": "BUNGA DEPOSITO | Deposito 3 | Jumlah Rp45.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:09:42.297719",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+            }
+        ],
+        "status": "aktif",
+        "level": 1
     }
 }

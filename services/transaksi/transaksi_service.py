@@ -1,12 +1,15 @@
+
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.services.transaksi.limit import LimitService
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
+from bank_djago.utils.validator import Validator
 
 class TransaksiService:
 
     @staticmethod
     def setor_tunai(bank,rekening,nominal):
+        Validator.amankan_rekening(rekening)
         if nominal < 10000:
             raise ValueError("Minimal setor adalah Rp10.0000")
         rekening.tambah_saldo(nominal)
@@ -18,6 +21,7 @@ class TransaksiService:
 
     @staticmethod
     def tarik_tunai(bank,rekening,nominal):
+        Validator.amankan_rekening(rekening)
         if nominal < 10000:
             raise ValueError("Minimal tarik adalah Rp10.000")
         if rekening.saldo - nominal < rekening.saldosetor_min:
@@ -31,9 +35,10 @@ class TransaksiService:
 
     @staticmethod
     def transfer(bank,pengirim,penerima,nominal):
+        Validator.amankan_rekening(pengirim)
         if nominal < 10000:
             raise ValueError("Minimal transfer adalah Rp10.0000")
-        LimitService.reset_limit(pengirim)
+        LimitService.reset_limit(bank,pengirim)
         total = nominal + pengirim.pajak
         if pengirim.limit_harian is not None:
             if pengirim.limit_sisa < nominal:
@@ -58,12 +63,14 @@ class TransaksiService:
 
     @staticmethod
     def tarik_semua_uang(rekening):
+        Validator.amankan_rekening(rekening)
         total = rekening.saldo
         rekening.kurangi_saldo(total)
 
 
     @staticmethod
     def transfer_semua_uang(rekening,penerima):
+        Validator.amankan_rekening(rekening)
         total = rekening.saldo
         rekening.kurangi_saldo(total)
         penerima.tambah_saldo(total)
@@ -71,6 +78,7 @@ class TransaksiService:
 
     @staticmethod
     def cari_penerima(bank,norek_penerima,pengirim):
+
         penerima = bank.cari_rekening(norek_penerima)
 
         if not penerima:
@@ -78,5 +86,8 @@ class TransaksiService:
 
         if penerima == pengirim:
             raise ValueError("Tidak dapat transfer ke nomor rekening sendiri")
+
+        if penerima.status != "aktif":
+            raise ValueError(f"Rekening penerima sudah/telah di{penerima.status}")
 
         return penerima

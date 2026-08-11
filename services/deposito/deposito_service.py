@@ -3,6 +3,8 @@ from bank_djago.core.deposito import Deposito
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
 from bank_djago.utils.utililty import Utilitas,JenisAro
+from bank_djago.utils.validator import Validator
+
 
 class StatusDeposito:
     AKTIF = "aktif"
@@ -24,6 +26,7 @@ class DepositoService:
 
     @staticmethod
     def buka_deposito(bank,rekening,nominal,lama_bulan,jenis_aro=JenisAro.TIDAK,lama_aro=None):
+        Validator.amankan_rekening(rekening)
 
         if nominal < DepositoService.MIN_DEPO:
             raise ValueError("Jumlah Depo kurang dari minimum")
@@ -49,7 +52,7 @@ class DepositoService:
         rekening.kurangi_saldo(nominal)
 
         nasabah.deposito.append(deposito_baru)
-        log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"DEPOSITO | Rp{Utilitas.format_rupiah(nominal)} |Bunga {bunga:.1%} | Lama {lama_bulan} bulan| ")
+        log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"DEPOSITO | Rp{Utilitas.format_rupiah(nominal)} |Bunga {bunga:.1%} | Lama {lama_bulan} bulan ")
 
         rekening.simpan_riwayat(log)
         AuditService.tambah_audit(bank,kategori="transaksi",jenis="deposito",log=f"{rekening.pemilik.nama} membuka deposito Rp{Utilitas.format_rupiah(nominal)}",nik=rekening.pemilik.NIK,norek=rekening.norek)
@@ -58,11 +61,13 @@ class DepositoService:
 
     @staticmethod
     def cairkan_deposito(bank,deposito):
-        if deposito.status != StatusDeposito.AKTIF:
-            raise ValueError("Deposito sudah dicairkan")
-
+        Validator.amankan_rekening(deposito.rekening)
         if datetime.date.today() < deposito.jatuh_tempo:
             raise ValueError("Deposito belum jatuh tempo")
+
+        if deposito.status != StatusDeposito.JATUH_TEMPO:
+            raise ValueError("Deposito sudah dicairkan")
+
 
         total = deposito.total_pencairan
         deposito.rekening.tambah_saldo(total)
@@ -94,6 +99,7 @@ class DepositoService:
         if hari_ini < deposito.jatuh_tempo:
             raise ValueError("Deposito belum jatuh tempo")
 
+
         if deposito.jenis_aro == JenisAro.TIDAK:
             return None
 
@@ -108,12 +114,34 @@ class DepositoService:
         else:
             raise ValueError("ARO tidak valid")
 
+
         lama_bulan = deposito.lama_aro
         if lama_bulan not in DepositoService.JANGKA_WAKTU:
             raise ValueError("Lama bulan tidak terdaftar")
 
         deposito.rekening.tambah_saldo(total)
         deposito.rekening.kurangi_saldo(nominal_baru)
+
+        if deposito.jenis_aro == JenisAro.POKOK:
+            nominal_baru = deposito.nominal
+            bunga_diterima = total - nominal_baru
+
+        elif deposito.jenis_aro == JenisAro.POKOK_BUNGA:
+            nominal_baru = total
+            bunga_diterima = 0
+
+        if bunga_diterima > 0:
+            log_bunga = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="bunga deposito",
+                log=(
+                    f"BUNGA DEPOSITO | "
+                    f"Deposito {deposito.ID} | "
+                    f"Jumlah Rp{Utilitas.format_rupiah(bunga_diterima)}"
+                )
+            )
+
+            deposito.rekening.simpan_riwayat(log_bunga)
 
 
         tanggal_buka = deposito.jatuh_tempo
@@ -145,3 +173,7 @@ class DepositoService:
         )
 
 
+    @staticmethod
+    def depo_jatuh_tempo(nasabah):
+        return [deposito for deposito in nasabah.deposito
+                if deposito.status == StatusDeposito.JATUH_TEMPO]

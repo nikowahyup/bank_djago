@@ -20,7 +20,7 @@ class Deposito:
     @property
     def total_pencairan(self):
         bunga = (self.nominal*self.bunga*self.lama_bulan/12)
-        return self.nominal + bunga
+        return round(self.nominal + bunga)
 
 
 

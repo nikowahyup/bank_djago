@@ -1,11 +1,12 @@
-from bank_djago.services.rekening.rekening_service import RekeningService
+from bank_djago.services.deposito.deposito_service import DepositoService
+from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksiUI import TransaksiUI
 from bank_djago.services.rekening.rekeningUI import RekeningUI
 from bank_djago.services.deposito.ui import DepositoUI
 from bank_djago.services.layanan_nasabah import LayananNasabah
 from bank_djago.services.transaksi.riwayat.ui import RiwayatUI
 from bank_djago.utils.ui import UI
-
+from bank_djago.utils.utililty import Utilitas
 
 
 class NasabahMenu:
@@ -21,36 +22,34 @@ class NasabahMenu:
             if not nasabah:
                 UI.gagal("NIK tidak terfdatar. Coba Lagi")
                 continue
+            break
 
-            norek = input("Masukkan nomor rekening Anda: ")
-            pin   = input("Masukkan PIN rekening Anda: ")
+        return nasabah
 
-            try:
-                rekening = RekeningService.autentikasi_rekening(bank,norek,pin)
-            except ValueError as e:
-                UI.gagal(str(e))
-                continue
-
-            if rekening not in nasabah.rekening:
-                UI.gagal("Nomor rekening ini tidak terdaftar di akun Anda")
-                continue
-
-            return nasabah,rekening
 
 
     @staticmethod
-    def menu_utama(bank,nasabah,rekening):
+    def menu_utama(bank,nasabah):
+
+        rekening = Utilitas.pilihan_rekening(nasabah)
 
         while True:
             UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
             print()
-            print(f"👋Halo,{nasabah.nama}!\n")
+            print(f"👋Halo,{nasabah.nama}!")
+            deposito = DepositoService.depo_jatuh_tempo(nasabah)
+            if deposito:
+                print(f"⚠️ Anda memiliki {len(deposito)} yang telah jatuh tempo")
+
+            print()
             print("1. Menu layanan Rekening")
             print("2. Menu Transaksi")
             print("3. Menu Deposito")
             print("4. Menu Profil")
             print("5. Menu Lihat Riwayat")
-            print("6. Keluar\n")
+            print("6. Ganti rekening")
+            print("7. Cek Notifikasi")
+            print("8. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
@@ -69,8 +68,14 @@ class NasabahMenu:
                 RiwayatUI.menu_riwayat(rekening)
 
             elif pilihan == "6":
-                break
+               rekening = Utilitas.pilihan_rekening(nasabah)
+               UI.sukses("Ganti rekening berhasil!")
 
+            elif pilihan == "7":
+                NotifikasiUI.menu(nasabah)
+
+            elif pilihan == "8":
+                break
 
 
 

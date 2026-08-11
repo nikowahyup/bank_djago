@@ -2,7 +2,7 @@ from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
-
+from bank_djago.utils.validator import Validator
 
 class RekeningService:
     level = {1: 'Reguler',
@@ -53,6 +53,7 @@ class RekeningService:
 
     @staticmethod
     def upgrade_rekening(bank,rekening_lama,target_level):
+        Validator.amankan_rekening(rekening_lama)
         info = RekeningService.jenis_rekening[target_level]
         kelas = info["kelas"]
 
@@ -78,6 +79,7 @@ class RekeningService:
 
     @staticmethod
     def downgrade_rekening(bank,rekening_lama,target_level):
+        Validator.amankan_rekening(rekening_lama)
 
         info = RekeningService.jenis_rekening[target_level]
 
@@ -106,6 +108,7 @@ class RekeningService:
 
     @staticmethod
     def blokir_rekening(rekening,alasan):
+        Validator.amankan_rekening(rekening)
         if rekening.status == "blokir":
             raise ValueError("Rekening ini sudah diblokir")
         if rekening.status == "tutup":
@@ -126,6 +129,7 @@ class RekeningService:
 
     @staticmethod
     def tutup_rekening(rekening,penerima=None):
+        Validator.amankan_rekening(rekening)
         if rekening.status == "tutup":
             raise ValueError("Rekening memang telah ditutup")
         if rekening.status == "blokir":

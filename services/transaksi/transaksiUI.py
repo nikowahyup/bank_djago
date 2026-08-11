@@ -64,7 +64,7 @@ class TransaksiUI:
             print()
             rek_penerima = input("Masukkan nomor rekening penerima: ")
             Utilitas.animasi("Mencari penerima")
-            penerima = TransaksiService.cari_penerima(bank,rekening,rek_penerima)
+            penerima = TransaksiService.cari_penerima(bank,rek_penerima,rekening)
             UI.sukses("Rekening ditemukan")
             UI.wadah_info(penerima.pemilik.nama,rek_penerima)
         except ValueError as e:

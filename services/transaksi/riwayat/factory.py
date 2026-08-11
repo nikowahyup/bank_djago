@@ -4,7 +4,7 @@ class RiwayatTemplate:
     @staticmethod
     def template(kategori,jenis,log):
         return {"kategori":kategori,
-                "jenis": jenis.title(),
+                "jenis": jenis,
                 "waktu":datetime.datetime.now().isoformat(),
                 "log":log}
 
@@ -19,7 +19,7 @@ class RiwayatTemplate:
 
     @staticmethod
     def tarik_uang(jumlah):
-        return RiwayatTemplate.template("kategori","tarik uang",f'TARIK UANG | Jumlah Rp{jumlah:,}'.replace(",","."))
+        return RiwayatTemplate.template("transaksi","tarik uang",f'TARIK UANG | Jumlah Rp{jumlah:,}'.replace(",","."))
 
     @staticmethod
     def upgrade_rekening(sebelum,sesudah):
@@ -35,4 +35,4 @@ class RiwayatTemplate:
 
     @staticmethod
     def setor_uang(jumlah):
-        return RiwayatTemplate.template("transaksi","setor uang",f"SETOR TUNAI | Jumlah Rp{jumlah:,}".replace(",", "."))
+        return RiwayatTemplate.template("transaksi","setor uang",f"SETOR UANG | Jumlah Rp{jumlah:,}".replace(",", "."))

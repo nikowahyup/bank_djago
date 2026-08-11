@@ -1,3 +1,4 @@
+from bank_djago.services.admin.rekap_audit import AuditService
 import datetime
 
 
@@ -5,7 +6,7 @@ class BiayaAdminService:
 
 
     @staticmethod
-    def potong_admin(rekening):
+    def potong_admin(bank,rekening):
 
         hari_ini = datetime.date.today()
 
@@ -34,3 +35,5 @@ class BiayaAdminService:
             "log": f"BIAYA ADMIN | Jumlah Rp{total_admin:,}".replace(",", ".")
         }
         rekening.simpan_riwayat(simpan)
+        AuditService.tambah_audit(bank, kategori="transaksi", jenis="beri bunga", log="Berikan bunga nasabah")
+        AuditService.tambah_audit(bank, kategori="sistem", jenis="biaya admin", log="Bayar rutin bulanan biaya admin")

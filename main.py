@@ -1,5 +1,6 @@
 from bank_djago.services.NasabahMenu import NasabahMenu
 from bank_djago.services.rekening.rekeningUI import RekeningUI
+from bank_djago.utils.debug import Debug
 from penyimpanan.storage import JsonStorage
 from bank_djago.utils.utililty import Utilitas
 from bank_djago.services.admin.menu_admin import MenuAdmin
@@ -8,7 +9,7 @@ from bank_djago.services.admin.menu_admin import MenuAdmin
 def menu():
 
     bank = JsonStorage.muat_bank()
-
+    Debug.cek_jatuh_tempo(bank,12)
     bank.proses_harian()
 
     while True:
@@ -19,8 +20,8 @@ def menu():
             RekeningUI.buka_rekening(bank)
 
         elif pilihan == "2":
-            nasabah,rekening = NasabahMenu.login(bank)
-            NasabahMenu.menu_utama(bank,nasabah,rekening)
+            nasabah = NasabahMenu.login(bank)
+            NasabahMenu.menu_utama(bank,nasabah)
 
         elif pilihan == "3":
             JsonStorage.simpan_bank(bank)

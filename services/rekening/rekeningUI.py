@@ -15,6 +15,7 @@ class RekeningUI:
              4: 'Platinum'}
     @staticmethod
     def menu(bank,rekening):
+
         while True:
             UI.header("MENU LAYANAN REKENING", UI.KUNING)
             print()
@@ -278,7 +279,7 @@ class RekeningUI:
                     UI.gagal("Masukkan angka yang valid.")
 
                 try:
-                    rekening_baru = bank.buka_rekening(nasabah,pilihan,pin,setor_awal)
+                    rekening_baru = RekeningService.buka_rekening(bank,nasabah,pilihan,pin,setor_awal)
                     print(f"Selamat! Rekening dengan nomor {rekening_baru.norek} telah dibuka!")
                     AuditService.tambah_audit(bank,kategori="rekening",jenis="buka",log=f"{nasabah.nama} membuka rekening lain",nik=nasabah.NIK,norek=rekening_baru.norek)
                 except ValueError as e:

@@ -7,7 +7,7 @@ class RiwayatService:
             data = rekening.riwayat
 
         else:
-            data = [item for item in rekening.riwayat if item["jenis"] == jenis.title()]
+            data = [item for item in rekening.riwayat if item["jenis"] == jenis]
 
         if not data:
             raise ValueError("Riwayat tidak ditemukan")
