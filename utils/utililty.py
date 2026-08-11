@@ -185,9 +185,9 @@ class Utilitas:
         print()
 
 class JenisAro:
-    TIDAK = "tidak"
-    POKOK = "pokok"
-    POKOK_BUNGA = "pokok_bunga"
+        TIDAK = "tidak"
+        POKOK = "pokok"
+        POKOK_BUNGA = "pokok_bunga"
 
 
 

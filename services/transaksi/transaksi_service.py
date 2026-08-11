@@ -56,3 +56,27 @@ class TransaksiService:
         if pengirim.limit_harian is not None:
             pengirim.limit_sisa -= nominal
 
+    @staticmethod
+    def tarik_semua_uang(rekening):
+        total = rekening.saldo
+        rekening.kurangi_saldo(total)
+
+
+    @staticmethod
+    def transfer_semua_uang(rekening,penerima):
+        total = rekening.saldo
+        rekening.kurangi_saldo(total)
+        penerima.tambah_saldo(total)
+
+
+    @staticmethod
+    def cari_penerima(bank,norek_penerima,pengirim):
+        penerima = bank.cari_rekening(norek_penerima)
+
+        if not penerima:
+            raise ValueError("Penerima tidak terdaftar")
+
+        if penerima == pengirim:
+            raise ValueError("Tidak dapat transfer ke nomor rekening sendiri")
+
+        return penerima

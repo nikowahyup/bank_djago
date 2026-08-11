@@ -98,41 +98,11 @@ class Rekening:
 
     # ------------------------------------------------------------------------------------------------------------------------------
 
-    def ganti_pin(self,pin):
-        self.__pin = pin
-
-    # ------------------------------------------------------------------------------------------------------------------------------
-
-    def blokir(self,alasan):
-        if self.status == "tutup":
-            raise ValueError("Rekening ini telah ditutup!")
-        if self.status == "blokir":
-            raise ValueError("Rekening ini sudah dalam status blokir")
-        self.alasan_blokir = alasan
-        self.status        = "blokir"
-
-    # ------------------------------------------------------------------------------------------------------------------------------
-
-    def buka_blokir(self):
-        if self.status == "tutup":
-            raise ValueError("Rekening ini telah ditutup!")
-        if self.status == "aktif":
-            raise ValueError("Rekening sudah dalam status aktif")
-        self.status = "aktif"
-
-    # ------------------------------------------------------------------------------------------------------------------------------
-
-    def tutup(self):
-        if self.status == "tutup":
-            raise ValueError("Rekening memang telah ditutup")
-        if self.status == "blokir":
-            raise ValueError("Rekening dalam status blokir. Tidak bisa ditutup")
-        self.status = "tutup"
-
-    # ------------------------------------------------------------------------------------------------------------------------------
-
-    def reset_pin(self,pin_baru):
+    def ganti_pin(self,pin_baru):
         self.__pin = pin_baru
+
+    # ------------------------------------------------------------------------------------------------------------------------------
+
 
 #------------------------------------------------------------------------------------------------------------------------------
 

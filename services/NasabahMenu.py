@@ -1,5 +1,6 @@
+from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.services.transaksi.transaksiUI import TransaksiUI
-from bank_djago.services.admin.rekeningUI import RekeningUI
+from bank_djago.services.rekening.rekeningUI import RekeningUI
 from bank_djago.services.deposito.ui import DepositoUI
 from bank_djago.services.layanan_nasabah import LayananNasabah
 from bank_djago.services.transaksi.riwayat.ui import RiwayatUI
@@ -25,7 +26,7 @@ class NasabahMenu:
             pin   = input("Masukkan PIN rekening Anda: ")
 
             try:
-                rekening = bank.autentikasi_rekening(norek,pin)
+                rekening = RekeningService.autentikasi_rekening(bank,norek,pin)
             except ValueError as e:
                 UI.gagal(str(e))
                 continue
@@ -53,7 +54,7 @@ class NasabahMenu:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                RekeningUI.menu(bank, rekening)
+                RekeningUI.menu(bank,rekening)
 
             elif pilihan == "2":
                 TransaksiUI.menu_transaksi(bank, rekening)

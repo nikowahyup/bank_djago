@@ -1456,7 +1456,7 @@
     "1001943459674793": {
         "norek": "1001943459674793",
         "pin": "111111",
-        "saldo": 951905000.0,
+        "saldo": 1861904999.9999998,
         "limit": null,
         "riwayat": [
             {
@@ -1596,6 +1596,30 @@
                 "jenis": "Deposito",
                 "waktu": "2026-08-10T12:55:48.556385",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp124.618.193.7653125"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T22:21:43.002910",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp130.226.012.48475155"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T22:21:43.002960",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp136.086.183.04656538"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-11T05:54:14.179383",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp142.210.061.28366083"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-11T05:55:34.742864",
+                "log": "SETOR TUNAI | Jumlah Rp10.000.000"
             }
         ],
         "status": "aktif",
@@ -1604,7 +1628,7 @@
     "2001741025943181": {
         "norek": "2001741025943181",
         "pin": "111111",
-        "saldo": 900000000.0,
+        "saldo": 0.0,
         "limit": 200000000,
         "riwayat": [
             {
@@ -1624,6 +1648,62 @@
                 "jenis": "Deposito",
                 "waktu": "2026-08-10T12:55:48.556503",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp104.500.000.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T22:21:43.002938",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp109.202.500.0"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-10T22:21:43.002974",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp114.116.612.5"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "Deposito",
+                "waktu": "2026-08-11T05:54:14.179412",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp119.251.860.0625"
+            }
+        ],
+        "status": "tutup",
+        "level": 3
+    },
+    "1001235139496894": {
+        "norek": "1001235139496894",
+        "pin": "111111",
+        "saldo": 0,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-10T22:22:16.642337",
+                "log": "SETOR TUNAI | Jumlah Rp100.000.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "Perubahan",
+                "waktu": "2026-08-10T22:24:14.247404",
+                "log": "Turun Rekening Platinum ke Gold"
+            }
+        ],
+        "status": "tutup",
+        "level": 3
+    },
+    "2001279229055126": {
+        "norek": "2001279229055126",
+        "pin": "111111",
+        "saldo": 100000000,
+        "limit": 200000000,
+        "riwayat": [
+            {
+                "kategori": "transaksi",
+                "jenis": "Setor Uang",
+                "waktu": "2026-08-11T06:28:18.347664",
+                "log": "SETOR TUNAI | Jumlah Rp100.000.000"
             }
         ],
         "status": "aktif",

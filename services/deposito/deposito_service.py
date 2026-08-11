@@ -12,6 +12,7 @@ class StatusDeposito:
 
 
 
+
 class DepositoService:
     JANGKA_WAKTU = {
         1: 0.03,
