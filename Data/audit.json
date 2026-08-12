@@ -9748,5 +9748,69 @@
         "log": "Fuga memperpanjang deposito Rp1.000.000",
         "nik": "3150156202002002",
         "rekening": "4001963632735803"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-11T22:24:03.321683",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp211.337.680",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-11T22:24:03.321720",
+        "jenis": "DEPOSITO",
+        "log": "Yuda memperpanjang deposito Rp177.219.609",
+        "nik": "3510152202082002",
+        "rekening": "2001741025943181"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-11T22:24:03.321738",
+        "jenis": "DEPOSITO",
+        "log": "Fuga memperpanjang deposito Rp1.246.181",
+        "nik": "3150156202002002",
+        "rekening": "4001963632735803"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-11T22:24:03.321758",
+        "jenis": "DEPOSITO",
+        "log": "Fuga memperpanjang deposito Rp1.000.000",
+        "nik": "3150156202002002",
+        "rekening": "4001963632735803"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-12T06:39:27.530460",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp220.847.876",
+        "nik": "3510152602082002",
+        "rekening": "1001943459674793"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-12T06:39:27.530502",
+        "jenis": "DEPOSITO",
+        "log": "Yuda memperpanjang deposito Rp185.194.491",
+        "nik": "3510152202082002",
+        "rekening": "2001741025943181"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-12T06:39:27.530526",
+        "jenis": "DEPOSITO",
+        "log": "Fuga memperpanjang deposito Rp1.302.259",
+        "nik": "3150156202002002",
+        "rekening": "4001963632735803"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-12T06:39:27.530551",
+        "jenis": "DEPOSITO",
+        "log": "Fuga memperpanjang deposito Rp1.000.000",
+        "nik": "3150156202002002",
+        "rekening": "4001963632735803"
     }
 ]

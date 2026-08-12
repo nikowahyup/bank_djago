@@ -6,7 +6,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "1998-12-16",
+            "jatuh_tempo": "1996-12-16",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -17,7 +17,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2000-12-29",
+            "jatuh_tempo": "1998-12-29",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -28,7 +28,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2000-12-29",
+            "jatuh_tempo": "1998-12-29",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -39,7 +39,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2002-01-06",
+            "jatuh_tempo": "2000-01-06",
             "status": "selesai",
             "jenis_aro": "pokok_bunga",
             "lama_aro": 6
@@ -50,7 +50,7 @@
             "bunga": 0.04,
             "lama_bulan": 6,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2002-07-13",
+            "jatuh_tempo": "2000-07-13",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -61,7 +61,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2003-01-13",
+            "jatuh_tempo": "2001-01-13",
             "status": "selesai",
             "jenis_aro": "pokok_bunga",
             "lama_aro": 12
@@ -72,7 +72,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2004-07-21",
+            "jatuh_tempo": "2002-07-21",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -83,7 +83,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-11",
-            "jatuh_tempo": "2019-08-11",
+            "jatuh_tempo": "2017-08-11",
             "status": "dicairkan",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -96,7 +96,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2006-02-02",
+            "jatuh_tempo": "2004-02-02",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -107,7 +107,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2006-02-02",
+            "jatuh_tempo": "2004-02-02",
             "status": "selesai",
             "jenis_aro": "pokok",
             "lama_aro": 12
@@ -118,7 +118,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2006-02-02",
+            "jatuh_tempo": "2004-02-02",
             "status": "selesai",
             "jenis_aro": "pokok_bunga",
             "lama_aro": 12
@@ -129,7 +129,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2007-02-09",
+            "jatuh_tempo": "2005-02-09",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -140,7 +140,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-09",
-            "jatuh_tempo": "2007-02-09",
+            "jatuh_tempo": "2005-02-09",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
@@ -151,7 +151,7 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-10",
-            "jatuh_tempo": "2009-02-10",
+            "jatuh_tempo": "2007-02-10",
             "status": "selesai",
             "jenis_aro": "pokok_bunga",
             "lama_aro": 12
@@ -162,14 +162,14 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-10",
-            "jatuh_tempo": "2010-02-10",
+            "jatuh_tempo": "2008-02-10",
             "status": "selesai",
             "jenis_aro": "tidak",
             "lama_aro": null
         },
         "8": {
             "norek": "1001943459674793",
-            "nominal": 202237014,
+            "nominal": 220847876,
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-02-10",
@@ -182,7 +182,7 @@
     "3510152202082002": {
         "1": {
             "norek": "2001741025943181",
-            "nominal": 169588143,
+            "nominal": 185194491,
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-02-10",
@@ -199,14 +199,14 @@
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-11",
-            "jatuh_tempo": "2021-08-11",
+            "jatuh_tempo": "2019-08-11",
             "status": "dicairkan",
             "jenis_aro": "tidak",
             "lama_aro": null
         },
         "2": {
             "norek": "4001963632735803",
-            "nominal": 1192518,
+            "nominal": 1302259,
             "bunga": 0.045,
             "lama_bulan": 12,
             "tanggal_buka": "2026-08-11",

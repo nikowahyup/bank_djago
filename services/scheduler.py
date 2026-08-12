@@ -1,4 +1,4 @@
-from bank_djago.services.admin.admin_payroll import BiayaAdminService
+from bank_djago.services.admin.AdminTeller.admin_payroll import BiayaAdminService
 from bank_djago.services.deposito.deposito_service import StatusDeposito,DepositoService,JenisAro
 from bank_djago.services.bunga import BungaService
 from bank_djago.services.transaksi.limit import LimitService

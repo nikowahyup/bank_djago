@@ -7,6 +7,8 @@ class Nasabahh:
         self.deposito = []
         self.jumlah_deposito = 0
         self.notifikasi = []
+        self.pinjaman = None
+        self.jumlah_pinjaman = 0
 
 
     def ke_dict(self): # pengonversi objek nasabah ke dictionary agar bisa disimpan ke JSON

@@ -8,6 +8,7 @@ class JsonStorage:
     file_nasabah = "Data/nasabah.json"
     file_audit = "Data/audit.json"
     file_depo = "Data/deposito.json"
+    file_pinjaman = "Data/pinjaman.json"
 
 
 
@@ -18,7 +19,9 @@ class JsonStorage:
         data_nasabah = JsonStorage.muat_json(JsonStorage.file_nasabah,{})
         data_audit = JsonStorage.muat_json(JsonStorage.file_audit,[])
         data_deposito= JsonStorage.muat_json(JsonStorage.file_depo,{})
-        return Bank("Djago",data_audit,data_rekening,data_nasabah,data_deposito)
+        data_pinjaman = JsonStorage.muat_json(JsonStorage.file_pinjaman,{})
+
+        return Bank("Djago",data_audit,data_nasabah,data_rekening,data_deposito,data_pinjaman)
 
     @staticmethod
     def simpan_bank(bank):
@@ -26,6 +29,7 @@ class JsonStorage:
         JsonStorage.simpan_json(JsonStorage.file_nasabah,bank.data_nasabah_dict())
         JsonStorage.simpan_json(JsonStorage.file_depo,JsonStorage.buat_data_deposito(bank))
         JsonStorage.simpan_json(JsonStorage.file_audit,bank.audit_log)
+        JsonStorage.simpan_json(JsonStorage.file_pinjaman,bank.data_pinjaman_dict())
 
 
 

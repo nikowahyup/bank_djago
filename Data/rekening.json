@@ -1746,6 +1746,18 @@
                 "jenis": "deposito",
                 "waktu": "2026-08-11T22:09:42.297624",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp202.237.014"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:24:03.321668",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp211.337.680"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-12T06:39:27.530435",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp220.847.876"
             }
         ],
         "status": "aktif",
@@ -1840,6 +1852,18 @@
                 "jenis": "deposito",
                 "waktu": "2026-08-11T22:09:42.297677",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp169.588.143"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:24:03.321713",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp177.219.609"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-12T06:39:27.530492",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp185.194.491"
             }
         ],
         "status": "tutup",
@@ -2008,7 +2032,7 @@
     "4001963632735803": {
         "norek": "4001963632735803",
         "pin": "111111",
-        "saldo": 8135000,
+        "saldo": 8225000,
         "limit": 5000000,
         "riwayat": [
             {
@@ -2087,6 +2111,42 @@
                 "kategori": "transaksi",
                 "jenis": "deposito",
                 "waktu": "2026-08-11T22:09:42.297719",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:24:03.321734",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.246.181"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga deposito",
+                "waktu": "2026-08-11T22:24:03.321748",
+                "log": "BUNGA DEPOSITO | Deposito 3 | Jumlah Rp45.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-11T22:24:03.321755",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-12T06:39:27.530521",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.302.259"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga deposito",
+                "waktu": "2026-08-12T06:39:27.530538",
+                "log": "BUNGA DEPOSITO | Deposito 3 | Jumlah Rp45.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-12T06:39:27.530547",
                 "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
             }
         ],

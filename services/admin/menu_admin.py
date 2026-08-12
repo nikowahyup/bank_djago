@@ -18,10 +18,11 @@ Masukkan sembarang simbol untuk keluar""")
         while True:
             UI.header("MENU ADMIN")
             print()
-            print("1. Menu Rekap Bank")
-            print("2. Menu Audit")
-            print("3. Customer Service")
-            print("4. Keluar\n")
+            print("1. Kelola Rekap Bank")
+            print("2. Kelola Audit")
+            print("3. Kelola Pinjaman")
+            print("4. Kelola Deposito")
+            print("5. Keluar\n")
 
             pilihan = input("Pilihan Kamu: ")
 

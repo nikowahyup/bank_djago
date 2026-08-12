@@ -7,6 +7,7 @@ from bank_djago.services.layanan_nasabah import LayananNasabah
 from bank_djago.services.transaksi.riwayat.ui import RiwayatUI
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utililty import Utilitas
+from bank_djago.services.pinjaman.pinjamanUI import PinjamanUI
 
 
 class NasabahMenu:
@@ -45,11 +46,12 @@ class NasabahMenu:
             print("1. Menu layanan Rekening")
             print("2. Menu Transaksi")
             print("3. Menu Deposito")
-            print("4. Menu Profil")
-            print("5. Menu Lihat Riwayat")
-            print("6. Ganti rekening")
-            print("7. Cek Notifikasi")
-            print("8. Keluar\n")
+            print("4. Menu Pinjaman")
+            print("5. Menu Profil")
+            print("6. Menu Lihat Riwayat")
+            print("7. Ganti rekening")
+            print("8. Cek Notifikasi")
+            print("9. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
@@ -75,7 +77,7 @@ class NasabahMenu:
                 NotifikasiUI.menu(nasabah)
 
             elif pilihan == "8":
-                break
+                PinjamanUI.menu(bank,nasabah,rekening)
 
 
 
