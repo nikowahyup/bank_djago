@@ -15,6 +15,7 @@ class Deposito:
         self.ID           = id
         self.jenis_aro    = JenisAro.TIDAK
         self.lama_aro     = None
+        self.notifikasi_depo = False
 
 
     @property
@@ -26,6 +27,7 @@ class Deposito:
 
     def ke_dict(self):
         return {"norek": self.rekening.norek,
+                "nik":self.pemilik.NIK,
                 "nominal":self.nominal,
                 "bunga":self.bunga,
                 "lama_bulan":self.lama_bulan,

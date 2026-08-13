@@ -10,6 +10,7 @@ def menu():
 
     bank = JsonStorage.muat_bank()
     Debug.cek_jatuh_tempo(bank,12)
+    Debug.cek_jatuh_tempo_pinjaman(bank,1)
     bank.proses_harian()
 
     while True:

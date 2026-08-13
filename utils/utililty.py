@@ -48,23 +48,7 @@ class Utilitas:
             rekening.dapat_bunga -= datetime.timedelta(days=bulan * 31)
 
     @staticmethod
-    def nama_bulan(tanggal):
-        BULAN = {
-            1: "Januari",
-            2: "Februari",
-            3: "Maret",
-            4: "April",
-            5: "Mei",
-            6: "Juni",
-            7: "Juli",
-            8: "Agustus",
-            9: "September",
-            10: "Oktober",
-            11: "November",
-            12: "Desember"
-        }
 
-        return BULAN[tanggal.month]
 
     @staticmethod
     def format_waktu(iso):
@@ -222,9 +206,43 @@ class Utilitas:
 
         return f"{tanggal.day} {bulan[tanggal.month - 1]} {tanggal.year}"
 
+    @staticmethod
+    def nama_bulan(tanggal):
+        bulan = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember"
+        ]
+
+        return f"{bulan[tanggal.month - 1]}"
+
 
 
 class JenisAro:
         TIDAK = "tidak"
         POKOK = "pokok"
         POKOK_BUNGA = "pokok_bunga"
+
+from enum import Enum
+
+class StatusPinjaman(Enum):
+    DIAJUKAN = "diajukan"
+    DITOLAK = "ditolak"
+    DISETUJUI = "disetujui"
+    AKTIF = "aktif"
+    LUNAS = "lunas"
+
+
+class JenisReferensiID(Enum):
+    PINJAMAN = 1
+    DEPOSITO = 2
+    TRANSAKSI = 3

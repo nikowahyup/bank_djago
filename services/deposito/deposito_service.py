@@ -76,7 +76,7 @@ class DepositoService:
         log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"PENCAIRAN DEPOSITO | Rp{Utilitas.format_rupiah(total)}")
 
         deposito.rekening.simpan_riwayat(log)
-
+        deposito.notifikasi_depo = False
         AuditService.tambah_audit(
             bank,
             kategori="transaksi",

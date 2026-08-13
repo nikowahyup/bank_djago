@@ -1,4 +1,4 @@
-from bank_djago.services.pinjaman.pinjaman_service import StatusPinjaman
+from bank_djago.utils.utililty import StatusPinjaman
 
 
 class Pinjaman:
@@ -15,6 +15,8 @@ class Pinjaman:
         self.status = StatusPinjaman.DIAJUKAN
         self.bunga_bulanan = 0
         self.tanggal_pencairan = None
+        self.tanggal_jatuh_tempo = None
+        self.notifikasi_jatuh_tempo = False
 
     def ke_dict(self):
         return {
@@ -32,8 +34,10 @@ class Pinjaman:
             "tanggal_pencairan": (
                 self.tanggal_pencairan.isoformat()
                 if self.tanggal_pencairan
-                else None
-            )
+                else None),
+            "jatuh_tempo": (self.tanggal_jatuh_tempo.isoformat()
+                            if self.tanggal_jatuh_tempo
+                            else None)
         }
 
 

@@ -1,3 +1,4 @@
+from bank_djago.services.admin.menu_pinjaman import AdminPinjaman
 from bank_djago.utils.utililty import UI
 from bank_djago.utils.AuditUI import AuditUI
 from bank_djago.utils.rekapUI import RekapUI
@@ -31,4 +32,7 @@ Masukkan sembarang simbol untuk keluar""")
             elif pilihan == "2":
                 AuditUI.menu_tampilkan_audit(bank)
             elif pilihan == "3":
+                AdminPinjaman.menu(bank)
+
+            elif pilihan == "5":
                 break

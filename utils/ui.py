@@ -66,6 +66,30 @@ class UI:
         print(f"  {UI.SIMBOL["uang"]} Saldo  : Rp{saldo}")
         print("╚" + "═" * 37 + "╝")
 
+
+    @staticmethod
+    def kotak_status_pinjaman(status,nominal,bunga,tenor,cicilan_tetap=None,sisa_cicilan=None,terbayar=None,bunga_bulanan=None):
+        if sisa_cicilan or terbayar or bunga_bulanan or cicilan_tetap is None:
+            print("╔" + "═" * 30 + "╗")
+            print(f"  STATUS  : {status}")
+            print(f"  NOMINAL : Rp{nominal}")
+            print(f"  BUNGA   : {bunga}% / tahun")
+            print(f"  TENOR   : {tenor} bulan")
+            print("╚" + "═" * 30 + "╝")
+            return
+        print("╔" + "═" * 37 + "╗")
+        print(f"  STATUS            : {status}")
+        print(f"  NOMINAL AWAL      : Rp{nominal}")
+        print(f"  SISA CICILAN      : Rp{sisa_cicilan}")
+        print(f"  CICILAN TETAP     : Rp{cicilan_tetap}")
+
+        print(f"  CICILAN TERBAYAR  : {terbayar}/{tenor}")
+        print(f"  BUNGA BULAN INI   : Rp{bunga_bulanan}")
+
+        print("╚" + "═" * 37 + "╝")
+
+
+
     @staticmethod
     def sukses(pesan):
         print(Fore.GREEN + f'✔{pesan}!')

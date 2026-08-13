@@ -1,123 +1,25 @@
 {
-    "3150152602082002": {
-        "nama": "Gojo Satoru",
-        "alamat": "jln.shinjuku",
-        "nik": "3150152602082002",
-        "rekening": [
-            "1001459575832760",
-            "2001819668456896"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3150152082602002": {
-        "nama": "Aoi Todo",
-        "alamat": "jln.kyoto",
-        "nik": "3150152082602002",
-        "rekening": [
-            "2001333025915187"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3150152602062002": {
-        "nama": "Wendy",
-        "alamat": "jln.korea",
-        "nik": "3150152602062002",
-        "rekening": [
-            "2001743023402145"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510152002602001": {
-        "nama": "Quin",
-        "alamat": "jln.queens",
-        "nik": "3510152002602001",
-        "rekening": [
-            "2001642528517163"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510152612082002": {
-        "nama": "Niko",
-        "alamat": "jln",
-        "nik": "3510152612082002",
-        "rekening": [
-            "2001424788827431"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510151001012002": {
-        "nama": "Yhwach",
-        "alamat": "jln",
-        "nik": "3510151001012002",
-        "rekening": [
-            "3001877015748075"
-        ],
-        "deposito": [],
-        "notif": []
-    },
     "3510152602082002": {
         "nama": "Niko Wahyu Pratama",
-        "alamat": "jln",
+        "alamat": "jln.perk kalibendo",
         "nik": "3510152602082002",
         "rekening": [
-            "1001943459674793"
+            "2001494367017388"
         ],
         "deposito": [],
-        "notif": []
-    },
-    "3510152202082002": {
-        "nama": "Yuda",
-        "alamat": "jn",
-        "nik": "3510152202082002",
-        "rekening": [
-            "2001741025943181"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510153302002002": {
-        "nama": "Rusdi",
-        "alamat": "jln",
-        "nik": "3510153302002002",
-        "rekening": [
-            "1001235139496894"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510153703702002": {
-        "nama": "Higuain",
-        "alamat": "jln",
-        "nik": "3510153703702002",
-        "rekening": [
-            "2001279229055126"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3510158008002002": {
-        "nama": "Gusti",
-        "alamat": "jln",
-        "nik": "3510158008002002",
-        "rekening": [
-            "3001562142687195"
-        ],
-        "deposito": [],
-        "notif": []
-    },
-    "3150156202002002": {
-        "nama": "Fuga",
-        "alamat": "jljn",
-        "nik": "3150156202002002",
-        "rekening": [
-            "4001963632735803"
-        ],
-        "deposito": [],
-        "notif": []
+        "notifikasi": [
+            {
+                "ID": 1,
+                "jenis": "deposito",
+                "pesan": "Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
+                "referensi": 2
+            },
+            {
+                "ID": 2,
+                "jenis": "pinjaman",
+                "pesan": "Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman",
+                "referensi": 1
+            }
+        ]
     }
 }

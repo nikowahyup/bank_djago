@@ -1,5 +1,8 @@
 import datetime
-from .utililty import Utilitas
+from .utililty import Utilitas, StatusPinjaman
+from ..services.deposito.deposito_service import StatusDeposito
+
+
 class Debug:
 
     @staticmethod
@@ -18,3 +21,11 @@ class Debug:
                     deposito.jatuh_tempo,
                     -bulan
                 )
+
+    @staticmethod
+    def cek_jatuh_tempo_pinjaman(bank,bulan=1):
+        for pinjaman in bank.daftar_pinjaman:
+            if pinjaman.status != StatusPinjaman.AKTIF:
+                continue
+
+            pinjaman.tanggal_jatuh_tempo = Utilitas.tambah_bulan(pinjaman.tanggal_jatuh_tempo,-bulan)

@@ -1,4 +1,4 @@
-from bank_djago.services.deposito.deposito_service import DepositoService
+
 from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksiUI import TransaksiUI
 from bank_djago.services.rekening.rekeningUI import RekeningUI
@@ -38,17 +38,17 @@ class NasabahMenu:
             UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
             print()
             print(f"👋Halo,{nasabah.nama}!")
-            deposito = DepositoService.depo_jatuh_tempo(nasabah)
-            if deposito:
-                print(f"⚠️ Anda memiliki {len(deposito)} yang telah jatuh tempo")
+            notifikasi = nasabah.notifikasi
+            if notifikasi:
+                print(f"⚠️ Anda memiliki {len(notifikasi)} notifikasi")
 
             print()
             print("1. Menu layanan Rekening")
             print("2. Menu Transaksi")
             print("3. Menu Deposito")
             print("4. Menu Pinjaman")
-            print("5. Menu Profil")
-            print("6. Menu Lihat Riwayat")
+            print("5. Menu Lihat Riwayat")
+            print("6. Menu Profil")
             print("7. Ganti rekening")
             print("8. Cek Notifikasi")
             print("9. Keluar\n")
@@ -64,20 +64,24 @@ class NasabahMenu:
                 DepositoUI.menu_deposito(bank, nasabah, rekening)
 
             elif pilihan == "4":
-                LayananNasabah.menu_profil(nasabah,rekening)
+                PinjamanUI.menu(bank,nasabah,rekening)
 
             elif pilihan == "5":
                 RiwayatUI.menu_riwayat(rekening)
 
             elif pilihan == "6":
+                LayananNasabah.menu_profil(nasabah,rekening)
+
+            elif pilihan == "7":
                rekening = Utilitas.pilihan_rekening(nasabah)
                UI.sukses("Ganti rekening berhasil!")
 
-            elif pilihan == "7":
-                NotifikasiUI.menu(nasabah)
 
             elif pilihan == "8":
-                PinjamanUI.menu(bank,nasabah,rekening)
+                NotifikasiUI.menu(nasabah)
+
+            elif pilihan == "9":
+                break
 
 
 

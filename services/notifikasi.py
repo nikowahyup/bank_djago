@@ -1,6 +1,9 @@
-from bank_djago.services.deposito.deposito_service import DepositoService
-from bank_djago.utils.utililty import Utilitas
+
+
+
+
 from bank_djago.utils.ui import UI
+from bank_djago.utils.utililty import JenisReferensiID
 
 
 class NotifikasiUI:
@@ -12,25 +15,44 @@ class NotifikasiUI:
             UI.header("CEK NOTIFIKASI",UI.BIRU)
             print()
             print("1. Notifikasi Deposito")
-            print("2. Keluar\n")
+            print("2. Notifikasi Deposito")
+            print("3. Notifikasi Pinjaman")
+            print("4. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                NotifikasiUI.notif_depo(nasabah)
+                NotifikasiUI.lihat_notifikasi(nasabah)
+
             elif pilihan == "2":
+                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensiID.DEPOSITO)
+
+            elif pilihan == "3":
+                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensiID.PINJAMAN)
+            elif pilihan == "4":
                 break
 
+    @staticmethod
+    def lihat_notifikasi(nasabah):
+        if not nasabah.notifikasi:
+            print("Tidak ada notifikasi.")
+            return
 
+        for i, item in enumerate(nasabah.notifikasi, start=1):
+            print(f"{i}. {item.pesan}")
 
     @staticmethod
-    def notif_depo(nasabah):
-        deposito = DepositoService.depo_jatuh_tempo(nasabah)
-        if not deposito:
-            print("Anda tidak memiliki notifikasi di deposito")
+    def tampilkan_berdasarkan_referensi(nasabah, referensi_id):
+
+        daftar = [
+            item
+            for item in nasabah.notifikasi
+            if item.referensi_id == referensi_id
+        ]
+
+        if not daftar:
+            print("Tidak ada notifikasi.")
             return
-        print(f"Anda memiliki {len(deposito)} yang telah jatuh tempo")
-        print()
-        for i,depo in enumerate(deposito,start=1):
-            print(f"{i}. Deposito #{depo.ID}\n"
-                  f"Nominal     : Rp{Utilitas.format_rupiah(depo.total_pencairan)}\n"
-                  f"Jatuh tempo : {Utilitas.format_tanggal_indonesia(depo.jatuh_tempo)}\n"
-                  f"ARO         : {depo.jenis_aro}\n")
+
+        for i, item in enumerate(daftar, start=1):
+            print(f"{i}. {item.pesan}")
+
+

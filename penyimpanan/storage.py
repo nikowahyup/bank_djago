@@ -17,6 +17,7 @@ class JsonStorage:
     def muat_bank():
         data_rekening = JsonStorage.muat_json(JsonStorage.file_rek,{})
         data_nasabah = JsonStorage.muat_json(JsonStorage.file_nasabah,{})
+        print("DATA NASABAH JSON :", data_nasabah)
         data_audit = JsonStorage.muat_json(JsonStorage.file_audit,[])
         data_deposito= JsonStorage.muat_json(JsonStorage.file_depo,{})
         data_pinjaman = JsonStorage.muat_json(JsonStorage.file_pinjaman,{})
@@ -25,11 +26,39 @@ class JsonStorage:
 
     @staticmethod
     def simpan_bank(bank):
-        JsonStorage.simpan_json(JsonStorage.file_rek,bank.data_rekening_dict())
-        JsonStorage.simpan_json(JsonStorage.file_nasabah,bank.data_nasabah_dict())
-        JsonStorage.simpan_json(JsonStorage.file_depo,JsonStorage.buat_data_deposito(bank))
-        JsonStorage.simpan_json(JsonStorage.file_audit,bank.audit_log)
-        JsonStorage.simpan_json(JsonStorage.file_pinjaman,bank.data_pinjaman_dict())
+        print("DATA NASABAH SEBELUM SIMPAN:")
+        print(bank.data_nasabah)
+
+        print("HASIL data_nasabah_dict:")
+        print(bank.data_nasabah_dict())
+        print("\n=== DEBUG SIMPAN BANK ===")
+        print("Jumlah nasabah :", len(bank.data_nasabah))
+        print("NIK nasabah    :", list(bank.data_nasabah.keys()))
+        print("=========================\n")
+        JsonStorage.simpan_json(
+            JsonStorage.file_nasabah,
+            bank.data_nasabah_dict()
+        )
+
+        JsonStorage.simpan_json(
+            JsonStorage.file_rek,
+            bank.data_rekening_dict()
+        )
+
+        JsonStorage.simpan_json(
+            JsonStorage.file_depo,
+            JsonStorage.buat_data_deposito(bank)
+        )
+
+        JsonStorage.simpan_json(
+            JsonStorage.file_audit,
+            bank.audit_log
+        )
+
+        JsonStorage.simpan_json(
+            JsonStorage.file_pinjaman,
+            bank.data_pinjaman_dict()
+        )
 
 
 

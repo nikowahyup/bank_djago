@@ -1,0 +1,17 @@
+{
+    "3510152602082002": {
+        "ID": 1,
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388",
+        "nominal_pinjaman": 10000000,
+        "bunga": 0.12,
+        "tenor": 12,
+        "cicilan_tetap": 0,
+        "sisa_pokok": 10000000,
+        "cicilan_terbayar": 0,
+        "bunga_bulanan": 0,
+        "status": "disetujui",
+        "tanggal_pencairan": null,
+        "jatuh_tempo": null
+    }
+}

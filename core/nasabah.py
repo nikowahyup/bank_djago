@@ -9,6 +9,7 @@ class Nasabahh:
         self.notifikasi = []
         self.pinjaman = None
         self.jumlah_pinjaman = 0
+        self.jumlah_notifikasi = 0
 
 
     def ke_dict(self): # pengonversi objek nasabah ke dictionary agar bisa disimpan ke JSON
@@ -22,7 +23,7 @@ class Nasabahh:
 
             ],
             "deposito":[],
-            "notif" : self.notifikasi
+            "notifikasi" : [notifikasi.ke_dict() for notifikasi in self.notifikasi]
         }
     @classmethod
     def dari_dict(cls,data): # pengonversi file JSON ke objek nasabah kembali
@@ -36,12 +37,6 @@ class Nasabahh:
 
 
 
-
-    def notifikasi(self):
-        if not self.notifikasi:
-            return
-
-        for notif in self.notifikasi:
-            print(f'. {notif}')
-
-        self.notifikasi.clear()
+    def buat_id_notifikasi(self):
+        self.jumlah_notifikasi += 1
+        return self.jumlah_notifikasi
