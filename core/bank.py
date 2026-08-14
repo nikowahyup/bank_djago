@@ -92,11 +92,8 @@ class Bank:
     def _muat_pinjaman(self,data_pinjaman):
         for nik,info in data_pinjaman.items():
 
-            norek = info["rekening"]
-            print("NIK PINJAMAN :", nik)
-            print("NIK DI DATA NASABAH :", list(self.data_nasabah.keys()))
-
             nasabah = self.data_nasabah[nik]
+            norek = info["rekening"]
             rekening = self.rekening_index[norek]
 
             pinjaman = Pinjaman(ID=int(info["ID"]),
@@ -185,7 +182,8 @@ class Bank:
     # ------------------------------------------------------------------------------------------------------------------------------
 
     def proses_harian(self):
-            Scheduler.jalankan(self)
+            tanggal = datetime.date(2028,8,13)
+            Scheduler.jalankan(self,tanggal)
 
 
     def verifikasi_admin(self,password):

@@ -146,6 +146,7 @@ class PinjamanUI:
             PinjamanService.bayar_cicilan(bank,pinjaman)
             print()
             UI.sukses(f"Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))} telah dipotong dari rekening Anda")
+            print("SETELAH BAYAR :", pinjaman.tanggal_jatuh_tempo)
         except ValueError as e:
             UI.gagal(str(e))
 

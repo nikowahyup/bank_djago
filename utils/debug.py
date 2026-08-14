@@ -19,7 +19,7 @@ class Debug:
             for deposito in nasabah.deposito:
                 deposito.jatuh_tempo = Utilitas.tambah_bulan(
                     deposito.jatuh_tempo,
-                    -bulan
+                    bulan
                 )
 
     @staticmethod
@@ -28,4 +28,4 @@ class Debug:
             if pinjaman.status != StatusPinjaman.AKTIF:
                 continue
 
-            pinjaman.tanggal_jatuh_tempo = Utilitas.tambah_bulan(pinjaman.tanggal_jatuh_tempo,-bulan)
+            pinjaman.tanggal_jatuh_tempo = Utilitas.tambah_bulan(pinjaman.tanggal_jatuh_tempo,bulan)

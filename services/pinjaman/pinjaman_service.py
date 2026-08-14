@@ -4,7 +4,7 @@
 # AKTIF     = dana sudah dicairkan dan masih ada kewajiban
 # LUNAS     = seluruh pokok dan bunga sudah terselesaikan
 import datetime
-from enum import Enum
+
 
 from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.core.pinjaman import Pinjaman
@@ -67,7 +67,7 @@ class PinjamanService:
         nasabah = pinjaman.pemilik
         PinjamanService.hapus_notif_pinjaman(nasabah)
 
-        notifikasi = Notifikasi(id_notifikasi=nasabah.buat_id_notifikasi(),
+        notifikasi = Notifikasi(
                                 jenis='pinjaman', pesan='Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman',
                                 referensi_id=JenisReferensiID.PINJAMAN)
         nasabah.notifikasi.append(notifikasi)
@@ -132,7 +132,7 @@ class PinjamanService:
             nasabah = pinjaman.pemilik
             PinjamanService.hapus_notif_pinjaman(nasabah)
 
-            notifikasi = Notifikasi(id_notifikasi=nasabah.buat_id_notifikasi(),
+            notifikasi = Notifikasi(
                                     jenis='pinjaman',
                                     pesan='🎉 Pinjaman Anda telah lunas. Terima kasih telah mempercayai bank Djago',
                                     referensi_id=JenisReferensiID.PINJAMAN)
@@ -173,7 +173,7 @@ class PinjamanService:
                 log=log_riwayat
             )
         )
-
+        PinjamanService.hapus_notif_pinjaman(pinjaman.pemilik)
         return pinjaman
 
 
@@ -187,7 +187,7 @@ class PinjamanService:
         nasabah = pinjaman.pemilik
         PinjamanService.hapus_notif_pinjaman(nasabah)
 
-        notifikasi = Notifikasi(id_notifikasi=nasabah.buat_id_notifikasi(),
+        notifikasi = Notifikasi(
                                 jenis='pinjaman',pesan='Maaf,pengajuan pinjaman Anda ditolak',
                                 referensi_id=JenisReferensiID.PINJAMAN)
 

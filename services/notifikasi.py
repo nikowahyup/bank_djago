@@ -14,7 +14,7 @@ class NotifikasiUI:
         while True :
             UI.header("CEK NOTIFIKASI",UI.BIRU)
             print()
-            print("1. Notifikasi Deposito")
+            print("1. Semua Notifikasi ")
             print("2. Notifikasi Deposito")
             print("3. Notifikasi Pinjaman")
             print("4. Keluar\n")
@@ -32,6 +32,7 @@ class NotifikasiUI:
 
     @staticmethod
     def lihat_notifikasi(nasabah):
+        print(f"BANYAKNYA NOTIFIKASI {len(nasabah.notifikasi)}")
         if not nasabah.notifikasi:
             print("Tidak ada notifikasi.")
             return

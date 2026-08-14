@@ -2,8 +2,9 @@ import datetime
 from bank_djago.core.deposito import Deposito
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
-from bank_djago.utils.utililty import Utilitas,JenisAro
+from bank_djago.utils.utililty import Utilitas, JenisAro, JenisReferensiID
 from bank_djago.utils.validator import Validator
+
 
 
 class StatusDeposito:
@@ -62,8 +63,8 @@ class DepositoService:
     @staticmethod
     def cairkan_deposito(bank,deposito):
         Validator.amankan_rekening(deposito.rekening)
-        if datetime.date.today() < deposito.jatuh_tempo:
-            raise ValueError("Deposito belum jatuh tempo")
+        # if datetime.date.today() < deposito.jatuh_tempo:
+        #     raise ValueError("Deposito belum jatuh tempo")
 
         if deposito.status != StatusDeposito.JATUH_TEMPO:
             raise ValueError("Deposito sudah dicairkan")
@@ -76,6 +77,13 @@ class DepositoService:
         log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"PENCAIRAN DEPOSITO | Rp{Utilitas.format_rupiah(total)}")
 
         deposito.rekening.simpan_riwayat(log)
+
+        nasabah = deposito.pemilik
+        for item in nasabah.notifikasi:
+            if item.referensi_id == JenisReferensiID.DEPOSITO:
+                nasabah.notifikasi.remove(item)
+                break
+
         deposito.notifikasi_depo = False
         AuditService.tambah_audit(
             bank,
@@ -91,17 +99,18 @@ class DepositoService:
 
     @staticmethod
     def perpanjangan(bank,deposito):
-        hari_ini = datetime.date.today()
+        # hari_ini = datetime.date.today()
 
         if deposito.status != StatusDeposito.AKTIF:
             raise ValueError("Deposito sudah tidak aktif")
 
-        if hari_ini < deposito.jatuh_tempo:
-            raise ValueError("Deposito belum jatuh tempo")
+        # if hari_ini < deposito.jatuh_tempo:
+        #     raise ValueError("Deposito belum jatuh tempo")
 
 
         if deposito.jenis_aro == JenisAro.TIDAK:
             return None
+
 
         total = deposito.total_pencairan
 
@@ -171,6 +180,7 @@ class DepositoService:
             nik=deposito.pemilik.NIK,
             norek=deposito.rekening.norek
         )
+
 
 
     @staticmethod

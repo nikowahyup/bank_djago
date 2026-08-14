@@ -10804,5 +10804,371 @@
         "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
         "nik": "3510152602082002",
         "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:46:38.978463",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama mengajukan pinjaman",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:47:04.905842",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:48:02.315571",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp10.450.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:48:31.223462",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:50:33.182930",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:51:40.557628",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T05:57:42.582436",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:05:31.369085",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:10:25.380799",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama mengajukan pinjaman",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:10:44.739885",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:11:06.724206",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:12:09.357263",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T06:20:30.651861",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:02:22.707473",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:12:22.045397",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:13:34.173803",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:13:41.395760",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:14:13.072180",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:23:28.822246",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:24:29.367739",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:24:36.178999",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:25:01.312863",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:28:02.200656",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:28:19.794850",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:46:21.345488",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T07:46:41.050402",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T08:42:42.474772",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T08:42:58.248548",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama mengajukan pinjaman",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T08:43:11.991717",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T08:44:51.652339",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-14T09:40:22.760875",
+        "jenis": "BUKA REKENING",
+        "log": "Galih membuka rekening pertama",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-14T09:40:22.760891",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510151001002002",
+        "nama": "Galih"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:41:33.497796",
+        "jenis": "DEPOSITO",
+        "log": "Galih membuka deposito Rp10.000.000",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:41:45.468201",
+        "jenis": "PINJAMAN",
+        "log": "Galih mengajukan pinjaman",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:42:07.941907",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Galih telah disetujui",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:43:24.873273",
+        "jenis": "PINJAMAN",
+        "log": "Galih menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:46:07.504724",
+        "jenis": "PINJAMAN",
+        "log": "Galih membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:52:45.014527",
+        "jenis": "PINJAMAN",
+        "log": "Galih membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T09:58:17.483943",
+        "jenis": "PINJAMAN",
+        "log": "Galih membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510151001002002",
+        "rekening": "2001419099077995"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:19:51.113266",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:20:14.721076",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:21:27.810342",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp88.848.78867834168",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:26:58.358368",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:28:44.460342",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:34:45.629573",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:48:53.549660",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:56:31.481343",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-14T19:57:44.917409",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001494367017388"
     }
 ]
