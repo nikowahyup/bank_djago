@@ -11170,5 +11170,505 @@
         "log": "Niko Wahyu Pratama memperpanjang deposito Rp1.000.000",
         "nik": "3510152602082002",
         "rekening": "2001494367017388"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T06:30:32.492688",
+        "jenis": "BUKA REKENING",
+        "log": "Gojo Satoru membuka rekening pertama",
+        "nik": "3150153003002002",
+        "rekening": "1001861707677823"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T06:30:32.492702",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150153003002002",
+        "nama": "Gojo Satoru"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:31:16.392767",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3150153003002002",
+        "rekening": "1001861707677823"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T06:32:46.334399",
+        "jenis": "BUKA REKENING",
+        "log": "Ryomen Sukuna membuka rekening pertama",
+        "nik": "3150152002002002",
+        "rekening": "1001847908772654"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T06:32:46.334414",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150152002002002",
+        "nama": "Ryomen Sukuna"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:33:14.641820",
+        "jenis": "DEPOSITO",
+        "log": "Ryomen Sukuna membuka deposito Rp1.000.000",
+        "nik": "3150152002002002",
+        "rekening": "1001847908772654"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:34:45.410732",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:36:26.478403",
+        "jenis": "DEPOSITO",
+        "log": "Ryomen Sukuna memperpanjang deposito Rp1.000.000",
+        "nik": "3150152002002002",
+        "rekening": "1001847908772654"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:38:23.279290",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3150153003002002",
+        "rekening": "1001861707677823"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:42:18.353176",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru mencairkan deposito Rp1.045.000"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T06:44:15.175798",
+        "jenis": "BUKA REKENING",
+        "log": "Yuji Itadori membuka rekening pertama",
+        "nik": "3150154004002002",
+        "rekening": "3001288451175268"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T06:44:15.175810",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150154004002002",
+        "nama": "Yuji Itadori"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T06:45:01.837457",
+        "jenis": "BUKA REKENING",
+        "log": "Joo Hojin membuka rekening pertama",
+        "nik": "3150155005002002",
+        "rekening": "1001152761772423"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T06:45:01.837465",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150155005002002",
+        "nama": "Joo Hojin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:45:52.735390",
+        "jenis": "DEPOSITO",
+        "log": "Yuji Itadori membuka deposito Rp1.000.000",
+        "nik": "3150154004002002",
+        "rekening": "3001288451175268"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:46:21.273233",
+        "jenis": "DEPOSITO",
+        "log": "Joo Hojin membuka deposito Rp1.000.000",
+        "nik": "3150155005002002",
+        "rekening": "1001152761772423"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:49:19.458300",
+        "jenis": "DEPOSITO",
+        "log": "Joo Hojin memperpanjang deposito Rp1.000.000",
+        "nik": "3150155005002002",
+        "rekening": "1001152761772423"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:51:18.086837",
+        "jenis": "DEPOSITO",
+        "log": "Ryomen Sukuna memperpanjang deposito Rp1.000.000",
+        "nik": "3150152002002002",
+        "rekening": "1001847908772654"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:51:18.086928",
+        "jenis": "DEPOSITO",
+        "log": "Joo Hojin memperpanjang deposito Rp1.000.000",
+        "nik": "3150155005002002",
+        "rekening": "1001152761772423"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:57:02.614534",
+        "jenis": "DEPOSITO",
+        "log": "Ryomen Sukuna memperpanjang deposito Rp1.000.000",
+        "nik": "3150152002002002",
+        "rekening": "1001847908772654"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:57:02.614588",
+        "jenis": "DEPOSITO",
+        "log": "Joo Hojin memperpanjang deposito Rp1.000.000",
+        "nik": "3150155005002002",
+        "rekening": "1001152761772423"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:57:26.722682",
+        "jenis": "DEPOSITO",
+        "log": "Yuji Itadori membuka deposito Rp1.000.000",
+        "nik": "3150154004002002",
+        "rekening": "3001288451175268"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:58:09.225613",
+        "jenis": "DEPOSITO",
+        "log": "Yuji Itadori memperpanjang deposito Rp1.000.000",
+        "nik": "3150154004002002",
+        "rekening": "3001288451175268"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T06:59:07.434695",
+        "jenis": "DEPOSITO",
+        "log": "Yuji Itadori membuka deposito Rp1.000.000",
+        "nik": "3150154004002002",
+        "rekening": "3001288451175268"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T08:14:26.840337",
+        "jenis": "BUKA REKENING",
+        "log": "Niko Bin Testing membuka rekening pertama",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T08:14:26.840350",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510153456782002",
+        "nama": "Niko Bin Testing"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:17:05.458969",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:17:19.337079",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:17:35.390861",
+        "jenis": "PINJAMAN",
+        "log": "Niko Bin Testing mengajukan pinjaman",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:26:07.394372",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Bin Testing telah disetujui",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:26:47.492691",
+        "jenis": "PINJAMAN",
+        "log": "Niko Bin Testing menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:39:30.019401",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:39:47.429607",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T08:46:04.530892",
+        "jenis": "BUKA REKENING",
+        "log": "Niko Bin Testing membuka rekening pertama",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T08:46:04.530902",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510151234562002",
+        "nama": "Niko Bin Testing"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:46:42.958384",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:46:58.027921",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing membuka deposito Rp10.000.000",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:47:15.969559",
+        "jenis": "PINJAMAN",
+        "log": "Niko Bin Testing mengajukan pinjaman",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:47:32.843677",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Bin Testing telah disetujui",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T08:48:20.083511",
+        "jenis": "PINJAMAN",
+        "log": "Niko Bin Testing menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T09:18:57.293563",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing memperpanjang deposito Rp10.000.000",
+        "nik": "3510153456782002",
+        "rekening": "1001847161181504"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T09:18:57.293623",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing memperpanjang deposito Rp10.000.000",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T09:23:52.289325",
+        "jenis": "PINJAMAN",
+        "log": "Niko Bin Testing membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510151234562002",
+        "rekening": "1001454213965009"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T09:26:50.072443",
+        "jenis": "DEPOSITO",
+        "log": "Niko Bin Testing mencairkan deposito Rp10.025.000"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T13:01:20.661881",
+        "jenis": "BUKA REKENING",
+        "log": "Niko Wahyu Pratama membuka rekening pertama",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T13:01:20.661892",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:01:54.618526",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:02:07.028944",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:02:17.648201",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama mengajukan pinjaman",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:02:36.646236",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:02:52.770412",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:05:18.290538",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:06:07.281840",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp10.025.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:06:16.856398",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:14:55.263625",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:20:17.310918",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama memperpanjang deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:20:45.808987",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.002.500"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:25:27.656035",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp888.487.8867834168",
+        "nik": "3510152602082002",
+        "rekening": "1001388205874890"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-15T13:26:53.443681",
+        "jenis": "BUKA REKENING",
+        "log": "Gojo Satoru membuka rekening pertama",
+        "nik": "3150152602082002",
+        "rekening": "2001222205868208"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-15T13:26:53.443689",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150152602082002",
+        "nama": "Gojo Satoru"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:27:17.797931",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001222205868208"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:27:29.412169",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001222205868208"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:28:52.060717",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru memperpanjang deposito Rp1.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001222205868208"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-15T13:30:28.399830",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru mencairkan deposito Rp1.002.500"
     }
 ]

@@ -95,7 +95,7 @@ class PinjamanService:
 
 
         AuditService.tambah_audit(bank,kategori='transaksi',jenis='pinjaman',log=f'{pinjaman.pemilik.nama} menerima pencairan pinjaman Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)}',nik=pinjaman.pemilik.NIK,norek=pinjaman.rekening.norek)
-        log = RiwayatTemplate.template(kategori="transaksi",jenis="pinjaman",log=f'PENCAIRAN PINJAMAN |  Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)}')
+        log = RiwayatTemplate.template(kategori="transaksi",jenis="pinjaman",log=f'PENCAIRAN PINJAMAN |  +Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)}')
 
         pinjaman.rekening.simpan_riwayat(log)
 
@@ -117,6 +117,7 @@ class PinjamanService:
         pinjaman.sisa_pokok -= pokok_saja
         pinjaman.cicilan_terbayar += 1
         pinjaman.bunga_bulanan = bunga_bulanan
+        PinjamanService.hapus_notif_pinjaman(pinjaman.pemilik)
 
         if pinjaman.sisa_pokok <= 0:
             pinjaman.sisa_pokok = 0
@@ -154,7 +155,7 @@ class PinjamanService:
 
             log_riwayat = (
                 f"PEMBAYARAN CICILAN PINJAMAN | "
-                f"Rp{Utilitas.format_rupiah(total_bayar)}"
+                f"-Rp{Utilitas.format_rupiah(total_bayar)}"
             )
 
         AuditService.tambah_audit(
@@ -173,7 +174,6 @@ class PinjamanService:
                 log=log_riwayat
             )
         )
-        PinjamanService.hapus_notif_pinjaman(pinjaman.pemilik)
         return pinjaman
 
 

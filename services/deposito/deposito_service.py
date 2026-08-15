@@ -4,6 +4,7 @@ from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
 from bank_djago.utils.utililty import Utilitas, JenisAro, JenisReferensiID
 from bank_djago.utils.validator import Validator
+from bank_djago.core.notifikasi import Notifikasi
 
 
 
@@ -74,7 +75,7 @@ class DepositoService:
         deposito.rekening.tambah_saldo(total)
         deposito.status = StatusDeposito.DICAIRKAN
 
-        log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"PENCAIRAN DEPOSITO | Rp{Utilitas.format_rupiah(total)}")
+        log = RiwayatTemplate.template(kategori="transaksi",jenis="deposito",log=f"PENCAIRAN DEPOSITO | +Rp{Utilitas.format_rupiah(total)}")
 
         deposito.rekening.simpan_riwayat(log)
 
@@ -146,7 +147,7 @@ class DepositoService:
                 log=(
                     f"BUNGA DEPOSITO | "
                     f"Deposito {deposito.ID} | "
-                    f"Jumlah Rp{Utilitas.format_rupiah(bunga_diterima)}"
+                    f" +Rp{Utilitas.format_rupiah(bunga_diterima)}"
                 )
             )
 
@@ -181,6 +182,21 @@ class DepositoService:
             norek=deposito.rekening.norek
         )
 
+        nasabah = deposito.pemilik
+        notifikasi = Notifikasi(jenis="deposito",
+                                pesan=f"Deposito Anda diperpanjang otomatis.\n"
+                                      f"Jatuh tempo berikutnya : {Utilitas.format_tanggal_indonesia(deposito.jatuh_tempo)}",
+                                referensi_id=JenisReferensiID.DEPOSITO)
+        notifikasi.id_objek = deposito.ID
+        nasabah.notifikasi.append(notifikasi)
+        deposito.notifikasi_depo = True
+
+    @staticmethod
+    def hapus_notifikasi_deposito(nasabah,deposito):
+        for item in nasabah.notifikasi:
+            if item.referensi_id == JenisReferensiID.DEPOSITO and item.id_objek == deposito.ID:
+                nasabah.notifikasi.remove(item)
+                break
 
 
     @staticmethod

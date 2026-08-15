@@ -1,138 +1,66 @@
 {
     "3510152602082002": {
         "1": {
-            "norek": "2001494367017388",
+            "norek": "1001388205874890",
             "nik": "3510152602082002",
             "nominal": 10000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-13",
-            "jatuh_tempo": "2015-08-13",
+            "bunga": 0.03,
+            "lama_bulan": 1,
+            "tanggal_buka": "2026-08-15",
+            "jatuh_tempo": "2026-09-15",
             "status": "dicairkan",
             "jenis_aro": "tidak",
             "lama_aro": null
         },
         "2": {
-            "norek": "2001494367017388",
+            "norek": "1001388205874890",
             "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2021-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "3": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2022-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "4": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2023-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "5": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2024-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "6": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2025-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "7": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2026-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "8": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2027-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "9": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2027-08-14",
-            "status": "dicairkan",
-            "jenis_aro": "tidak",
-            "lama_aro": null
-        },
-        "10": {
-            "norek": "2001494367017388",
-            "nik": "3510152602082002",
-            "nominal": 1000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2031-08-14",
-            "jatuh_tempo": "2032-08-14",
+            "nominal": 10000000,
+            "bunga": 0.03,
+            "lama_bulan": 1,
+            "tanggal_buka": "2026-10-15",
+            "jatuh_tempo": "2026-11-15",
             "status": "aktif",
             "jenis_aro": "pokok",
-            "lama_aro": 12
-        }
-    },
-    "3510151001002002": {
-        "1": {
-            "norek": "2001419099077995",
-            "nik": "3510151001002002",
-            "nominal": 10000000,
-            "bunga": 0.045,
-            "lama_bulan": 12,
-            "tanggal_buka": "2026-08-14",
-            "jatuh_tempo": "2027-08-14",
-            "status": "jatuh tempo",
+            "lama_aro": 1
+        },
+        "3": {
+            "norek": "1001388205874890",
+            "nik": "3510152602082002",
+            "nominal": 1000000,
+            "bunga": 0.03,
+            "lama_bulan": 1,
+            "tanggal_buka": "2026-08-15",
+            "jatuh_tempo": "2026-09-15",
+            "status": "dicairkan",
             "jenis_aro": "tidak",
             "lama_aro": null
+        }
+    },
+    "3150152602082002": {
+        "1": {
+            "norek": "2001222205868208",
+            "nik": "3150152602082002",
+            "nominal": 1000000,
+            "bunga": 0.03,
+            "lama_bulan": 1,
+            "tanggal_buka": "2026-08-15",
+            "jatuh_tempo": "2026-09-15",
+            "status": "dicairkan",
+            "jenis_aro": "tidak",
+            "lama_aro": null
+        },
+        "2": {
+            "norek": "2001222205868208",
+            "nik": "3150152602082002",
+            "nominal": 1000000,
+            "bunga": 0.03,
+            "lama_bulan": 1,
+            "tanggal_buka": "2026-09-15",
+            "jatuh_tempo": "2026-10-15",
+            "status": "aktif",
+            "jenis_aro": "pokok",
+            "lama_aro": 1
         }
     }
 }

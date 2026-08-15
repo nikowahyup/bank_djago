@@ -1,295 +1,133 @@
 {
-    "2001494367017388": {
-        "norek": "2001494367017388",
-        "pin": "111111",
-        "saldo": 115615223.89062113,
-        "limit": 200000000,
+    "1001388205874890": {
+        "norek": "1001388205874890",
+        "pin": "111000",
+        "saldo": 998300524.2264333,
+        "limit": null,
         "riwayat": [
             {
                 "kategori": "transaksi",
                 "jenis": "setor uang",
-                "waktu": "2026-08-13T22:35:57.919519",
-                "log": "SETOR UANG | Jumlah Rp100.000.000"
+                "waktu": "2026-08-15T13:01:20.661862",
+                "log": "SETOR UANG | +Rp1.000.000.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-13T22:36:45.721361",
-                "log": "DEPOSITO | Rp10.000.000 |Bunga 4.5% | Lama 12 bulan "
+                "waktu": "2026-08-15T13:01:54.618494",
+                "log": "DEPOSITO | Rp10.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-14T05:48:02.315541",
-                "log": "PENCAIRAN DEPOSITO | Rp10.450.000"
+                "waktu": "2026-08-15T13:02:07.028918",
+                "log": "DEPOSITO | Rp10.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
                 "jenis": "pinjaman",
-                "waktu": "2026-08-14T05:48:31.223483",
-                "log": "PENCAIRAN PINJAMAN |  Rp10.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T05:50:33.182966",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T05:51:40.557650",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T05:57:42.582459",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T06:05:31.369119",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T06:11:06.724224",
-                "log": "PENCAIRAN PINJAMAN |  Rp10.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T06:12:09.357310",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T06:20:30.651882",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:02:22.707453",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:12:22.045379",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:13:34.173774",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:13:41.395733",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:14:13.072161",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:23:28.822225",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:24:29.367670",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:24:36.178970",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:25:01.312846",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:28:02.200634",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:28:19.794823",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:46:21.345461",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T07:46:41.050384",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T08:42:42.474751",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T08:44:51.652354",
-                "log": "PENCAIRAN PINJAMAN |  Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T19:19:51.113226",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T19:20:14.721044",
-                "log": "PENCAIRAN DEPOSITO | Rp1.045.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T19:21:27.810363",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp88.848.78867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T19:26:58.358349",
-                "log": "DEPOSITO | Rp1.000.000 |Bunga 4.5% | Lama 12 bulan "
+                "waktu": "2026-08-15T13:02:52.770428",
+                "log": "PENCAIRAN PINJAMAN |  +Rp10.000.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "bunga deposito",
-                "waktu": "2026-08-14T19:28:44.456850",
-                "log": "BUNGA DEPOSITO | Deposito 10 | Jumlah Rp45.000"
+                "waktu": "2026-08-15T13:05:18.286131",
+                "log": "BUNGA DEPOSITO | Deposito 2 |  +Rp25.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-14T19:28:44.460321",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+                "waktu": "2026-08-15T13:05:18.290515",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp10.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-15T13:06:07.281810",
+                "log": "PENCAIRAN DEPOSITO | +Rp10.025.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "pinjaman",
+                "waktu": "2026-08-15T13:06:16.856428",
+                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp888.487.8867834168"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "deposito",
+                "waktu": "2026-08-15T13:14:55.263590",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
                 "jenis": "bunga deposito",
-                "waktu": "2026-08-14T19:34:45.624926",
-                "log": "BUNGA DEPOSITO | Deposito 10 | Jumlah Rp45.000"
+                "waktu": "2026-08-15T13:20:17.306376",
+                "log": "BUNGA DEPOSITO | Deposito 2 |  +Rp25.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-14T19:34:45.629549",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "bunga deposito",
-                "waktu": "2026-08-14T19:48:53.546735",
-                "log": "BUNGA DEPOSITO | Deposito 10 | Jumlah Rp45.000"
+                "waktu": "2026-08-15T13:20:17.310899",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp10.000.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-14T19:48:53.549629",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+                "waktu": "2026-08-15T13:20:45.808951",
+                "log": "PENCAIRAN DEPOSITO | +Rp1.002.500"
             },
             {
                 "kategori": "transaksi",
-                "jenis": "bunga deposito",
-                "waktu": "2026-08-14T19:56:31.477333",
-                "log": "BUNGA DEPOSITO | Deposito 10 | Jumlah Rp45.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T19:56:31.481324",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "bunga deposito",
-                "waktu": "2026-08-14T19:57:44.913377",
-                "log": "BUNGA DEPOSITO | Deposito 10 | Jumlah Rp45.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "deposito",
-                "waktu": "2026-08-14T19:57:44.917391",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
+                "jenis": "pinjaman",
+                "waktu": "2026-08-15T13:25:27.656066",
+                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp888.487.8867834168"
             }
         ],
         "status": "aktif",
-        "level": 3
+        "level": 4
     },
-    "2001419099077995": {
-        "norek": "2001419099077995",
+    "2001222205868208": {
+        "norek": "2001222205868208",
         "pin": "111000",
-        "saldo": 97334536.33964974,
+        "saldo": 99005000,
         "limit": 200000000,
         "riwayat": [
             {
                 "kategori": "transaksi",
                 "jenis": "setor uang",
-                "waktu": "2026-08-14T09:40:22.760843",
-                "log": "SETOR UANG | Jumlah Rp100.000.000"
+                "waktu": "2026-08-15T13:26:53.443660",
+                "log": "SETOR UANG | +Rp100.000.000"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-14T09:41:33.497768",
-                "log": "DEPOSITO | Rp10.000.000 |Bunga 4.5% | Lama 12 bulan "
+                "waktu": "2026-08-15T13:27:17.797912",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T09:43:24.873310",
-                "log": "PENCAIRAN PINJAMAN |  Rp10.000.000"
+                "jenis": "deposito",
+                "waktu": "2026-08-15T13:27:29.412154",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T09:46:07.504749",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
+                "jenis": "bunga deposito",
+                "waktu": "2026-08-15T13:28:52.056322",
+                "log": "BUNGA DEPOSITO | Deposito 2 |  +Rp2.500"
             },
             {
                 "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T09:52:45.014542",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
+                "jenis": "deposito",
+                "waktu": "2026-08-15T13:28:52.060689",
+                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
             },
             {
                 "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-14T09:58:17.483960",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | Rp888.487.8867834168"
+                "jenis": "deposito",
+                "waktu": "2026-08-15T13:30:28.399789",
+                "log": "PENCAIRAN DEPOSITO | +Rp1.002.500"
             }
         ],
         "status": "aktif",

@@ -44,30 +44,26 @@ class Scheduler:
                 if deposito.jenis_aro == JenisAro.TIDAK:
                     if hari_ini.day < jatuh_tempo.day and hari_ini.month == jatuh_tempo.month and hari_ini.year == jatuh_tempo.year:
                         if not deposito.notifikasi_depo:
-                            for item in nasabah.notifikasi:
-                                if item.referensi_id == JenisReferensiID.DEPOSITO:
-                                    nasabah.notifikasi.remove(item)
-                                    break
+                            DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
 
 
                             notifikasi = Notifikasi(
                                                     jenis="deposito",
                                                     pesan=f"Deposito Anda akan jatuh tempo pada {Utilitas.format_tanggal_indonesia(jatuh_tempo)}",
                                                     referensi_id=JenisReferensiID.DEPOSITO)
+                            notifikasi.id_objek = deposito.ID
                             nasabah.notifikasi.append(notifikasi)
                             deposito.notifikasi_depo = True
 
                     elif hari_ini == jatuh_tempo or hari_ini > jatuh_tempo:
-                        for item in nasabah.notifikasi:
-                            if item.referensi_id == JenisReferensiID.DEPOSITO:
-                                nasabah.notifikasi.remove(item)
-                                break
+                        DepositoService.hapus_notifikasi_deposito(nasabah,deposito)
 
                         notifikasi = Notifikasi(
                                                 jenis="deposito",
                                                 pesan=f"Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
                                                 referensi_id=JenisReferensiID.DEPOSITO)
 
+                        notifikasi.id_objek = deposito.ID
                         nasabah.notifikasi.append(notifikasi)
                         deposito.notifikasi_depo = True
                         deposito.status = StatusDeposito.JATUH_TEMPO
@@ -77,27 +73,13 @@ class Scheduler:
                 else:
                     if hari_ini < jatuh_tempo:
                         nasabah = deposito.pemilik
-                        for item in nasabah.notifikasi:
-                            if item.referensi_id == JenisReferensiID.DEPOSITO:
-                                nasabah.notifikasi.remove(item)
-                                break
+                        DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
 
 
                     elif hari_ini == jatuh_tempo:
                         nasabah = deposito.pemilik
-                        for item in nasabah.notifikasi:
-                            if item.referensi_id == JenisReferensiID.DEPOSITO:
-                                nasabah.notifikasi.remove(item)
-                                break
-
-                        notifikasi = Notifikasi(jenis="deposito",
-                                                pesan="Deposito telah jatuh tempo. Deposito otomatis akan berjalan setelah ini",
-                                                referensi_id=JenisReferensiID.DEPOSITO)
-
-                        nasabah.notifikasi.append(notifikasi)
-                        deposito.notifikasi_depo = True
-
-                    DepositoService.perpanjangan(bank, deposito)
+                        DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
+                        DepositoService.perpanjangan(bank, deposito)
 
         for pinjaman in bank.daftar_pinjaman:
 

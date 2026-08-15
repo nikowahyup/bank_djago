@@ -1,39 +1,22 @@
 {
     "3510152602082002": {
         "nama": "Niko Wahyu Pratama",
-        "alamat": "jln.perk kalibendo",
+        "alamat": "jln.kalibendo",
         "nik": "3510152602082002",
         "rekening": [
-            "2001494367017388"
+            "1001388205874890"
         ],
         "deposito": [],
-        "notifikasi": [
-            {
-                "jenis": "deposito",
-                "pesan": "Deposito telah jatuh tempo. Deposito otomatis akan berjalan setelah ini",
-                "referensi": 2
-            }
-        ]
+        "notifikasi": []
     },
-    "3510151001002002": {
-        "nama": "Galih",
-        "alamat": "jln",
-        "nik": "3510151001002002",
+    "3150152602082002": {
+        "nama": "Gojo Satoru",
+        "alamat": "jln.shinjuku",
+        "nik": "3150152602082002",
         "rekening": [
-            "2001419099077995"
+            "2001222205868208"
         ],
         "deposito": [],
-        "notifikasi": [
-            {
-                "jenis": "pinjaman",
-                "pesan": "Cicilan bulan Desember telah jatuh tempo. Cicilan sebesar Rp888.488",
-                "referensi": 1
-            },
-            {
-                "jenis": "deposito",
-                "pesan": "Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
-                "referensi": 2
-            }
-        ]
+        "notifikasi": []
     }
 }

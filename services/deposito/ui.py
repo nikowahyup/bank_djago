@@ -141,7 +141,7 @@ class DepositoUI:
 
     @staticmethod
     def tanya_aro():
-        print("\n=== PERPANJANGAN DEPOSITO ===")
+        print("\n=== PERPANJANGAN OTOMATIS ===")
         print("1. Tidak diperpanjang")
         print("2. Perpanjang pokok")
         print("3. Perpanjang pokok + bunga")
@@ -169,6 +169,9 @@ class DepositoUI:
 
                 if lama_aro <= 0:
                     print("Lama perpanjangan harus lebih dari 0 bulan.")
+                    continue
+                if lama_aro not in(1,3,6,12):
+                    print("Harap pilih tenor yang tersedia")
                     continue
 
                 return jenis_aro, lama_aro

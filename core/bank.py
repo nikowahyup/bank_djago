@@ -5,12 +5,10 @@ from .deposito import Deposito
 from .nasabah import Nasabahh
 from .notifikasi import Notifikasi
 from .pinjaman import Pinjaman
-from ..services.scheduler import Scheduler
+# from ..services.scheduler import Scheduler
 from ..services.deposito.deposito_service import JenisAro
 from ..services.rekening.rekening_service import RekeningService
 from bank_djago.services.pinjaman.pinjaman_service import StatusPinjaman
-
-
 
 class Bank:
     def __init__(self,nama,data_audit,data_nasabah=None,data_rekening=None,data_deposito=None,data_pinjaman=None):
@@ -181,9 +179,9 @@ class Bank:
         for pinjaman in self.daftar_pinjaman}
     # ------------------------------------------------------------------------------------------------------------------------------
 
-    def proses_harian(self):
-            tanggal = datetime.date(2028,8,13)
-            Scheduler.jalankan(self,tanggal)
+    # def proses_harian(self):
+    #         tanggal = datetime.date(2028,8,13)
+    #         Scheduler.jalankan(self,tanggal)
 
 
     def verifikasi_admin(self,password):
