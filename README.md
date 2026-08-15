@@ -191,10 +191,10 @@ Jawaban:
 Karena setiap jenis rekening memiliki perilaku yang berbeda (limit harian, bunga, saldo minimal).
 Daripada hanya mengubah atribut level, lebih baik membuat rekening baru yang sesuai dengan perilaku masing-masing.
 
-### 2. Mengapa logika transaksi dipindahkan dari file transaksi ke admin teller?
+### 2. Mengapa logika transaksi dipindahkan ke `TransaksiService`?
 
 Jawaban:
-Agar file transaksi fokus pada logika transaksi yang sudah ditetapkan bank.
+Agar logika transaksi terpusat di `TransaksiService` dan terpisah dari input serta tampilan antarmuka.
 
 ### 3. Mengapa notifikasi memiliki `referensi_id` dan `id_objek`?
 
