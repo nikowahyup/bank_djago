@@ -19,7 +19,7 @@ Aplikasi simulasi perbankan berbasis Python untuk mengelola nasabah dan rekening
 
 ## 📈 Status Pengembangan (Development Progress)
 
-## Konsep yang sudah Dipelajari dan dipakai
+## Konsep yang sudah Dipelajari dan Dipakai
 - Object-Oriented Programming
 - Encapsulation
 - Inheritance
@@ -30,8 +30,11 @@ Aplikasi simulasi perbankan berbasis Python untuk mengelola nasabah dan rekening
 - Audit Trail
 - Data Validation
 - JSON Persistence
+- Scheduler
+- Notification System
 
 ## Struktur Folder
+```text
 bank_djago/
 │
 ├── core/
@@ -40,110 +43,162 @@ bank_djago/
 ├── ui/
 ├── utils/
 ├── main.py
+```
 
-### 📑 Fitur Saat Ini (22 Juli - 05 Agustus 2026)
+### 📑 Fitur Saat Ini
 
 ## 📌 Versi Pengembangan
 
 ### `v0.1` - Pembuatan Objek Esensial
 Memisahkan tanggung jawab objek (*Separation of Concerns*).
 
-- `Bank`: Wadah penyimpanan data dan eksekutor logika utama perbankan.
-- `Nasabah`: Objek pemilik rekening yang terdaftar secara resmi.
-- `Rekening`: Entitas keuangan yang menangani saldo, PIN, dan riwayat transaksi.
+- [x] `Bank`: Wadah penyimpanan data dan eksekutor logika utama perbankan.
+- [x] `Nasabah`: Objek pemilik rekening yang terdaftar secara resmi.
+- [x] `Rekening`: Entitas keuangan yang menangani saldo, PIN, dan riwayat transaksi.
 
 ### `v0.2` - Fundamental
-- **Logika Transaksi:** Setor tunai, tarik tunai, dan transfer antar-rekening.
-- **Keamanan & Validasi:** Keberadaan rekening, validasi PIN, dan saldo minimum.
-- **Data Persistence:** Penyimpanan dan pemuatan menggunakan JSON.
+- [x] **Logika Transaksi:** Setor tunai, tarik tunai, dan transfer antar-rekening.
+- [x] **Keamanan & Validasi:** Keberadaan rekening, validasi PIN, dan saldo minimum.
+- [x] **Data Persistence:** Penyimpanan dan pemuatan menggunakan JSON.
 
 ### `v0.3` - Perluasan & Konsep OOP Lanjutan
-- **Inheritance:** Variasi jenis rekening dari satu parent class.
-- **Fitur Finansial:** Bunga, limit transfer harian, dan saldo minimum.
+- [x] **Inheritance:** Variasi jenis rekening dari satu parent class.
+- [x] **Fitur Finansial:** Bunga, limit transfer harian, dan saldo minimum.
 
 ### `v0.4` - Manajemen Status Rekening
-- **Status Lifecycle:** Aktif, diblokir, dan ditutup.
-- **Fitur Dinamis:** Upgrade dan downgrade jenis rekening.
+- [x] **Status Lifecycle:** Aktif, diblokir, dan ditutup.
+- [x] **Fitur Dinamis:** Upgrade dan downgrade jenis rekening.
 
 ### `v0.5` - Audit & Rekapitulasi Data
-- **Audit System:** Pencatatan aktivitas transaksi.
-- **Bank Summary:** Rekap nasabah, rekening aktif, dan akumulasi kas.
+- [x] **Audit System:** Pencatatan aktivitas transaksi.
+- [x] **Bank Summary:** Rekap nasabah, rekening aktif, dan akumulasi kas.
 
 ### `v0.6` - Refactor & Penyempurnaan Arsitektur
-- **Pemisahan Logika Transaksi:** Memindahkan aturan transaksi ke `TransaksiService`.
-- **Pemisahan UI Teller:** Input dan komunikasi dengan nasabah ditangani `TellerUI`.
-- **Pemisahan Riwayat:** Log transaksi ditangani pada layer transaksi.
-- **Penyederhanaan Struktur:** Menghapus perantara yang tidak lagi memiliki tanggung jawab jelas.
-- **UI Terminal:** Menambahkan sistem warna pada header dan membedakan level navigasi.
+- [x] **Pemisahan Logika Transaksi:** Memindahkan aturan transaksi ke `TransaksiService`.
+- [x] **Pemisahan UI Teller:** Input dan komunikasi dengan nasabah ditangani `TellerUI`.
+- [x] **Pemisahan Riwayat:** Log transaksi ditangani pada layer transaksi.
+- [x] **Penyederhanaan Struktur:** Menghapus perantara yang tidak lagi memiliki tanggung jawab jelas.
+- [x] **UI Terminal:** Menambahkan sistem warna pada header dan membedakan level navigasi.
 
 ### `v0.7` - Manajemen Admin
-- **Admin:** Pengelolaan nasabah dan rekening.
-- **Audit Log:** Pemantauan aktivitas bank.
-- **Rekapitulasi:** Penyajian laporan administrasi.
+- [x] **Admin:** Pengelolaan nasabah dan rekening.
+- [x] **Audit Log:** Pemantauan aktivitas bank.
+- [x] **Rekapitulasi:** Penyajian laporan administrasi.
 
-### `v0.7` - Deposito
-- **Struktur Deposito:** Membuat entitas deposito.
-- **Pembukaan Deposito:** Validasi nominal minimum, saldo minimum, tenor, dan bunga.
-- **Jatuh Tempo:** Perhitungan tanggal jatuh tempo berdasarkan tenor.
-- **Riwayat & Audit:** Mencatat pembukaan deposito.
-- **Pencairan Deposito:** Pencairan saat jatuh tempo dan perhitungan hasil deposito.
-- **UI Deposito:** Menu dan alur input deposito.
-
-## 🚧 Sedang & Akan Dikembangkan (Roadmap)
--  **Fitur Deposito & Pinjaman:** Perhitungan bunga, tenor, denda pencairan awal, dan skema cicilan.
--  *Integrasi Database:** Bermigrasi dari simpanan JSON ke database relasional `SQLite`.
--  *Web Interface:** Mengembangkan antarmuka berbasis web menggunakan *framework* `Django`.
-
-
+### `v0.8` - Deposito
+- [x] **Struktur Deposito:** Membuat entitas deposito.
+- [x] **Pembukaan Deposito:** Validasi nominal minimum, saldo minimum, tenor, dan bunga.
+- [x] **Jatuh Tempo:** Perhitungan tanggal jatuh tempo berdasarkan tenor.
+- [x] **Riwayat & Audit:** Mencatat pembukaan deposito.
+- [x] **Pencairan Deposito:** Pencairan saat jatuh tempo dan perhitungan hasil deposito.
+- [x] **ARO:** Perpanjangan otomatis pokok atau pokok + bunga.
+- [x] **Scheduler Deposito:** Pemeriksaan jatuh tempo dan proses otomatis.
+- [x] **Notifikasi Deposito:** Reminder, jatuh tempo, pencairan, dan informasi perpanjangan otomatis.
+- [x] **Pemisahan Notifikasi per Objek:** Notifikasi deposito menggunakan `id_objek` untuk membedakan beberapa deposito milik nasabah yang sama.
+- [x] **UI Deposito:** Menu dan alur input deposito.
 
 ### `v0.9` - Pinjaman
-- **Pengajuan Pinjaman**
-- **Tenor dan Bunga**
-- **Perhitungan Cicilan**
-- **Denda Keterlambatan**
-- **Pelunasan**
+- [x] **Pengajuan Pinjaman**
+- [x] **Persetujuan dan Penolakan Pinjaman**
+- [x] **Tenor dan Bunga**
+- [x] **Perhitungan Cicilan**
+- [x] **Pencairan Pinjaman**
+- [x] **Jatuh Tempo Cicilan**
+- [x] **Reminder Jatuh Tempo**
+- [x] **Notifikasi Jatuh Tempo**
+- [x] **Pembayaran Cicilan**
+- [x] **Pergeseran Jatuh Tempo Setelah Pembayaran**
+- [x] **Pelunasan**
+- [x] **Persistence Pinjaman ke JSON**
+- [ ] **Denda Keterlambatan**
+- [ ] **Status Tunggakan**
 
 ### `v1.0` - Penyempurnaan Sistem
-- Stabilitas dan validasi keseluruhan sistem.
-- Pengujian fitur utama.
-- Perapian struktur proyek.
-- Dokumentasi.
+Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebelum migrasi database dan web.
+
+- [x] **Scheduler:** Otomatisasi proses bunga, biaya admin, limit, jatuh tempo, dan notifikasi.
+- [x] **Notification System:** Sistem notifikasi berbasis referensi dan `id_objek`.
+- [x] **Pengujian Lifecycle Pinjaman:** Pengajuan → persetujuan → pencairan → cicilan → jatuh tempo → pembayaran → pelunasan.
+- [x] **Pengujian Deposito ARO & Non-ARO:** Pengujian reminder, jatuh tempo, pencairan, dan perpanjangan otomatis.
+- [x] **Pengujian Multiple Deposito:** Memastikan notifikasi beberapa deposito dalam satu nasabah tidak saling bertabrakan.
+- [ ] **Denda Keterlambatan:** Implementasi aturan denda dan konsekuensi tunggakan.
+- [ ] **Status Tunggakan:** Menambahkan lifecycle khusus untuk cicilan yang melewati jatuh tempo.
+- [ ] **Pengujian Integrasi:** Menguji interaksi antar-service dan seluruh lifecycle utama secara menyeluruh.
+- [ ] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
+- [ ] **Pengujian Edge Case:** Menguji kondisi batas, tanggal, saldo, status, dan data tidak valid.
+- [ ] **Perapian Struktur Proyek:** Refactor bagian yang masih memiliki tanggung jawab tumpang tindih.
+- [ ] **Dokumentasi:** Melengkapi dokumentasi arsitektur, alur bisnis, dan keputusan desain.
 
 ### `v1.1` - Database
-- Migrasi dari JSON ke SQLite.
-- Pemisahan layer penyimpanan data.
-- Penyesuaian model dan service terhadap database.
+- [ ] Migrasi dari JSON ke SQLite.
+- [ ] Pemisahan layer penyimpanan data.
+- [ ] Penyesuaian model dan service terhadap database.
+- [ ] Validasi relasi dan integritas data pada database.
 
 ### `v2.0` - Web Interface
-- Migrasi antarmuka terminal ke Django.
-- UI berbasis web.
-- Integrasi sistem autentikasi.
-- Dashboard nasabah dan admin.
+- [ ] Migrasi antarmuka terminal ke Django.
+- [ ] UI berbasis web.
+- [ ] Integrasi sistem autentikasi.
+- [ ] Dashboard nasabah dan admin.
+- [ ] Integrasi business logic yang sudah dibangun pada backend.
 
 ---
 
-##Change Log
+## 🚧 Roadmap Utama
+
+- [x] Sistem rekening dan transaksi dasar
+- [x] Manajemen admin
+- [x] Audit dan rekapitulasi
+- [x] Deposito
+- [x] Pinjaman
+- [x] Scheduler
+- [x] Notification System
+- [ ] Denda keterlambatan dan tunggakan
+- [ ] Penyempurnaan testing dan validasi integritas data
+- [ ] Migrasi database ke SQLite
+- [ ] Migrasi ke Django
+- [ ] Web Interface
+
+---
+
+## Change Log
 
 (05/08/2026)
 - Memisahkan menu admin
+
 (06/08/2026)
 - Memisahkan semua service dari bank ke admin
+
 (07/08/2026)
 - Refactor Transaksi dari admin teller
+
 (10/08/2026)
 - Refactor menu dan admin
 
+(14/08/2026)
+- Menyelesaikan lifecycle pinjaman dan sistem notifikasi scheduler
+- Menambahkan pengujian reminder dan jatuh tempo pinjaman
+- Menambahkan notifikasi deposito ARO dan non-ARO
+- Menambahkan `id_objek` pada notifikasi untuk membedakan objek deposito
+- Menguji beberapa deposito dalam satu nasabah
+
 # Catatan Desain
-1. Mengapa rekening dibuat sebagai objek baru saat diupgrade atau downgrade?
+
+### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
 
 Jawaban:
-Karena setiap jenis rekening memiliki perilaku yang berbeda(limit harian,bunga,saldo minimal).
-Daripada hanya mengubah atribut level,lebih baik membuat rekening baru yang sesuai dengan perilaku
-masing-masing.
+Karena setiap jenis rekening memiliki perilaku yang berbeda (limit harian, bunga, saldo minimal).
+Daripada hanya mengubah atribut level, lebih baik membuat rekening baru yang sesuai dengan perilaku masing-masing.
 
-2. Mengapa logika transaksi dipindahkan dari file transaksi ke admin teller?
+### 2. Mengapa logika transaksi dipindahkan dari file transaksi ke admin teller?
 
-Jawaban: Agar file transaksi fokus pada logika transaksi yang sudah ditetapkan bank
+Jawaban:
+Agar file transaksi fokus pada logika transaksi yang sudah ditetapkan bank.
+
+### 3. Mengapa notifikasi memiliki `referensi_id` dan `id_objek`?
+
+Jawaban:
+`referensi_id` menunjukkan domain atau jenis objek yang dirujuk, sedangkan `id_objek` menunjukkan entitas spesifik yang memiliki notifikasi tersebut. Dengan demikian beberapa deposito milik nasabah yang sama dapat memiliki notifikasi masing-masing tanpa saling bertabrakan.
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
