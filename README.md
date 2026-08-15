@@ -121,11 +121,11 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Pengujian Lifecycle Pinjaman:** Pengajuan → persetujuan → pencairan → cicilan → jatuh tempo → pembayaran → pelunasan.
 - [x] **Pengujian Deposito ARO & Non-ARO:** Pengujian reminder, jatuh tempo, pencairan, dan perpanjangan otomatis.
 - [x] **Pengujian Multiple Deposito:** Memastikan notifikasi beberapa deposito dalam satu nasabah tidak saling bertabrakan.
+- [x] **Pengujian Integrasi:** Menguji alur deposito dan pinjaman dalam satu nasabah, scheduler berbasis tanggal simulasi, pergantian notifikasi, ARO/non-ARO, pembayaran, pencairan, serta save/load setelah perubahan.
 - [ ] **Denda Keterlambatan:** Implementasi aturan denda dan konsekuensi tunggakan.
 - [ ] **Status Tunggakan:** Menambahkan lifecycle khusus untuk cicilan yang melewati jatuh tempo.
-- [ ] **Pengujian Integrasi:** Menguji interaksi antar-service dan seluruh lifecycle utama secara menyeluruh.
 - [ ] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
-- [ ] **Pengujian Edge Case:** Menguji kondisi batas, tanggal, saldo, status, dan data tidak valid.
+- [ ] **Pengujian Edge Case:** Menguji kondisi batas, missed scheduler, tanggal, saldo, status, dan data tidak valid.
 - [ ] **Perapian Struktur Proyek:** Refactor bagian yang masih memiliki tanggung jawab tumpang tindih.
 - [ ] **Dokumentasi:** Melengkapi dokumentasi arsitektur, alur bisnis, dan keputusan desain.
 
@@ -181,6 +181,7 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - Menambahkan notifikasi deposito ARO dan non-ARO
 - Menambahkan `id_objek` pada notifikasi untuk membedakan objek deposito
 - Menguji beberapa deposito dalam satu nasabah
+- Menyelesaikan pengujian integrasi deposito dan pinjaman hingga save/load setelah pembayaran dan pencairan
 
 # Catatan Desain
 
