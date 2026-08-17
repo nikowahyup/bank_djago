@@ -108,6 +108,8 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - [x] **Notifikasi Jatuh Tempo**
 - [x] **Pembayaran Cicilan**
 - [x] **Pergeseran Jatuh Tempo Setelah Pembayaran**
+- [x] **Validasi Periode Pembayaran:** Mencegah cicilan periode berikutnya dibayar sebelum periode pembayaran berikutnya dimulai.
+- [x] **Validasi Saldo Pembayaran:** Menolak pembayaran jika saldo setelah cicilan berada di bawah saldo minimum rekening.
 - [x] **Pelunasan**
 - [x] **Persistence Pinjaman ke JSON**
 - [ ] **Denda Keterlambatan**
@@ -124,8 +126,8 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Pengujian Integrasi:** Menguji alur deposito dan pinjaman dalam satu nasabah, scheduler berbasis tanggal simulasi, pergantian notifikasi, ARO/non-ARO, pembayaran, pencairan, serta save/load setelah perubahan.
 - [ ] **Denda Keterlambatan:** Implementasi aturan denda dan konsekuensi tunggakan.
 - [ ] **Status Tunggakan:** Menambahkan lifecycle khusus untuk cicilan yang melewati jatuh tempo.
-- [ ] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
-- [ ] **Pengujian Edge Case:** Menguji kondisi batas, missed scheduler, tanggal, saldo, status, dan data tidak valid.
+- [x] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
+- [x] **Pengujian Edge Case:** Menguji repeated scheduler, missed scheduler, multiple deposito, save/load, pembayaran sebelum jatuh tempo, pencegahan pembayaran periode berikutnya terlalu cepat, saldo tidak cukup, status lunas, dan tanggal ujung bulan.
 - [ ] **Perapian Struktur Proyek:** Refactor bagian yang masih memiliki tanggung jawab tumpang tindih.
 - [ ] **Dokumentasi:** Melengkapi dokumentasi arsitektur, alur bisnis, dan keputusan desain.
 
@@ -154,7 +156,7 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] Scheduler
 - [x] Notification System
 - [ ] Denda keterlambatan dan tunggakan
-- [ ] Penyempurnaan testing dan validasi integritas data
+- [x] Penyempurnaan testing dan validasi integritas data
 - [ ] Migrasi database ke SQLite
 - [ ] Migrasi ke Django
 - [ ] Web Interface
@@ -183,6 +185,15 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - Menguji beberapa deposito dalam satu nasabah
 - Menyelesaikan pengujian integrasi deposito dan pinjaman hingga save/load setelah pembayaran dan pencairan
 
+(17/08/2026)
+- Menyelesaikan validasi integritas relasi rekening, deposito, pinjaman, dan notifikasi pada fresh dataset
+- Menguji scheduler berulang pada tanggal yang sama serta missed scheduler untuk deposito ARO dan pinjaman
+- Menambahkan persistence tanggal proses ARO agar cleanup notifikasi tetap konsisten setelah save/load
+- Menguji pembayaran cicilan sebelum jatuh tempo dan mencegah pembayaran cicilan periode berikutnya terlalu cepat
+- Menambahkan validasi saldo minimum saat pembayaran cicilan dan memastikan kegagalan pembayaran tidak mengubah state pinjaman
+- Menguji pelunasan hingga status `LUNAS` serta penolakan pembayaran setelah pinjaman lunas
+- Menguji tanggal ujung bulan dengan pencairan 31 Januari dan penyesuaian jatuh tempo melalui Februari
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -200,6 +211,11 @@ Agar logika transaksi terpusat di `TransaksiService` dan terpisah dari input ser
 
 Jawaban:
 `referensi_id` menunjukkan domain atau jenis objek yang dirujuk, sedangkan `id_objek` menunjukkan entitas spesifik yang memiliki notifikasi tersebut. Dengan demikian beberapa deposito milik nasabah yang sama dapat memiliki notifikasi masing-masing tanpa saling bertabrakan.
+
+### 4. Bagaimana aturan jatuh tempo pada tanggal ujung bulan?
+
+Jawaban:
+Jatuh tempo berikutnya dihitung satu bulan dari jatuh tempo sebelumnya. Jika bulan tujuan tidak memiliki tanggal yang sama, tanggal disesuaikan ke hari terakhir bulan tersebut. Tanggal hasil penyesuaian menjadi acuan untuk jatuh tempo berikutnya.
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
