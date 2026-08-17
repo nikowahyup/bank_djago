@@ -1,5 +1,5 @@
-from bank_djago.services.NasabahMenu import NasabahMenu
-from bank_djago.services.rekening.rekeningUI import RekeningUI
+from bank_djago.services.nasabah_menu import NasabahMenu
+from bank_djago.services.rekening.rekening_ui import RekeningUI
 from bank_djago.services.scheduler import Scheduler
 from penyimpanan.storage import JsonStorage
 from bank_djago.utils.utililty import Utilitas

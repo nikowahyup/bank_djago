@@ -1,5 +1,5 @@
-from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
-from bank_djago.services.admin.rekap_audit import AuditService
+from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+from bank_djago.services.rekap_audit import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.validator import Validator
@@ -126,7 +126,7 @@ class RekeningService:
 
 
     @staticmethod
-    def blokir_rekening(rekening,alasan):
+    def blokir_rekening(bank,rekening,alasan):
         Validator.amankan_rekening(rekening)
         if rekening.status == "blokir":
             raise ValueError("Rekening ini sudah diblokir")
@@ -134,20 +134,23 @@ class RekeningService:
             raise ValueError("Rekening ini telah ditutup")
         rekening.status = "blokir"
         rekening.alasan_blokir = alasan
+        AuditService.tambah_audit(bank,kategori="rekening",jenis="pemblokiran",log=f"{rekening.pemilik.nama} telah memblokir rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
 
 
 
     @staticmethod
-    def buka_blokir(rekening):
+    def buka_blokir(bank,rekening):
         if rekening.status == "tutup":
             raise ValueError("Rekening ini telah ditutup!")
         if rekening.status == "aktif":
             raise ValueError("Rekening sudah dalam status aktif")
         rekening.status = "aktif"
+        AuditService.tambah_audit(bank,kategori="rekening",jenis="buka blokir",log=f"{rekening.pemilik.nama} membuka kembali blokiran rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
+
 
 
     @staticmethod
-    def tutup_rekening(rekening,penerima=None):
+    def tutup_rekening(bank,rekening,penerima=None):
         Validator.amankan_rekening(rekening)
         if rekening.status == "tutup":
             raise ValueError("Rekening memang telah ditutup")
@@ -159,7 +162,7 @@ class RekeningService:
         else:
             TransaksiService.tarik_semua_uang(rekening)
             rekening.status = "tutup"
-
+        AuditService.tambah_audit(bank,kategori="rekening",jenis="penutupan",log=f"{rekening.pemilik.nama} telah menutup rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
     @staticmethod
     def buka_rekening(bank,nasabah,pilihan,pin,setor_awal):
         info = RekeningService.jenis_rekening[pilihan]
@@ -178,3 +181,12 @@ class RekeningService:
         nasabah.rekening.append(rekening_baru)
 
         return rekening_baru
+
+    @staticmethod
+    def reset_pin(bank,rekening,pin):
+        if pin == rekening.pin:
+            raise ValueError("PIN masih sama dengan PIN lama")
+        rekening.ganti_pin(pin)
+        AuditService.tambah_audit(bank, "rekening", jenis="reset pin",
+                                  log=f"{rekening.pemilik.nama} meminta reset pin pada rekeningnya",
+                                  norek=rekening.norek)

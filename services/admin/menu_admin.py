@@ -1,7 +1,7 @@
 from bank_djago.services.admin.menu_pinjaman import AdminPinjaman
 from bank_djago.utils.utililty import UI
-from bank_djago.utils.AuditUI import AuditUI
-from bank_djago.utils.rekapUI import RekapUI
+from bank_djago.services.admin.audit_ui  import AuditUI
+from bank_djago.services.admin.rekap_ui  import RekapUI
 
 class MenuAdmin:
 

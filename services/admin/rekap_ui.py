@@ -1,4 +1,4 @@
-from bank_djago.services.admin.rekap_bank import RekapService
+from bank_djago.services.rekap_bank import RekapService
 from bank_djago.utils.utililty import Utilitas,UI
 
 

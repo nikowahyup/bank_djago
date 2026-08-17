@@ -1,9 +1,7 @@
-# from datetime import timedelta
-
 from bank_djago.core.notifikasi import Notifikasi
-from bank_djago.services.admin.AdminTeller.admin_payroll import BiayaAdminService
+from bank_djago.services.rekening.admin_payroll import  BiayaAdminService
 from bank_djago.services.deposito.deposito_service import StatusDeposito,DepositoService,JenisAro
-from bank_djago.services.bunga import BungaService
+from bank_djago.services.rekening.bunga import BungaService
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 from bank_djago.services.transaksi.limit import LimitService
 import datetime

@@ -1,6 +1,6 @@
-from bank_djago.services.admin.rekap_audit import AuditService
+from bank_djago.services.rekap_audit import AuditService
 from bank_djago.services.rekening.rekening_service import RekeningService
-from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
+from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utililty import Utilitas
@@ -32,9 +32,9 @@ class RekeningUI:
             elif pilihan == "2":
                 RekeningUI.downgrade_rekening(bank, rekening)
             elif pilihan == "3":
-                RekeningUI.blokir_rekening(rekening)
+                RekeningUI.blokir_rekening(bank,rekening)
             elif pilihan == "4":
-                RekeningUI.buka_blokir(rekening)
+                RekeningUI.buka_blokir(bank,rekening)
             elif pilihan == "5":
                 RekeningUI.tutup_rekening(bank,rekening)
             elif pilihan == "6":
@@ -106,26 +106,26 @@ class RekeningUI:
             UI.gagal(str(e))
 
     @staticmethod
-    def blokir_rekening(rekening):
+    def blokir_rekening(bank,rekening):
         UI.header("BLOKIR REKENING",UI.MERAH)
 
         alasan = input("Masukkan alasan pemblokiran: ")
 
         try:
-            RekeningService.blokir_rekening(rekening,alasan)
+            RekeningService.blokir_rekening(bank,rekening,alasan)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil diblokir")
         except ValueError as e:
             UI.gagal(str(e))
 
     @staticmethod
-    def buka_blokir(rekening):
+    def buka_blokir(bank,rekening):
         UI.header("BUKA BLOKIR REKENING",UI.MERAH)
 
         konfirmasi = input("Apakah Anda yakin ingin membuka kembali rekening ini(ya/tidak): ").lower()
         if konfirmasi not in('ya','y','iya'):
             return
         try:
-            RekeningService.buka_blokir(rekening)
+            RekeningService.buka_blokir(bank,rekening)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil dibuka kembali")
         except ValueError as e:
             UI.gagal(str(e))
@@ -136,12 +136,12 @@ class RekeningUI:
 
         pin = input("Masukkan PIN baru: ")
         Utilitas.animasi('Proses')
-        if pin == rekening.pin:
-            return
-        rekening.reset_pin()
-        UI.sukses("PIN berhasil direset dan diganti")
-        AuditService.tambah_audit(bank,"rekening",jenis="reset pin",log=f"{rekening.pemilik.nama} meminta reset pin pada rekeningnya",norek=rekening.norek)
+        try:
+            RekeningService.reset_pin(bank,rekening,pin)
+            UI.sukses("PIN berhasil direset dan diganti")
 
+        except ValueError as e:
+            UI.gagal(str(e))
     @staticmethod
     def tutup_rekening(bank,rekening):
         UI.header("TUTUP REKENING",UI.MERAH)
@@ -158,7 +158,7 @@ class RekeningUI:
                     konfirmasi = input("Apakah Anda yakin(ya/tidak):").lower()
                     if konfirmasi not in ('iya','ya','y'):
                         return
-                    RekeningService.tutup_rekening(rekening)
+                    RekeningService.tutup_rekening(bank,rekening)
                     UI.sukses(f"Rekening dengan nomor {rekening.norek} telah ditutup!")
                 elif pilihan == "2":
                     rek_penerima = input("Masukkan nomor rekening penerima: ")

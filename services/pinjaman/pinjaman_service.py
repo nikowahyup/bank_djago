@@ -8,8 +8,8 @@ import datetime
 
 from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.core.pinjaman import Pinjaman
-from bank_djago.services.admin.rekap_audit import AuditService
-from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
+from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utililty import Utilitas, StatusPinjaman, JenisReferensiID, StatusPembayaran
 from bank_djago.utils.validator import Validator
 

@@ -1,7 +1,7 @@
 import datetime
 from bank_djago.core.deposito import Deposito
-from bank_djago.services.admin.rekap_audit import AuditService
-from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
+from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utililty import Utilitas, JenisAro, JenisReferensiID
 from bank_djago.utils.validator import Validator
 from bank_djago.core.notifikasi import Notifikasi
