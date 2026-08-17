@@ -16,6 +16,7 @@ class Deposito:
         self.jenis_aro    = JenisAro.TIDAK
         self.lama_aro     = None
         self.notifikasi_depo = False
+        self.proses_aro = None
 
 
     @property
@@ -35,4 +36,5 @@ class Deposito:
                 "jatuh_tempo":self.jatuh_tempo.isoformat(),
                 "status":self.status,
                 "jenis_aro":self.jenis_aro,
-                "lama_aro":self.lama_aro}
+                "lama_aro":self.lama_aro,
+                "proses_aro":self.proses_aro.isoformat() if self.proses_aro is not None else None}

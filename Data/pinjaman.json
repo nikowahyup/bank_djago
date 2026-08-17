@@ -2,16 +2,16 @@
     "3510152602082002": {
         "ID": 1,
         "nik": "3510152602082002",
-        "rekening": "1001388205874890",
-        "nominal_pinjaman": 10000000,
+        "rekening": "2001385564852780",
+        "nominal_pinjaman": 1000000,
         "bunga": 0.12,
         "tenor": 12,
-        "cicilan_tetap": 888487.8867834168,
-        "sisa_pokok": 8415139,
-        "cicilan_terbayar": 2,
-        "bunga_bulanan": 92115.12,
+        "cicilan_tetap": 88848.78867834168,
+        "sisa_pokok": 1000000,
+        "cicilan_terbayar": 0,
+        "bunga_bulanan": 10000.0,
         "status": "aktif",
-        "tanggal_pencairan": "2026-08-15",
-        "jatuh_tempo": "2026-11-15"
+        "tanggal_pencairan": "2027-01-31",
+        "jatuh_tempo": "2027-02-28"
     }
 }

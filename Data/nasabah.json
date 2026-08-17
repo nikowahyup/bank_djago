@@ -1,22 +1,63 @@
 {
     "3510152602082002": {
         "nama": "Niko Wahyu Pratama",
-        "alamat": "jln.kalibendo",
+        "alamat": "jln,kalibendo",
         "nik": "3510152602082002",
         "rekening": [
-            "1001388205874890"
+            "2001385564852780"
+        ],
+        "deposito": [],
+        "notifikasi": [
+            {
+                "jenis": "pinjaman",
+                "pesan": "Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman",
+                "referensi": 1,
+                "ID_objek": null
+            }
+        ]
+    },
+    "3150152602082002": {
+        "nama": "Gojo Satoru",
+        "alamat": "jlnl",
+        "nik": "3150152602082002",
+        "rekening": [
+            "2001633585477864"
         ],
         "deposito": [],
         "notifikasi": []
     },
-    "3150152602082002": {
-        "nama": "Gojo Satoru",
-        "alamat": "jln.shinjuku",
-        "nik": "3150152602082002",
+    "3150152602002002": {
+        "nama": "Sukuna",
+        "alamat": "jln",
+        "nik": "3150152602002002",
         "rekening": [
-            "2001222205868208"
+            "2001853603886040"
         ],
         "deposito": [],
-        "notifikasi": []
+        "notifikasi": [
+            {
+                "jenis": "pinjaman",
+                "pesan": "Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman",
+                "referensi": 1,
+                "ID_objek": null
+            }
+        ]
+    },
+    "3150152402002002": {
+        "nama": "Yuji",
+        "alamat": "jln",
+        "nik": "3150152402002002",
+        "rekening": [
+            "4001843668003460"
+        ],
+        "deposito": [],
+        "notifikasi": [
+            {
+                "jenis": "pinjaman",
+                "pesan": "Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman",
+                "referensi": 1,
+                "ID_objek": null
+            }
+        ]
     }
 }

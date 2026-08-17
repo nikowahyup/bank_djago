@@ -69,17 +69,27 @@ class Scheduler:
                         deposito.status = StatusDeposito.JATUH_TEMPO
 
 
-
                 else:
-                    if hari_ini < jatuh_tempo:
+                    if (
+                            deposito.proses_aro is not None
+                            and deposito.proses_aro < hari_ini < jatuh_tempo
+                    ):
                         nasabah = deposito.pemilik
-                        DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
+                        DepositoService.hapus_notifikasi_deposito(
+                            nasabah,
+                            deposito
+                        )
 
-
-                    elif hari_ini == jatuh_tempo:
+                    elif hari_ini >= jatuh_tempo:
                         nasabah = deposito.pemilik
-                        DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
+
+                        DepositoService.hapus_notifikasi_deposito(
+                            nasabah,
+                            deposito
+                        )
+
                         DepositoService.perpanjangan(bank, deposito)
+                        deposito.proses_aro = hari_ini
 
         for pinjaman in bank.daftar_pinjaman:
 
@@ -98,14 +108,14 @@ class Scheduler:
                     PinjamanService.hapus_notif_pinjaman(nasabah)
                     notifikasi = Notifikasi(
                                             jenis="pinjaman",
-                                            pesan=f"Cicilan bulan {Utilitas.nama_bulan(jatuh_tempo)} akan jatuh pada {Utilitas.format_tanggal_indonesia(jatuh_tempo)}",
+                                            pesan=f"Batas pembayaran cicilan Anda periode ini akan berakhir pada {Utilitas.format_tanggal_indonesia(jatuh_tempo)}",
                                             referensi_id=JenisReferensiID.PINJAMAN)
 
                     nasabah.notifikasi.append(notifikasi)
                     pinjaman.notifikasi_jatuh_tempo = True
             # sudah waktunya jatuh tempo
 
-            elif hari_ini == jatuh_tempo:
+            elif hari_ini >= jatuh_tempo:
 
                     PinjamanService.hapus_notif_pinjaman(nasabah)
 

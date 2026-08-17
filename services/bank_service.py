@@ -234,10 +234,6 @@ class BankService:
                 elif referensi == JenisReferensiID.PINJAMAN:
 
                     if id_objek is None:
-                        error.append(
-                            f"Notifikasi pinjaman milik nasabah {nik} "
-                            f"tidak memiliki id_objek."
-                        )
                         continue
 
                     pinjaman_ditemukan = any(

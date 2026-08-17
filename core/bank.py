@@ -79,6 +79,11 @@ class Bank:
                 deposito.status = info["status"]
                 deposito.lama_aro = info.get("lama_aro",None)
                 deposito.jenis_aro = info.get("jenis_aro",JenisAro.TIDAK)
+                proses_aro = info.get("proses_aro")
+                if proses_aro:
+                    deposito.proses_aro = datetime.date.fromisoformat(proses_aro)
+                else:
+                    deposito.proses_aro = None
 
                 nasabah.deposito.append(deposito)
                 if daftar_deposito:

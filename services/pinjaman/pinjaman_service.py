@@ -77,7 +77,9 @@ class PinjamanService:
 
 
     @staticmethod
-    def cairkan_pinjaman(bank,pinjaman):
+    def cairkan_pinjaman(bank,pinjaman,hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
         if pinjaman.status != StatusPinjaman.DISETUJUI:
             raise ValueError("Pinjaman masih belum disetujui")
 
@@ -88,7 +90,7 @@ class PinjamanService:
         pinjaman.status = StatusPinjaman.AKTIF
         bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
         pinjaman.bunga_bulanan = bunga_bulanan
-        pinjaman.tanggal_pencairan = datetime.date.today()
+        pinjaman.tanggal_pencairan = hari_ini
         pinjaman.tanggal_jatuh_tempo = Utilitas.tambah_bulan(pinjaman.tanggal_pencairan,1)
 
 
@@ -102,15 +104,28 @@ class PinjamanService:
         return pinjaman
 
     @staticmethod
-    def bayar_cicilan(bank, pinjaman):
+    def bayar_cicilan(bank, pinjaman,hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
+
         if pinjaman.status != StatusPinjaman.AKTIF:
             raise ValueError("Pinjaman sedang tidak aktif")
+
+        tanggal_boleh_bayar = PinjamanService.tanggal_boleh_bayar(pinjaman)
+
+        if hari_ini < tanggal_boleh_bayar:
+            raise ValueError(f"Cicilan berikutnya baru boleh dibayar mulai "
+                             f"{Utilitas.format_tanggal_indonesia(tanggal_boleh_bayar)}")
+
 
         persentase_bunga = pinjaman.bunga / 12
 
         bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
         total_bayar = pinjaman.cicilan_tetap
         pokok_saja = total_bayar - bunga_bulanan
+
+        if pinjaman.rekening.saldo - total_bayar < pinjaman.rekening.saldosetor_min:
+            raise ValueError("Saldo Anda tidak cukup untuk membayar cicilan")
 
         pinjaman.rekening.kurangi_saldo(total_bayar)
 
@@ -214,3 +229,21 @@ class PinjamanService:
     @staticmethod
     def daftar_ajuan(bank):
         return [ajuan for ajuan in bank.daftar_pinjaman if ajuan.status == StatusPinjaman.DIAJUKAN]
+
+    @staticmethod
+    def tanggal_boleh_bayar(pinjaman):
+        if pinjaman.cicilan_terbayar == 0:
+            return pinjaman.tanggal_pencairan
+
+        jatuh_tempo_sebelumnya = Utilitas.tambah_bulan(
+            pinjaman.tanggal_pencairan,
+            1
+        )
+
+        for _ in range(pinjaman.cicilan_terbayar - 1):
+            jatuh_tempo_sebelumnya = Utilitas.tambah_bulan(
+                jatuh_tempo_sebelumnya,
+                1
+            )
+
+        return jatuh_tempo_sebelumnya + datetime.timedelta(days=1)

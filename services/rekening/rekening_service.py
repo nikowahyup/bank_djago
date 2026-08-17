@@ -67,6 +67,16 @@ class RekeningService:
         rekening_baru.set_saldo(rekening_lama.saldo)
         rekening_baru.riwayat = rekening_lama.riwayat
 
+        pinjaman = nasabah.pinjaman
+        if pinjaman:
+            if pinjaman.rekening == rekening_lama:
+                pinjaman.rekening = rekening_baru
+
+
+        for deposito in nasabah.deposito:
+            if deposito.rekening == rekening_lama:
+                deposito.rekening = rekening_baru
+
         bank.rekening_index[rekening_baru.norek] = rekening_baru
         indeks = nasabah.rekening.index(rekening_lama)
         nasabah.rekening[indeks] = rekening_baru
@@ -95,6 +105,15 @@ class RekeningService:
         rek_tujuan = RekeningService.level[target_level]
 
         nasabah = rekening_lama.pemilik
+        pinjaman = nasabah.pinjaman
+        if pinjaman:
+            if pinjaman.rekening == rekening_lama:
+                pinjaman.rekening = rekening_baru
+
+
+        for deposito in nasabah.deposito:
+            if deposito.rekening == rekening_lama:
+                deposito.rekening = rekening_baru
 
         bank.rekening_index[rekening_lama.norek] = rekening_baru
         index = nasabah.rekening.index(rekening_lama)
@@ -154,6 +173,8 @@ class RekeningService:
 
         bank.rekening_index[norek] = rekening_baru
         rekening_baru.tambah_saldo(setor_awal)
+
+
         nasabah.rekening.append(rekening_baru)
 
         return rekening_baru

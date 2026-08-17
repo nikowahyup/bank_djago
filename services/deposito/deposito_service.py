@@ -154,7 +154,7 @@ class DepositoService:
             deposito.rekening.simpan_riwayat(log_bunga)
 
 
-        tanggal_buka = deposito.jatuh_tempo
+        tanggal_buka = deposito.jatuh_tempo # kunci
         jatuh_tempo_baru = Utilitas.tambah_bulan(tanggal_buka,lama_bulan)
         deposito.nominal = nominal_baru
         deposito.bunga = DepositoService.JANGKA_WAKTU[lama_bulan]
