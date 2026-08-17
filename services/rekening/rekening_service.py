@@ -69,12 +69,12 @@ class RekeningService:
 
         pinjaman = nasabah.pinjaman
         if pinjaman:
-            if pinjaman.rekening == rekening_lama:
+            if pinjaman.rekening is rekening_lama:
                 pinjaman.rekening = rekening_baru
 
 
         for deposito in nasabah.deposito:
-            if deposito.rekening == rekening_lama:
+            if deposito.rekening is rekening_lama:
                 deposito.rekening = rekening_baru
 
         bank.rekening_index[rekening_baru.norek] = rekening_baru
@@ -107,12 +107,12 @@ class RekeningService:
         nasabah = rekening_lama.pemilik
         pinjaman = nasabah.pinjaman
         if pinjaman:
-            if pinjaman.rekening == rekening_lama:
+            if pinjaman.rekening is rekening_lama:
                 pinjaman.rekening = rekening_baru
 
 
         for deposito in nasabah.deposito:
-            if deposito.rekening == rekening_lama:
+            if deposito.rekening is rekening_lama:
                 deposito.rekening = rekening_baru
 
         bank.rekening_index[rekening_lama.norek] = rekening_baru

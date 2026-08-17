@@ -26,13 +26,6 @@ class JsonStorage:
     @staticmethod
     def simpan_bank(bank):
 
-        for pinjaman in bank.daftar_pinjaman:
-            print(
-                "SEBELUM SIMPAN:",
-                pinjaman.ID,
-                pinjaman.tanggal_jatuh_tempo
-            )
-
         JsonStorage.simpan_json(
             JsonStorage.file_nasabah,
             bank.data_nasabah_dict()

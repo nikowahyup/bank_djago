@@ -18,6 +18,7 @@ class Pinjaman:
         self.tanggal_jatuh_tempo = None
         self.notifikasi_jatuh_tempo = False
 
+
     def ke_dict(self):
         return {
             "ID": self.ID,

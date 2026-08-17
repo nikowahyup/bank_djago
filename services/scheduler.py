@@ -1,3 +1,5 @@
+# from datetime import timedelta
+
 from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.services.admin.AdminTeller.admin_payroll import BiayaAdminService
 from bank_djago.services.deposito.deposito_service import StatusDeposito,DepositoService,JenisAro
@@ -96,8 +98,14 @@ class Scheduler:
             if pinjaman.status != StatusPinjaman.AKTIF:
                 continue
 
+
+
             jatuh_tempo = pinjaman.tanggal_jatuh_tempo
+            #sehari sebelum jatuh tempo
+            hari_terlambat = PinjamanService.hitung_hari_terlambat(pinjaman, hari_ini)
+            denda = PinjamanService.hitung_denda(pinjaman, hari_ini)
             nasabah = pinjaman.pemilik
+
             #belum masuk bulan jatuh tempo
             if (hari_ini.year < jatuh_tempo.year or
                     (hari_ini.year == jatuh_tempo.year and hari_ini.month < jatuh_tempo.month)):
@@ -115,7 +123,7 @@ class Scheduler:
                     pinjaman.notifikasi_jatuh_tempo = True
             # sudah waktunya jatuh tempo
 
-            elif hari_ini >= jatuh_tempo:
+            elif hari_terlambat == 0:
 
                     PinjamanService.hapus_notif_pinjaman(nasabah)
 
@@ -126,6 +134,42 @@ class Scheduler:
                     nasabah.notifikasi.append(notifikasi)
                     pinjaman.notifikasi_jatuh_tempo = True
 
+            elif hari_terlambat <= PinjamanService.BATAS_HARI_TUNGGAKAN:
+                PinjamanService.hapus_notif_pinjaman(nasabah)
+                sisa_toleransi = PinjamanService.BATAS_HARI_TUNGGAKAN - hari_terlambat
+
+                if sisa_toleransi == 0 :
+                    pesan = (
+                        "Hari ini adalah hari terakhir masa toleransi "
+                        "pembayaran cicilan Anda. Denda mulai dihitung "
+                        "besok jika cicilan belum dibayar.")
+                else:
+                    pesan = (f"Cicilan Anda terlambat {hari_terlambat} hari. "
+                        f"Masa toleransi tersisa {sisa_toleransi} hari.")
+
+                notifikasi = Notifikasi(jenis="pinjaman",pesan=pesan,referensi_id=JenisReferensiID.PINJAMAN)
+                nasabah.notifikasi.append(notifikasi)
+                pinjaman.notifikasi_jatuh_tempo = True
+
+            else:
+                hari_denda = hari_terlambat - PinjamanService.BATAS_HARI_TUNGGAKAN
+                total_tagihan = pinjaman.cicilan_tetap + denda
+                PinjamanService.hapus_notif_pinjaman(nasabah)
+                notifikasi = Notifikasi(
+                    jenis="pinjaman",
+                    pesan=(
+                        f"Cicilan Anda terlambat {hari_terlambat} hari. "
+                        f"Denda telah berjalan selama {hari_denda} hari "
+                        f"dengan nominal "
+                        f"Rp{Utilitas.format_rupiah(denda)}. "
+                        f"Total pembayaran saat ini "
+                        f"Rp{Utilitas.format_rupiah(round(total_tagihan))}."
+                    ),
+                    referensi_id=JenisReferensiID.PINJAMAN,
+                    id_objek=pinjaman.ID
+                )
+                nasabah.notifikasi.append(notifikasi)
+                pinjaman.notifikasi_jatuh_tempo = True
 
 
 

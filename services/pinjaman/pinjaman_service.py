@@ -10,7 +10,7 @@ from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.core.pinjaman import Pinjaman
 from bank_djago.services.admin.rekap_audit import AuditService
 from bank_djago.services.transaksi.riwayat.factory import RiwayatTemplate
-from bank_djago.utils.utililty import Utilitas, StatusPinjaman, JenisReferensiID
+from bank_djago.utils.utililty import Utilitas, StatusPinjaman, JenisReferensiID, StatusPembayaran
 from bank_djago.utils.validator import Validator
 
 
@@ -27,6 +27,9 @@ class PinjamanService:
 
     MIN_PINJAMAN = 1_000_000
     MAX_PINJAMAN = 50_000_000
+    BATAS_HARI_TUNGGAKAN = 7
+    PERSENTASE_DENDA_HARIAN = 0.001
+    MAKSIMAL_PERSENTASE_DENDA = 0.1
 
 
     @staticmethod
@@ -118,40 +121,71 @@ class PinjamanService:
                              f"{Utilitas.format_tanggal_indonesia(tanggal_boleh_bayar)}")
 
 
-        persentase_bunga = pinjaman.bunga / 12
-
-        bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
-        total_bayar = pinjaman.cicilan_tetap
-        pokok_saja = total_bayar - bunga_bulanan
+        denda = PinjamanService.hitung_denda(pinjaman,hari_ini)
+        hari_terlambat = PinjamanService.hitung_hari_terlambat(pinjaman,hari_ini)
+        total_bayar = pinjaman.cicilan_tetap + denda
 
         if pinjaman.rekening.saldo - total_bayar < pinjaman.rekening.saldosetor_min:
-            raise ValueError("Saldo Anda tidak cukup untuk membayar cicilan")
+            raise ValueError("Saldo Anda tidak cukup untuk membayar cicilan dan denda")
+
 
         pinjaman.rekening.kurangi_saldo(total_bayar)
 
+        persentase_bunga = pinjaman.bunga / 12
+
+        bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
+        pokok_saja = pinjaman.cicilan_tetap - bunga_bulanan
+
         pinjaman.sisa_pokok -= pokok_saja
         pinjaman.cicilan_terbayar += 1
+
         pinjaman.bunga_bulanan = bunga_bulanan
         PinjamanService.hapus_notif_pinjaman(pinjaman.pemilik)
 
-        if pinjaman.sisa_pokok <= 0:
+        # Pinjaman dinyatakan lunas ketika seluruh cicilan
+        # telah dibayar atau sisa pokok telah habis.
+        if (
+                pinjaman.cicilan_terbayar >= pinjaman.tenor
+                or pinjaman.sisa_pokok <= 0
+        ):
             pinjaman.sisa_pokok = 0
             pinjaman.status = StatusPinjaman.LUNAS
+
+            # Hapus referensi pinjaman aktif agar nasabah
+            # dapat mengajukan pinjaman baru.
+            pinjaman.pemilik.pinjaman = None
 
             log_audit = (
                 f"{pinjaman.pemilik.nama} telah melunasi "
                 f"pinjaman {pinjaman.ID} "
-                f"sebesar Rp{Utilitas.format_rupiah(total_bayar)}"
+                f"sebesar Rp"
+                f"{Utilitas.format_rupiah(round(total_bayar))}"
             )
 
-            log_riwayat = "PINJAMAN ANDA TELAH LUNAS"
+            log_riwayat = (
+                f"PELUNASAN PINJAMAN | "
+                f"Cicilan Rp"
+                f"{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))} | "
+                f"Denda Rp{Utilitas.format_rupiah(denda)} | "
+                f"Terlambat {hari_terlambat} hari | "
+                f"Total Rp"
+                f"{Utilitas.format_rupiah(round(total_bayar))}"
+            )
+
             nasabah = pinjaman.pemilik
+
             PinjamanService.hapus_notif_pinjaman(nasabah)
 
             notifikasi = Notifikasi(
-                                    jenis='pinjaman',
-                                    pesan='🎉 Pinjaman Anda telah lunas. Terima kasih telah mempercayai bank Djago',
-                                    referensi_id=JenisReferensiID.PINJAMAN)
+                jenis="pinjaman",
+                pesan=(
+                    "🎉 Pinjaman Anda telah lunas. "
+                    "Terima kasih telah mempercayai Bank Djago"
+                ),
+                referensi_id=JenisReferensiID.PINJAMAN,
+                id_objek=pinjaman.ID
+            )
+
             nasabah.notifikasi.append(notifikasi)
 
         else:
@@ -169,8 +203,11 @@ class PinjamanService:
             )
 
             log_riwayat = (
-                f"PEMBAYARAN CICILAN PINJAMAN | "
-                f"-Rp{Utilitas.format_rupiah(total_bayar)}"
+                f"PEMBAYARAN CICILAN | "
+                f"Cicilan Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))} | "
+                f"Denda Rp{Utilitas.format_rupiah(denda)} | "
+                f"Terlambat {hari_terlambat} hari | "
+                f"Total Rp{Utilitas.format_rupiah(round(total_bayar))}"
             )
 
         AuditService.tambah_audit(
@@ -247,3 +284,41 @@ class PinjamanService:
             )
 
         return jatuh_tempo_sebelumnya + datetime.timedelta(days=1)
+
+    @staticmethod
+    def hitung_hari_terlambat(pinjaman,hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
+        return  max(0,(hari_ini - pinjaman.tanggal_jatuh_tempo).days)
+
+
+
+    @staticmethod
+    def perbarui_status_pembayaran(pinjaman,hari_ini=None):
+        hari_terlambat = PinjamanService.hitung_hari_terlambat(pinjaman,hari_ini)
+
+        if hari_terlambat > 0:
+            pinjaman.status_pembayaran = StatusPembayaran.MENUNGGAK
+        else:
+            pinjaman.status_pembayaran = StatusPembayaran.LANCAR
+
+        return hari_terlambat
+
+    @staticmethod
+    def hitung_denda(pinjaman,hari_ini=None):
+        hari_terlambat = PinjamanService.hitung_hari_terlambat(pinjaman, hari_ini)
+
+        hari_denda = max(0,hari_terlambat-PinjamanService.BATAS_HARI_TUNGGAKAN)
+
+        denda = pinjaman.cicilan_tetap*hari_denda*PinjamanService.PERSENTASE_DENDA_HARIAN
+
+        denda_maksimal = pinjaman.cicilan_tetap*PinjamanService.MAKSIMAL_PERSENTASE_DENDA
+
+        return round(min(denda,denda_maksimal))
+
+
+
+
+
+
+
