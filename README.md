@@ -112,8 +112,10 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - [x] **Validasi Saldo Pembayaran:** Menolak pembayaran jika saldo setelah cicilan berada di bawah saldo minimum rekening.
 - [x] **Pelunasan**
 - [x] **Persistence Pinjaman ke JSON**
-- [ ] **Denda Keterlambatan**
-- [ ] **Status Tunggakan**
+- [x] **Denda Keterlambatan:** Denda harian 0,1% setelah masa toleransi 7 hari, dengan batas maksimal 10% dari cicilan.
+- [x] **Status Tunggakan:** Deteksi keterlambatan berdasarkan selisih tanggal jatuh tempo tanpa menyimpan state turunan.
+- [x] **Pembayaran Cicilan Tertunggak:** Pembayaran menyelesaikan cicilan tertua beserta dendanya tanpa menggeser jadwal kontrak.
+- [x] **Pengejaran Beberapa Periode:** Nasabah dapat membayar beberapa cicilan tertunggak secara berurutan untuk kembali mengikuti jadwal.
 
 ### `v1.0` - Penyempurnaan Sistem
 Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebelum migrasi database dan web.
@@ -124,10 +126,11 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Pengujian Deposito ARO & Non-ARO:** Pengujian reminder, jatuh tempo, pencairan, dan perpanjangan otomatis.
 - [x] **Pengujian Multiple Deposito:** Memastikan notifikasi beberapa deposito dalam satu nasabah tidak saling bertabrakan.
 - [x] **Pengujian Integrasi:** Menguji alur deposito dan pinjaman dalam satu nasabah, scheduler berbasis tanggal simulasi, pergantian notifikasi, ARO/non-ARO, pembayaran, pencairan, serta save/load setelah perubahan.
-- [ ] **Denda Keterlambatan:** Implementasi aturan denda dan konsekuensi tunggakan.
-- [ ] **Status Tunggakan:** Menambahkan lifecycle khusus untuk cicilan yang melewati jatuh tempo.
+- [x] **Denda Keterlambatan:** Perhitungan denda harian setelah masa toleransi, pembayaran denda bersama cicilan, dan batas maksimal denda.
+- [x] **Status Tunggakan:** Kondisi tunggakan dihitung dari tanggal jatuh tempo sehingga tetap konsisten pada repeated scheduler dan missed scheduler.
 - [x] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
 - [x] **Pengujian Edge Case:** Menguji repeated scheduler, missed scheduler, multiple deposito, save/load, pembayaran sebelum jatuh tempo, pencegahan pembayaran periode berikutnya terlalu cepat, saldo tidak cukup, status lunas, dan tanggal ujung bulan.
+- [x] **Pengujian Tunggakan & Denda:** Menguji H/H+1/H+7/H+8, batas maksimal denda, pembayaran gagal tanpa perubahan state, beberapa periode tertunggak, pelunasan terlambat, dan save/load saat menunggak.
 - [ ] **Perapian Struktur Proyek:** Refactor bagian yang masih memiliki tanggung jawab tumpang tindih.
 - [ ] **Dokumentasi:** Melengkapi dokumentasi arsitektur, alur bisnis, dan keputusan desain.
 
@@ -155,7 +158,7 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] Pinjaman
 - [x] Scheduler
 - [x] Notification System
-- [ ] Denda keterlambatan dan tunggakan
+- [x] Denda keterlambatan dan tunggakan
 - [x] Penyempurnaan testing dan validasi integritas data
 - [ ] Migrasi database ke SQLite
 - [ ] Migrasi ke Django
@@ -193,6 +196,10 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - Menambahkan validasi saldo minimum saat pembayaran cicilan dan memastikan kegagalan pembayaran tidak mengubah state pinjaman
 - Menguji pelunasan hingga status `LUNAS` serta penolakan pembayaran setelah pinjaman lunas
 - Menguji tanggal ujung bulan dengan pencairan 31 Januari dan penyesuaian jatuh tempo melalui Februari
+- Menambahkan masa toleransi tunggakan 7 hari dan denda harian 0,1% dengan batas maksimal 10% dari cicilan
+- Mengintegrasikan denda ke pembayaran cicilan tanpa mengurangi pokok atau menggeser jadwal jatuh tempo
+- Menguji pembayaran beberapa periode tertunggak, pelunasan dengan denda, dan kegagalan pembayaran tanpa perubahan state
+- Memastikan perhitungan denda tetap konsisten setelah save/load dan repeated scheduler
 
 # Catatan Desain
 
@@ -216,6 +223,21 @@ Jawaban:
 
 Jawaban:
 Jatuh tempo berikutnya dihitung satu bulan dari jatuh tempo sebelumnya. Jika bulan tujuan tidak memiliki tanggal yang sama, tanggal disesuaikan ke hari terakhir bulan tersebut. Tanggal hasil penyesuaian menjadi acuan untuk jatuh tempo berikutnya.
+
+### 5. Mengapa denda tidak disimpan sebagai state pinjaman?
+
+Jawaban:
+Denda dihitung dari cicilan tetap, tanggal jatuh tempo, tanggal proses, masa toleransi, dan persentase denda. Karena seluruh sumber perhitungannya sudah tersedia, menyimpan nominal denda akan membuat dua sumber kebenaran yang berisiko tidak sinkron. Perhitungan dinamis juga menjaga hasil tetap konsisten ketika scheduler dijalankan berulang atau sempat terlewat.
+
+### 6. Mengapa keterlambatan tidak menggeser jadwal cicilan?
+
+Jawaban:
+Setiap pembayaran menyelesaikan cicilan tertua, lalu jatuh tempo berikutnya dihitung satu bulan dari jatuh tempo sebelumnya, bukan dari tanggal pembayaran. Nasabah yang terlambat tetap dapat mengejar beberapa cicilan, sedangkan keterlambatan tidak berubah menjadi perpanjangan tenor secara otomatis.
+
+### 7. Bagaimana prinsip penambahan state baru?
+
+Jawaban:
+State lama dan nilai turunan digunakan terlebih dahulu. State baru hanya ditambahkan jika mewakili informasi bisnis independen yang tidak dapat dihitung kembali secara aman. Prinsip ini mengurangi duplikasi data dan mempermudah integrity check, persistence, serta migrasi menuju database dan web.
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
