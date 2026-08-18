@@ -248,6 +248,4 @@ class JenisReferensiID(Enum):
     TRANSAKSI = 3
 
 
-class StatusPembayaran(Enum):
-    LANCAR = "lancar"
-    MENUNGGAK = "tunggak"
+

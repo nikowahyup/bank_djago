@@ -10,7 +10,7 @@ from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.core.pinjaman import Pinjaman
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensiID, StatusPembayaran
+from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensiID
 from bank_djago.utils.validator import Validator
 
 
@@ -299,17 +299,6 @@ class PinjamanService:
         return  max(0,(hari_ini - pinjaman.tanggal_jatuh_tempo).days)
 
 
-
-    @staticmethod
-    def perbarui_status_pembayaran(pinjaman,hari_ini=None):
-        hari_terlambat = PinjamanService.hitung_hari_terlambat(pinjaman,hari_ini)
-
-        if hari_terlambat > 0:
-            pinjaman.status_pembayaran = StatusPembayaran.MENUNGGAK
-        else:
-            pinjaman.status_pembayaran = StatusPembayaran.LANCAR
-
-        return hari_terlambat
 
     @staticmethod
     def hitung_denda(pinjaman,hari_ini=None):
