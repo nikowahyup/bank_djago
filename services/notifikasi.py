@@ -1,7 +1,7 @@
 
 
 
-
+from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import JenisReferensiID
 
@@ -27,6 +27,8 @@ class NotifikasiUI:
 
             elif pilihan == "3":
                 NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensiID.PINJAMAN)
+
+
             elif pilihan == "4":
                 break
 

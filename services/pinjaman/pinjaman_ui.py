@@ -130,7 +130,8 @@ class PinjamanUI:
                     f"  CICILAN TERBAYAR : {pinjaman.cicilan_terbayar}/{pinjaman.tenor}\n"
                     f"  BUNGA BULAN INI  : Rp{Utilitas.format_rupiah(round(pinjaman.bunga_bulanan))}")
             print("╚" + "═" * 35 + "╝")
-
+            PinjamanService.hapus_notif_pinjaman(nasabah)
+            pinjaman.notifikasi_jatuh_tempo = True
 
 
 

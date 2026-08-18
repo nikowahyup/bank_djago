@@ -128,7 +128,7 @@ class UI:
 
     @staticmethod
     def info_deposito(deposito):
-        from .utililty import Utilitas
+        from .utility import Utilitas
         UI.kotak_info("INFORMASI DEPOSITO",{
         "Nominal": f"Rp{Utilitas.format_rupiah(deposito.nominal)}",
         "Bunga": f"{deposito.bunga:.1%} per tahun",

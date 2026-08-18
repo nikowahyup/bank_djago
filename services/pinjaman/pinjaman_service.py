@@ -114,6 +114,11 @@ class PinjamanService:
         if pinjaman.status != StatusPinjaman.AKTIF:
             raise ValueError("Pinjaman sedang tidak aktif")
 
+        if pinjaman.rekening.status == "tutup" or pinjaman.rekening.status == "blokir":
+            raise ValueError("Pembayaran cicilan tidak dapat dilakukan menggunakan\n"
+                             "rekening yang sedang diblokir atau sudah ditutup")
+
+
         tanggal_boleh_bayar = PinjamanService.tanggal_boleh_bayar(pinjaman)
 
         if hari_ini < tanggal_boleh_bayar:
@@ -199,7 +204,7 @@ class PinjamanService:
             log_audit = (
                 f"{pinjaman.pemilik.nama} membayar cicilan "
                 f"pinjaman {pinjaman.ID} "
-                f"sebesar Rp{Utilitas.format_rupiah(total_bayar)}"
+                f"sebesar Rp{Utilitas.format_rupiah(round(total_bayar))}"
             )
 
             log_riwayat = (
@@ -250,6 +255,8 @@ class PinjamanService:
         AuditService.tambah_audit(bank, kategori="transaksi", jenis="pinjaman",
                                   log=f"Pinjaman {pinjaman.pemilik.nama} ditolak", nik=pinjaman.pemilik.NIK,
                                   norek=pinjaman.rekening.norek)
+        nasabah = pinjaman.pemilik
+        nasabah.pinjaman = None
 
 
         return pinjaman

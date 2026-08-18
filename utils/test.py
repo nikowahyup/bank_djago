@@ -2280,189 +2280,191 @@ bank = JsonStorage.muat_bank()
 
 
 
-def siapkan_dua_pinjaman_untuk_uji(bank):
-    nik = input("Masukkan NIK nasabah yang akan diuji: ").strip()
-
-    nasabah = bank.cari_nasabah(nik)
-
-    if nasabah is None:
-        raise ValueError("NIK nasabah tidak ditemukan")
-
-    pinjaman_lama = nasabah.pinjaman
-
-    if pinjaman_lama is None:
-        raise ValueError(
-            "Nasabah tidak memiliki pinjaman berjalan"
-        )
-
-    if pinjaman_lama.status != StatusPinjaman.AKTIF:
-        raise ValueError(
-            "Pinjaman nasabah belum berstatus aktif"
-        )
-
-    rekening = pinjaman_lama.rekening
-
-    print()
-    print("DATA PINJAMAN LAMA")
-    print("Nasabah          :", nasabah.nama)
-    print("ID pinjaman      :", pinjaman_lama.ID)
-    print("Status           :", pinjaman_lama.status.value)
-    print("Tenor            :", pinjaman_lama.tenor)
-    print("Cicilan terbayar :", pinjaman_lama.cicilan_terbayar)
-    print(
-        "Cicilan tersisa  :",
-        pinjaman_lama.tenor
-        - pinjaman_lama.cicilan_terbayar
-    )
-    print()
-
-    cicilan_tersisa = (
-        pinjaman_lama.tenor
-        - pinjaman_lama.cicilan_terbayar
-    )
-
-    tanggal_pelunasan = None
-
-    # Melunasi seluruh cicilan yang masih tersisa.
-    for _ in range(cicilan_tersisa):
-        tanggal_bayar = pinjaman_lama.tanggal_jatuh_tempo
-        tanggal_pelunasan = tanggal_bayar
-
-        denda = PinjamanService.hitung_denda(
-            pinjaman_lama,
-            tanggal_bayar
-        )
-
-        total_bayar = (
-            pinjaman_lama.cicilan_tetap
-            + denda
-        )
-
-        saldo_minimum = (
-            total_bayar
-            + rekening.saldosetor_min
-        )
-
-        # Menambahkan saldo pengujian jika saldo tidak mencukupi.
-        if rekening.saldo < saldo_minimum:
-            kekurangan = saldo_minimum - rekening.saldo
-            rekening.tambah_saldo(kekurangan)
-
-        nomor_cicilan = (
-            pinjaman_lama.cicilan_terbayar
-            + 1
-        )
-
-        PinjamanService.bayar_cicilan(
-            bank,
-            pinjaman_lama,
-            hari_ini=tanggal_bayar
-        )
-
-        print(
-            f"Cicilan ke-{nomor_cicilan} dibayar "
-            f"pada {tanggal_bayar}"
-        )
-
-    assert pinjaman_lama.status == StatusPinjaman.LUNAS, (
-        "Pinjaman lama seharusnya sudah lunas"
-    )
-
-    assert pinjaman_lama.sisa_pokok == 0, (
-        "Sisa pokok pinjaman lama seharusnya nol"
-    )
-
-    assert nasabah.pinjaman is None, (
-        "Nasabah masih menunjuk pinjaman lama"
-    )
-
-    assert pinjaman_lama in bank.daftar_pinjaman, (
-        "Pinjaman lama hilang dari daftar pinjaman Bank"
-    )
-
-    print()
-    print("✅ Pinjaman lama berhasil dilunasi")
-    print("ID pinjaman :", pinjaman_lama.ID)
-    print("Status      :", pinjaman_lama.status.value)
-    print()
-
-    # Pinjaman baru dimulai sehari setelah pelunasan.
-    tanggal_pencairan_baru = (
-        tanggal_pelunasan
-        + datetime.timedelta(days=1)
-    )
-
-    pinjaman_baru = PinjamanService.ajukan_pinjaman(
-        bank=bank,
-        nasabah=nasabah,
-        rekening=rekening,
-        nominal=1_000_000,
-        tenor=6
-    )
-
-    PinjamanService.setujui_pinjaman(
-        bank,
-        pinjaman_baru
-    )
-
-    PinjamanService.cairkan_pinjaman(
-        bank,
-        pinjaman_baru,
-        hari_ini=tanggal_pencairan_baru
-    )
-
-    assert pinjaman_baru.status == StatusPinjaman.AKTIF, (
-        "Pinjaman baru seharusnya berstatus aktif"
-    )
-
-    assert nasabah.pinjaman is pinjaman_baru, (
-        "Nasabah tidak menunjuk pinjaman baru"
-    )
-
-    assert pinjaman_baru in bank.daftar_pinjaman, (
-        "Pinjaman baru belum masuk daftar pinjaman Bank"
-    )
-
-    assert pinjaman_baru is not pinjaman_lama, (
-        "Pinjaman baru dan lama merupakan objek yang sama"
-    )
-
-    assert pinjaman_baru.ID > pinjaman_lama.ID, (
-        "ID pinjaman baru tidak melanjutkan ID sebelumnya"
-    )
-
-    daftar_pinjaman_nasabah = [
-        pinjaman
-        for pinjaman in bank.daftar_pinjaman
-        if pinjaman.pemilik is nasabah
-    ]
-
-    assert len(daftar_pinjaman_nasabah) >= 2, (
-        "Bank belum menyimpan kedua pinjaman nasabah"
-    )
-
-    print("DATA PINJAMAN SETELAH PERSIAPAN")
-    print("Nasabah              :", nasabah.nama)
-    print("Pinjaman lama        :", pinjaman_lama.ID)
-    print("Status pinjaman lama :", pinjaman_lama.status.value)
-    print("Pinjaman baru        :", pinjaman_baru.ID)
-    print("Status pinjaman baru :", pinjaman_baru.status.value)
-    print(
-        "Jumlah pinjaman Bank :",
-        len(daftar_pinjaman_nasabah)
-    )
-    print(
-        "Pinjaman aktif       :",
-        nasabah.pinjaman.ID
-    )
-    print()
-    print("✅ Dataset dua pinjaman siap diuji")
-
-    return nasabah, pinjaman_lama, pinjaman_baru
-
-nasabah_uji, pinjaman_lunas, pinjaman_aktif = (
-    siapkan_dua_pinjaman_untuk_uji(bank)
-)
+# def siapkan_dua_pinjaman_untuk_uji(bank):
+#     nik = input("Masukkan NIK nasabah yang akan diuji: ").strip()
+#
+#     nasabah = bank.cari_nasabah(nik)
+#
+#     if nasabah is None:
+#         raise ValueError("NIK nasabah tidak ditemukan")
+#
+#     pinjaman_lama = nasabah.pinjaman
+#
+#     if pinjaman_lama is None:
+#         raise ValueError(
+#             "Nasabah tidak memiliki pinjaman berjalan"
+#         )
+#
+#     if pinjaman_lama.status != StatusPinjaman.AKTIF:
+#         raise ValueError(
+#             "Pinjaman nasabah belum berstatus aktif"
+#         )
+#
+#     rekening = pinjaman_lama.rekening
+#
+#     print()
+#     print("DATA PINJAMAN LAMA")
+#     print("Nasabah          :", nasabah.nama)
+#     print("ID pinjaman      :", pinjaman_lama.ID)
+#     print("Status           :", pinjaman_lama.status.value)
+#     print("Tenor            :", pinjaman_lama.tenor)
+#     print("Cicilan terbayar :", pinjaman_lama.cicilan_terbayar)
+#     print(
+#         "Cicilan tersisa  :",
+#         pinjaman_lama.tenor
+#         - pinjaman_lama.cicilan_terbayar
+#     )
+#     print()
+#
+#     cicilan_tersisa = (
+#         pinjaman_lama.tenor
+#         - pinjaman_lama.cicilan_terbayar
+#     )
+#
+#     tanggal_pelunasan = None
+#
+#     # Melunasi seluruh cicilan yang masih tersisa.
+#     for _ in range(cicilan_tersisa):
+#         tanggal_bayar = pinjaman_lama.tanggal_jatuh_tempo
+#         tanggal_pelunasan = tanggal_bayar
+#
+#         denda = PinjamanService.hitung_denda(
+#             pinjaman_lama,
+#             tanggal_bayar
+#         )
+#
+#         total_bayar = (
+#             pinjaman_lama.cicilan_tetap
+#             + denda
+#         )
+#
+#         saldo_minimum = (
+#             total_bayar
+#             + rekening.saldosetor_min
+#         )
+#
+#         # Menambahkan saldo pengujian jika saldo tidak mencukupi.
+#         if rekening.saldo < saldo_minimum:
+#             kekurangan = saldo_minimum - rekening.saldo
+#             rekening.tambah_saldo(kekurangan)
+#
+#         nomor_cicilan = (
+#             pinjaman_lama.cicilan_terbayar
+#             + 1
+#         )
+#
+#         PinjamanService.bayar_cicilan(
+#             bank,
+#             pinjaman_lama,
+#             hari_ini=tanggal_bayar
+#         )
+#
+#         print(
+#             f"Cicilan ke-{nomor_cicilan} dibayar "
+#             f"pada {tanggal_bayar}"
+#         )
+#
+#     assert pinjaman_lama.status == StatusPinjaman.LUNAS, (
+#         "Pinjaman lama seharusnya sudah lunas"
+#     )
+#
+#     assert pinjaman_lama.sisa_pokok == 0, (
+#         "Sisa pokok pinjaman lama seharusnya nol"
+#     )
+#
+#     assert nasabah.pinjaman is None, (
+#         "Nasabah masih menunjuk pinjaman lama"
+#     )
+#
+#     assert pinjaman_lama in bank.daftar_pinjaman, (
+#         "Pinjaman lama hilang dari daftar pinjaman Bank"
+#     )
+#
+#     print()
+#     print("✅ Pinjaman lama berhasil dilunasi")
+#     print("ID pinjaman :", pinjaman_lama.ID)
+#     print("Status      :", pinjaman_lama.status.value)
+#     print()
+#
+#     # Pinjaman baru dimulai sehari setelah pelunasan.
+#     tanggal_pencairan_baru = (
+#         tanggal_pelunasan
+#         + datetime.timedelta(days=1)
+#     )
+#
+#     pinjaman_baru = PinjamanService.ajukan_pinjaman(
+#         bank=bank,
+#         nasabah=nasabah,
+#         rekening=rekening,
+#         nominal=1_000_000,
+#         tenor=6
+#     )
+#
+#     PinjamanService.setujui_pinjaman(
+#         bank,
+#         pinjaman_baru
+#     )
+#
+#     PinjamanService.cairkan_pinjaman(
+#         bank,
+#         pinjaman_baru,
+#         hari_ini=tanggal_pencairan_baru
+#     )
+#
+#     assert pinjaman_baru.status == StatusPinjaman.AKTIF, (
+#         "Pinjaman baru seharusnya berstatus aktif"
+#     )
+#
+#     assert nasabah.pinjaman is pinjaman_baru, (
+#         "Nasabah tidak menunjuk pinjaman baru"
+#     )
+#
+#     assert pinjaman_baru in bank.daftar_pinjaman, (
+#         "Pinjaman baru belum masuk daftar pinjaman Bank"
+#     )
+#
+#     assert pinjaman_baru is not pinjaman_lama, (
+#         "Pinjaman baru dan lama merupakan objek yang sama"
+#     )
+#
+#     assert pinjaman_baru.ID > pinjaman_lama.ID, (
+#         "ID pinjaman baru tidak melanjutkan ID sebelumnya"
+#     )
+#
+#     daftar_pinjaman_nasabah = [
+#         pinjaman
+#         for pinjaman in bank.daftar_pinjaman
+#         if pinjaman.pemilik is nasabah
+#     ]
+#
+#     assert len(daftar_pinjaman_nasabah) >= 2, (
+#         "Bank belum menyimpan kedua pinjaman nasabah"
+#     )
+#
+#     print("DATA PINJAMAN SETELAH PERSIAPAN")
+#     print("Nasabah              :", nasabah.nama)
+#     print("Pinjaman lama        :", pinjaman_lama.ID)
+#     print("Status pinjaman lama :", pinjaman_lama.status.value)
+#     print("Pinjaman baru        :", pinjaman_baru.ID)
+#     print("Status pinjaman baru :", pinjaman_baru.status.value)
+#     print(
+#         "Jumlah pinjaman Bank :",
+#         len(daftar_pinjaman_nasabah)
+#     )
+#     print(
+#         "Pinjaman aktif       :",
+#         nasabah.pinjaman.ID
+#     )
+#     print()
+#     print("✅ Dataset dua pinjaman siap diuji")
+#
+#     return nasabah, pinjaman_lama, pinjaman_baru
+#
+# if __name__ = "__main__":
+#     siapkan_dua_pinjaman_untuk_uji()
+# nasabah_uji, pinjaman_lunas, pinjaman_aktif = (
+#     siapkan_dua_pinjaman_untuk_uji(bank)
+# )
 
 
 # -------------------------------------------------------------------------

@@ -1,7 +1,9 @@
+from bank_djago.services.deposito.deposito_service import StatusDeposito
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
+from bank_djago.utils.utility import StatusPinjaman
 from bank_djago.utils.validator import Validator
 
 class RekeningService:
@@ -53,6 +55,12 @@ class RekeningService:
 
     @staticmethod
     def upgrade_rekening(bank,rekening_lama,target_level):
+        if target_level not in RekeningService.jenis_rekening:
+            raise ValueError("Level rekening tidak tersedia")
+
+        if target_level <= rekening_lama.level:
+            raise  ValueError("Level upgrade rekening harus lebih tinggi dari level saat ini")
+
         Validator.amankan_rekening(rekening_lama)
         info = RekeningService.jenis_rekening[target_level]
         kelas = info["kelas"]
@@ -90,6 +98,12 @@ class RekeningService:
 
     @staticmethod
     def downgrade_rekening(bank,rekening_lama,target_level):
+
+        if target_level not in RekeningService.jenis_rekening:
+            raise ValueError("Level rekening tidak tersedia")
+
+        if target_level >= rekening_lama.level:
+            raise ValueError("Pilihan level rekening harus lebih rendah dari level saat ini")
         Validator.amankan_rekening(rekening_lama)
 
         info = RekeningService.jenis_rekening[target_level]
@@ -163,6 +177,14 @@ class RekeningService:
         else:
             TransaksiService.tarik_semua_uang(rekening)
             rekening.status = "tutup"
+
+        deposito_aktif = any(deposito.rekening is rekening and deposito.status in (StatusDeposito.AKTIF,StatusDeposito.JATUH_TEMPO) for deposito in rekening.pemilik.deposito)
+        if deposito_aktif:
+            raise ValueError("Rekening ini masih memiliki deposito aktif")
+
+        pinjaman_aktif = any(pinjaman.rekening is rekening and pinjaman.status in (StatusPinjaman.AKTIF,StatusPinjaman.DISETUJUI,StatusPinjaman.DIAJUKAN) for pinjaman in bank.daftar_pinjaman)
+        if pinjaman_aktif:
+            raise ValueError("Rekening masih memiliki pinjaman aktif")
         AuditService.tambah_audit(bank,kategori="rekening",jenis="penutupan",log=f"{rekening.pemilik.nama} telah menutup rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
     @staticmethod
     def buka_rekening(bank,nasabah,pilihan,pin,setor_awal):

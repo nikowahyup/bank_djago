@@ -12215,5 +12215,45 @@
         "log": "Niko Wahyu Pratama Setor Uang Rp100.000.000",
         "nik": "3510152602082002",
         "rekening": "2001385564852780"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-18T08:57:25.765405",
+        "jenis": "PINJAMAN",
+        "log": "Gojo Satoru mengajukan pinjaman",
+        "nik": "3150152602082002",
+        "rekening": "2001633585477864"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-18T08:57:46.003765",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Gojo Satoru telah disetujui",
+        "nik": "3150152602082002",
+        "rekening": "2001633585477864"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-18T08:58:20.326259",
+        "jenis": "PINJAMAN",
+        "log": "Gojo Satoru menerima pencairan pinjaman Rp1.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001633585477864"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-18T09:22:37.844617",
+        "jenis": "PEMBLOKIRAN",
+        "log": "Gojo Satoru telah memblokir rekening",
+        "nik": "3150152602082002",
+        "rekening": "2001633585477864"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-18T09:23:18.529463",
+        "jenis": "BUKA BLOKIR",
+        "log": "Gojo Satoru membuka kembali blokiran rekening",
+        "nik": "3150152602082002",
+        "rekening": "2001633585477864"
     }
 ]

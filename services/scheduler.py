@@ -1,5 +1,5 @@
 from bank_djago.core.notifikasi import Notifikasi
-from bank_djago.services.rekening.biaya_admine_service import  BiayaAdminService
+from bank_djago.services.rekening.biaya_admin_service import  BiayaAdminService
 from bank_djago.services.deposito.deposito_service import StatusDeposito,DepositoService,JenisAro
 from bank_djago.services.rekening.bunga_service import BungaService
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
@@ -17,6 +17,10 @@ class Scheduler:
             hari_ini = datetime.date.today()
 
         for rekening in bank.rekening_index.values():
+
+            if rekening.status == "tutup":
+                continue
+
             BungaService.berikan_bunga(rekening)
 
             LimitService.reset_limit(bank,rekening)
@@ -127,7 +131,8 @@ class Scheduler:
 
                     notifikasi = Notifikasi(
                                             jenis="pinjaman",
-                                            pesan=f"Cicilan bulan {Utilitas.nama_bulan(jatuh_tempo)} telah jatuh tempo. Cicilan sebesar Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))}",
+                                            pesan=f"Hari ini waktu icilan bulan {Utilitas.nama_bulan(jatuh_tempo)} terakhir.\n"
+                                                  f"Cicilan sebesar Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))}",
                                             referensi_id=JenisReferensiID.PINJAMAN)
                     nasabah.notifikasi.append(notifikasi)
                     pinjaman.notifikasi_jatuh_tempo = True
@@ -138,11 +143,12 @@ class Scheduler:
 
                 if sisa_toleransi == 0 :
                     pesan = (
-                        "Hari ini adalah hari terakhir masa toleransi "
-                        "pembayaran cicilan Anda. Denda mulai dihitung "
+                        "Hari ini adalah hari terakhir masa toleransi"
+                        "pembayaran cicilan Anda\n"
+                        ". Denda mulai dihitung"
                         "besok jika cicilan belum dibayar.")
                 else:
-                    pesan = (f"Cicilan Anda terlambat {hari_terlambat} hari. "
+                    pesan = (f"Cicilan Anda terlambat {hari_terlambat} hari.\n"
                         f"Masa toleransi tersisa {sisa_toleransi} hari.")
 
                 notifikasi = Notifikasi(jenis="pinjaman",pesan=pesan,referensi_id=JenisReferensiID.PINJAMAN)
@@ -156,10 +162,10 @@ class Scheduler:
                 notifikasi = Notifikasi(
                     jenis="pinjaman",
                     pesan=(
-                        f"Cicilan Anda terlambat {hari_terlambat} hari. "
-                        f"Denda telah berjalan selama {hari_denda} hari "
+                        f"Cicilan Anda terlambat {hari_terlambat} hari.\n"
+                        f"Denda telah berjalan selama {hari_denda} hari\n"
                         f"dengan nominal "
-                        f"Rp{Utilitas.format_rupiah(denda)}. "
+                        f"Rp{Utilitas.format_rupiah(denda)}.\n"
                         f"Total pembayaran saat ini "
                         f"Rp{Utilitas.format_rupiah(round(total_tagihan))}."
                     ),

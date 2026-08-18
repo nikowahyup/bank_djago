@@ -148,7 +148,7 @@ class RekeningUI:
     def tutup_rekening(bank,rekening):
         UI.header("TUTUP REKENING",UI.MERAH)
         if rekening.saldo > 0:
-            print(f"Masih ada saldo Rp{rekening.cek_saldo()}. Harus dikosongkan sebelum ditutup")
+            print(f"Masih ada saldo Rp{Utilitas.format_rupiah(round(rekening.saldo))}. Harus dikosongkan sebelum ditutup")
             print("Pilih cara pengosongan rekening")
             print("1. Tarik seluruh saldo")
             print("2. Transfer ke rekening lain")
@@ -171,7 +171,7 @@ class RekeningUI:
                     saldo = rekening.saldo
                     penerima = TransaksiService.cari_penerima(bank,rek_penerima,rekening)
                     RekeningService.tutup_rekening(bank,rekening, penerima)
-                    UI.sukses(f"Rp{Utilitas.format_rupiah(saldo)} telah masuk ke rekening {penerima.pemilik.nama}")
+                    UI.sukses(f"Rp{Utilitas.format_rupiah(round(saldo))} telah masuk ke rekening {penerima.pemilik.nama}")
                     UI.sukses(f"Rekening dengan nomor {rekening.norek} telah ditutup!")
 
             except ValueError as e:

@@ -1,3 +1,5 @@
+import datetime
+
 from bank_djago.services.nasabah_menu import NasabahMenu
 from bank_djago.services.rekening.rekening_ui import RekeningUI
 from bank_djago.services.scheduler import Scheduler
@@ -9,7 +11,8 @@ from bank_djago.services.admin.menu_admin import MenuAdmin
 def menu():
 
     bank = JsonStorage.muat_bank()
-    Scheduler.jalankan(bank)
+    hari_ini = datetime.date(2026,9,25)
+    Scheduler.jalankan(bank,hari_ini)
 
 
     while True:

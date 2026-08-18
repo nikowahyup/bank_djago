@@ -1,4 +1,5 @@
 from bank_djago.utils.ui import UI
+from bank_djago.utils.utility import Utilitas
 
 
 class LayananNasabah:
@@ -43,7 +44,7 @@ class LayananNasabah:
             print(f"{i}. {rek.jenis}")
             print(f"💳 Nomor Rekening : {rek.norek}")
             print(f"📃 Status         : {rek.status}")
-            print(f"💰 Saldo          : Rp{rek.cek_saldo()}\n")
+            print(f"💰 Saldo          : Rp{Utilitas.format_rupiah(round(rek.saldo))}\n")
 
     @staticmethod
     def ganti_alamat(nasabah):
