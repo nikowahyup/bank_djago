@@ -1,4 +1,4 @@
-from bank_djago.utils.utililty import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensiID
 
 
 class Notifikasi:

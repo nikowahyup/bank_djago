@@ -1,4 +1,4 @@
-from bank_djago.utils.utililty import JenisAro
+from bank_djago.utils.utility import JenisAro
 
 class Deposito:
 

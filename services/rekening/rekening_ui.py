@@ -1,9 +1,9 @@
-from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.ui import UI
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.validator import Validator
 
 
@@ -28,9 +28,9 @@ class RekeningUI:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                RekeningUI.upgrade_rekening(bank, rekening)
+                rekening = RekeningUI.upgrade_rekening(bank, rekening)
             elif pilihan == "2":
-                RekeningUI.downgrade_rekening(bank, rekening)
+                rekening = RekeningUI.downgrade_rekening(bank, rekening)
             elif pilihan == "3":
                 RekeningUI.blokir_rekening(bank,rekening)
             elif pilihan == "4":
@@ -65,13 +65,14 @@ class RekeningUI:
             break
 
         try:
-            RekeningService.upgrade_rekening(bank,rekening,pilihan)
+            rekening_baru = RekeningService.upgrade_rekening(bank,rekening,pilihan)
             UI.sukses('Peningkatan Sukses!')
             UI.sukses(f"Rekening telah ditingkatkan ke {RekeningUI.level[pilihan]}")
+            return rekening_baru
         except ValueError as e:
             UI.gagal("Peningkatan Gagal")
             UI.gagal(str(e))
-
+            return rekening
 
     @staticmethod
     def downgrade_rekening(bank,rekening):
@@ -98,13 +99,14 @@ class RekeningUI:
             break
 
         try:
-            RekeningService.downgrade_rekening(bank,rekening,pilihan)
+            rekening_baru = RekeningService.downgrade_rekening(bank,rekening,pilihan)
             UI.sukses('Penurunan Sukses!')
             UI.sukses(f"Rekening telah diturunkan ke {RekeningUI.level[pilihan]}")
+            return rekening_baru
         except ValueError as e:
             UI.gagal("Penurunan Gagal!")
             UI.gagal(str(e))
-
+            return rekening
     @staticmethod
     def blokir_rekening(bank,rekening):
         UI.header("BLOKIR REKENING",UI.MERAH)
@@ -168,7 +170,7 @@ class RekeningUI:
 
                     saldo = rekening.saldo
                     penerima = TransaksiService.cari_penerima(bank,rek_penerima,rekening)
-                    RekeningService.tutup_rekening(rekening, penerima)
+                    RekeningService.tutup_rekening(bank,rekening, penerima)
                     UI.sukses(f"Rp{Utilitas.format_rupiah(saldo)} telah masuk ke rekening {penerima.pemilik.nama}")
                     UI.sukses(f"Rekening dengan nomor {rekening.norek} telah ditutup!")
 

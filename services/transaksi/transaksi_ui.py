@@ -1,6 +1,6 @@
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.ui import UI
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 
 
 class TransaksiUI:

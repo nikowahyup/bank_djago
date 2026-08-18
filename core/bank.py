@@ -8,7 +8,7 @@ from .pinjaman import Pinjaman
 # from ..services.scheduler import Scheduler
 from ..services.deposito.deposito_service import JenisAro
 from ..services.rekening.rekening_service import RekeningService
-from bank_djago.services.pinjaman.pinjaman_service import StatusPinjaman
+from bank_djago.utils.utility import StatusPinjaman
 
 class Bank:
     def __init__(self,nama,data_audit,data_nasabah=None,data_rekening=None,data_deposito=None,data_pinjaman=None):
@@ -92,41 +92,78 @@ class Bank:
                         for id_deposito in daftar_deposito
                     )
 
-    def _muat_pinjaman(self,data_pinjaman):
-        for nik,info in data_pinjaman.items():
-
+    def _muat_pinjaman(self, data_pinjaman):
+        for nik, daftar_pinjaman in data_pinjaman.items():
             nasabah = self.data_nasabah[nik]
-            norek = info["rekening"]
-            rekening = self.rekening_index[norek]
 
-            pinjaman = Pinjaman(ID=int(info["ID"]),
-                                pemilik=nasabah,
-                                rekening=rekening,
-                                nominal_pinjaman=int(info["nominal_pinjaman"]),
-                                bunga=float(info["bunga"]),
-                                tenor=int(info["tenor"]))
-            pinjaman.cicilan_tetap = float(info["cicilan_tetap"])
-            pinjaman.sisa_pokok = int(info["sisa_pokok"])
-            pinjaman.cicilan_terbayar = int(info["cicilan_terbayar"])
-            pinjaman.bunga_bulanan = float(info["bunga_bulanan"])
-            pinjaman.status = StatusPinjaman(info["status"])
 
-            if info["tanggal_pencairan"]:
-                pinjaman.tanggal_pencairan = datetime.date.fromisoformat(
-                    info["tanggal_pencairan"]
+            if "ID" in daftar_pinjaman:
+                daftar_pinjaman = {
+                    str(daftar_pinjaman["ID"]): daftar_pinjaman
+                }
+
+            for id_pinjaman, info in daftar_pinjaman.items():
+                norek = info["rekening"]
+                rekening = self.rekening_index[norek]
+
+                pinjaman = Pinjaman(
+                    ID=int(info["ID"]),
+                    pemilik=nasabah,
+                    rekening=rekening,
+                    nominal_pinjaman=int(info["nominal_pinjaman"]),
+                    bunga=float(info["bunga"]),
+                    tenor=int(info["tenor"])
                 )
-            else:
-                pinjaman.tanggal_pencairan = None
 
-            if info["jatuh_tempo"]:
-                pinjaman.tanggal_jatuh_tempo = datetime.date.fromisoformat(info["jatuh_tempo"])
-            else:
-                pinjaman.tanggal_jatuh_tempo = None
+                pinjaman.cicilan_tetap = float(
+                    info["cicilan_tetap"]
+                )
 
-            self.daftar_pinjaman.append(pinjaman)
+                pinjaman.sisa_pokok = float(
+                    info["sisa_pokok"]
+                )
 
-            if pinjaman.status in (StatusPinjaman.DIAJUKAN,StatusPinjaman.DISETUJUI,StatusPinjaman.AKTIF):
-                nasabah.pinjaman = pinjaman
+                pinjaman.cicilan_terbayar = int(
+                    info["cicilan_terbayar"]
+                )
+
+                pinjaman.bunga_bulanan = float(
+                    info["bunga_bulanan"]
+                )
+
+                pinjaman.status = StatusPinjaman(
+                    info["status"]
+                )
+
+                if info["tanggal_pencairan"]:
+                    pinjaman.tanggal_pencairan = (
+                        datetime.date.fromisoformat(
+                            info["tanggal_pencairan"]
+                        )
+                    )
+
+                if info["jatuh_tempo"]:
+                    pinjaman.tanggal_jatuh_tempo = (
+                        datetime.date.fromisoformat(
+                            info["jatuh_tempo"]
+                        )
+                    )
+
+
+                self.daftar_pinjaman.append(pinjaman)
+
+                if pinjaman.status in (
+                        StatusPinjaman.DIAJUKAN,
+                        StatusPinjaman.DISETUJUI,
+                        StatusPinjaman.AKTIF
+                ):
+                    nasabah.pinjaman = pinjaman
+
+            if daftar_pinjaman:
+                nasabah.jumlah_pinjaman = max(
+                    int(id_pinjaman)
+                    for id_pinjaman in daftar_pinjaman
+                )
 
     # ------------------------------------------------------------------------------------------------------------------------------
     def buat_norek(self,digit_awal):

@@ -2,7 +2,7 @@
     "2001385564852780": {
         "norek": "2001385564852780",
         "pin": "111000",
-        "saldo": 100913651.21132165,
+        "saldo": 200913651.21132165,
         "limit": 200000000,
         "riwayat": [
             {
@@ -46,6 +46,12 @@
                 "jenis": "pinjaman",
                 "waktu": "2026-08-17T09:52:04.847398",
                 "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "setor uang",
+                "waktu": "2026-08-18T06:36:44.131878",
+                "log": "SETOR UANG | +Rp100.000.000"
             }
         ],
         "status": "aktif",

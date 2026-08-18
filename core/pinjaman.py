@@ -1,4 +1,4 @@
-from bank_djago.utils.utililty import StatusPinjaman
+from bank_djago.utils.utility import StatusPinjaman
 
 
 class Pinjaman:

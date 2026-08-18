@@ -1,5 +1,5 @@
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 from bank_djago.utils.validator import Validator
@@ -84,6 +84,7 @@ class RekeningService:
         log = RiwayatTemplate.upgrade_rekening(sebelum=rek_awal, sesudah=rek_tujuan)
         AuditService.tambah_audit(bank, "rekening", jenis="upgrade",log=f"{nasabah.nama} meningkatkan rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
         rekening_baru.simpan_riwayat(log)
+        return rekening_baru
 
 
 
@@ -122,7 +123,7 @@ class RekeningService:
         log = RiwayatTemplate.downgrade_rekening(sebelum=rek_awal, sesudah=rek_tujuan)
         AuditService.tambah_audit(bank, "rekening", jenis="downgrade",log=f"{nasabah.nama} menurunkan rekeningnya dari {rek_awal} ke {rek_tujuan}",norek=rekening_baru.norek)
         rekening_baru.simpan_riwayat(log)
-
+        return rekening_baru
 
 
     @staticmethod

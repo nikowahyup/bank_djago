@@ -1,7 +1,7 @@
 
 
 from bank_djago.services.pinjaman.pinjaman_service import  PinjamanService
-from bank_djago.utils.utililty import Utilitas,StatusPinjaman
+from bank_djago.utils.utility import Utilitas,StatusPinjaman
 from bank_djago.utils.ui import UI
 
 class PinjamanUI:

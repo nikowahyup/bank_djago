@@ -1,5 +1,5 @@
 import datetime
-from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.admin.audit_service  import AuditService
 
 class LimitService:
 

@@ -26,30 +26,15 @@ class JsonStorage:
     @staticmethod
     def simpan_bank(bank):
 
-        JsonStorage.simpan_json(
-            JsonStorage.file_nasabah,
-            bank.data_nasabah_dict()
-        )
+        JsonStorage.simpan_json(JsonStorage.file_nasabah,bank.data_nasabah_dict())
 
-        JsonStorage.simpan_json(
-            JsonStorage.file_rek,
-            bank.data_rekening_dict()
-        )
+        JsonStorage.simpan_json(JsonStorage.file_rek,bank.data_rekening_dict())
 
-        JsonStorage.simpan_json(
-            JsonStorage.file_depo,
-            JsonStorage.buat_data_deposito(bank)
-        )
+        JsonStorage.simpan_json(JsonStorage.file_depo,JsonStorage.buat_data_deposito(bank))
 
-        JsonStorage.simpan_json(
-            JsonStorage.file_audit,
-            bank.audit_log
-        )
+        JsonStorage.simpan_json(JsonStorage.file_audit,bank.audit_log)
 
-        JsonStorage.simpan_json(
-            JsonStorage.file_pinjaman,
-            bank.data_pinjaman_dict()
-        )
+        JsonStorage.simpan_json(JsonStorage.file_pinjaman,JsonStorage.buat_data_pinjaman(bank))
 
 
 
@@ -98,3 +83,16 @@ class JsonStorage:
 
 
 
+    @staticmethod
+    def buat_data_pinjaman(bank):
+        data_pinjaman = {}
+
+        for pinjaman in bank.daftar_pinjaman:
+            nik = pinjaman.pemilik.NIK
+
+            if nik not in data_pinjaman:
+                data_pinjaman[nik] = {}
+
+            data_pinjaman[nik][str(pinjaman.ID)] = pinjaman.ke_dict()
+
+        return data_pinjaman

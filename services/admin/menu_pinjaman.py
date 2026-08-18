@@ -1,5 +1,5 @@
 from bank_djago.utils.ui import UI
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 

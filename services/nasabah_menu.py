@@ -3,10 +3,10 @@ from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksi_ui import TransaksiUI
 from bank_djago.services.rekening.rekening_ui import RekeningUI
 from bank_djago.services.deposito.deposito_ui import DepositoUI
-from bank_djago.services.layanan_nasabah import LayananNasabah
+from bank_djago.services.profil_nasabah_ui import LayananNasabah
 from bank_djago.services.transaksi.riwayat.riwayat_ui import RiwayatUI
 from bank_djago.utils.ui import UI
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 from bank_djago.services.pinjaman.pinjaman_ui import PinjamanUI
 
 

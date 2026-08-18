@@ -12207,5 +12207,13 @@
         "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp1.000.000",
         "nik": "3510152602082002",
         "rekening": "2001385564852780"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-18T06:36:44.131912",
+        "jenis": "SETOR UANG",
+        "log": "Niko Wahyu Pratama Setor Uang Rp100.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001385564852780"
     }
 ]

@@ -1,5 +1,5 @@
-from bank_djago.services.rekap_audit import AuditService
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.services.admin.audit_service import AuditService
+from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.ui import UI
 class AuditUI:
 

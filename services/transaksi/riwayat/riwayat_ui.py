@@ -1,4 +1,4 @@
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 from .riwayat_service import RiwayatService
 from bank_djago.utils.ui import UI
 class RiwayatUI:

@@ -1,5 +1,5 @@
-from bank_djago.services.rekap_bank import RekapService
-from bank_djago.utils.utililty import Utilitas,UI
+from bank_djago.services.admin.rekap_bak_service import RekapService
+from bank_djago.utils.utility import Utilitas,UI
 
 
 class RekapUI:

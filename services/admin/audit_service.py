@@ -1,4 +1,4 @@
-from bank_djago.utils.utililty import Utilitas
+from bank_djago.utils.utility import Utilitas
 class AuditService:
 
     @staticmethod

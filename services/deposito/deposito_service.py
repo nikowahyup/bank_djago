@@ -1,8 +1,8 @@
 import datetime
 from bank_djago.core.deposito import Deposito
-from bank_djago.services.rekap_audit import AuditService
+from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.utils.utililty import Utilitas, JenisAro, JenisReferensiID
+from bank_djago.utils.utility import Utilitas, JenisAro, JenisReferensiID
 from bank_djago.utils.validator import Validator
 from bank_djago.core.notifikasi import Notifikasi
 
@@ -80,10 +80,7 @@ class DepositoService:
         deposito.rekening.simpan_riwayat(log)
 
         nasabah = deposito.pemilik
-        for item in nasabah.notifikasi:
-            if item.referensi_id == JenisReferensiID.DEPOSITO:
-                nasabah.notifikasi.remove(item)
-                break
+        DepositoService.hapus_notifikasi_deposito(nasabah,deposito)
 
         deposito.notifikasi_depo = False
         AuditService.tambah_audit(
