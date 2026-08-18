@@ -39,10 +39,16 @@ bank_djago/
 │
 ├── core/
 ├── services/
-├── storage/
-├── ui/
+│   ├── admin/
+│   ├── deposito/
+│   ├── pinjaman/
+│   ├── rekening/
+│   └── transaksi/
+├── penyimpanan/
+├── tests/
 ├── utils/
-├── main.py
+├── Data/
+└── main.py
 ```
 
 ### 📑 Fitur Saat Ini
@@ -75,7 +81,7 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 
 ### `v0.6` - Refactor & Penyempurnaan Arsitektur
 - [x] **Pemisahan Logika Transaksi:** Memindahkan aturan transaksi ke `TransaksiService`.
-- [x] **Pemisahan UI Teller:** Input dan komunikasi dengan nasabah ditangani `TellerUI`.
+- [x] **Pemisahan UI Transaksi:** Input dan komunikasi transaksi dengan nasabah ditangani `TransaksiUI`.
 - [x] **Pemisahan Riwayat:** Log transaksi ditangani pada layer transaksi.
 - [x] **Penyederhanaan Struktur:** Menghapus perantara yang tidak lagi memiliki tanggung jawab jelas.
 - [x] **UI Terminal:** Menambahkan sistem warna pada header dan membedakan level navigasi.
@@ -131,8 +137,14 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Validasi Integritas Data:** Memastikan relasi nasabah, rekening, deposito, pinjaman, dan notifikasi tetap konsisten setelah save/load.
 - [x] **Pengujian Edge Case:** Menguji repeated scheduler, missed scheduler, multiple deposito, save/load, pembayaran sebelum jatuh tempo, pencegahan pembayaran periode berikutnya terlalu cepat, saldo tidak cukup, status lunas, dan tanggal ujung bulan.
 - [x] **Pengujian Tunggakan & Denda:** Menguji H/H+1/H+7/H+8, batas maksimal denda, pembayaran gagal tanpa perubahan state, beberapa periode tertunggak, pelunasan terlambat, dan save/load saat menunggak.
-- [ ] **Perapian Struktur Proyek:** Refactor bagian yang masih memiliki tanggung jawab tumpang tindih.
-- [ ] **Dokumentasi:** Melengkapi dokumentasi arsitektur, alur bisnis, dan keputusan desain.
+- [x] **Integritas Upgrade/Downgrade:** Memastikan Bank, Nasabah, Deposito, Pinjaman, dan UI menunjuk objek rekening pengganti yang sama.
+- [x] **Riwayat Multiple Pinjaman:** Menyimpan seluruh pinjaman nasabah menggunakan struktur NIK → ID pinjaman → data pinjaman.
+- [x] **Pemulihan Pinjaman Aktif:** Memuat seluruh riwayat pinjaman ke Bank dan memilih pinjaman berjalan berdasarkan status.
+- [x] **Isolasi Notifikasi:** Memastikan penghapusan notifikasi deposito tidak memengaruhi deposito lain, pinjaman, atau rekening.
+- [x] **Validasi Relasi Rekening:** Mencegah rekening ditutup selama masih memiliki deposito atau pinjaman berjalan.
+- [x] **Validasi Rekening Terblokir:** Menolak pembayaran cicilan melalui rekening yang sedang diblokir.
+- [x] **Perapian Struktur Proyek:** Memisahkan service, UI, penyimpanan, dan pengujian berdasarkan tanggung jawab.
+- [x] **Dokumentasi:** Mendokumentasikan arsitektur, alur bisnis, integrity check, dan keputusan desain.
 
 ### `v1.1` - Database
 - [ ] Migrasi dari JSON ke SQLite.
@@ -201,6 +213,16 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - Menguji pembayaran beberapa periode tertunggak, pelunasan dengan denda, dan kegagalan pembayaran tanpa perubahan state
 - Memastikan perhitungan denda tetap konsisten setelah save/load dan repeated scheduler
 
+(18/08/2026)
+- Memperbaiki relasi objek rekening setelah upgrade dan downgrade
+- Menguji relasi rekening dengan deposito dan pinjaman setelah save/load
+- Menambahkan penyimpanan multiple riwayat pinjaman berdasarkan NIK dan ID
+- Memulihkan pinjaman berjalan berdasarkan status bisnis
+- Memperbaiki isolasi penghapusan notifikasi deposito
+- Mencegah penutupan rekening yang masih memiliki kewajiban berjalan
+- Menolak pembayaran cicilan melalui rekening terblokir
+- Menghapus state status pembayaran yang dapat dihitung dari tanggal jatuh tempo
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -238,6 +260,11 @@ Setiap pembayaran menyelesaikan cicilan tertua, lalu jatuh tempo berikutnya dihi
 
 Jawaban:
 State lama dan nilai turunan digunakan terlebih dahulu. State baru hanya ditambahkan jika mewakili informasi bisnis independen yang tidak dapat dihitung kembali secara aman. Prinsip ini mengurangi duplikasi data dan mempermudah integrity check, persistence, serta migrasi menuju database dan web.
+
+### 8. Mengapa status pembayaran tidak disimpan sebagai state?
+
+Jawaban:
+Status pembayaran merupakan nilai turunan dari status pinjaman, tanggal jatuh tempo, dan tanggal pemeriksaan. Menyimpannya akan menciptakan dua sumber kebenaran yang dapat tidak sinkron. Kondisi lancar atau menunggak ditentukan secara dinamis melalui perhitungan hari keterlambatan.
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
