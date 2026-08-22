@@ -115,21 +115,21 @@ class Bank:
                     tenor=int(info["tenor"])
                 )
 
-                pinjaman.cicilan_tetap = float(
+                pinjaman.cicilan_tetap = round(float(
                     info["cicilan_tetap"]
-                )
+                ))
 
-                pinjaman.sisa_pokok = float(
+                pinjaman.sisa_pokok = round(float(
                     info["sisa_pokok"]
-                )
+                ))
 
                 pinjaman.cicilan_terbayar = int(
                     info["cicilan_terbayar"]
                 )
 
-                pinjaman.bunga_bulanan = float(
+                pinjaman.bunga_bulanan = round(float(
                     info["bunga_bulanan"]
-                )
+                ))
 
                 pinjaman.status = StatusPinjaman(
                     info["status"]

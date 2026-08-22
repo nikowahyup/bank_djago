@@ -47,7 +47,7 @@ class RekeningUI:
         print()
         if rekening.level == 4:
             print("Rekening ini sudah platinum")
-            return
+            return rekening
         print("Mau tingkatkan ke mana: ")
         opsi = list(range(rekening.level+1,5))
         while True:
@@ -81,7 +81,7 @@ class RekeningUI:
         print(f"Rekening saat ini : {RekeningUI.level[rekening.level]}")
         if rekening.level == 1:
             print("Rekening sudah reguler")
-            return
+            return rekening
         while True:
             print("Mau turunkan ke mana: ")
             opsi = list(range(1,rekening.level))

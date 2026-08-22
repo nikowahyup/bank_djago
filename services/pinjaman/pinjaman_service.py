@@ -89,9 +89,9 @@ class PinjamanService:
         pinjaman.rekening.tambah_saldo(pinjaman.nominal_pinjaman)
         pinjaman.sisa_pokok = pinjaman.nominal_pinjaman
         persentase_bunga = pinjaman.bunga/12
-        pinjaman.cicilan_tetap = (pinjaman.nominal_pinjaman * persentase_bunga * ((1 + persentase_bunga) ** pinjaman.tenor)) / ((1 + persentase_bunga) ** pinjaman.tenor - 1)
+        pinjaman.cicilan_tetap = round((pinjaman.nominal_pinjaman * persentase_bunga * ((1 + persentase_bunga) ** pinjaman.tenor)) / ((1 + persentase_bunga) ** pinjaman.tenor - 1))
         pinjaman.status = StatusPinjaman.AKTIF
-        bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
+        bunga_bulanan = round(pinjaman.sisa_pokok * persentase_bunga)
         pinjaman.bunga_bulanan = bunga_bulanan
         pinjaman.tanggal_pencairan = hari_ini
         pinjaman.tanggal_jatuh_tempo = Utilitas.tambah_bulan(pinjaman.tanggal_pencairan,1)
@@ -138,7 +138,7 @@ class PinjamanService:
 
         persentase_bunga = pinjaman.bunga / 12
 
-        bunga_bulanan = pinjaman.sisa_pokok * persentase_bunga
+        bunga_bulanan = round(pinjaman.sisa_pokok * persentase_bunga)
         pokok_saja = pinjaman.cicilan_tetap - bunga_bulanan
 
         pinjaman.sisa_pokok -= pokok_saja
@@ -297,7 +297,6 @@ class PinjamanService:
         if hari_ini is None:
             hari_ini = datetime.date.today()
         return  max(0,(hari_ini - pinjaman.tanggal_jatuh_tempo).days)
-
 
 
     @staticmethod

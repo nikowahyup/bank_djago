@@ -34,7 +34,8 @@ class TransaksiService:
     #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def transfer(bank,pengirim,penerima,nominal):
+    def transfer(bank,pengirim,norek_penerima,nominal):
+        penerima = TransaksiService.cari_penerima(bank, norek_penerima, pengirim)
         Validator.amankan_rekening(pengirim)
         if nominal < 10000:
             raise ValueError("Minimal transfer adalah Rp10.0000")
@@ -84,7 +85,7 @@ class TransaksiService:
         if not penerima:
             raise ValueError("Penerima tidak terdaftar")
 
-        if penerima == pengirim:
+        if penerima == pengirim or penerima.norek == pengirim.norek:
             raise ValueError("Tidak dapat transfer ke nomor rekening sendiri")
 
         if penerima.status != "aktif":

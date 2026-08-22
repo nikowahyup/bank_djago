@@ -1194,6 +1194,144 @@ def uji_notifikasi_tunggakan():
 ---------------------------------------------------------------
 
 
+# def uji_pembulatan_cicilan_terakhir(bank):
+#     # Mengambil satu-satunya pinjaman aktif.
+#     pinjaman = next(
+#         (
+#             item
+#             for item in bank.daftar_pinjaman
+#             if item.status == StatusPinjaman.AKTIF
+#         ),
+#         None
+#     )
+#
+#     assert pinjaman is not None, (
+#         "Tidak ditemukan pinjaman aktif"
+#     )
+#
+#     assert pinjaman.cicilan_terbayar == 1, (
+#         "Pengujian mengharapkan satu cicilan sudah dibayar"
+#     )
+#
+#     # Menyiapkan saldo agar seluruh cicilan simulasi dapat dibayar.
+#     pinjaman.rekening.set_saldo(100_000_000)
+#
+#     print("KONDISI AWAL")
+#     print("ID pinjaman      :", pinjaman.ID)
+#     print("Tenor            :", pinjaman.tenor)
+#     print("Cicilan terbayar :", pinjaman.cicilan_terbayar)
+#     print("Cicilan tersisa  :", (
+#         pinjaman.tenor - pinjaman.cicilan_terbayar
+#     ))
+#     print("Cicilan tetap    :", pinjaman.cicilan_tetap)
+#     print("Sisa pokok       :", pinjaman.sisa_pokok)
+#     print()
+#
+#     # Membayar cicilan normal sampai tersisa satu cicilan.
+#     while pinjaman.cicilan_terbayar < pinjaman.tenor - 1:
+#         nomor_cicilan = pinjaman.cicilan_terbayar + 1
+#         hari_bayar = pinjaman.tanggal_jatuh_tempo
+#
+#         PinjamanService.bayar_cicilan(
+#             bank,
+#             pinjaman,
+#             hari_ini=hari_bayar
+#         )
+#
+#         print(
+#             f"Cicilan ke-{nomor_cicilan} dibayar pada "
+#             f"{hari_bayar} | "
+#             f"Sisa pokok: Rp"
+#             f"{Utilitas.format_rupiah(pinjaman.sisa_pokok)}"
+#         )
+#
+#     assert pinjaman.cicilan_terbayar == pinjaman.tenor - 1
+#     assert pinjaman.status == StatusPinjaman.AKTIF
+#
+#     # Menghitung komponen cicilan terakhir menurut rumus normal.
+#     persentase_bunga = pinjaman.bunga / 12
+#
+#     bunga_terakhir = round(
+#         pinjaman.sisa_pokok * persentase_bunga
+#     )
+#
+#     pokok_normal = (
+#         pinjaman.cicilan_tetap - bunga_terakhir
+#     )
+#
+#     sisa_pokok_sebelum = pinjaman.sisa_pokok
+#
+#     # Pembayaran yang tepat untuk melunasi seluruh sisa pokok.
+#     cicilan_terakhir_tepat = (
+#         sisa_pokok_sebelum + bunga_terakhir
+#     )
+#
+#     # Selisih antara cicilan tetap dan kebutuhan sebenarnya.
+#     selisih_pembayaran = (
+#         pinjaman.cicilan_tetap
+#         - cicilan_terakhir_tepat
+#     )
+#
+#     print()
+#     print("SEBELUM CICILAN TERAKHIR")
+#     print("Sisa pokok             :", sisa_pokok_sebelum)
+#     print("Bunga terakhir         :", bunga_terakhir)
+#     print("Pokok menurut cicilan  :", pokok_normal)
+#     print("Cicilan tetap          :", pinjaman.cicilan_tetap)
+#     print("Cicilan yang tepat     :", cicilan_terakhir_tepat)
+#     print("Selisih pembayaran     :", selisih_pembayaran)
+#
+#     saldo_sebelum = pinjaman.rekening.saldo
+#     hari_pelunasan = pinjaman.tanggal_jatuh_tempo
+#
+#     # Membayar cicilan terakhir menggunakan implementasi saat ini.
+#     PinjamanService.bayar_cicilan(
+#         bank,
+#         pinjaman,
+#         hari_ini=hari_pelunasan
+#     )
+#
+#     saldo_setelah = pinjaman.rekening.saldo
+#     saldo_terpotong = saldo_sebelum - saldo_setelah
+#
+#     print()
+#     print("SETELAH CICILAN TERAKHIR")
+#     print("Tanggal pelunasan :", hari_pelunasan)
+#     print("Saldo terpotong   :", saldo_terpotong)
+#     print("Sisa pokok        :", pinjaman.sisa_pokok)
+#     print("Status            :", pinjaman.status.value)
+#     print(
+#         "Cicilan terbayar :",
+#         f"{pinjaman.cicilan_terbayar}/{pinjaman.tenor}"
+#     )
+#
+#     assert pinjaman.status == StatusPinjaman.LUNAS
+#     assert pinjaman.sisa_pokok == 0
+#     assert pinjaman.cicilan_terbayar == pinjaman.tenor
+#
+#     if selisih_pembayaran > 0:
+#         print(
+#             f"⚠ Nasabah membayar lebih "
+#             f"Rp{Utilitas.format_rupiah(selisih_pembayaran)}"
+#         )
+#     elif selisih_pembayaran < 0:
+#         print(
+#             f"⚠ Terdapat kekurangan pembayaran "
+#             f"Rp{Utilitas.format_rupiah(abs(selisih_pembayaran))}"
+#         )
+#     else:
+#         print("✅ Cicilan tetap tepat melunasi sisa pinjaman")
+#
+#     print("✅ Simulasi pinjaman hingga akhir berhasil")
+#
+#
+# bank = JsonStorage.muat_bank()
+#
+#
+# if __name__=="__main__":
+#     uji_pembulatan_cicilan_terakhir(bank)
+
+
 
 
 
@@ -1723,3 +1861,107 @@ for tanggal in tanggal_test:
         pinjaman.status
     )
 PinjamanService.bayar_cicilan(bank,pinjaman,datetime.date(2027,2,18))
+
+
+
+---------------------------------------------------------------------------
+
+
+# def uji_serialisasi_integer_pinjaman(bank):
+#     data_pinjaman = JsonStorage.buat_data_pinjaman(bank)
+#
+#     for nik, daftar_pinjaman in data_pinjaman.items():
+#         for id_pinjaman, data in daftar_pinjaman.items():
+#             assert isinstance(data["nominal_pinjaman"], int)
+#             assert isinstance(data["cicilan_tetap"], int)
+#             assert isinstance(data["sisa_pokok"], int)
+#             assert isinstance(data["bunga_bulanan"], int)
+#
+#             print(
+#                 f"✅ Pinjaman {id_pinjaman} milik {nik} "
+#                 f"siap disimpan sebagai integer"
+#             )
+#
+# bank = JsonStorage.muat_bank()
+#
+#
+#
+# if __name__=="__main__":
+#     uji_integer_pembayaran_pinjaman(bank)
+#     uji_serialisasi_integer_pinjaman(bank)
+
+
+-------------------------------------------------------------------------
+# def uji_integer_pembayaran_pinjaman(bank):
+#     # Mengambil satu pinjaman aktif yang belum memasuki cicilan terakhir.
+#     pinjaman = next(
+#         (
+#             item
+#             for item in bank.daftar_pinjaman
+#             if item.status == StatusPinjaman.AKTIF
+#             and item.cicilan_terbayar < item.tenor - 1
+#         ),
+#         None
+#     )
+#
+#     assert pinjaman is not None, (
+#         "Tidak ditemukan pinjaman aktif untuk pengujian"
+#     )
+#
+#     # Menggunakan hari kedelapan setelah jatuh tempo agar denda
+#     # telah berjalan selama satu hari setelah masa toleransi.
+#     hari_uji = (
+#         pinjaman.tanggal_jatuh_tempo
+#         + datetime.timedelta(
+#             days=PinjamanService.BATAS_HARI_TUNGGAKAN + 1
+#         )
+#     )
+#
+#     # Menyiapkan saldo agar pembayaran dapat dilakukan.
+#     pinjaman.rekening.set_saldo(100_000_000)
+#
+#     # Menghitung nilai yang juga akan digunakan oleh service.
+#     denda = PinjamanService.hitung_denda(
+#         pinjaman,
+#         hari_uji
+#     )
+#
+#     total_bayar = pinjaman.cicilan_tetap + denda
+#     saldo_sebelum = pinjaman.rekening.saldo
+#
+#     print("Sebelum pembayaran:")
+#     print("Cicilan tetap :", pinjaman.cicilan_tetap)
+#     print("Sisa pokok    :", pinjaman.sisa_pokok)
+#     print("Bunga bulanan :", pinjaman.bunga_bulanan)
+#     print("Denda         :", denda)
+#     print("Total bayar   :", total_bayar)
+#
+#     # Memastikan seluruh nominal pembayaran sudah berupa integer.
+#     assert isinstance(pinjaman.cicilan_tetap, int)
+#     assert isinstance(pinjaman.sisa_pokok, int)
+#     assert isinstance(pinjaman.bunga_bulanan, int)
+#     assert isinstance(denda, int)
+#     assert isinstance(total_bayar, int)
+#
+#     PinjamanService.bayar_cicilan(
+#         bank,
+#         pinjaman,
+#         hari_ini=hari_uji
+#     )
+#
+#     saldo_setelah = pinjaman.rekening.saldo
+#     saldo_terpotong = saldo_sebelum - saldo_setelah
+#
+#     # Membuktikan service memotong cicilan dan denda yang sama.
+#     assert saldo_terpotong == total_bayar
+#
+#     # Memastikan hasil perhitungan cicilan tetap berupa integer.
+#     assert isinstance(pinjaman.sisa_pokok, int)
+#     assert isinstance(pinjaman.bunga_bulanan, int)
+#     assert isinstance(pinjaman.rekening.saldo, int)
+#
+#     print("\nSetelah pembayaran:")
+#     print("Saldo terpotong:", saldo_terpotong)
+#     print("Sisa pokok     :", pinjaman.sisa_pokok)
+#     print("Bunga bulanan  :", pinjaman.bunga_bulanan)
+#     print("✅ Seluruh nominal pinjaman sudah berupa integer")

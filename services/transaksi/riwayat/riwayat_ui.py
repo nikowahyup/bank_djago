@@ -22,8 +22,7 @@ class RiwayatUI:
                 pilihan = input("Masukkan pilihan Anda: ")
                 try:
                     if pilihan == "1":
-                        riwayat = RiwayatService.ambil_riwayat(rekening)
-                        for item in riwayat:
+                        for item in rekening.riwayat:
                             print(Utilitas.format_waktu(item["waktu"]), '|', item["log"])
 
                     elif pilihan == "2":

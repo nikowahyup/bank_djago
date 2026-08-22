@@ -21,11 +21,11 @@ class Scheduler:
             if rekening.status == "tutup":
                 continue
 
-            BungaService.berikan_bunga(rekening)
+            BungaService.berikan_bunga(bank, rekening, hari_ini)
 
-            LimitService.reset_limit(bank,rekening)
+            LimitService.reset_limit(bank,rekening, hari_ini)
 
-            BiayaAdminService.potong_admin(bank, rekening)
+            BiayaAdminService.potong_admin(bank, rekening, hari_ini)
 
 
 

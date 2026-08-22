@@ -22,6 +22,7 @@ class Rekening:
         self.saldosetor_min    = minimum
         self.penutupan         = None
         self.alasan_blokir     = None
+        self.boleh_ubah_rekening = None
 
 #------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +33,11 @@ class Rekening:
                 "limit"  :self.limit_sisa,
                 "riwayat":self.riwayat,
                 "status" :self.status,
-                "level"  :self.level
+                "level"  :self.level,
+                "kesempatan_ubah":self.boleh_ubah_rekening.isoformat() if self.boleh_ubah_rekening  is not None else None,
+                "reset":self.reset.isoformat(),
+                "dapat_bunga":self.dapat_bunga.isoformat(),
+                "bayar_admin":self.waktu_bayar_admin.isoformat()
                 }
 
     # ------------------------------------------------------------------------------------------------------------------------------
@@ -49,8 +54,24 @@ class Rekening:
         rekening.limit_sisa     = data["limit"]
         rekening.riwayat        = data["riwayat"]
         rekening.status         = data["status"]
+        terakhir_ubah_level = data.get("kesempatan_ubah")
+        tanggal_reset = data.get("reset")
+        tanggal_dapat_bunga = data.get("dapat_bunga")
+        tanggal_bayar_admin = data.get("bayar_admin")
+        rekening.boleh_ubah_rekening = (datetime.date.fromisoformat(terakhir_ubah_level) if terakhir_ubah_level is not None else None)
+
+        if tanggal_reset is not None:
+            rekening.reset = datetime.date.fromisoformat(tanggal_reset)
+
+        if tanggal_dapat_bunga is not None:
+            rekening.dapat_bunga = datetime.date.fromisoformat(tanggal_dapat_bunga)
+
+        if tanggal_bayar_admin is not None:
+            rekening.reset = datetime.date.fromisoformat(tanggal_bayar_admin)
 
         return rekening
+
+
 
    # ------------------------------------------------------------------------------------------------------------------------------
 
@@ -114,6 +135,13 @@ class Rekening:
             3: "Gold",
             4: "Platinum"
         }[self.level]
+
+    @property
+    def boleh_ubah_level(self):
+        return (
+                self.boleh_ubah_rekening is None
+                or self.boleh_ubah_rekening < datetime.date.today()
+        )
 
 class RekeningReguler(Rekening):
     pass

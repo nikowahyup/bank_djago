@@ -1,168 +1,136 @@
 {
-    "2001385564852780": {
-        "norek": "2001385564852780",
-        "pin": "111000",
-        "saldo": 200913651.21132165,
+    "1001532233868694": {
+        "norek": "1001532233868694",
+        "pin": "111111",
+        "saldo": 1158892420,
         "limit": 200000000,
         "riwayat": [
             {
                 "kategori": "transaksi",
                 "jenis": "setor uang",
-                "waktu": "2026-08-17T06:39:57.282915",
-                "log": "SETOR UANG | +Rp100.000.000"
+                "waktu": "2026-08-21T15:01:05.831194",
+                "log": "SETOR UANG | +Rp1.000.000.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "perubahan",
+                "waktu": "2026-08-21T15:14:54.978694",
+                "log": "Turun Rekening Platinum ke Gold"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-21T17:56:49.763599",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp46.666.664"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-21T18:16:33.736230",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp48.844.448"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-21T18:21:17.281563",
+                "log": "BUNGA AGUSTUS 2026 | Jumlah Rp51.123.848"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bunga",
+                "waktu": "2026-08-22T05:08:24.097256",
+                "log": "BUNGA SEPTEMBER 2026 | Jumlah Rp6.688.704"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-22T05:08:24.097300",
+                "log": "BIAYA ADMIN | Jumlah Rp10.000"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "rekening",
+                "waktu": "2026-08-22T05:17:22.950131",
+                "log": "Limit harian telah direset"
+            },
+            {
+                "kategori": "sistem",
+                "jenis": "biaya admin",
+                "waktu": "2026-08-22T05:17:22.953938",
+                "log": "BIAYA ADMIN | Jumlah Rp10.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "beri bunga",
+                "waktu": "2026-08-22T06:51:27.597282",
+                "log": "BUNGA OKTOBER 2026 +Rp6.727.605"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "reset limit",
+                "waktu": "2026-08-22T06:51:27.597313",
+                "log": "Limit harian telah direset"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bayar admin",
+                "waktu": "2026-08-22T06:51:27.597346",
+                "log": "Bayar admin bulanan | -Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "reset limit",
+                "waktu": "2026-08-22T06:52:21.417000",
+                "log": "Limit harian telah direset"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bayar admin",
+                "waktu": "2026-08-22T06:52:21.421299",
+                "log": "Bayar admin bulanan | -Rp20.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "pinjaman",
+                "waktu": "2026-08-22T06:52:35.007911",
+                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "reset limit",
+                "waktu": "2026-08-22T06:53:57.915869",
+                "log": "Limit harian telah direset"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "bayar admin",
+                "waktu": "2026-08-22T06:53:57.919390",
+                "log": "Bayar admin bulanan | -Rp10.000"
+            },
+            {
+                "kategori": "transaksi",
+                "jenis": "pinjaman",
+                "waktu": "2026-08-22T06:54:20.670524",
+                "log": "PEMBAYARAN CICILAN | Cicilan Rp88.849 | Denda Rp0 | Terlambat 0 hari | Total Rp88.849"
             },
             {
                 "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-17T06:40:16.999836",
+                "waktu": "2026-08-22T07:56:08.874019",
                 "log": "DEPOSITO | Rp1.000.000 |Bunga 3.0% | Lama 1 bulan "
             },
             {
                 "kategori": "transaksi",
-                "jenis": "bunga deposito",
-                "waktu": "2026-08-17T06:40:56.814508",
-                "log": "BUNGA DEPOSITO | Deposito 1 |  +Rp2.500"
-            },
-            {
-                "kategori": "transaksi",
                 "jenis": "deposito",
-                "waktu": "2026-08-17T06:40:56.817457",
-                "log": "PENCAIRAN DAN PERPANJANGAN DEPOSITO | Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T06:48:18.245196",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T06:53:31.629742",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp88.848.78867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T09:52:04.847398",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "setor uang",
-                "waktu": "2026-08-18T06:36:44.131878",
-                "log": "SETOR UANG | +Rp100.000.000"
+                "waktu": "2026-08-22T07:56:25.958276",
+                "log": "DEPOSITO | Rp1.000.000 |Bunga 3.0% | Lama 1 bulan "
             }
         ],
         "status": "aktif",
-        "level": 3
-    },
-    "2001633585477864": {
-        "norek": "2001633585477864",
-        "pin": "111111",
-        "saldo": 1010111512.1132166,
-        "limit": 200000000,
-        "riwayat": [
-            {
-                "kategori": "transaksi",
-                "jenis": "setor uang",
-                "waktu": "2026-08-17T07:32:53.431167",
-                "log": "SETOR UANG | +Rp1.000.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T07:33:46.816052",
-                "log": "PENCAIRAN PINJAMAN |  +Rp10.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T07:34:52.598761",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp888.487.8867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-18T08:58:20.326277",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            }
-        ],
-        "status": "aktif",
-        "level": 3
-    },
-    "2001853603886040": {
-        "norek": "2001853603886040",
-        "pin": "111111",
-        "saldo": 102733453.63396496,
-        "limit": 200000000,
-        "riwayat": [
-            {
-                "kategori": "transaksi",
-                "jenis": "setor uang",
-                "waktu": "2026-08-17T08:15:57.598564",
-                "log": "SETOR UANG | +Rp100.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T08:17:50.589842",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T08:19:29.184423",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp88.848.78867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T08:44:10.954138",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp88.848.78867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T08:47:08.575702",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T08:48:02.918720",
-                "log": "PEMBAYARAN CICILAN PINJAMAN | -Rp88.848.78867834168"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T09:01:43.177065",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            }
-        ],
-        "status": "aktif",
-        "level": 3
-    },
-    "4001843668003460": {
-        "norek": "4001843668003460",
-        "pin": "111000",
-        "saldo": 1500000,
-        "limit": 5000000,
-        "riwayat": [
-            {
-                "kategori": "transaksi",
-                "jenis": "setor uang",
-                "waktu": "2026-08-17T09:23:43.668092",
-                "log": "SETOR UANG | +Rp500.000"
-            },
-            {
-                "kategori": "transaksi",
-                "jenis": "pinjaman",
-                "waktu": "2026-08-17T09:29:52.271352",
-                "log": "PENCAIRAN PINJAMAN |  +Rp1.000.000"
-            }
-        ],
-        "status": "aktif",
-        "level": 1
+        "level": 3,
+        "kesempatan_ubah": "2026-08-21",
+        "reset": "2026-09-22",
+        "dapat_bunga": "2026-10-21",
+        "bayar_admin": "2026-08-22"
     }
 }

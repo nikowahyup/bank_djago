@@ -75,7 +75,7 @@ class TransaksiUI:
             print()
             nominal = int(input("Masukkan nominal transfer: "))
             Utilitas.animasi("proses")
-            TransaksiService.transfer(bank,rekening,penerima,nominal)
+            TransaksiService.transfer(bank,rekening,rek_penerima,nominal)
             UI.sukses(f"Transfer berhasil! Rp{Utilitas.format_rupiah(nominal)} telah masuk ke rekening {penerima.pemilik.nama}")
 
         except ValueError as e:

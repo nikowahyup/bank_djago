@@ -1,5 +1,5 @@
 import datetime
-from .utililty import Utilitas, StatusPinjaman
+from .utility import Utilitas, StatusPinjaman
 from ..services.deposito.deposito_service import StatusDeposito
 
 
@@ -9,8 +9,8 @@ class Debug:
     def debug_bunga(bank,bulan=1):
 
         for rekening in bank.rekening_index.values():
-            rekening.dapat_bunga -= datetime.timedelta(days=bulan * 31)
-            rekening.waktu_bayar_admin -= datetime.timedelta(days=bulan * 31)
+            rekening.dapat_bunga = Utilitas.tambah_bulan(rekening.dapat_bunga,-bulan)
+
 
 
     @staticmethod

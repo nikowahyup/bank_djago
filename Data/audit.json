@@ -12255,5 +12255,259 @@
         "log": "Gojo Satoru membuka kembali blokiran rekening",
         "nik": "3150152602082002",
         "rekening": "2001633585477864"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T09:05:56.532757",
+        "jenis": "BUKA REKENING",
+        "log": "Yuda Agista membuka rekening pertama",
+        "nik": "3510159999992002",
+        "rekening": "1001473380944752"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-21T09:05:56.532767",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510159999992002",
+        "nama": "Yuda Agista"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-21T09:06:24.601089",
+        "jenis": "DEPOSITO",
+        "log": "Yuda Agista membuka deposito Rp10.000.000",
+        "nik": "3510159999992002",
+        "rekening": "1001473380944752"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T09:07:38.115636",
+        "jenis": "BUKA REKENING",
+        "log": "Gianuino membuka rekening pertama",
+        "nik": "3510154446662002",
+        "rekening": "2001108299775189"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-21T09:07:38.115643",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510154446662002",
+        "nama": "Gianuino"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-21T09:08:08.187762",
+        "jenis": "PINJAMAN",
+        "log": "Gianuino mengajukan pinjaman",
+        "nik": "3510154446662002",
+        "rekening": "2001108299775189"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T09:09:28.690831",
+        "jenis": "BUKA REKENING",
+        "log": "Tutup membuka rekening pertama",
+        "nik": "3150151112222002",
+        "rekening": "4001396901498409"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-21T09:09:28.690839",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150151112222002",
+        "nama": "Tutup"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T09:09:45.644036",
+        "jenis": "PENUTUPAN",
+        "log": "Tutup telah menutup rekening",
+        "nik": "3150151112222002",
+        "rekening": "4001396901498409"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T09:11:03.682052",
+        "jenis": "BUKA REKENING",
+        "log": "Test membuka rekening pertama",
+        "nik": "3510150001112002",
+        "rekening": "4001326900805935"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-21T09:11:03.682060",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510150001112002",
+        "nama": "Test"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T15:01:05.831218",
+        "jenis": "BUKA REKENING",
+        "log": "Niko Wahyu Pratama membuka rekening pertama",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-21T15:01:05.831249",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-21T15:14:54.978714",
+        "jenis": "DOWNGRADE",
+        "log": "Niko Wahyu Pratama menurunkan rekeningnya dari Platinum ke Gold",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-21T18:16:33.736246",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-21T18:21:17.281576",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T05:08:24.097272",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T05:08:24.097283",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T05:08:24.097304",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T05:17:22.950145",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T05:17:22.953958",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:51:27.597300",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T06:51:27.597318",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:51:27.597351",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:51:49.012245",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama mengajukan pinjaman",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:52:04.854264",
+        "jenis": "PINJAMAN",
+        "log": "Pinjaman Niko Wahyu Pratama telah disetujui",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T06:52:21.417010",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:52:21.421317",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:52:35.007888",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama menerima pencairan pinjaman Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T06:53:57.915883",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:53:57.919410",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T06:54:20.670505",
+        "jenis": "PINJAMAN",
+        "log": "Niko Wahyu Pratama membayar cicilan pinjaman 1 sebesar Rp88.849",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T07:56:08.874046",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T07:56:25.958295",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
     }
 ]

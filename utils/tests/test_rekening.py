@@ -437,3 +437,74 @@ def uji_integritas_upgrade_rekening(bank):
 
 
 
+from bank_djago.penyimpanan.storage import JsonStorage
+from bank_djago.utils.utility import Utilitas
+
+
+def uji_save_load_waktu_bunga(bank):
+    rekening = next(iter(bank.rekening_index.values()))
+
+    # Menyimpan tanggal asli agar dataset dapat dikembalikan.
+    tanggal_asli = rekening.dapat_bunga
+
+    print("Sebelum debug :", rekening.dapat_bunga)
+
+    Utilitas.debug_bunga(bank, 6)
+
+    tanggal_debug = rekening.dapat_bunga
+    print("Setelah debug :", tanggal_debug)
+
+    # Menyimpan rekening tanpa menjalankan scheduler.
+    JsonStorage.simpan_bank(bank)
+
+    # Memuat bank baru dari data yang baru disimpan.
+    bank_baru = JsonStorage.muat_bank()
+    rekening_baru = bank_baru.cari_rekening(rekening.norek)
+
+    print("Setelah load  :", rekening_baru.dapat_bunga)
+
+    assert rekening_baru.dapat_bunga == tanggal_debug, (
+        "Tanggal bunga berubah setelah save/load"
+    )
+
+    print("✅ Save/load waktu bunga berhasil")
+
+    # Mengembalikan tanggal asli agar dataset pengujian tidak tertinggal.
+    rekening_baru.dapat_bunga = tanggal_asli
+    JsonStorage.simpan_bank(bank_baru)
+
+------------------------------------------------------
+# def uji_save_load_waktu_bunga(bank):
+#     rekening = next(iter(bank.rekening_index.values()))
+#
+#     # Menyimpan tanggal asli agar dataset dapat dikembalikan.
+#     tanggal_asli = rekening.dapat_bunga
+#
+#     print("Sebelum debug :", rekening.dapat_bunga)
+#
+#     Debug.debug_bunga(bank,6)
+#
+#     tanggal_debug = rekening.dapat_bunga
+#     print("Setelah debug :", tanggal_debug)
+#
+#     # Menyimpan rekening tanpa menjalankan scheduler.
+#     JsonStorage.simpan_bank(bank)
+#
+#     # Memuat bank baru dari data yang baru disimpan.
+#     bank_baru = JsonStorage.muat_bank()
+#     rekening_baru = bank_baru.cari_rekening(rekening.norek)
+#
+#     print("Setelah load  :", rekening_baru.dapat_bunga)
+#
+#     assert rekening_baru.dapat_bunga == tanggal_debug, (
+#         "Tanggal bunga berubah setelah save/load"
+#     )
+#
+#     print("✅ Save/load waktu bunga berhasil")
+#
+#     # Mengembalikan tanggal asli agar dataset pengujian tidak tertinggal.
+#     rekening_baru.dapat_bunga = tanggal_asli
+#     JsonStorage.simpan_bank(bank_baru)
+#
+# bank = JsonStorage.muat_bank()
+# if __name__=="__main__":
