@@ -92,7 +92,7 @@ class Scheduler:
                             deposito
                         )
 
-                        DepositoService.perpanjangan(bank, deposito)
+                        DepositoService.perpanjangan(bank, deposito, hari_ini)
                         deposito.proses_aro = hari_ini
 
         for pinjaman in bank.daftar_pinjaman:

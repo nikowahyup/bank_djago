@@ -12509,5 +12509,258 @@
         "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
         "nik": "3510152602082002",
         "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:04:28.945617",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:04:59.736999",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:05:40.397500",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp1.002.500"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:06:06.943701",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp1.000.000",
+        "nik": "3510152602082002",
+        "rekening": "1001532233868694"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-22T11:10:13.599775",
+        "jenis": "BUKA REKENING",
+        "log": "Gojo Satoru membuka rekening pertama",
+        "nik": "3510152602082002",
+        "rekening": "2001928414927215"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-22T11:10:13.599783",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510152602082002",
+        "nama": "Gojo Satoru"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-22T11:11:57.416570",
+        "jenis": "BUKA REKENING",
+        "log": "Gojo Satoru membuka rekening pertama",
+        "nik": "3510153402082002",
+        "rekening": "2001689588236815"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-22T11:11:57.416576",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510153402082002",
+        "nama": "Gojo Satoru"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:09.341094",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah",
+        "nama": "Gojo Satoru",
+        "rekening": "2001928414927215"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T11:12:09.341115",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:09.341153",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Gojo Satoru",
+        "rekening": "2001928414927215"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:09.341186",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah",
+        "nama": "Gojo Satoru",
+        "rekening": "2001689588236815"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T11:12:09.341195",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:09.341220",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510153402082002",
+        "nama": "Gojo Satoru",
+        "rekening": "2001689588236815"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:35.920890",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3510153402082002",
+        "rekening": "2001689588236815"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:12:59.122792",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru mencairkan deposito Rp1.002.500"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:13:10.305220",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp1.000.000",
+        "nik": "3510153402082002",
+        "rekening": "2001689588236815"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-22T11:21:17.382333",
+        "jenis": "BUKA REKENING",
+        "log": "Niko Wahyu Pratama membuka rekening pertama",
+        "nik": "3510152602082002",
+        "rekening": "2001661251477941"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-22T11:21:17.382361",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama"
+    },
+    {
+        "kategori": "rekening",
+        "waktu": "2026-08-22T11:21:56.281825",
+        "jenis": "BUKA REKENING",
+        "log": "Gojo Satoru membuka rekening pertama",
+        "nik": "3150152602082002",
+        "rekening": "2001703944452732"
+    },
+    {
+        "kategori": "nasabah",
+        "waktu": "2026-08-22T11:21:56.281831",
+        "jenis": "DAFTAR",
+        "log": "Pendaftaran Menjadi Nasabah Bank Djago",
+        "nik": "3150152602082002",
+        "nama": "Gojo Satoru"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:22:45.666601",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001661251477941"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:13.413413",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp10.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001703944452732"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:22.293931",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "2001661251477941"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T11:23:22.293944",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:22.293968",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3510152602082002",
+        "nama": "Niko Wahyu Pratama",
+        "rekening": "2001661251477941"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:22.293994",
+        "jenis": "BERI BUNGA",
+        "log": "Berikan bunga nasabah",
+        "nama": "Gojo Satoru",
+        "rekening": "2001703944452732"
+    },
+    {
+        "kategori": "sistem",
+        "waktu": "2026-08-22T11:23:22.294000",
+        "jenis": "RESET LIMIT",
+        "log": "Reset limit harian rekening"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:22.294011",
+        "jenis": "BIAYA ADMIN",
+        "log": "Bayar rutin bulanan biaya admin",
+        "nik": "3150152602082002",
+        "nama": "Gojo Satoru",
+        "rekening": "2001703944452732"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:34.175558",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama mencairkan deposito Rp10.025.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:23:44.959145",
+        "jenis": "DEPOSITO",
+        "log": "Niko Wahyu Pratama membuka deposito Rp10.000.000",
+        "nik": "3510152602082002",
+        "rekening": "2001661251477941"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:24:00.625344",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru mencairkan deposito Rp10.025.000"
+    },
+    {
+        "kategori": "transaksi",
+        "waktu": "2026-08-22T11:24:11.081256",
+        "jenis": "DEPOSITO",
+        "log": "Gojo Satoru membuka deposito Rp10.000.000",
+        "nik": "3150152602082002",
+        "rekening": "2001703944452732"
     }
 ]

@@ -96,8 +96,9 @@ class DepositoService:
 
 
     @staticmethod
-    def perpanjangan(bank,deposito):
-        hari_ini = datetime.date.today()
+    def perpanjangan(bank,deposito,hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
 
         if deposito.status != StatusDeposito.AKTIF:
             raise ValueError("Deposito sudah tidak aktif")

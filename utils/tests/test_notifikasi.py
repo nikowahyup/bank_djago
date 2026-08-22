@@ -287,5 +287,39 @@ if __name__ == "__main__":
 
 
 
------------------------------------------------------
+# -----------------------------------------------------
 
+from bank_djago.core.notifikasi import Notifikasi
+def uji_referensi_notifikasi_deposito_dengan_data(bank):
+    nasabah = next(
+        nasabah
+        for nasabah in bank.data_nasabah.values()
+        if nasabah.deposito
+    )
+
+    deposito = nasabah.deposito[0]
+    notifikasi_asli = list(nasabah.notifikasi)
+
+    try:
+        notifikasi_uji = Notifikasi(
+            jenis="deposito",
+            pesan="Uji referensi deposito",
+            referensi_id=JenisReferensiID.DEPOSITO,
+            id_objek=deposito.ID
+        )
+
+        nasabah.notifikasi.append(notifikasi_uji)
+
+        uji_referensi_notifikasi_deposito(bank)
+
+        print(
+            "✅ Pemeriksaan referensi dijalankan "
+            "menggunakan notifikasi deposito nyata"
+        )
+
+    finally:
+        nasabah.notifikasi = notifikasi_asli
+bank = JsonStorage.muat_bank()
+if __name__=="__main__":
+    uji_referensi_notifikasi_deposito(bank)
+    uji_referensi_notifikasi_deposito_dengan_data(bank)

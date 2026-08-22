@@ -140,14 +140,27 @@ def cek_integritas_notifikasi(bank):
 
 
 
-@staticmethod
 def cek_integritas_pinjaman(bank):
     error = []
-    pemilik_pinjaman = {}
+
+    status_berjalan = (
+        StatusPinjaman.DIAJUKAN,
+        StatusPinjaman.DISETUJUI,
+        StatusPinjaman.AKTIF
+    )
+
+    status_valid = (
+        StatusPinjaman.DIAJUKAN,
+        StatusPinjaman.DITOLAK,
+        StatusPinjaman.DISETUJUI,
+        StatusPinjaman.AKTIF,
+        StatusPinjaman.LUNAS
+    )
+
+    pinjaman_berjalan_per_nik = {}
 
     for pinjaman in bank.daftar_pinjaman:
-
-        # 1. Pemilik harus ada
+        # Pinjaman harus mempunyai pemilik.
         if pinjaman.pemilik is None:
             error.append(
                 f"Pinjaman {pinjaman.ID} tidak memiliki pemilik."
@@ -157,107 +170,204 @@ def cek_integritas_pinjaman(bank):
         nasabah = pinjaman.pemilik
         nik = nasabah.NIK
 
-        # 2. NIK pemilik harus terdaftar di bank
+        # Pemilik harus terdaftar dalam bank.
         if nik not in bank.data_nasabah:
             error.append(
                 f"Pinjaman {pinjaman.ID} memiliki pemilik "
                 f"dengan NIK {nik} yang tidak terdaftar."
             )
 
-        # 3. Pemilik pinjaman harus menunjuk ke nasabah yang benar
-        if bank.data_nasabah.get(nik) is not nasabah:
+        elif bank.data_nasabah[nik] is not nasabah:
             error.append(
-                f"Pinjaman {pinjaman.ID} menunjuk ke objek "
-                f"nasabah yang tidak sesuai dengan NIK {nik}."
+                f"Pinjaman {pinjaman.ID} menunjuk objek nasabah "
+                f"yang tidak sesuai dengan NIK {nik}."
             )
 
-        # 4. Satu nasabah hanya punya satu pinjaman
-        if nik in pemilik_pinjaman:
+        # Status pinjaman harus dikenal sistem.
+        if pinjaman.status not in status_valid:
             error.append(
-                f"Nasabah {nik} memiliki lebih dari satu pinjaman: "
-                f"{pemilik_pinjaman[nik]} dan {pinjaman.ID}."
+                f"Pinjaman {pinjaman.ID} mempunyai "
+                f"status tidak valid: {pinjaman.status}."
             )
-        else:
-            pemilik_pinjaman[nik] = pinjaman.ID
 
-        # 5. Rekening harus ada
+        # Hanya pinjaman berjalan yang dibatasi satu per nasabah.
+        if pinjaman.status in status_berjalan:
+            if nik in pinjaman_berjalan_per_nik:
+                pinjaman_sebelumnya = (
+                    pinjaman_berjalan_per_nik[nik]
+                )
+
+                error.append(
+                    f"Nasabah {nik} mempunyai lebih dari satu "
+                    f"pinjaman berjalan: "
+                    f"{pinjaman_sebelumnya.ID} dan {pinjaman.ID}."
+                )
+            else:
+                pinjaman_berjalan_per_nik[nik] = pinjaman
+
+        # Pinjaman harus mempunyai rekening.
         if pinjaman.rekening is None:
             error.append(
                 f"Pinjaman {pinjaman.ID} tidak memiliki rekening."
             )
             continue
 
-        norek = pinjaman.rekening.norek
+        rekening = pinjaman.rekening
+        norek = rekening.norek
 
-        # 6. Rekening harus ada di index
+        # Rekening harus terdaftar dalam indeks bank.
         if norek not in bank.rekening_index:
             error.append(
                 f"Pinjaman {pinjaman.ID} menggunakan rekening "
                 f"{norek} yang tidak ditemukan."
             )
 
-        # 7. Rekening harus dimiliki nasabah yang sama
-        if pinjaman.rekening.pemilik is not nasabah:
+        else:
+            # Harus menunjuk objek rekening resmi dalam indeks.
+            if bank.rekening_index[norek] is not rekening:
+                error.append(
+                    f"Pinjaman {pinjaman.ID} masih menunjuk "
+                    f"objek rekening lama."
+                )
+
+        # Rekening harus dimiliki nasabah yang sama.
+        if rekening.pemilik is not nasabah:
             pemilik_rekening = (
-                pinjaman.rekening.pemilik.NIK
-                if pinjaman.rekening.pemilik is not None
+                rekening.pemilik.NIK
+                if rekening.pemilik is not None
                 else "None"
             )
 
             error.append(
                 f"Pinjaman {pinjaman.ID} milik nasabah {nik} "
-                f"menggunakan rekening {norek} yang dimiliki "
-                f"oleh {pemilik_rekening}."
+                f"menggunakan rekening milik {pemilik_rekening}."
+            )
+
+    # Memastikan referensi pinjaman pada setiap nasabah sesuai.
+    for nik, nasabah in bank.data_nasabah.items():
+        pinjaman_berjalan = pinjaman_berjalan_per_nik.get(nik)
+
+        if pinjaman_berjalan is None:
+            if nasabah.pinjaman is not None:
+                error.append(
+                    f"Nasabah {nik} masih menunjuk pinjaman, "
+                    f"padahal tidak ada pinjaman berjalan."
+                )
+
+        elif nasabah.pinjaman is not pinjaman_berjalan:
+            error.append(
+                f"Nasabah {nik} tidak menunjuk objek "
+                f"pinjaman berjalan yang benar."
             )
 
     return error
 
 
-@staticmethod
 def cek_integritas_rekening(bank):
     error = []
-
-    # 1. Setiap rekening harus punya pemilik
-    for norek, rekening in bank.rekening_index.items():
-        if rekening.pemilik is None:
-            error.append(
-                f"Rekening {norek} tidak memiliki pemilik."
-            )
-
-    # 2. Setiap rekening milik nasabah harus ada di rekening_index
-    # 3. Setiap rekening hanya boleh dimiliki satu nasabah
     pemilik_rekening = {}
 
+    status_valid = (
+        "aktif",
+        "blokir",
+        "tutup"
+    )
+
+    # Memeriksa seluruh rekening resmi yang disimpan bank.
+    for norek_index, rekening in bank.rekening_index.items():
+        # Key indeks harus sama dengan nomor pada objek rekening.
+        if rekening.norek != norek_index:
+            error.append(
+                f"Key indeks {norek_index} tidak sesuai dengan "
+                f"nomor pada objek rekening {rekening.norek}."
+            )
+
+        # Setiap rekening harus mempunyai pemilik.
+        if rekening.pemilik is None:
+            error.append(
+                f"Rekening {norek_index} tidak memiliki pemilik."
+            )
+            continue
+
+        nasabah = rekening.pemilik
+        nik = nasabah.NIK
+
+        # Pemilik rekening harus terdaftar dalam bank.
+        if nik not in bank.data_nasabah:
+            error.append(
+                f"Pemilik rekening {norek_index} dengan NIK {nik} "
+                f"tidak terdaftar dalam bank."
+            )
+
+        elif bank.data_nasabah[nik] is not nasabah:
+            error.append(
+                f"Rekening {norek_index} menunjuk objek nasabah "
+                f"yang berbeda dari data_nasabah[{nik}]."
+            )
+
+        # Objek rekening harus terdapat pada daftar rekening pemilik.
+        rekening_ditemukan = any(
+            rekening_milik_nasabah is rekening
+            for rekening_milik_nasabah in nasabah.rekening
+        )
+
+        if not rekening_ditemukan:
+            error.append(
+                f"Rekening {norek_index} ada dalam rekening_index, "
+                f"tetapi tidak ada pada daftar rekening milik {nik}."
+            )
+
+        if rekening.status not in status_valid:
+            error.append(
+                f"Rekening {norek_index} memiliki "
+                f"status tidak valid: {rekening.status}."
+            )
+
+    # Memeriksa rekening dari sisi setiap nasabah.
     for nik, nasabah in bank.data_nasabah.items():
         for rekening in nasabah.rekening:
             norek = rekening.norek
 
+            # Rekening nasabah harus terdaftar dalam indeks bank.
             if norek not in bank.rekening_index:
                 error.append(
                     f"Rekening {norek} milik nasabah {nik} "
-                    f"tidak ditemukan di rekening_index."
+                    f"tidak ditemukan dalam rekening_index."
                 )
 
+            else:
+                # Nomor yang sama harus menunjuk objek yang sama.
+                if bank.rekening_index[norek] is not rekening:
+                    error.append(
+                        f"Rekening {norek} milik nasabah {nik} "
+                        f"bukan objek resmi dalam rekening_index."
+                    )
+
+            # Satu nomor rekening tidak boleh dimiliki dua nasabah.
             if norek in pemilik_rekening:
                 error.append(
-                    f"Rekening {norek} dimiliki lebih dari satu nasabah: "
+                    f"Rekening {norek} dimiliki lebih dari "
+                    f"satu nasabah: "
                     f"{pemilik_rekening[norek]} dan {nik}."
                 )
             else:
                 pemilik_rekening[norek] = nik
 
-            # 4. Pemilik pada objek rekening harus sesuai
+            # Atribut pemilik harus menunjuk nasabah yang menyimpannya.
             if rekening.pemilik is not nasabah:
-                pemilik = (
+                pemilik_objek = (
                     rekening.pemilik.NIK
                     if rekening.pemilik is not None
                     else "None"
                 )
 
                 error.append(
-                    f"Rekening {norek}: "
-                    f"pemilik pada objek = {pemilik}, "
-                    f"tetapi tercantum pada nasabah = {nik}."
+                    f"Rekening {norek}: pemilik pada objek adalah "
+                    f"{pemilik_objek}, tetapi rekening tersimpan "
+                    f"pada nasabah {nik}."
                 )
 
     return error
+
+
+

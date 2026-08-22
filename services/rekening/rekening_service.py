@@ -85,8 +85,8 @@ class RekeningService:
         rekening_baru.dapat_bunga = rekening_lama.dapat_bunga
         rekening_baru.boleh_ubah_rekening = datetime.date.today()
 
-        pinjaman = nasabah.pinjaman
-        if pinjaman:
+
+        for pinjaman in bank.daftar_pinjaman:
             if pinjaman.rekening is rekening_lama:
                 pinjaman.rekening = rekening_baru
 

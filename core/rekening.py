@@ -22,7 +22,7 @@ class Rekening:
         self.saldosetor_min    = minimum
         self.penutupan         = None
         self.alasan_blokir     = None
-        self.boleh_ubah_rekening = None
+        self.terakhir_ubah_rekening = None
 
 #------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ class Rekening:
                 "riwayat":self.riwayat,
                 "status" :self.status,
                 "level"  :self.level,
-                "kesempatan_ubah":self.boleh_ubah_rekening.isoformat() if self.boleh_ubah_rekening  is not None else None,
+                "kesempatan_ubah":self.terakhir_ubah_rekening.isoformat() if self.terakhir_ubah_rekening  is not None else None,
                 "reset":self.reset.isoformat(),
                 "dapat_bunga":self.dapat_bunga.isoformat(),
                 "bayar_admin":self.waktu_bayar_admin.isoformat()
@@ -58,7 +58,7 @@ class Rekening:
         tanggal_reset = data.get("reset")
         tanggal_dapat_bunga = data.get("dapat_bunga")
         tanggal_bayar_admin = data.get("bayar_admin")
-        rekening.boleh_ubah_rekening = (datetime.date.fromisoformat(terakhir_ubah_level) if terakhir_ubah_level is not None else None)
+        rekening.terakhir_ubah_rekening = (datetime.date.fromisoformat(terakhir_ubah_level) if terakhir_ubah_level is not None else None)
 
         if tanggal_reset is not None:
             rekening.reset = datetime.date.fromisoformat(tanggal_reset)
@@ -67,7 +67,7 @@ class Rekening:
             rekening.dapat_bunga = datetime.date.fromisoformat(tanggal_dapat_bunga)
 
         if tanggal_bayar_admin is not None:
-            rekening.reset = datetime.date.fromisoformat(tanggal_bayar_admin)
+            rekening.waktu_bayar_admin = datetime.date.fromisoformat(tanggal_bayar_admin)
 
         return rekening
 
@@ -139,8 +139,8 @@ class Rekening:
     @property
     def boleh_ubah_level(self):
         return (
-                self.boleh_ubah_rekening is None
-                or self.boleh_ubah_rekening < datetime.date.today()
+                self.terakhir_ubah_rekening is None
+                or self.terakhir_ubah_rekening < datetime.date.today()
         )
 
 class RekeningReguler(Rekening):

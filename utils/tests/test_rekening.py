@@ -78,7 +78,7 @@ def uji_relasi_downgrade_rekening(bank):
     # Semua deposito harus menunjuk rekening Gold.
     for deposito in deposito_terkait:
         assert deposito.rekening is rekening_gold, (
-            f"Deposito #{deposito.id} masih menunjuk rekening Platinum"
+            f"Deposito #{deposito.ID} masih menunjuk rekening Platinum"
         )
 
     # Semua pinjaman harus menunjuk rekening Gold.
@@ -190,7 +190,7 @@ def uji_relasi_upgrade_rekening(bank):
     # Memastikan semua deposito terkait berpindah ke rekening baru.
     for deposito in deposito_terkait:
         assert deposito.rekening is rekening_baru, (
-            f"Deposito #{deposito.id} masih menunjuk rekening lama"
+            f"Deposito #{deposito.ID} masih menunjuk rekening lama"
         )
 
     # Memastikan semua pinjaman terkait berpindah ke rekening baru.
@@ -369,70 +369,7 @@ def uji_save_load_relasi_rekening(bank):
 
 
 ----------------------------------------------------------------------------
-bank = JsonStorage.muat_bank()
-def uji_integritas_upgrade_rekening(bank):
-    # Mengambil rekening awal yang akan diuji.
-    rekening_lama = next(iter(bank.rekening_index.values()))
-    nasabah = rekening_lama.pemilik
 
-    print("Sebelum upgrade:")
-    print("Objek rekening:", id(rekening_lama))
-    print("Level:", rekening_lama.level)
-
-    # Menambahkan saldo agar memenuhi persyaratan upgrade.
-    rekening_lama.set_saldo(200_000_000)
-
-    # Melakukan upgrade dan menerima objek rekening pengganti.
-    rekening_baru = RekeningService.upgrade_rekening(
-        bank,
-        rekening_lama,
-        target_level=4
-    )
-
-    print()
-    print("Setelah upgrade:")
-    print("Objek rekening:", id(rekening_baru))
-    print("Level:", rekening_baru.level)
-    print("Jenis:", RekeningService.level[rekening_baru.level])
-
-
-    # Memastikan bank menyimpan objek rekening baru.
-    assert rekening_baru is bank.rekening_index[rekening_baru.norek], (
-        "Bank masih menyimpan objek rekening lama"
-    )
-
-    assert rekening_baru is not rekening_lama, (
-        "Service tidak membuat objek rekening pengganti"
-    )
-
-    assert rekening_baru.level == 4, (
-        "Rekening baru seharusnya Platinum"
-    )
-
-    assert rekening_baru.norek == rekening_lama.norek, (
-        "Nomor rekening berubah setelah upgrade"
-    )
-    # Memastikan nasabah juga menyimpan objek rekening baru.
-    assert rekening_baru in nasabah.rekening, (
-        "Daftar rekening nasabah belum menyimpan rekening baru"
-    )
-
-    indeks = nasabah.rekening.index(rekening_baru)
-
-    assert rekening_baru is nasabah.rekening[indeks], (
-        "Referensi rekening milik nasabah tidak sama"
-    )
-
-    # Memastikan objek lama tidak lagi berada pada relasi utama.
-    assert rekening_lama is not bank.rekening_index[rekening_baru.norek], (
-        "Bank masih menunjuk objek rekening lama"
-    )
-
-    assert rekening_lama not in nasabah.rekening, (
-        "Objek rekening lama masih tersimpan pada nasabah"
-    )
-
-    print("✅ Integritas upgrade rekening berhasil")
 - ----------------------------------------------------------------
 
 
@@ -474,37 +411,308 @@ def uji_save_load_waktu_bunga(bank):
     JsonStorage.simpan_bank(bank_baru)
 
 ------------------------------------------------------
-# def uji_save_load_waktu_bunga(bank):
-#     rekening = next(iter(bank.rekening_index.values()))
-#
-#     # Menyimpan tanggal asli agar dataset dapat dikembalikan.
-#     tanggal_asli = rekening.dapat_bunga
-#
-#     print("Sebelum debug :", rekening.dapat_bunga)
-#
-#     Debug.debug_bunga(bank,6)
-#
-#     tanggal_debug = rekening.dapat_bunga
-#     print("Setelah debug :", tanggal_debug)
-#
-#     # Menyimpan rekening tanpa menjalankan scheduler.
-#     JsonStorage.simpan_bank(bank)
-#
-#     # Memuat bank baru dari data yang baru disimpan.
-#     bank_baru = JsonStorage.muat_bank()
-#     rekening_baru = bank_baru.cari_rekening(rekening.norek)
-#
-#     print("Setelah load  :", rekening_baru.dapat_bunga)
-#
-#     assert rekening_baru.dapat_bunga == tanggal_debug, (
-#         "Tanggal bunga berubah setelah save/load"
-#     )
-#
-#     print("✅ Save/load waktu bunga berhasil")
-#
-#     # Mengembalikan tanggal asli agar dataset pengujian tidak tertinggal.
-#     rekening_baru.dapat_bunga = tanggal_asli
-#     JsonStorage.simpan_bank(bank_baru)
-#
-# bank = JsonStorage.muat_bank()
-# if __name__=="__main__":
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------
+import datetime
+
+from bank_djago.services.scheduler import Scheduler
+
+
+def uji_scheduler_rekening_dua_kali(bank):
+    # Mengambil satu rekening untuk pengujian.
+    rekening = next(iter(bank.rekening_index.values()))
+
+    hari_uji = datetime.date(2026, 10, 23)
+
+    # Menyiapkan keadaan agar bunga dan biaya admin sudah jatuh tempo.
+    rekening.dapat_bunga = datetime.date(2026, 9, 23)
+    rekening.waktu_bayar_admin = datetime.date(2026, 9, 23)
+
+    # Reset limit belum dilakukan pada hari pengujian.
+    rekening.reset = datetime.date(2026, 10, 22)
+    rekening.limit_sisa = 1
+
+    # Memastikan saldo cukup untuk menerima bunga dan membayar admin.
+    rekening.set_saldo(100_000_000)
+
+    print("SEBELUM SCHEDULER")
+    print("Saldo             :", rekening.saldo)
+    print("Dapat bunga       :", rekening.dapat_bunga)
+    print("Bayar admin       :", rekening.waktu_bayar_admin)
+    print("Reset limit       :", rekening.reset)
+    print("Limit tersisa     :", rekening.limit_sisa)
+
+    # Pemanggilan pertama harus memproses ketiga kegiatan.
+    Scheduler.jalankan(bank, hari_uji)
+
+    saldo_setelah_pertama = rekening.saldo
+    bunga_setelah_pertama = rekening.dapat_bunga
+    admin_setelah_pertama = rekening.waktu_bayar_admin
+    reset_setelah_pertama = rekening.reset
+    limit_setelah_pertama = rekening.limit_sisa
+    jumlah_riwayat_setelah_pertama = len(rekening.riwayat)
+
+    print()
+    print("SETELAH PEMANGGILAN PERTAMA")
+    print("Saldo             :", saldo_setelah_pertama)
+    print("Dapat bunga       :", bunga_setelah_pertama)
+    print("Bayar admin       :", admin_setelah_pertama)
+    print("Reset limit       :", reset_setelah_pertama)
+    print("Limit tersisa     :", limit_setelah_pertama)
+    print("Jumlah riwayat    :", jumlah_riwayat_setelah_pertama)
+
+    # Pemanggilan kedua menggunakan tanggal yang sama.
+    Scheduler.jalankan(bank, hari_uji)
+
+    print()
+    print("SETELAH PEMANGGILAN KEDUA")
+    print("Saldo             :", rekening.saldo)
+    print("Dapat bunga       :", rekening.dapat_bunga)
+    print("Bayar admin       :", rekening.waktu_bayar_admin)
+    print("Reset limit       :", rekening.reset)
+    print("Limit tersisa     :", rekening.limit_sisa)
+    print("Jumlah riwayat    :", len(rekening.riwayat))
+
+    # Pemanggilan kedua tidak boleh mengubah saldo.
+    assert rekening.saldo == saldo_setelah_pertama, (
+        "Saldo berubah ketika scheduler dipanggil ulang pada hari yang sama"
+    )
+
+    # Ketiga penanda waktu tidak boleh bergerak lagi.
+    assert rekening.dapat_bunga == bunga_setelah_pertama, (
+        "Bunga diberikan lebih dari sekali"
+    )
+
+    assert rekening.waktu_bayar_admin == admin_setelah_pertama, (
+        "Biaya admin dipotong lebih dari sekali"
+    )
+
+    assert rekening.reset == reset_setelah_pertama, (
+        "Limit direset lebih dari sekali"
+    )
+
+    assert rekening.limit_sisa == limit_setelah_pertama, (
+        "Jumlah limit berubah pada pemanggilan kedua"
+    )
+
+    # Tidak boleh ada riwayat rekening baru dari pemanggilan kedua.
+    assert len(rekening.riwayat) == jumlah_riwayat_setelah_pertama, (
+        "Scheduler menambahkan riwayat lagi pada pemanggilan kedua"
+    )
+
+    # Memastikan ketiga jadwal sudah diproses menuju tanggal yang benar.
+    assert rekening.dapat_bunga == hari_uji, (
+        "Penanda bunga tidak sampai pada periode yang diharapkan"
+    )
+
+    assert rekening.waktu_bayar_admin == hari_uji, (
+        "Penanda biaya admin tidak sampai pada periode yang diharapkan"
+    )
+
+    assert rekening.reset == hari_uji, (
+        "Tanggal reset limit tidak sesuai hari pengujian"
+    )
+
+    assert rekening.limit_sisa == rekening.limit_harian, (
+        "Limit tersisa tidak dikembalikan ke limit harian"
+    )
+
+    print()
+    print("✅ Bunga hanya diberikan satu kali")
+    print("✅ Biaya admin hanya dipotong satu kali")
+    print("✅ Limit hanya direset satu kali")
+    print("✅ Scheduler rekening bersifat idempoten")
+
+bank = JsonStorage.muat_bank()
+
+if __name__=="__main__":
+    uji_scheduler_rekening_dua_kali(bank)
+
+
+-------------------------------------------------------------------------
+def uji_state_perubahan_level(
+    bank,
+    nik,
+    pin,
+    target_level
+):
+    # Mencari rekening aktif milik nasabah yang akan diuji.
+    rekening_lama = next(
+        (
+            rekening
+            for rekening in bank.rekening_index.values()
+            if rekening.pemilik.NIK == nik
+            and rekening.status == "aktif"
+        ),
+        None
+    )
+
+    if rekening_lama is None:
+        raise ValueError(
+            "Nasabah tidak ditemukan atau tidak mempunyai rekening aktif"
+        )
+
+    nasabah = rekening_lama.pemilik
+    level_awal = rekening_lama.level
+
+    if target_level == level_awal:
+        raise ValueError(
+            "Target level harus berbeda dari level rekening sekarang"
+        )
+
+    # Menyiapkan saldo agar memenuhi persyaratan perubahan level.
+    rekening_lama.set_saldo(250_000_000)
+
+    # Menyimpan state yang wajib dipertahankan.
+    norek_sebelum = rekening_lama.norek
+    saldo_sebelum = rekening_lama.saldo
+    pemilik_sebelum = rekening_lama.pemilik
+    riwayat_sebelum = list(rekening_lama.riwayat)
+
+    waktu_bunga_sebelum = rekening_lama.dapat_bunga
+    waktu_admin_sebelum = rekening_lama.waktu_bayar_admin
+
+    objek_lama = id(rekening_lama)
+
+    print("SEBELUM PERUBAHAN LEVEL")
+    print(f"Objek rekening   : {objek_lama}")
+    print(f"Nomor rekening   : {norek_sebelum}")
+    print(f"Level            : {level_awal}")
+    print(f"Saldo            : {saldo_sebelum}")
+    print(f"Limit harian     : {rekening_lama.limit_harian}")
+    print(f"Limit tersisa    : {rekening_lama.limit_sisa}")
+    print(f"Waktu bunga      : {waktu_bunga_sebelum}")
+    print(f"Waktu admin      : {waktu_admin_sebelum}")
+    print(f"Jumlah riwayat   : {len(riwayat_sebelum)}")
+
+    # Menjalankan upgrade atau downgrade berdasarkan target level.
+    if target_level > level_awal:
+        rekening_baru = RekeningService.upgrade_rekening(
+            bank,
+            rekening_lama,
+            target_level
+        )
+        jenis_perubahan = "upgrade"
+
+    else:
+        rekening_baru = RekeningService.downgrade_rekening(
+            bank,
+            rekening_lama,
+            target_level
+        )
+        jenis_perubahan = "downgrade"
+
+    print("\nSETELAH PERUBAHAN LEVEL")
+    print(f"Jenis perubahan  : {jenis_perubahan}")
+    print(f"Objek rekening   : {id(rekening_baru)}")
+    print(f"Nomor rekening   : {rekening_baru.norek}")
+    print(f"Level            : {rekening_baru.level}")
+    print(f"Saldo            : {rekening_baru.saldo}")
+    print(f"Limit harian     : {rekening_baru.limit_harian}")
+    print(f"Limit tersisa    : {rekening_baru.limit_sisa}")
+    print(f"Waktu bunga      : {rekening_baru.dapat_bunga}")
+    print(f"Waktu admin      : {rekening_baru.waktu_bayar_admin}")
+    print(f"Jumlah riwayat   : {len(rekening_baru.riwayat)}")
+
+    # Memastikan perubahan menghasilkan objek rekening baru.
+    assert rekening_baru is not rekening_lama, (
+        "Perubahan level tidak menghasilkan objek rekening baru"
+    )
+
+    # Memastikan identitas bisnis rekening tetap dipertahankan.
+    assert rekening_baru.norek == norek_sebelum, (
+        "Nomor rekening berubah setelah perubahan level"
+    )
+
+    assert rekening_baru.pemilik is pemilik_sebelum, (
+        "Pemilik rekening berubah setelah perubahan level"
+    )
+
+    assert rekening_baru.cek_pin(pin), (
+        "PIN rekening tidak ikut dipertahankan"
+    )
+
+    # Memastikan state keuangan tetap dipertahankan.
+    assert rekening_baru.saldo == saldo_sebelum, (
+        "Saldo berubah ketika rekening diganti"
+    )
+
+    # Seluruh riwayat lama harus tetap tersedia.
+    for riwayat in riwayat_sebelum:
+        assert riwayat in rekening_baru.riwayat, (
+            "Terdapat riwayat lama yang tidak ikut dipindahkan"
+        )
+
+    # Jadwal bunga dan biaya admin tidak boleh dimulai ulang.
+    assert rekening_baru.dapat_bunga == waktu_bunga_sebelum, (
+        "Jadwal pemberian bunga berubah"
+    )
+
+    assert rekening_baru.waktu_bayar_admin == waktu_admin_sebelum, (
+        "Jadwal pembayaran biaya admin berubah"
+    )
+
+    # Level harus mengikuti pilihan perubahan.
+    assert rekening_baru.level == target_level, (
+        "Level rekening baru tidak sesuai target"
+    )
+
+    # Rekening baru harus tetap dapat digunakan.
+    assert rekening_baru.status == "aktif", (
+        "Rekening baru tidak berstatus aktif"
+    )
+
+    # Limit tersisa sengaja dimulai ulang.
+    assert rekening_baru.limit_sisa == rekening_baru.limit_harian, (
+        "Limit tersisa tidak di-reset sesuai jenis rekening baru"
+    )
+
+    # Bank harus menunjuk objek rekening baru.
+    assert bank.rekening_index[norek_sebelum] is rekening_baru, (
+        "Indeks rekening bank belum diperbarui"
+    )
+
+    # Nasabah harus menyimpan objek rekening baru.
+    assert rekening_baru in nasabah.rekening, (
+        "Rekening baru tidak ditemukan pada daftar rekening nasabah"
+    )
+
+    assert rekening_lama not in nasabah.rekening, (
+        "Rekening lama masih tersimpan pada nasabah"
+    )
+
+    # Waktu perubahan level harus tercatat agar tidak bisa diubah berulang.
+    assert rekening_baru.boleh_ubah_level is not None, (
+        "Waktu pembatas perubahan level belum disimpan"
+    )
+
+    print(
+        "\n✅ Seluruh state rekening sesuai setelah "
+        f"{jenis_perubahan}"
+    )
+
+    return rekening_baru
+
+bank = JsonStorage.muat_bank()
+
+
+rekening_hasil = uji_state_perubahan_level(
+    bank,
+    nik="3510152602082002",
+    pin="111111",
+    target_level=4
+)
+
+rekening = uji_state_perubahan_level(
+    bank,
+    nik="3510152602082002",
+    pin="111111",
+    target_level=3
+)

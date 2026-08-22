@@ -1,10 +1,20 @@
 {
     "3510152602082002": {
         "nama": "Niko Wahyu Pratama",
-        "alamat": "jln kalibendo",
+        "alamat": "jln",
         "nik": "3510152602082002",
         "rekening": [
-            "1001532233868694"
+            "2001661251477941"
+        ],
+        "deposito": [],
+        "notifikasi": []
+    },
+    "3150152602082002": {
+        "nama": "Gojo Satoru",
+        "alamat": "jln",
+        "nik": "3150152602082002",
+        "rekening": [
+            "2001703944452732"
         ],
         "deposito": [],
         "notifikasi": []

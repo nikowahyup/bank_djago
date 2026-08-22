@@ -60,7 +60,7 @@ def cek_integritas_deposito(bank):
     return error
 
 
------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------
 
 
 def uji_serialisasi_integer_deposito(bank):
@@ -104,10 +104,9 @@ def uji_serialisasi_integer_deposito(bank):
         f"✅ {jumlah_diperiksa} deposito siap disimpan "
         f"dengan nominal berupa integer"
     )
-if __name__=="__main__":
-    uji_serialisasi_integer_deposito(bank)
 
-    -----------------------------------------------------------------------------
+
+    # -----------------------------------------------------------------------------
 
 def uji_integer_aro_pokok_bunga(bank):
     # Mencari deposito ARO pokok+bunga yang masih aktif.
@@ -187,39 +186,21 @@ def uji_integer_aro_pokok_bunga(bank):
     print("✅ Nominal baru sudah berupa integer")
     print("✅ Saldo rekening tetap konsisten")
 
-bank = JsonStorage.muat_bank()
+
 
 if __name__=="__main__":
     uji_integer_aro_pokok_bunga(bank)
 
------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
-# def uji_integer_deposito(bank):
-#     nasabah = bank.data_nasabah["3510152602082002"]
-#     deposito = nasabah.deposito[0]
-#
-#     print("Sebelum pengujian:")
-#     print("Nominal        :", deposito.nominal)
-#     print("Total cair     :", deposito.total_pencairan)
-#     print("Jenis nominal  :", type(deposito.nominal))
-#     print("Jenis total    :", type(deposito.total_pencairan))
-#
-#     assert isinstance(deposito.nominal, int), (
-#         "Nominal deposito belum berupa integer"
-#     )
-#
-#     assert isinstance(deposito.total_pencairan, int), (
-#         "Total pencairan deposito belum berupa integer"
-#     )
-#
-#     print("✅ Nominal deposito dan total pencairan sudah berupa integer")
-#
-# bank = JsonStorage.muat_bank()
-#
-#
-# if __name__=="__main__":
-#     uji_integer_deposito(bank)
 
----------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------
+
+
+
+
+
+
 
