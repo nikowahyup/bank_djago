@@ -121,7 +121,10 @@ def uji_isolasi_notifikasi(bank):
         # Mengembalikan list notifikasi asli milik nasabah.
         nasabah.notifikasi = notifikasi_asli
 
--------------------------------------------------------------------
+# -------------------------------------------------------------------
+from bank_djago.penyimpanan.storage import JsonStorage
+from bank_djago.utils.utility import JenisReferensiID
+
 
 def uji_save_load_notifikasi(bank):
     nasabah = next(iter(bank.data_nasabah.values()))

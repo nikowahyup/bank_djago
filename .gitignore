@@ -1,4 +1,35 @@
-__pycache__/
+
 *.pyc
+
+
+
+
+# Virtual environment
 .venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Database SQLite lokal
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment dan rahasia lokal
+.env
+.env.*
+
+# Cache pengujian
+.pytest_cache/
+.coverage
+htmlcov/
+
+# File sementara
+*.log
+*.tmp
+
+# Konfigurasi IDE lokal
 .idea/

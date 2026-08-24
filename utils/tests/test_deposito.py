@@ -1,4 +1,4 @@
-@staticmethod
+
 def cek_integritas_deposito(bank):
     error = []
 
@@ -108,6 +108,12 @@ def uji_serialisasi_integer_deposito(bank):
 
     # -----------------------------------------------------------------------------
 
+from bank_djago.utils.utility import Utilitas
+from bank_djago.services.deposito.deposito_service import DepositoService, StatusDeposito
+from bank_djago.penyimpanan.storage import JsonStorage
+
+import datetime
+
 def uji_integer_aro_pokok_bunga(bank):
     # Mencari deposito ARO pokok+bunga yang masih aktif.
     nasabah = bank.data_nasabah["3510152602082002"]
@@ -186,7 +192,7 @@ def uji_integer_aro_pokok_bunga(bank):
     print("✅ Nominal baru sudah berupa integer")
     print("✅ Saldo rekening tetap konsisten")
 
-
+bank = JsonStorage.muat_bank()
 
 if __name__=="__main__":
     uji_integer_aro_pokok_bunga(bank)

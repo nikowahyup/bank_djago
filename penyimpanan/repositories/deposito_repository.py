@@ -1,0 +1,126 @@
+import sqlite3
+
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+
+
+class DepositoRepository:
+
+    @staticmethod
+    def tambah_deposito(deposito):
+        koneksi = buat_koneksi()
+
+        try:
+            proses_aro = (
+                deposito.proses_aro.isoformat()
+                if deposito.proses_aro is not None
+                else None
+            )
+
+            cursor = koneksi.execute(
+                """
+                INSERT INTO deposito (
+                    norek,
+                    nominal,
+                    bunga,
+                    lama_bulan,
+                    tanggal_buka,
+                    jatuh_tempo,
+                    status,
+                    jenis_aro,
+                    lama_aro,
+                    proses_aro
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    deposito.rekening.norek,
+                    deposito.nominal,
+                    deposito.bunga,
+                    deposito.lama_bulan,
+                    deposito.tanggal_buka.isoformat(),
+                    deposito.jatuh_tempo.isoformat(),
+                    deposito.status,
+                    deposito.jenis_aro,
+                    deposito.lama_aro,
+                    proses_aro
+                )
+            )
+
+            id_deposito = cursor.lastrowid
+
+            koneksi.commit()
+            return id_deposito
+
+        except sqlite3.IntegrityError as error:
+            koneksi.rollback()
+            print(f"Gagal menyimpan deposito: {error}")
+            return None
+
+        except sqlite3.Error as error:
+            koneksi.rollback()
+            print(f"Gagal menyimpan deposito: {error}")
+            return None
+
+        finally:
+            koneksi.close()
+
+    @staticmethod
+    def cari_deposito_dengan_id(id_deposito):
+        koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT *
+                FROM deposito
+                WHERE id = ?
+                """,
+                (id_deposito,)
+            )
+
+            return cursor.fetchone()
+
+        finally:
+            koneksi.close()
+
+    @staticmethod
+    def cari_deposito_dengan_norek(norek):
+        koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT *
+                FROM deposito
+                WHERE norek = ?
+                ORDER BY id
+                """,
+                (norek,)
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            koneksi.close()
+
+    @staticmethod
+    def cari_deposito_dengan_nik(nik):
+        koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT deposito.*
+                FROM deposito
+                JOIN rekening
+                    ON deposito.norek = rekening.norek
+                WHERE rekening.nik_pemilik = ?
+                ORDER BY deposito.id
+                """,
+                (nik,)
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            koneksi.close()

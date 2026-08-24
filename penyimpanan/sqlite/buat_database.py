@@ -1,0 +1,288 @@
+from bank_djago.penyimpanan.sqlite.database import (
+    buat_database,
+    buat_koneksi
+)
+#
+#
+# def buat_tabel_nasabah():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS nasabah (
+#                 nik TEXT NOT NULL PRIMARY KEY,
+#                 nama TEXT NOT NULL,
+#                 alamat TEXT NOT NULL
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel nasabah berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_rekening():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS rekening (
+#                 norek TEXT NOT NULL PRIMARY KEY,
+#                 nik_pemilik TEXT NOT NULL,
+#                 pin TEXT NOT NULL,
+#                 saldo INTEGER NOT NULL DEFAULT 0,
+#                 level INTEGER NOT NULL DEFAULT 1,
+#                 status TEXT NOT NULL DEFAULT 'aktif',
+#                 limit_sisa INTEGER,
+#                 reset TEXT NOT NULL,
+#                 dapat_bunga TEXT NOT NULL,
+#                 waktu_bayar_admin TEXT NOT NULL,
+#                 terakhir_ubah_rekening TEXT,
+#                 alasan_blokir TEXT,
+#
+#                 CHECK (saldo >= 0),
+#                 CHECK (level IN (1, 2, 3, 4)),
+#                 CHECK (status IN ('aktif', 'blokir', 'tutup')),
+#                 CHECK (limit_sisa IS NULL OR limit_sisa >= 0),
+#
+#                 FOREIGN KEY (nik_pemilik)
+#                 REFERENCES nasabah(nik)
+#                 ON UPDATE CASCADE
+#                 ON DELETE RESTRICT
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel rekening berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_deposito():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS deposito (
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 norek TEXT NOT NULL,
+#                 nominal INTEGER NOT NULL,
+#                 bunga REAL NOT NULL,
+#                 lama_bulan INTEGER NOT NULL,
+#                 tanggal_buka TEXT NOT NULL,
+#                 jatuh_tempo TEXT NOT NULL,
+#                 status TEXT NOT NULL DEFAULT 'aktif',
+#                 jenis_aro TEXT NOT NULL DEFAULT 'tidak',
+#                 lama_aro INTEGER,
+#                 proses_aro TEXT,
+#
+#                 CHECK (nominal > 0),
+#                 CHECK (bunga >= 0),
+#                 CHECK (lama_bulan IN (1, 3, 6, 12)),
+#                 CHECK (
+#                     status IN (
+#                         'aktif',
+#                         'jatuh tempo',
+#                         'dicairkan',
+#                         'selesai'
+#                     )
+#                 ),
+#                 CHECK (
+#                     jenis_aro IN (
+#                         'tidak',
+#                         'pokok',
+#                         'pokok_bunga'
+#                     )
+#                 ),
+#                 CHECK (
+#                     lama_aro IS NULL
+#                     OR lama_aro IN (1, 3, 6, 12)
+#                 ),
+#
+#                 FOREIGN KEY (norek)
+#                 REFERENCES rekening(norek)
+#                 ON UPDATE CASCADE
+#                 ON DELETE RESTRICT
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel deposito berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_pinjaman():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS pinjaman (
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 norek TEXT NOT NULL,
+#                 nominal_pinjaman INTEGER NOT NULL,
+#                 bunga REAL NOT NULL,
+#                 tenor INTEGER NOT NULL,
+#                 cicilan_tetap INTEGER NOT NULL DEFAULT 0,
+#                 sisa_pokok INTEGER NOT NULL,
+#                 cicilan_terbayar INTEGER NOT NULL DEFAULT 0,
+#                 status TEXT NOT NULL DEFAULT 'diajukan',
+#                 tanggal_pencairan TEXT,
+#                 tanggal_jatuh_tempo TEXT,
+#
+#                 CHECK (nominal_pinjaman > 0),
+#                 CHECK (bunga >= 0),
+#                 CHECK (tenor IN (6, 12, 18, 24)),
+#                 CHECK (cicilan_tetap >= 0),
+#                 CHECK (sisa_pokok >= 0),
+#                 CHECK (
+#                     cicilan_terbayar >= 0
+#                     AND cicilan_terbayar <= tenor
+#                 ),
+#                 CHECK (
+#                     status IN (
+#                         'diajukan',
+#                         'ditolak',
+#                         'disetujui',
+#                         'aktif',
+#                         'lunas'
+#                     )
+#                 ),
+#
+#                 FOREIGN KEY (norek)
+#                 REFERENCES rekening(norek)
+#                 ON UPDATE CASCADE
+#                 ON DELETE RESTRICT
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel pinjaman berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_notifikasi():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS notifikasi (
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 nik_pemilik TEXT NOT NULL,
+#                 jenis TEXT NOT NULL,
+#                 pesan TEXT NOT NULL,
+#                 jenis_referensi INTEGER,
+#                 id_objek INTEGER,
+#
+#                 CHECK (
+#                     jenis_referensi IS NULL
+#                     OR jenis_referensi IN (1, 2, 3)
+#                 ),
+#
+#                 FOREIGN KEY (nik_pemilik)
+#                 REFERENCES nasabah(nik)
+#                 ON UPDATE CASCADE
+#                 ON DELETE CASCADE
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel notifikasi berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_riwayat():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS riwayat (
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 norek TEXT NOT NULL,
+#                 kategori TEXT NOT NULL,
+#                 jenis TEXT NOT NULL,
+#                 waktu TEXT NOT NULL,
+#                 log TEXT NOT NULL,
+#
+#                 FOREIGN KEY (norek)
+#                 REFERENCES rekening(norek)
+#                 ON UPDATE CASCADE
+#                 ON DELETE RESTRICT
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel riwayat berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def buat_tabel_audit():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         koneksi.execute("""
+#             CREATE TABLE IF NOT EXISTS audit (
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 kategori TEXT NOT NULL,
+#                 jenis TEXT NOT NULL,
+#                 waktu TEXT NOT NULL,
+#                 log TEXT NOT NULL,
+#                 nama TEXT,
+#                 nik TEXT,
+#                 norek TEXT
+#             )
+#         """)
+#
+#         koneksi.commit()
+#         print("Tabel audit berhasil dibuat")
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# def inisialisasi_database():
+#     buat_database()
+#     buat_tabel_nasabah()
+#     buat_tabel_rekening()
+#     buat_tabel_deposito()
+#     buat_tabel_pinjaman()
+#     buat_tabel_notifikasi()
+#     buat_tabel_riwayat()
+#     buat_tabel_audit()
+#
+#
+# if __name__ == "__main__":
+#     inisialisasi_database()
+
+
+
+def lihat_daftar_tabel():
+    koneksi = buat_koneksi()
+
+    try:
+        cursor = koneksi.execute("""
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+            ORDER BY name
+        """)
+
+        return cursor.fetchall()
+
+    finally:
+        koneksi.close()
+
+
+
+for tabel in lihat_daftar_tabel():
+    print(tabel["name"])

@@ -1,4 +1,3 @@
-@staticmethod
 def cek_integritas_deposito(bank):
     error = []
 
@@ -61,7 +60,8 @@ def cek_integritas_deposito(bank):
 
 
 
-@staticmethod
+from bank_djago.utils.utility import JenisReferensiID
+
 def cek_integritas_notifikasi(bank):
     error = []
 
@@ -139,6 +139,7 @@ def cek_integritas_notifikasi(bank):
 
 
 
+from bank_djago.utils.utility import StatusPinjaman
 
 def cek_integritas_pinjaman(bank):
     error = []
