@@ -13,7 +13,8 @@ Aplikasi simulasi perbankan berbasis Python untuk mengelola nasabah dan rekening
 
 ## 🛠️ Teknologi yang Digunakan
 * **Bahasa Pemrograman:** Python 3.x
-* **Konsep Utama:** Object-Oriented Programming (OOP), Data Encapsulation, Inheritance, Data Validation, File Handling (JSON)
+* **Konsep Utama:** Object-Oriented Programming (OOP), Data Encapsulation, Inheritance, Data Validation, Transaction Management, dan Relational Database
+* **Penyimpanan:** SQLite sebagai sumber data utama; JSON dipertahankan sebagai bagian dari riwayat pengembangan
 
 ---
 
@@ -146,18 +147,29 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Perapian Struktur Proyek:** Memisahkan service, UI, penyimpanan, dan pengujian berdasarkan tanggung jawab.
 - [x] **Dokumentasi:** Mendokumentasikan arsitektur, alur bisnis, integrity check, dan keputusan desain.
 
-### `v1.1` - Database
-- [ ] Migrasi dari JSON ke SQLite.
-- [ ] Pemisahan layer penyimpanan data.
-- [ ] Penyesuaian model dan service terhadap database.
-- [ ] Validasi relasi dan integritas data pada database.
+### `v1.1` - Database SQLite
+Fokus pada pemindahan sumber kebenaran dari JSON dan objek `Bank` menuju database relasional.
+
+- [x] Membuat skema SQLite untuk nasabah, rekening, deposito, pinjaman, notifikasi, riwayat, audit, dan pengajuan rekening.
+- [x] Memisahkan repository, service, UI, dan loader.
+- [x] Mengaktifkan foreign key dan menguji integritas relasi antartabel.
+- [x] Memigrasikan pendaftaran nasabah dan pembukaan rekening pertama secara atomik.
+- [x] Memigrasikan login dan pemuatan objek nasabah beserta seluruh rekeningnya.
+- [x] Memigrasikan setor tunai, tarik tunai, dan transfer sebagai transaksi database.
+- [x] Memigrasikan pembukaan, upgrade, downgrade, riwayat, serta audit rekening.
+- [x] Menambahkan alur pengajuan, persetujuan, penolakan, dan penyelesaian penutupan rekening.
+- [x] Mempertahankan rekening tertutup untuk kebutuhan audit dan riwayat.
+- [ ] Menyelesaikan migrasi operasional deposito, pinjaman, notifikasi, scheduler, dan rekap.
+- [ ] Menghapus ketergantungan akhir terhadap penyimpanan JSON dan agregat `Bank`.
 
 ### `v2.0` - Web Interface
-- [ ] Migrasi antarmuka terminal ke Django.
-- [ ] UI berbasis web.
-- [ ] Integrasi sistem autentikasi.
-- [ ] Dashboard nasabah dan admin.
-- [ ] Integrasi business logic yang sudah dibangun pada backend.
+- [ ] Mempelajari dasar HTTP, routing, request/response, template, session, dan autentikasi menggunakan Flask.
+- [ ] Memigrasikan antarmuka terminal ke Flask secara bertahap.
+- [ ] Membuat UI berbasis web.
+- [ ] Mengintegrasikan autentikasi nasabah dan admin.
+- [ ] Membuat dashboard nasabah dan admin.
+- [ ] Menghubungkan business logic yang sudah dibangun tanpa memindahkannya ke route.
+- [ ] Mengevaluasi Django setelah memahami dasar aplikasi web dan kebutuhan proyek bertambah.
 
 ---
 
@@ -172,8 +184,9 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] Notification System
 - [x] Denda keterlambatan dan tunggakan
 - [x] Penyempurnaan testing dan validasi integritas data
-- [ ] Migrasi database ke SQLite
-- [ ] Migrasi ke Django
+- [x] Fondasi database dan layanan utama menggunakan SQLite
+- [ ] Menyelesaikan migrasi seluruh fitur ke SQLite
+- [ ] Mempelajari dan mengintegrasikan Flask
 - [ ] Web Interface
 
 ---
@@ -223,6 +236,15 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - Menolak pembayaran cicilan melalui rekening terblokir
 - Menghapus state status pembayaran yang dapat dihitung dari tanggal jatuh tempo
 
+(27/08/2026)
+- Memigrasikan layanan utama dari JSON menuju SQLite
+- Menambahkan repository dan loader untuk memisahkan persistence dari objek domain
+- Membuat transaksi atomik untuk pendaftaran, transaksi saldo, perubahan level, dan penutupan rekening
+- Menambahkan pengajuan penutupan yang diproses oleh admin
+- Mendukung penyelesaian penutupan melalui penarikan atau pemindahan seluruh saldo
+- Mempertahankan rekening tertutup beserta riwayat dan auditnya
+- Menggabungkan pengajuan dan penyelesaian penutupan menjadi satu menu dinamis
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -265,6 +287,61 @@ State lama dan nilai turunan digunakan terlebih dahulu. State baru hanya ditamba
 
 Jawaban:
 Status pembayaran merupakan nilai turunan dari status pinjaman, tanggal jatuh tempo, dan tanggal pemeriksaan. Menyimpannya akan menciptakan dua sumber kebenaran yang dapat tidak sinkron. Kondisi lancar atau menunggak ditentukan secara dinamis melalui perhitungan hari keterlambatan.
+
+### 9. Mengapa SQLite menjadi sumber kebenaran utama, tetapi objek Python tetap digunakan?
+
+Jawaban:
+SQLite menyimpan state yang bertahan setelah program berhenti, sedangkan objek Python digunakan untuk menjalankan perilaku bisnis selama aplikasi aktif. Loader bertugas merangkai kembali data database menjadi objek agar service tetap dapat menggunakan desain OOP tanpa menjadikan memori sebagai sumber data utama.
+
+### 10. Mengapa UI, service, repository, dan loader dipisahkan?
+
+Jawaban:
+UI menangani input dan pesan pengguna, service menjalankan aturan bisnis serta transaksi, repository menjalankan SQL, dan loader membentuk kembali objek. Pemisahan ini mencegah satu method mengurus tampilan, aturan bisnis, dan penyimpanan sekaligus serta mempermudah migrasi dari terminal menuju web.
+
+### 11. Mengapa commit dan rollback dikelola oleh service?
+
+Jawaban:
+Satu fitur bisnis dapat menjalankan beberapa query. Contohnya pendaftaran harus menyimpan nasabah dan rekening pertama, sedangkan transfer harus mengubah dua saldo sekaligus serta menyimpan riwayat dan audit. Service memiliki gambaran lengkap terhadap operasi tersebut, sehingga seluruh query dapat berhasil bersama atau dibatalkan bersama.
+
+### 12. Mengapa beberapa repository menerima koneksi dari luar?
+
+Jawaban:
+Koneksi dari luar memungkinkan beberapa query memakai transaksi database yang sama. Repository tidak menutup koneksi yang diterimanya karena kepemilikan commit, rollback, dan close tetap berada pada service yang membuka transaksi tersebut. Method baca yang digunakan secara mandiri tetap boleh membuat dan menutup koneksinya sendiri.
+
+### 13. Mengapa repository tidak mengulang seluruh validasi bisnis?
+
+Jawaban:
+Repository bertugas menyimpan data yang sudah diputuskan oleh service. Integritas dasar tetap dijaga oleh primary key, foreign key, NOT NULL, UNIQUE, dan CHECK pada SQLite, sedangkan aturan seperti saldo minimum, limit transfer, dan kelayakan penutupan ditangani oleh service.
+
+### 14. Mengapa riwayat dan audit dipisahkan?
+
+Jawaban:
+Riwayat ditujukan kepada nasabah dan melekat pada rekening, sedangkan audit ditujukan untuk pemantauan sistem dan admin. Satu aktivitas dapat menghasilkan keduanya karena tujuan pembaca dan tingkat informasi yang disimpan berbeda.
+
+### 15. Mengapa rekening yang ditutup tidak dihapus?
+
+Jawaban:
+Penghapusan akan memutus jejak transaksi, pengajuan, riwayat, audit, deposito, atau pinjaman yang pernah merujuk rekening tersebut. Karena itu penutupan mengubah status dan mengosongkan saldo, sementara record rekening tetap disimpan sebagai data historis.
+
+### 16. Mengapa penutupan rekening menggunakan pengajuan admin?
+
+Jawaban:
+Nasabah hanya mengajukan penutupan. Admin memeriksa deposito dan pinjaman berjalan sebelum menyetujui atau menolak. Selama menunggu, rekening tetap aktif. Setelah disetujui, nasabah menyelesaikan saldo melalui penarikan atau pemindahan ke rekening lain, lalu status rekening berubah menjadi `tutup`.
+
+### 17. Mengapa pendaftaran nasabah dan rekening pertama berada dalam satu transaksi?
+
+Jawaban:
+Desain mengharuskan nasabah baru langsung memiliki rekening pertama dan bebas memilih jenisnya. Jika salah satu penyimpanan gagal, keduanya harus dibatalkan agar tidak terbentuk nasabah tanpa rekening atau rekening tanpa pemilik yang sah.
+
+### 18. Mengapa file database dan data pribadi tidak ikut dicommit?
+
+Jawaban:
+Repository membagikan struktur, kode pembuat database, dan contoh pengujian, bukan state lokal pengguna. Database dapat berisi saldo, PIN, identitas, audit, dan aktivitas pengujian. Pengguna lain dapat membuat database mereka sendiri dari skema yang tersedia tanpa menerima data lokal pengembang.
+
+### 19. Mengapa Flask dipilih lebih dahulu untuk tahap web?
+
+Jawaban:
+Flask menyediakan komponen web secara lebih eksplisit sehingga routing, request/response, template, session, autentikasi, dan integrasi service dapat dipelajari satu per satu. Django tetap dapat dievaluasi ketika kebutuhan proyek berkembang dan manfaat fitur bawaannya menjadi lebih besar.
 
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
