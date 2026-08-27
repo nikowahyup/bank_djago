@@ -147,29 +147,121 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Perapian Struktur Proyek:** Memisahkan service, UI, penyimpanan, dan pengujian berdasarkan tanggung jawab.
 - [x] **Dokumentasi:** Mendokumentasikan arsitektur, alur bisnis, integrity check, dan keputusan desain.
 
-### `v1.1` - Database SQLite
-Fokus pada pemindahan sumber kebenaran dari JSON dan objek `Bank` menuju database relasional.
+### `v1.1` - Fondasi SQLite
+Membangun dasar penyimpanan relasional sebelum memindahkan fitur bisnis.
 
-- [x] Membuat skema SQLite untuk nasabah, rekening, deposito, pinjaman, notifikasi, riwayat, audit, dan pengajuan rekening.
-- [x] Memisahkan repository, service, UI, dan loader.
-- [x] Mengaktifkan foreign key dan menguji integritas relasi antartabel.
-- [x] Memigrasikan pendaftaran nasabah dan pembukaan rekening pertama secara atomik.
-- [x] Memigrasikan login dan pemuatan objek nasabah beserta seluruh rekeningnya.
-- [x] Memigrasikan setor tunai, tarik tunai, dan transfer sebagai transaksi database.
-- [x] Memigrasikan pembukaan, upgrade, downgrade, riwayat, serta audit rekening.
-- [x] Menambahkan alur pengajuan, persetujuan, penolakan, dan penyelesaian penutupan rekening.
-- [x] Mempertahankan rekening tertutup untuk kebutuhan audit dan riwayat.
-- [ ] Menyelesaikan migrasi operasional deposito, pinjaman, notifikasi, scheduler, dan rekap.
-- [ ] Menghapus ketergantungan akhir terhadap penyimpanan JSON dan agregat `Bank`.
+- [x] Membuat koneksi SQLite terpusat.
+- [x] Mengaktifkan foreign key.
+- [x] Membuat skema nasabah, rekening, deposito, pinjaman, notifikasi, riwayat, audit, dan pengajuan rekening.
+- [x] Membuat repository untuk operasi SQL.
+- [x] Menguji primary key, foreign key, constraint, isolasi data, dan ID global.
+- [x] Mengecualikan database lokal dari Git.
 
-### `v2.0` - Web Interface
-- [ ] Mempelajari dasar HTTP, routing, request/response, template, session, dan autentikasi menggunakan Flask.
-- [ ] Memigrasikan antarmuka terminal ke Flask secara bertahap.
-- [ ] Membuat UI berbasis web.
-- [ ] Mengintegrasikan autentikasi nasabah dan admin.
-- [ ] Membuat dashboard nasabah dan admin.
-- [ ] Menghubungkan business logic yang sudah dibangun tanpa memindahkannya ke route.
-- [ ] Mengevaluasi Django setelah memahami dasar aplikasi web dan kebutuhan proyek bertambah.
+### `v1.2` - Nasabah dan Rekening
+Memindahkan pendaftaran, login, dan pembentukan objek dari JSON menuju SQLite.
+
+- [x] Mendaftarkan nasabah dan membuka rekening pertama dalam satu transaksi.
+- [x] Membebaskan nasabah memilih jenis rekening pertamanya.
+- [x] Membuka rekening tambahan untuk nasabah lama.
+- [x] Membuat nomor rekening melalui `RekeningService`.
+- [x] Memuat nasabah dan seluruh rekeningnya melalui loader.
+- [x] Menggunakan SQLite pada login.
+- [x] Memisahkan UI, service, repository, dan loader.
+
+### `v1.3` - Transaksi dan Lifecycle Rekening
+Memindahkan perubahan saldo serta perubahan jenis rekening ke transaksi database yang atomik.
+
+- [x] Memigrasikan setor tunai.
+- [x] Memigrasikan tarik tunai.
+- [x] Memigrasikan transfer antar-rekening.
+- [x] Memperbarui saldo, limit, riwayat, dan audit dalam satu transaksi.
+- [x] Memigrasikan upgrade dan downgrade rekening.
+- [x] Memuat riwayat langsung dari SQLite.
+- [x] Mempertahankan rekening tertutup untuk kebutuhan historis.
+
+### `v1.4` - Pengajuan dan Penutupan Rekening
+Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
+
+- [x] Membuat tabel dan repository pengajuan rekening.
+- [x] Mengajukan penutupan tanpa langsung mengubah status rekening.
+- [x] Menampilkan seluruh pengajuan yang menunggu kepada admin.
+- [x] Menyetujui atau menolak pengajuan beserta catatan admin.
+- [x] Mencegah persetujuan ketika deposito atau pinjaman masih berjalan.
+- [x] Menyelesaikan penutupan melalui penarikan seluruh saldo.
+- [x] Menyelesaikan penutupan melalui pemindahan seluruh saldo.
+- [x] Menyatukan pengajuan, status, dan penyelesaian dalam satu menu dinamis.
+- [x] Menyimpan riwayat serta audit penutupan.
+- [x] Tetap menyediakan riwayat rekening yang sudah ditutup.
+
+### `v1.5` - Migrasi Deposito
+Memindahkan seluruh lifecycle deposito dari koleksi objek/JSON menuju SQLite.
+
+- [ ] Membuka deposito menggunakan rekening yang dimuat dari SQLite.
+- [ ] Memuat seluruh deposito milik nasabah.
+- [ ] Memigrasikan pencairan deposito.
+- [ ] Memigrasikan deposito ARO dan non-ARO.
+- [ ] Memperbarui status serta proses ARO secara atomik.
+- [ ] Menyimpan riwayat, audit, dan notifikasi deposito.
+- [ ] Menguji beberapa deposito pada satu nasabah.
+
+### `v1.6` - Migrasi Pinjaman
+Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
+
+- [ ] Mengajukan pinjaman menggunakan rekening dari SQLite.
+- [ ] Menampilkan dan memproses pengajuan pinjaman untuk admin.
+- [ ] Memigrasikan persetujuan, penolakan, dan pencairan.
+- [ ] Memigrasikan pembayaran cicilan dan pelunasan.
+- [ ] Memigrasikan tunggakan, masa toleransi, dan denda.
+- [ ] Menyimpan seluruh riwayat pinjaman nasabah.
+- [ ] Menguji transaksi gagal tanpa perubahan state sebagian.
+
+### `v1.7` - Notifikasi dan Scheduler
+Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank` yang selalu berada di memori.
+
+- [ ] Memuat target scheduler langsung dari repository.
+- [ ] Memigrasikan bunga rekening dan biaya admin.
+- [ ] Memigrasikan reset limit harian.
+- [ ] Memigrasikan jatuh tempo deposito dan pinjaman.
+- [ ] Memigrasikan pembuatan serta penghapusan notifikasi.
+- [ ] Menjamin scheduler aman ketika dijalankan berulang pada tanggal yang sama.
+- [ ] Mencatat satu audit sistem untuk proses global yang sesuai.
+
+### `v1.8` - Admin, Rekap, dan Pelepasan JSON
+Menjadikan SQLite satu-satunya sumber kebenaran seluruh aplikasi.
+
+- [ ] Memigrasikan rekap bank ke query SQLite.
+- [ ] Memigrasikan tampilan audit admin.
+- [ ] Menyelesaikan pengajuan blokir dan buka blokir.
+- [ ] Menambahkan desain pemblokiran darurat dengan verifikasi pembukaan blokir yang lebih kuat.
+- [ ] Menghapus parameter `bank` yang tidak lagi dibutuhkan.
+- [ ] Menghapus proses save/load JSON dari alur utama.
+- [ ] Memastikan data JSON lama hanya menjadi artefak riwayat pengembangan.
+
+### `v1.9` - Stabilisasi dan Persiapan Web
+Menyiapkan business logic agar dapat digunakan oleh terminal maupun web tanpa duplikasi.
+
+- [ ] Menjalankan pengujian integrasi seluruh lifecycle.
+- [ ] Menambahkan pengujian otomatis dengan `pytest`.
+- [ ] Menghapus import pengujian yang memiliki efek samping.
+- [ ] Merapikan type hint dan dokumentasi method penting.
+- [ ] Memastikan service tidak bergantung pada `input()` atau `print()`.
+- [ ] Memindahkan konfigurasi dan rahasia dari source code.
+- [ ] Menyiapkan autentikasi, session, dan aturan otorisasi.
+- [ ] Menetapkan kontrak data antara route web dan service.
+
+### `v2.0` - Web dengan Flask
+Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
+
+- [ ] Mempelajari dasar HTTP, routing, request, response, template, dan form.
+- [ ] Membuat struktur aplikasi Flask.
+- [ ] Menghubungkan route Flask dengan service yang sudah ada.
+- [ ] Membuat login dan session nasabah/admin.
+- [ ] Membuat dashboard nasabah.
+- [ ] Membuat dashboard admin.
+- [ ] Memigrasikan transaksi, rekening, deposito, pinjaman, riwayat, dan notifikasi ke halaman web.
+- [ ] Menambahkan validasi server-side serta penanganan error.
+- [ ] Menguji alur web dan keamanan akses.
+- [ ] Mengevaluasi Django setelah memahami kebutuhan aplikasi yang sebenarnya.
 
 ---
 
