@@ -1,14 +1,23 @@
+from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
+
+
+
 class RiwayatService:
 
 
     @staticmethod
     def ambil_riwayat(rekening,jenis=None):
+
         if jenis is None:
-            data = rekening.riwayat
+            daftar_riwayat = RiwayatRepository.cari_seluruh_riwayat(rekening.norek)
 
         else:
-            data = [item for item in rekening.riwayat if item["jenis"] == jenis]
+            daftar_riwayat = RiwayatRepository.cari_riwayat_berdasarkan_jenis(rekening.norek, jenis)
 
-        if not data:
+        if not daftar_riwayat:
             raise ValueError("Riwayat tidak ditemukan")
-        return data
+
+        return daftar_riwayat
+
+
+

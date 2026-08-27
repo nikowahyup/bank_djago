@@ -17,7 +17,7 @@ class Rekening:
         self.dapat_bunga       = datetime.date.today()
         self.biaya_admin       = biaya_admin
         self.limit_sisa        = limit
-        self. limit_harian     = limit
+        self.limit_harian     = limit
         self.waktu_bayar_admin = datetime.date.today()
         self.saldosetor_min    = minimum
         self.penutupan         = None

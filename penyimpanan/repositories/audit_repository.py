@@ -7,13 +7,10 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 class AuditRepository:
 
     @staticmethod
-    def tambah_audit(audit):
-        koneksi = buat_koneksi()
+    def tambah_audit(audit, koneksi):
 
-        try:
             waktu = audit["waktu"]
 
-            # Mengubah date atau datetime menjadi teks ISO.
             if isinstance(waktu, (datetime.date, datetime.datetime)):
                 waktu = waktu.isoformat()
 
@@ -40,24 +37,10 @@ class AuditRepository:
                     audit.get("norek")
                 )
             )
+            return cursor.lastrowid
 
-            id_audit = cursor.lastrowid
 
-            koneksi.commit()
-            return id_audit
 
-        except sqlite3.IntegrityError as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan audit: {error}")
-            return None
-
-        except sqlite3.Error as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan audit: {error}")
-            return None
-
-        finally:
-            koneksi.close()
 
     @staticmethod
     def cari_audit_dengan_nik(nik):

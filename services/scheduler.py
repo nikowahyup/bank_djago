@@ -23,7 +23,7 @@ class Scheduler:
 
             BungaService.berikan_bunga(bank, rekening, hari_ini)
 
-            LimitService.reset_limit(bank,rekening, hari_ini)
+            LimitService.hitung_limit_saat_ini(rekening, hari_ini)
 
             BiayaAdminService.potong_admin(bank, rekening, hari_ini)
 

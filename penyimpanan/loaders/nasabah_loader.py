@@ -1,0 +1,53 @@
+import datetime
+
+
+from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.core.nasabah import Nasabahh
+from bank_djago.services.rekening.rekening_service import RekeningService
+
+
+
+class NasabahLoader:
+
+    @staticmethod
+    def muat_nasabah(nik):
+        data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(nik)
+
+        if data_nasabah is None:
+            return None
+
+        nasabah = Nasabahh(nama=data_nasabah["nama"],
+                           alamat=data_nasabah["alamat"],
+                           nik=data_nasabah["nik"])
+
+        daftar_rekening = RekeningRepository.cari_rekening_dengan_nik(nik)
+
+        for data_rekening in daftar_rekening:
+            level = data_rekening["level"]
+
+            if level not in RekeningService.jenis_rekening:
+                raise ValueError("Jenis rekening tidak ditemukan")
+
+            kelas = RekeningService.jenis_rekening[level]["kelas"]
+            rekening = kelas(norek=data_rekening["norek"],
+                             pin=data_rekening["pin"],
+                             pemilik=nasabah)
+
+
+            rekening.set_saldo(data_rekening["saldo"])
+            rekening.status = data_rekening["status"]
+            rekening.limit_sisa = data_rekening["limit_sisa"]
+
+            rekening.reset = datetime.date.fromisoformat(data_rekening["reset"])
+            rekening.dapat_bunga = datetime.date.fromisoformat(data_rekening["dapat_bunga"])
+            rekening.waktu_bayar_admin = datetime.date.fromisoformat(data_rekening["waktu_bayar_admin"])
+
+            rekening.alasan_blokir = data_rekening["alasan_blokir"]
+            terakhir_ubah = data_rekening["terakhir_ubah_rekening"]
+            rekening.terakhir_ubah_rekening = (datetime.date.fromisoformat(terakhir_ubah) if terakhir_ubah is not None else None)
+
+            nasabah.rekening.append(rekening)
+
+        return nasabah
+

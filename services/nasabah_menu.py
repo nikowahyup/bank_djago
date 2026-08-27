@@ -1,3 +1,4 @@
+from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 
 from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksi_ui import TransaksiUI
@@ -13,26 +14,37 @@ from bank_djago.services.pinjaman.pinjaman_ui import PinjamanUI
 class NasabahMenu:
 
     @staticmethod
-    def login(bank):
+    def login():
         while True:
             print()
             print("LOGIN")
-            nik = input("Masukkan NIK Anda: ")
-            nasabah = bank.cari_nasabah(nik)
+            nik = input("Masukkan NIK Anda (ketik 0 untuk keluar): ")
 
-            if not nasabah:
+            if nik == "0":
+                return
+
+            nasabah = NasabahLoader.muat_nasabah(nik)
+
+            if nasabah is None:
                 UI.gagal("NIK tidak terfdatar. Coba Lagi")
                 continue
-            break
 
-        return nasabah
+
+            NasabahMenu.menu_utama(nasabah)
+            return
+
+
 
 
 
     @staticmethod
-    def menu_utama(bank,nasabah):
+    def menu_utama(nasabah):
 
         rekening = Utilitas.pilihan_rekening(nasabah)
+        if not rekening:
+            print("Tidak ada rekening yang terdaftar")
+            return
+        print(f"nomor rekening {rekening.norek}")
 
         while True:
             UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
@@ -55,19 +67,19 @@ class NasabahMenu:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                RekeningUI.menu(bank,rekening)
-
+                RekeningUI.menu(nasabah,rekening)
+                pass
             elif pilihan == "2":
-                TransaksiUI.menu_transaksi(bank, rekening)
+                TransaksiUI.menu_transaksi(rekening)
 
             elif pilihan == "3":
-                DepositoUI.menu_deposito(bank, nasabah, rekening)
+                DepositoUI.menu_deposito(nasabah, rekening)
 
             elif pilihan == "4":
-                PinjamanUI.menu(bank,nasabah,rekening)
+                PinjamanUI.menu(nasabah, rekening)
 
             elif pilihan == "5":
-                RiwayatUI.menu_riwayat(rekening)
+                RiwayatUI.menu_riwayat(nasabah)
 
             elif pilihan == "6":
                 LayananNasabah.menu_profil(nasabah,rekening)

@@ -168,25 +168,31 @@ class Utilitas:
             time.sleep(1)
         print()
 
-
     @staticmethod
     def pilihan_rekening(nasabah):
-        if len(nasabah.rekening) == 1:
-            return nasabah.rekening[0]
+        daftar_rekening = [
+            rekening
+            for rekening in nasabah.rekening
+            if rekening.status != "tutup"
+        ]
 
-        norek = [rekening.norek for rekening in nasabah.rekening]
+        if not daftar_rekening:
+            return None
+
+        if len(daftar_rekening) == 1:
+            return daftar_rekening[0]
 
         while True:
             print("Pilih nomor rekening yang ingin Anda gunakan\n")
 
-            for i, rek in enumerate(norek, start=1):
-                print(f"{i}. {rek}")
+            for i, rekening in enumerate(daftar_rekening, start=1):
+                print(f"{i}. {rekening.norek}")
 
             try:
                 print()
                 pilihan = int(input("Masukkan pilihan Anda: "))
 
-                if pilihan < 1 or pilihan > len(nasabah.rekening):
+                if pilihan < 1 or pilihan > len(daftar_rekening):
                     UI.gagal("Pilihan tidak valid")
                     continue
 
@@ -194,7 +200,7 @@ class Utilitas:
                 UI.gagal("Silakan masukkan angka")
                 continue
 
-            return nasabah.rekening[pilihan - 1]
+            return daftar_rekening[pilihan - 1]
 
     @staticmethod
     def format_tanggal_indonesia(tanggal):
@@ -224,6 +230,33 @@ class Utilitas:
         ]
 
         return f"{bulan[tanggal.month - 1]}"
+
+    @staticmethod
+    def pilih_rekening_riwayat(nasabah):
+        daftar_rekening = list(nasabah.rekening)
+        if not daftar_rekening:
+            print("Anda masih belum punya rekening")
+            return
+        for i,data in enumerate(daftar_rekening,start=1):
+            print(f"{i}. {data.norek} | {data.status}")
+
+        print()
+        while True:
+            try:
+                pilihan = int(input("Pilih rekening yang ingin Anda cek riwayatnya(ketik 0 untuk keluar) : "))
+                if pilihan == 0:
+                    return
+                if pilihan < 0 or pilihan > len(daftar_rekening):
+                    UI.gagal("Pilihan rekening tidak terdaftar")
+                    continue
+            except ValueError:
+                UI.gagal("Tolong pilih menggunakan angka")
+                continue
+
+
+            return daftar_rekening[pilihan - 1]
+
+
 
 
 

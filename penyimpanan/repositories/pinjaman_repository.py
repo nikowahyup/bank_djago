@@ -157,3 +157,24 @@ class PinjamanRepository:
 
         finally:
             koneksi.close()
+
+
+    @staticmethod
+    def cari_pinjaman_aktif(norek,koneksi=None):
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute("""SELECT *
+            FROM pinjaman
+            WHERE norek = ?
+            AND status IN ('diajukan','disetujui','aktif')
+            ORDER BY id DESC
+            LIMIT 1""",(norek,))
+
+            return cursor.fetchone()
+        finally:
+            if kelola_koneksi:
+                koneksi.close()

@@ -5,25 +5,33 @@ class RiwayatUI:
 
 
     @staticmethod
-    def menu_riwayat(rekening):
+    def menu_riwayat(nasabah):
+            UI.header("PILIH REKENING TERLEBIH DAHULU",UI.KUNING)
+            print()
+            rekening = Utilitas.pilih_rekening_riwayat(nasabah)
+
+            if rekening is None:
+             return
+
             while True:
                 print()
-                print(f"👋 Halo,{rekening.pemilik.nama}!")
+                print(f"👋 Halo,{nasabah.nama}!")
                 UI.header("MENU LIHAT RIWAYAT",UI.KUNING)
                 print()
-                print("1. Semua transaksi".title())
-                print("2. Setor Uang saja".title())
-                print("3. Tarik Uang saja".title())
-                print("4. Transfer Kirim saja".title())
-                print("5. Transfer Masuk  saja".title())
-                print("6. Lihat Upgrade atau Downgrade saja".title())
-                print("7. Keluar".title())
+                print("1. Semua riwayat")
+                print("2. Setor Uang saja")
+                print("3. Tarik Uang saja")
+                print("4. Transfer Kirim saja")
+                print("5. Transfer Masuk  saja")
+                print("6. Lihat Upgrade atau Downgrade saja")
+                print("7. Keluar")
                 print()
                 pilihan = input("Masukkan pilihan Anda: ")
                 try:
                     if pilihan == "1":
-                        for item in rekening.riwayat:
-                            print(Utilitas.format_waktu(item["waktu"]), '|', item["log"])
+                        riwayat = RiwayatService.ambil_riwayat(rekening)
+                        for item in riwayat:
+                            print(Utilitas.format_waktu(item["waktu"]) ,"|",item["log"])
 
                     elif pilihan == "2":
                         riwayat = RiwayatService.ambil_riwayat(rekening,"setor uang")

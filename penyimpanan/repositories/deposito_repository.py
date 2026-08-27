@@ -124,3 +124,24 @@ class DepositoRepository:
 
         finally:
             koneksi.close()
+
+    @staticmethod
+    def cari_deposito_aktif(norek, koneksi=None):
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute("""SELECT *
+            FROM deposito
+            WHERE norek = ?
+            AND status IN ('aktif','jatuh tempo')
+             ORDER BY id DESC
+             LIMIT 1""",(norek,))
+
+            return cursor.fetchone()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
