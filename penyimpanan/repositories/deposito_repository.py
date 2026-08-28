@@ -1,15 +1,11 @@
-import sqlite3
-
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
 class DepositoRepository:
 
     @staticmethod
-    def tambah_deposito(deposito):
-        koneksi = buat_koneksi()
+    def tambah_deposito(deposito, koneksi):
 
-        try:
             proses_aro = (
                 deposito.proses_aro.isoformat()
                 if deposito.proses_aro is not None
@@ -46,23 +42,11 @@ class DepositoRepository:
                 )
             )
 
-            id_deposito = cursor.lastrowid
+            return  cursor.lastrowid
 
-            koneksi.commit()
-            return id_deposito
 
-        except sqlite3.IntegrityError as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan deposito: {error}")
-            return None
 
-        except sqlite3.Error as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan deposito: {error}")
-            return None
 
-        finally:
-            koneksi.close()
 
     @staticmethod
     def cari_deposito_dengan_id(id_deposito):
@@ -145,3 +129,13 @@ class DepositoRepository:
         finally:
             if kelola_koneksi:
                 koneksi.close()
+
+    @staticmethod
+    def perbarui_status_deposito(id_deposito, status_baru, koneksi):
+
+        cursor = koneksi.execute("""UPDATE deposito
+                                SET status = ?
+                                WHERE id = ?
+                                """,(status_baru, id_deposito))
+
+        return cursor.rowcount

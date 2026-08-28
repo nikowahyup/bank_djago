@@ -7,26 +7,25 @@ class DepositoUI:
 
 
     @staticmethod
-    def menu_deposito(bank,nasabah,rekening):
+    def menu_deposito(nasabah,rekening):
         while True:
             UI.header("MENU DEPOSITO",UI.KUNING)
             print()
             print("1. Buka Deposito")
             print("2. Cairkan Deposito")
             print("3. Lihat Info Deposito")
-            print("4. Perpanjang")
-            print("5. Keluar\n")
+
+            print("4. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                DepositoUI.buka_deposito(bank,rekening)
+                DepositoUI.buka_deposito(rekening)
             elif pilihan == "2":
-                DepositoUI.cairkan_deposito(bank,nasabah)
+                DepositoUI.cairkan_deposito(nasabah)
             elif pilihan == "3":
                 DepositoUI.lihat_deposito(nasabah)
             elif pilihan == "4":
-                pass
-            elif pilihan == "5":
                 break
+
 
 
     @staticmethod
@@ -65,7 +64,7 @@ class DepositoUI:
 
 
     @staticmethod
-    def cairkan_deposito(bank,nasabah):
+    def cairkan_deposito(nasabah):
         UI.header("CAIRKAN DEPOSITO", UI.MERAH)
 
 
@@ -95,14 +94,14 @@ class DepositoUI:
         try:
             Utilitas.animasi("Proses")
             depo = deposito[pilihan - 1]
-            total_deposito = DepositoService.cairkan_deposito(bank,depo)
+            total_deposito = DepositoService.cairkan_deposito(depo)
             UI.sukses(f"Pencairan berhasil! Rp{Utilitas.format_rupiah(total_deposito)} masuk ke rekening Anda")
         except ValueError as e:
             UI.gagal(str(e))
 
 
     @staticmethod
-    def buka_deposito(bank,rekening):
+    def buka_deposito(rekening):
         UI.header("BUKA DEPOSITO", UI.MERAH)
 
         print("Pilihan jangka waktu deposito:\n")
@@ -127,13 +126,11 @@ class DepositoUI:
         lama_bulan = pilihan_bulan[pilihan-1]
 
 
-
-
         try:
             nominal = int(input("Masukkan nominal deposito: "))
-            Utilitas.animasi("Membuka deposito")
             jenis_aro,lama_aro = DepositoUI.tanya_aro()
-            DepositoService.buka_deposito(bank,rekening,nominal,lama_bulan,jenis_aro,lama_aro)
+            Utilitas.animasi("Membuka deposito")
+            DepositoService.buka_deposito(rekening,nominal,lama_bulan,jenis_aro,lama_aro)
             UI.sukses("Deposito berhasil dibuka!")
         except ValueError as e:
             UI.gagal(str(e))
@@ -170,7 +167,7 @@ class DepositoUI:
                 if lama_aro <= 0:
                     print("Lama perpanjangan harus lebih dari 0 bulan.")
                     continue
-                if lama_aro not in(1,3,6,12):
+                if lama_aro not in DepositoService.JANGKA_WAKTU:
                     print("Harap pilih tenor yang tersedia")
                     continue
 

@@ -6,8 +6,14 @@
         "rekening": [
             "2001661251477941"
         ],
-        "deposito": [],
-        "notifikasi": []
+        "notifikasi": [
+            {
+                "jenis": "deposito",
+                "pesan": "Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
+                "referensi": 2,
+                "ID_objek": 2
+            }
+        ]
     },
     "3150152602082002": {
         "nama": "Gojo Satoru",
@@ -16,7 +22,13 @@
         "rekening": [
             "2001703944452732"
         ],
-        "deposito": [],
-        "notifikasi": []
+        "notifikasi": [
+            {
+                "jenis": "deposito",
+                "pesan": "Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
+                "referensi": 2,
+                "ID_objek": 2
+            }
+        ]
     }
 }

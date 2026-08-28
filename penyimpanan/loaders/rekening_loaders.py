@@ -3,6 +3,9 @@ import datetime
 from bank_djago.core.nasabah import Nasabahh
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
+
+
+
 class RekeningLoader:
 
 
@@ -50,3 +53,36 @@ class RekeningLoader:
 
 
         return rekening
+
+    @staticmethod
+    def muat_semua_rekening(nasabah):
+        from bank_djago.services.rekening.rekening_service import RekeningService
+        daftar_rekening = RekeningRepository.cari_rekening_dengan_nik(nasabah.NIK)
+
+        if not daftar_rekening:
+            return
+
+        for data in daftar_rekening:
+            level = data["level"]
+            if level not in RekeningService.jenis_rekening:
+                raise ValueError("Jenis rekening tidak tersedia")
+
+            kelas = RekeningService.jenis_rekening[level]["kelas"]
+
+            rekening = kelas(norek=data["norek"],
+                             pin=data["pin"],
+                             pemilik=nasabah)
+
+            rekening.set_saldo(data["saldo"])
+            rekening.reset = datetime.date.fromisoformat(data["reset"])
+            rekening.status = data["status"]
+            rekening.waktu_bayar_admin = datetime.date.fromisoformat(data["waktu_bayar_admin"])
+            rekening.dapat_bunga = datetime.date.fromisoformat(data["dapat_bunga"])
+            rekening.alasan_blokir = data["alasan_blokir"]
+            rekening.limit_sisa = data["limit_sisa"]
+
+            terakhir_ubah = data["terakhir_ubah_rekening"]
+            rekening.terakhir_ubah_rekening = datetime.date.fromisoformat(
+                terakhir_ubah) if terakhir_ubah is not None else None
+
+            nasabah.rekening.append(rekening)
