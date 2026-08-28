@@ -196,13 +196,14 @@ Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
 ### `v1.5` - Migrasi Deposito
 Memindahkan seluruh lifecycle deposito dari koleksi objek/JSON menuju SQLite.
 
-- [ ] Membuka deposito menggunakan rekening yang dimuat dari SQLite.
-- [ ] Memuat seluruh deposito milik nasabah.
-- [ ] Memigrasikan pencairan deposito.
-- [ ] Memigrasikan deposito ARO dan non-ARO.
-- [ ] Memperbarui status serta proses ARO secara atomik.
-- [ ] Menyimpan riwayat, audit, dan notifikasi deposito.
-- [ ] Menguji beberapa deposito pada satu nasabah.
+- [x] Migrasi pembukaan deposito ke SQLite
+- [x] Pemuatan deposito beserta relasi rekening
+- [x] Migrasi pencairan deposito ke SQLite
+- [x] Penyimpanan riwayat dan audit deposito
+- [ ] Migrasi ARO/perpanjangan deposito
+- [ ] Integrasi deposito dengan scheduler
+- [ ] Migrasi notifikasi deposito
+- [ ] Pengujian akhir seluruh siklus deposito
 
 ### `v1.6` - Migrasi Pinjaman
 Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
