@@ -1,6 +1,7 @@
 import datetime
 
 from bank_djago.penyimpanan.loaders.deposito_loader import DepositoLoader
+from bank_djago.penyimpanan.loaders.notifikai_loader import NotifikasiLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
@@ -25,6 +26,7 @@ class NasabahLoader:
 
         RekeningLoader.muat_semua_rekening(nasabah)
         DepositoLoader.muat_deposito(nasabah)
+        NotifikasiLoader.muat_notifikasi(nasabah)
 
         return nasabah
 

@@ -1,10 +1,12 @@
 from bank_djago.core.notifikasi import Notifikasi
+from bank_djago.penyimpanan.loaders.deposito_loader import DepositoLoader
 from bank_djago.services.rekening.biaya_admin_service import  BiayaAdminService
 from bank_djago.services.deposito.deposito_service import StatusDeposito,DepositoService,JenisAro
 from bank_djago.services.rekening.bunga_service import BungaService
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 from bank_djago.services.transaksi.limit_service import LimitService
 import datetime
+from bank_djago.services.notifikasi_service import NotifikasiService
 
 from bank_djago.utils.utility import StatusPinjaman, Utilitas, JenisReferensiID
 
@@ -32,68 +34,91 @@ class Scheduler:
 
 
 
-        for nasabah in bank.data_nasabah.values():
-            for deposito in nasabah.deposito:
 
-                nasabah = deposito.pemilik
-                jatuh_tempo = deposito.jatuh_tempo
-                if deposito.status != StatusDeposito.AKTIF:
+
+        daftar_deposito = DepositoLoader.muat_semua_deposito_aktif()
+
+        for deposito in daftar_deposito:
+
+            if deposito.jenis_aro == JenisAro.TIDAK:
+                sisa_hari = (deposito.jatuh_tempo - hari_ini).days
+
+                if sisa_hari > 0:
+                    if sisa_hari <= 3:
+                        pesan = (
+                            f"Deposito ber-ID {deposito.ID} akan jatuh tempo pada "
+                            f"{Utilitas.format_tanggal_indonesia(deposito.jatuh_tempo)}"
+                        )
+
+                        NotifikasiService.simpan_notifikasi_referensi(
+                            nasabah=deposito.pemilik,
+                            jenis="deposito",
+                            pesan=pesan,
+                            jenis_referensi=JenisReferensiID.DEPOSITO,
+                            id_objek=deposito.ID
+                        )
+
                     continue
 
+                # sisa_hari == 0 atau negatif berarti sudah jatuh tempo.
+                DepositoService.tandai_jatuh_tempo(
+                    deposito=deposito,
+                    hari_ini=hari_ini
+                )
+
+                pesan = (
+                    f"Deposito ber-ID {deposito.ID} telah jatuh tempo. "
+                    "Silakan lakukan pencairan deposito."
+                )
+
+                NotifikasiService.simpan_notifikasi_referensi(
+                    nasabah=deposito.pemilik,
+                    jenis="deposito",
+                    pesan=pesan,
+                    jenis_referensi=JenisReferensiID.DEPOSITO,
+                    id_objek=deposito.ID
+                )
+
+                continue
+            else:
+
+
+                if (
+                        deposito.proses_aro is not None
+                        and deposito.proses_aro < hari_ini
+                ):
+                    NotifikasiService.hapus_notifikasi_referensi(
+                        nasabah=deposito.pemilik,
+                        jenis_referensi=JenisReferensiID.DEPOSITO,
+                        id_objek=deposito.ID
+                    )
+
+                if hari_ini < deposito.jatuh_tempo:
+                    continue
+
+                DepositoService.perpanjangan(
+                    deposito=deposito,
+                    hari_ini=hari_ini
+                )
+
+                pesan = (
+                    f"Deposito ARO ber-ID {deposito.ID} berhasil diperpanjang otomatis. "
+                    f"Jatuh tempo berikutnya pada "
+                    f"{Utilitas.format_tanggal_indonesia(deposito.jatuh_tempo)}."
+                )
+
+                NotifikasiService.simpan_notifikasi_referensi(
+                    nasabah=deposito.pemilik,
+                    jenis="deposito",
+                    pesan=pesan,
+                    jenis_referensi=JenisReferensiID.DEPOSITO,
+                    id_objek=deposito.ID
+                )
 
 
 
 
 
-                if deposito.jenis_aro == JenisAro.TIDAK:
-                    if hari_ini.day < jatuh_tempo.day and hari_ini.month == jatuh_tempo.month and hari_ini.year == jatuh_tempo.year:
-                        if not deposito.notifikasi_depo:
-                            DepositoService.hapus_notifikasi_deposito(nasabah, deposito)
-
-
-                            notifikasi = Notifikasi(
-                                                    jenis="deposito",
-                                                    pesan=f"Deposito Anda akan jatuh tempo pada {Utilitas.format_tanggal_indonesia(jatuh_tempo)}",
-                                                    referensi_id=JenisReferensiID.DEPOSITO)
-                            notifikasi.id_objek = deposito.ID
-                            nasabah.notifikasi.append(notifikasi)
-                            deposito.notifikasi_depo = True
-
-                    elif hari_ini == jatuh_tempo or hari_ini > jatuh_tempo:
-                        DepositoService.hapus_notifikasi_deposito(nasabah,deposito)
-
-                        notifikasi = Notifikasi(
-                                                jenis="deposito",
-                                                pesan=f"Deposito Anda telah jatuh tempo. Silahkan lakukan pencairan",
-                                                referensi_id=JenisReferensiID.DEPOSITO)
-
-                        notifikasi.id_objek = deposito.ID
-                        nasabah.notifikasi.append(notifikasi)
-                        deposito.notifikasi_depo = True
-                        deposito.status = StatusDeposito.JATUH_TEMPO
-
-
-                else:
-                    if (
-                            deposito.proses_aro is not None
-                            and deposito.proses_aro < hari_ini < jatuh_tempo
-                    ):
-                        nasabah = deposito.pemilik
-                        DepositoService.hapus_notifikasi_deposito(
-                            nasabah,
-                            deposito
-                        )
-
-                    elif hari_ini >= jatuh_tempo:
-                        nasabah = deposito.pemilik
-
-                        DepositoService.hapus_notifikasi_deposito(
-                            nasabah,
-                            deposito
-                        )
-
-                        DepositoService.perpanjangan(bank, deposito, hari_ini)
-                        deposito.proses_aro = hari_ini
 
         for pinjaman in bank.daftar_pinjaman:
 

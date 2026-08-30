@@ -1,6 +1,7 @@
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
+
 class DepositoRepository:
 
     @staticmethod
@@ -139,3 +140,66 @@ class DepositoRepository:
                                 """,(status_baru, id_deposito))
 
         return cursor.rowcount
+
+
+
+    @staticmethod
+    def perbarui_setelah_aro( id_deposito,
+                             nominal_baru,
+                             bunga_baru,
+                             lama_bulan_baru,
+                             tanggal_buka_baru,
+                             jatuh_tempo_baru,
+                             status_baru,
+                             proses_aro,
+                              koneksi):
+
+        tanggal_buka_baru = tanggal_buka_baru.isoformat()
+        jatuh_tempo_baru = jatuh_tempo_baru.isoformat()
+
+        proses_aro = (
+            proses_aro.isoformat()
+            if proses_aro is not None
+            else None
+        )
+
+        cursor = koneksi.execute("""UPDATE deposito
+        SET nominal = ?,
+        bunga = ?,
+        lama_bulan = ?,
+        tanggal_buka = ?,
+        jatuh_tempo = ?,
+        status = ?,
+        proses_aro = ?
+        WHERE id = ?
+        """,(nominal_baru,
+             bunga_baru,
+             lama_bulan_baru,
+             tanggal_buka_baru,
+             jatuh_tempo_baru,
+             status_baru,
+             proses_aro,
+             id_deposito))
+
+        return cursor.rowcount
+
+
+    @staticmethod
+    def cari_semua_deposito_aktif(koneksi=None):
+        from bank_djago.services.deposito.deposito_service import StatusDeposito
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+        try:
+            cursor = koneksi.execute("""SELECT *
+            FROM deposito
+            WHERE status = ?
+            ORDER BY id
+            """,(StatusDeposito.AKTIF,))
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()

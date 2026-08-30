@@ -15,7 +15,6 @@ class Deposito:
         self.ID           = id
         self.jenis_aro    = JenisAro.TIDAK
         self.lama_aro     = None
-        self.notifikasi_depo = False
         self.proses_aro = None
 
 

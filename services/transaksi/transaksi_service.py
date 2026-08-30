@@ -1,5 +1,5 @@
-from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
-from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
+
+# from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
 from bank_djago.utils.utility import Utilitas
 from bank_djago.services.transaksi.limit_service import LimitService
 from bank_djago.services.admin.audit_service import  AuditService
@@ -188,6 +188,7 @@ class TransaksiService:
 
     @staticmethod
     def cari_penerima(norek_penerima,pengirim, koneksi=None):
+        from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 
         kelola_koneksi = koneksi is None
 

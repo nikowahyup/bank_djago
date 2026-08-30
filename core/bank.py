@@ -11,7 +11,7 @@ from ..services.rekening.rekening_service import RekeningService
 from bank_djago.utils.utility import StatusPinjaman
 
 class Bank:
-    def __init__(self,nama,data_audit,data_nasabah=None,data_rekening=None,data_deposito=None,data_pinjaman=None):
+    def __init__(self,nama,data_audit,data_nasabah=None,data_rekening=None,data_pinjaman=None):
         self.nama            = nama
         self._password_admin = "admin123"
         self.rekening_index  = {}
@@ -25,8 +25,7 @@ class Bank:
         if data_nasabah:
             self._muat_nasabah(data_nasabah)
 
-        if data_deposito:
-            self._muat_deposito(data_deposito)
+
 
         if data_pinjaman:
             self._muat_pinjaman(data_pinjaman)
@@ -57,40 +56,7 @@ class Bank:
 
             self.data_nasabah[nik] = nasabah
 
-    def _muat_deposito(self,data_deposito):
-        for nik,daftar_deposito in data_deposito.items():
-            nasabah = self.data_nasabah[nik]
 
-            for id_deposito,info in daftar_deposito.items():
-                norek = info["norek"]
-                rekening = self.rekening_index[norek]
-
-
-
-                deposito = Deposito(pemilik=nasabah,
-                                    rekening=rekening,
-                                    nominal=info["nominal"],
-                                    bunga=info["bunga"],
-                                    id=int(id_deposito),
-                                    lama_bulan=info["lama_bulan"],
-                                    tanggal_buka=datetime.date.fromisoformat(info["tanggal_buka"]),
-                                    tanggal_jatuh_tempo=datetime.date.fromisoformat(info["jatuh_tempo"])
-                                    )
-                deposito.status = info["status"]
-                deposito.lama_aro = info.get("lama_aro",None)
-                deposito.jenis_aro = info.get("jenis_aro",JenisAro.TIDAK)
-                proses_aro = info.get("proses_aro")
-                if proses_aro:
-                    deposito.proses_aro = datetime.date.fromisoformat(proses_aro)
-                else:
-                    deposito.proses_aro = None
-
-                nasabah.deposito.append(deposito)
-                if daftar_deposito:
-                    nasabah.jumlah_deposito = max(
-                        int(id_deposito)
-                        for id_deposito in daftar_deposito
-                    )
 
     def _muat_pinjaman(self, data_pinjaman):
         for nik, daftar_pinjaman in data_pinjaman.items():
