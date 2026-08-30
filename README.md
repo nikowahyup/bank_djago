@@ -56,43 +56,43 @@ bank_djago/
 
 ## 📌 Versi Pengembangan
 
-### `v0.1` - Pembuatan Objek Esensial
+### `v0.1` - Pembuatan Objek Esensial✅
 Memisahkan tanggung jawab objek (*Separation of Concerns*).
 
 - [x] `Bank`: Wadah penyimpanan data dan eksekutor logika utama perbankan.
 - [x] `Nasabah`: Objek pemilik rekening yang terdaftar secara resmi.
 - [x] `Rekening`: Entitas keuangan yang menangani saldo, PIN, dan riwayat transaksi.
 
-### `v0.2` - Fundamental
+### `v0.2` - Fundamental✅
 - [x] **Logika Transaksi:** Setor tunai, tarik tunai, dan transfer antar-rekening.
 - [x] **Keamanan & Validasi:** Keberadaan rekening, validasi PIN, dan saldo minimum.
 - [x] **Data Persistence:** Penyimpanan dan pemuatan menggunakan JSON.
 
-### `v0.3` - Perluasan & Konsep OOP Lanjutan
+### `v0.3` - Perluasan & Konsep OOP Lanjutan✅
 - [x] **Inheritance:** Variasi jenis rekening dari satu parent class.
 - [x] **Fitur Finansial:** Bunga, limit transfer harian, dan saldo minimum.
 
-### `v0.4` - Manajemen Status Rekening
+### `v0.4` - Manajemen Status Rekening✅
 - [x] **Status Lifecycle:** Aktif, diblokir, dan ditutup.
 - [x] **Fitur Dinamis:** Upgrade dan downgrade jenis rekening.
 
-### `v0.5` - Audit & Rekapitulasi Data
+### `v0.5` - Audit & Rekapitulasi Data✅
 - [x] **Audit System:** Pencatatan aktivitas transaksi.
 - [x] **Bank Summary:** Rekap nasabah, rekening aktif, dan akumulasi kas.
 
-### `v0.6` - Refactor & Penyempurnaan Arsitektur
+### `v0.6` - Refactor & Penyempurnaan Arsitektur✅
 - [x] **Pemisahan Logika Transaksi:** Memindahkan aturan transaksi ke `TransaksiService`.
 - [x] **Pemisahan UI Transaksi:** Input dan komunikasi transaksi dengan nasabah ditangani `TransaksiUI`.
 - [x] **Pemisahan Riwayat:** Log transaksi ditangani pada layer transaksi.
 - [x] **Penyederhanaan Struktur:** Menghapus perantara yang tidak lagi memiliki tanggung jawab jelas.
 - [x] **UI Terminal:** Menambahkan sistem warna pada header dan membedakan level navigasi.
 
-### `v0.7` - Manajemen Admin
+### `v0.7` - Manajemen Admin✅
 - [x] **Admin:** Pengelolaan nasabah dan rekening.
 - [x] **Audit Log:** Pemantauan aktivitas bank.
 - [x] **Rekapitulasi:** Penyajian laporan administrasi.
 
-### `v0.8` - Deposito
+### `v0.8` - Deposito✅
 - [x] **Struktur Deposito:** Membuat entitas deposito.
 - [x] **Pembukaan Deposito:** Validasi nominal minimum, saldo minimum, tenor, dan bunga.
 - [x] **Jatuh Tempo:** Perhitungan tanggal jatuh tempo berdasarkan tenor.
@@ -104,7 +104,7 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - [x] **Pemisahan Notifikasi per Objek:** Notifikasi deposito menggunakan `id_objek` untuk membedakan beberapa deposito milik nasabah yang sama.
 - [x] **UI Deposito:** Menu dan alur input deposito.
 
-### `v0.9` - Pinjaman
+### `v0.9` - Pinjaman✅
 - [x] **Pengajuan Pinjaman**
 - [x] **Persetujuan dan Penolakan Pinjaman**
 - [x] **Tenor dan Bunga**
@@ -124,7 +124,7 @@ Memisahkan tanggung jawab objek (*Separation of Concerns*).
 - [x] **Pembayaran Cicilan Tertunggak:** Pembayaran menyelesaikan cicilan tertua beserta dendanya tanpa menggeser jadwal kontrak.
 - [x] **Pengejaran Beberapa Periode:** Nasabah dapat membayar beberapa cicilan tertunggak secara berurutan untuk kembali mengikuti jadwal.
 
-### `v1.0` - Penyempurnaan Sistem
+### `v1.0` - Penyempurnaan Sistem✅
 Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebelum migrasi database dan web.
 
 - [x] **Scheduler:** Otomatisasi proses bunga, biaya admin, limit, jatuh tempo, dan notifikasi.
@@ -147,7 +147,7 @@ Fokus pada stabilitas, pengujian, integritas data, dan kesiapan arsitektur sebel
 - [x] **Perapian Struktur Proyek:** Memisahkan service, UI, penyimpanan, dan pengujian berdasarkan tanggung jawab.
 - [x] **Dokumentasi:** Mendokumentasikan arsitektur, alur bisnis, integrity check, dan keputusan desain.
 
-### `v1.1` - Fondasi SQLite
+### `v1.1` - Fondasi SQLite✅
 Membangun dasar penyimpanan relasional sebelum memindahkan fitur bisnis.
 
 - [x] Membuat koneksi SQLite terpusat.
@@ -157,7 +157,7 @@ Membangun dasar penyimpanan relasional sebelum memindahkan fitur bisnis.
 - [x] Menguji primary key, foreign key, constraint, isolasi data, dan ID global.
 - [x] Mengecualikan database lokal dari Git.
 
-### `v1.2` - Nasabah dan Rekening
+### `v1.2` - Nasabah dan Rekening✅
 Memindahkan pendaftaran, login, dan pembentukan objek dari JSON menuju SQLite.
 
 - [x] Mendaftarkan nasabah dan membuka rekening pertama dalam satu transaksi.
@@ -168,7 +168,7 @@ Memindahkan pendaftaran, login, dan pembentukan objek dari JSON menuju SQLite.
 - [x] Menggunakan SQLite pada login.
 - [x] Memisahkan UI, service, repository, dan loader.
 
-### `v1.3` - Transaksi dan Lifecycle Rekening
+### `v1.3` - Transaksi dan Lifecycle Rekening✅
 Memindahkan perubahan saldo serta perubahan jenis rekening ke transaksi database yang atomik.
 
 - [x] Memigrasikan setor tunai.
@@ -179,7 +179,7 @@ Memindahkan perubahan saldo serta perubahan jenis rekening ke transaksi database
 - [x] Memuat riwayat langsung dari SQLite.
 - [x] Mempertahankan rekening tertutup untuk kebutuhan historis.
 
-### `v1.4` - Pengajuan dan Penutupan Rekening
+### `v1.4` - Pengajuan dan Penutupan Rekening✅
 Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
 
 - [x] Membuat tabel dan repository pengajuan rekening.
@@ -193,17 +193,21 @@ Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
 - [x] Menyimpan riwayat serta audit penutupan.
 - [x] Tetap menyediakan riwayat rekening yang sudah ditutup.
 
-### `v1.5` - Migrasi Deposito
+### v1.5 - Migrasi Deposito ✅
+
 Memindahkan seluruh lifecycle deposito dari koleksi objek/JSON menuju SQLite.
 
-- [x] Migrasi pembukaan deposito ke SQLite
-- [x] Pemuatan deposito beserta relasi rekening
-- [x] Migrasi pencairan deposito ke SQLite
-- [x] Penyimpanan riwayat dan audit deposito
-- [ ] Migrasi ARO/perpanjangan deposito
-- [ ] Integrasi deposito dengan scheduler
-- [ ] Migrasi notifikasi deposito
-- [ ] Pengujian akhir seluruh siklus deposito
+- [x] Migrasi pembukaan deposito ke SQLite.
+- [x] Pemuatan deposito beserta relasi nasabah dan rekening.
+- [x] Migrasi pencairan deposito ke SQLite.
+- [x] Penyimpanan riwayat dan audit deposito.
+- [x] Migrasi ARO pokok dan ARO pokok + bunga.
+- [x] Integrasi deposito dengan scheduler.
+- [x] Migrasi notifikasi deposito ke SQLite.
+- [x] Pengujian akhir seluruh siklus deposito.
+- [x] Menghapus penyimpanan deposito berbasis JSON beserta pengujian lamanya.
+
+**Status: selesai.** Pengembangan berikutnya berfokus pada **v1.6 – Migrasi Pinjaman**.
 
 ### `v1.6` - Migrasi Pinjaman
 Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
@@ -436,6 +440,21 @@ Repository membagikan struktur, kode pembuat database, dan contoh pengujian, buk
 Jawaban:
 Flask menyediakan komponen web secara lebih eksplisit sehingga routing, request/response, template, session, autentikasi, dan integrasi service dapat dipelajari satu per satu. Django tetap dapat dievaluasi ketika kebutuhan proyek berkembang dan manfaat fitur bawaannya menjadi lebih besar.
 
+#### Deposito dan notifikasi
+
+- SQLite menjadi satu-satunya sumber data aktif untuk deposito.
+- Objek deposito dimuat bersama objek rekening dan nasabah yang saling terhubung.
+- Identity map digunakan agar beberapa deposito pada rekening yang sama memakai objek nasabah dan rekening yang sama.
+- Pembukaan, pencairan, ARO, riwayat, audit, dan perubahan saldo disimpan dalam satu transaksi database.
+- ARO pokok memasukkan bunga ke saldo rekening dan mempertahankan pokok deposito.
+- ARO pokok + bunga menjadikan seluruh hasil pencairan sebagai nominal deposito periode berikutnya.
+- Deposito non-ARO memperoleh pengingat tiga hari sebelum jatuh tempo.
+- Notifikasi non-ARO dipertahankan sampai deposito dicairkan.
+- Notifikasi hasil pemrosesan ARO hanya berlaku pada hari pemrosesan dan dihapus pada hari berikutnya.
+- Notifikasi dikenali melalui kombinasi NIK pemilik, jenis referensi, dan ID objek agar tidak tercampur dengan objek domain lain.
+- Kode dan data deposito JSON lama dihapus setelah alur SQLite berhasil diuji.
+
+  
 # Refactor Besar
 - Memisahkan beberapa fitur bank yang sebelumnya ada di fitur layanan nasabah ke customer service admin
 - Menambahkan menu informasi untuk nasabah
