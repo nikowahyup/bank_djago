@@ -282,3 +282,25 @@ class JenisReferensiID(Enum):
 
 
 
+from enum import Enum
+
+
+class JenisTransaksi(Enum):
+    SETOR_AWAL = "setor_awal"
+    SETOR_TUNAI = "setor_tunai"
+    TARIK_TUNAI = "tarik_tunai"
+    TRANSFER = "transfer"
+
+    BIAYA_ADMIN = "biaya_admin"
+    BUNGA_TABUNGAN = "bunga_tabungan"
+
+    PEMBUKAAN_DEPOSITO = "pembukaan_deposito"
+    PENCAIRAN_DEPOSITO = "pencairan_deposito"
+    BUNGA_DEPOSITO = "bunga_deposito"
+
+    PENCAIRAN_PINJAMAN = "pencairan_pinjaman"
+    PEMBAYARAN_CICILAN = "pembayaran_cicilan"
+
+    PEMINDAHAN_SALDO_PENUTUPAN = (
+        "pemindahan_saldo_penutupan"
+    )

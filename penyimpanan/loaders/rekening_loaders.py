@@ -1,9 +1,9 @@
-# from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+
 import datetime
 from bank_djago.core.nasabah import Nasabahh
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
-from bank_djago.services.rekening.rekening_service import RekeningService
+
 
 
 class RekeningLoader:
@@ -36,9 +36,20 @@ class RekeningLoader:
             raise ValueError("Jenis rekening tidak terdaftar")
         info = RekeningService.jenis_rekening[data_rekening["level"]]
         kelas = info["kelas"]
-        rekening = kelas(norek=data_rekening["norek"],
-                             pin=data_rekening["pin"],
-                             pemilik=nasabah)
+        waktu_dibuat = (
+            datetime.datetime.fromisoformat(
+                data_rekening["waktu_dibuat"]
+            )
+            if data_rekening["waktu_dibuat"] is not None
+            else None
+        )
+
+        rekening = kelas(
+            norek=data_rekening["norek"],
+            pin=data_rekening["pin"],
+            pemilik=nasabah,
+            waktu_dibuat=waktu_dibuat
+        )
 
         rekening.set_saldo(data_rekening["saldo"])
         rekening.reset = datetime.date.fromisoformat(data_rekening["reset"])
@@ -47,6 +58,7 @@ class RekeningLoader:
         rekening.dapat_bunga = datetime.date.fromisoformat(data_rekening["dapat_bunga"])
         rekening.alasan_blokir = data_rekening["alasan_blokir"]
         rekening.limit_sisa = data_rekening["limit_sisa"]
+
 
         terakhir_ubah = data_rekening["terakhir_ubah_rekening"]
         rekening.terakhir_ubah_rekening = datetime.date.fromisoformat(terakhir_ubah) if terakhir_ubah is not None else None
@@ -69,9 +81,18 @@ class RekeningLoader:
 
             kelas = RekeningService.jenis_rekening[level]["kelas"]
 
-            rekening = kelas(norek=data["norek"],
-                             pin=data["pin"],
-                             pemilik=nasabah)
+            waktu_dibuat = (
+                datetime.datetime.fromisoformat(data["waktu_dibuat"])
+                if data["waktu_dibuat"] is not None
+                else None
+            )
+
+            rekening = kelas(
+                norek=data["norek"],
+                pin=data["pin"],
+                pemilik=nasabah,
+                waktu_dibuat=waktu_dibuat
+            )
 
             rekening.set_saldo(data["saldo"])
             rekening.reset = datetime.date.fromisoformat(data["reset"])
@@ -87,30 +108,54 @@ class RekeningLoader:
 
             nasabah.rekening.append(rekening)
 
-
     @staticmethod
     def rangkai_rekening(data_rekening, nasabah):
-        from bank_djago.services.rekening.rekening_service import RekeningService
+        from bank_djago.services.rekening.rekening_service import (
+            RekeningService
+        )
+
         level = data_rekening["level"]
+
         if level not in RekeningService.jenis_rekening:
             raise ValueError("Jenis rekening tidak tersedia")
 
         kelas = RekeningService.jenis_rekening[level]["kelas"]
 
-        rekening = kelas(norek=data_rekening["norek"],
-                         pin=data_rekening["pin"],
-                         pemilik=nasabah)
+        waktu_dibuat = (
+            datetime.datetime.fromisoformat(
+                data_rekening["waktu_dibuat"]
+            )
+            if data_rekening["waktu_dibuat"] is not None
+            else None
+        )
+
+        rekening = kelas(
+            norek=data_rekening["norek"],
+            pin=data_rekening["pin"],
+            pemilik=nasabah,
+            waktu_dibuat=waktu_dibuat
+        )
 
         rekening.set_saldo(data_rekening["saldo"])
-        rekening.reset = datetime.date.fromisoformat(data_rekening["reset"])
+        rekening.reset = datetime.date.fromisoformat(
+            data_rekening["reset"]
+        )
         rekening.status = data_rekening["status"]
-        rekening.waktu_bayar_admin = datetime.date.fromisoformat(data_rekening["waktu_bayar_admin"])
-        rekening.dapat_bunga = datetime.date.fromisoformat(data_rekening["dapat_bunga"])
+        rekening.waktu_bayar_admin = datetime.date.fromisoformat(
+            data_rekening["waktu_bayar_admin"]
+        )
+        rekening.dapat_bunga = datetime.date.fromisoformat(
+            data_rekening["dapat_bunga"]
+        )
         rekening.alasan_blokir = data_rekening["alasan_blokir"]
         rekening.limit_sisa = data_rekening["limit_sisa"]
 
         terakhir_ubah = data_rekening["terakhir_ubah_rekening"]
-        rekening.terakhir_ubah_rekening = datetime.date.fromisoformat(
-            terakhir_ubah) if terakhir_ubah is not None else None
+
+        rekening.terakhir_ubah_rekening = (
+            datetime.date.fromisoformat(terakhir_ubah)
+            if terakhir_ubah is not None
+            else None
+        )
 
         return rekening

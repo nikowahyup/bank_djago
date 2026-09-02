@@ -91,7 +91,8 @@ class RekeningService:
 
             rek_awal = RekeningService.level[rekening_lama.level]
             rek_tujuan = RekeningService.level[target_level]
-            rekening_baru = kelas(norek=rekening_lama.norek,pin=rekening_lama.pin,pemilik=nasabah)
+
+            rekening_baru = kelas(norek=rekening_lama.norek,pin=rekening_lama.pin,pemilik=nasabah,waktu_dibuat=rekening_lama.waktu_dibuat)
             rekening_baru.set_saldo(rekening_lama.saldo)
             rekening_baru.riwayat = list(rekening_lama.riwayat)
             rekening_baru.waktu_bayar_admin = rekening_lama.waktu_bayar_admin
@@ -190,10 +191,12 @@ class RekeningService:
             rek_tujuan = RekeningService.level[target_level]
             info = RekeningService.jenis_rekening[target_level]
 
+
             rekening_baru = info["kelas"](
                 norek=rekening_lama.norek,
                 pin=rekening_lama.pin,
-                pemilik=rekening_lama.pemilik)
+                pemilik=rekening_lama.pemilik,
+                waktu_dibuat=rekening_lama.waktu_dibuat)
 
             rekening_baru.set_saldo(rekening_lama.saldo)
             rekening_baru.riwayat = list(rekening_lama.riwayat)
@@ -282,45 +285,6 @@ class RekeningService:
 
 
 
-    @staticmethod
-    def tutup_rekening(bank,rekening,penerima=None):
-        Validator.amankan_rekening(rekening)
-        if rekening.status == "tutup":
-            raise ValueError("Rekening memang telah ditutup")
-
-        if rekening.status == "blokir":
-            raise ValueError("Rekening dalam status blokir. Tidak bisa ditutup")
-
-        deposito_aktif = any(deposito.rekening is rekening and deposito.status in
-                             (StatusDeposito.AKTIF,StatusDeposito.JATUH_TEMPO)
-                             for deposito in rekening.pemilik.deposito)
-        if deposito_aktif:
-            raise ValueError("Rekening ini masih memiliki deposito aktif")
-
-        pinjaman_aktif = any(pinjaman.rekening is rekening and pinjaman.status in
-                             (StatusPinjaman.AKTIF,StatusPinjaman.DISETUJUI,StatusPinjaman.DIAJUKAN)
-                             for pinjaman in bank.daftar_pinjaman)
-        if pinjaman_aktif:
-            raise ValueError("Rekening masih memiliki pinjaman aktif")
-
-        if penerima:
-            if penerima is rekening:
-                raise ValueError("Tidak bisa kirim uang ke rekening yang mau ditutup")
-
-            Validator.amankan_rekening(penerima)
-            TransaksiService.transfer_semua_uang(rekening,penerima)
-
-        else:
-            TransaksiService.tarik_semua_uang(rekening)
-        rekening.status = "tutup"
-
-
-        AuditService.tambah_audit(bank,kategori="rekening",
-                                  jenis="penutupan",
-                                  log=f"{rekening.pemilik.nama} telah menutup rekening",
-                                  nik=rekening.pemilik.NIK,
-                                  norek=rekening.norek)
-
 
 
 
@@ -337,7 +301,9 @@ class RekeningService:
             kelas_rek = info["kelas"]
             norek = RekeningService.buat_norek(pilihan, koneksi)
 
-            rekening_baru = kelas_rek(norek=norek,pin=pin,pemilik=nasabah)
+            waktu_dibuat = datetime.datetime.now()
+            rekening_baru = kelas_rek(norek=norek,pin=pin,pemilik=nasabah,waktu_dibuat=waktu_dibuat)
+
 
             if setor_awal < rekening_baru.saldosetor_min:
                 raise  ValueError("Setor awal tidak memenuhi saldo minimal setoran awal")

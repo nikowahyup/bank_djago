@@ -1,3 +1,5 @@
+
+#blueprint untuk nasabah
 class Nasabahh:
     def __init__(self,nama,alamat,nik):
         self.nama     = nama.title()
@@ -7,7 +9,7 @@ class Nasabahh:
         self.deposito = []
         self.jumlah_deposito = 0
         self.notifikasi = []
-        self.pinjaman = None
+        self.daftar_pinjaman = []
         self.jumlah_pinjaman = 0
         self.jumlah_notifikasi = 0
 

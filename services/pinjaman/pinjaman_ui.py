@@ -7,7 +7,7 @@ from bank_djago.utils.ui import UI
 class PinjamanUI:
 
     @staticmethod
-    def menu(bank,nasabah,rekening):
+    def menu(nasabah,rekening):
         while True:
 
             UI.header("MENU PINJAMAN",UI.BIRU)
@@ -19,7 +19,7 @@ class PinjamanUI:
             print("5. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                PinjamanUI.ajukan_pinjaman(bank,nasabah,rekening)
+                PinjamanUI.ajukan_pinjaman(nasabah,rekening)
 
             elif pilihan == "2":
                 PinjamanUI.cairkan_pinjaman(bank,nasabah)
@@ -40,7 +40,7 @@ class PinjamanUI:
 
 
     @staticmethod
-    def ajukan_pinjaman(bank, nasabah, rekening):
+    def ajukan_pinjaman(nasabah, rekening):
         UI.header("AJUKAN PINJAMAN", UI.MERAH)
         print()
 
@@ -76,7 +76,7 @@ class PinjamanUI:
 
         try:
             PinjamanService.ajukan_pinjaman(
-                bank=bank,
+
                 nasabah=nasabah,
                 rekening=rekening,
                 nominal=nominal,

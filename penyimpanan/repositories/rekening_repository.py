@@ -13,6 +13,12 @@ class RekeningRepository:
             else None
         )
 
+        waktu_dibuat = (
+            rekening.waktu_dibuat.isoformat()
+            if rekening.waktu_dibuat is not None
+            else None
+        )
+
         koneksi.execute(
             """
             INSERT INTO rekening (
@@ -22,6 +28,7 @@ class RekeningRepository:
                 saldo,
                 level,
                 status,
+                waktu_dibuat,
                 limit_sisa,
                 reset,
                 dapat_bunga,
@@ -29,7 +36,7 @@ class RekeningRepository:
                 terakhir_ubah_rekening,
                 alasan_blokir
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 rekening.norek,
@@ -38,6 +45,7 @@ class RekeningRepository:
                 rekening.saldo,
                 rekening.level,
                 rekening.status,
+                waktu_dibuat,
                 rekening.limit_sisa,
                 rekening.reset.isoformat(),
                 rekening.dapat_bunga.isoformat(),
@@ -82,6 +90,7 @@ class RekeningRepository:
                     saldo,
                     level,
                     status,
+                    waktu_dibuat,
                     limit_sisa,
                     reset,
                     dapat_bunga,

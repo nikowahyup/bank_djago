@@ -1,13 +1,13 @@
-#DIAJUKAN  = nasabah sudah meminta pinjaman
-# DITOLAK   = pengajuan gagal
-# DISETUJUI = bank menyetujui, tetapi dana belum dicairkan
-# AKTIF     = dana sudah dicairkan dan masih ada kewajiban
-# LUNAS     = seluruh pokok dan bunga sudah terselesaikan
 import datetime
 
-
+from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.core.notifikasi import Notifikasi
 from bank_djago.core.pinjaman import Pinjaman
+from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensiID
@@ -31,52 +31,202 @@ class PinjamanService:
     PERSENTASE_DENDA_HARIAN = 0.001
     MAKSIMAL_PERSENTASE_DENDA = 0.1
 
-
     @staticmethod
-    def ajukan_pinjaman(bank,nasabah,rekening,nominal,tenor):
+    def ajukan_pinjaman(nasabah, rekening, nominal, tenor):
         Validator.amankan_rekening(rekening)
 
+        if rekening.pemilik is not nasabah:
+            raise ValueError("Rekening bukan milik nasabah")
+
         if nominal < PinjamanService.MIN_PINJAMAN:
-            raise ValueError("Nominal pinjaman di bawah minimal pinjaman")
+            raise ValueError("Nominal pinjaman di bawah batas minimal")
 
         if nominal > PinjamanService.MAX_PINJAMAN:
             raise ValueError("Nominal pinjaman melebihi batas maksimal")
 
         if tenor not in PinjamanService.TENOR:
-            raise ValueError("Pilihan waktu pinjaman tidak tersedia")
+            raise ValueError("Pilihan tenor pinjaman tidak tersedia")
 
-        if nasabah.pinjaman is not None:
-            raise  ValueError("Anda masih punya pinjaman aktif")
+        koneksi = buat_koneksi()
 
-        nasabah.jumlah_pinjaman += 1
-        id_pinjaman = nasabah.jumlah_pinjaman
-        bunga = PinjamanService.TENOR[tenor]
-        pinjaman = Pinjaman(ID=id_pinjaman,pemilik=nasabah,rekening=rekening,nominal_pinjaman=nominal,bunga=bunga,tenor=tenor)
-        pinjaman.status = StatusPinjaman.DIAJUKAN
-        nasabah.pinjaman = pinjaman
-        AuditService.tambah_audit(bank,kategori="transaksi",jenis="pinjaman",log=f"{nasabah.nama} mengajukan pinjaman",nik=nasabah.NIK,norek=rekening.norek)
-        bank.daftar_pinjaman.append(pinjaman)
+        try:
+            pengajuan_aktif = (
+                PinjamanRepository.cari_pengajuan_aktif_nasabah(
+                    nik=nasabah.NIK,
+                    koneksi=koneksi
+                )
+            )
 
+            if pengajuan_aktif is not None:
+                raise ValueError(
+                    "Anda masih memiliki pengajuan pinjaman "
+                    "yang sedang menunggu proses"
+                )
+
+            bunga = PinjamanService.TENOR[tenor]
+
+            pinjaman = Pinjaman(
+                pemilik=nasabah,
+                rekening=rekening,
+                nominal_pinjaman=nominal,
+                bunga=bunga,
+                tenor=tenor,
+                id=None
+            )
+
+            id_pinjaman = PinjamanRepository.tambah_pinjaman(
+                pinjaman=pinjaman,
+                koneksi=koneksi
+            )
+
+            pinjaman.ID = id_pinjaman
+
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="pinjaman",
+                log=(
+                    f"PENGAJUAN PINJAMAN | ID {pinjaman.ID} | "
+                    f"Rp{Utilitas.format_rupiah(nominal)} | "
+                    f"Tenor {tenor} bulan"
+                )
+            )
+
+            audit = AuditService.tambah_audit(
+                kategori="transaksi",
+                jenis="pengajuan pinjaman",
+                log=(
+                    f"{nasabah.nama} mengajukan pinjaman "
+                    f"sebesar Rp{Utilitas.format_rupiah(nominal)}"
+                ),
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening.norek
+            )
+
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                koneksi=koneksi
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        nasabah.daftar_pinjaman.append(pinjaman)
+        rekening.simpan_riwayat(riwayat)
 
         return pinjaman
 
     @staticmethod
-    def setujui_pinjaman(bank,pinjaman):
-        if pinjaman.status != StatusPinjaman.DIAJUKAN:
-            raise ValueError("Pinjaman tidak dalam status pengajuan")
+    def setujui_pinjaman(id_pinjaman):
+        koneksi = buat_koneksi()
 
-        pinjaman.status = StatusPinjaman.DISETUJUI
+        try:
+            data_pinjaman = (
+                PinjamanRepository.cari_pinjaman_dengan_id(
+                    id_pinjaman=id_pinjaman,
+                    koneksi=koneksi
+                )
+            )
 
-        nasabah = pinjaman.pemilik
-        PinjamanService.hapus_notif_pinjaman(nasabah)
+            if data_pinjaman is None:
+                raise ValueError(
+                    f"Pinjaman ber-ID {id_pinjaman} tidak ditemukan"
+                )
 
-        notifikasi = Notifikasi(
-                                jenis='pinjaman', pesan='Pengajuan berhasil! Kini Anda dapat mencairkan uang pinjaman',
-                                referensi_id=JenisReferensiID.PINJAMAN)
-        nasabah.notifikasi.append(notifikasi)
-        AuditService.tambah_audit(bank,kategori="transaksi",jenis="pinjaman",log=f"Pinjaman {pinjaman.pemilik.nama} telah disetujui",nik=pinjaman.pemilik.NIK,norek=pinjaman.rekening.norek)
+            if (
+                    data_pinjaman["status"]
+                    != StatusPinjaman.DIAJUKAN.value
+            ):
+                raise ValueError(
+                    f"Pinjaman tidak dapat disetujui. "
+                    f"Status saat ini: {data_pinjaman['status']}"
+                )
 
-        return pinjaman
+            data_rekening = (
+                RekeningRepository.cari_rekening_dengan_norek(
+                    norek=data_pinjaman["norek"],
+                    koneksi=koneksi
+                )
+            )
+
+            if data_rekening is None:
+                raise ValueError(
+                    f"Rekening untuk pinjaman ber-ID "
+                    f"{id_pinjaman} tidak ditemukan"
+                )
+
+            data_nasabah = (
+                NasabahRepository.cari_nasabah_dengan_nik(
+                    nik=data_rekening["nik_pemilik"],
+                    koneksi=koneksi
+                )
+            )
+
+            if data_nasabah is None:
+                raise ValueError(
+                    f"Nasabah untuk pinjaman ber-ID "
+                    f"{id_pinjaman} tidak ditemukan"
+                )
+
+            status_baru = StatusPinjaman.DISETUJUI.value
+
+            jumlah_baris = (
+                PinjamanRepository.perbarui_status_pinjaman(
+                    id_pinjaman=id_pinjaman,
+                    status_baru=status_baru,
+                    koneksi=koneksi
+                )
+            )
+
+            if jumlah_baris != 1:
+                raise ValueError(
+                    "Gagal memperbarui status pinjaman"
+                )
+
+            audit = AuditService.tambah_audit(
+                kategori="transaksi",
+                jenis="persetujuan pinjaman",
+                log=(
+                    f"Pinjaman ber-ID {id_pinjaman} "
+                    f"milik {data_nasabah['nama']} telah disetujui"
+                ),
+                nama=data_nasabah["nama"],
+                nik=data_nasabah["nik"],
+                norek=data_pinjaman["norek"]
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            # TODO: Simpan notifikasi persetujuan pinjaman
+            # menggunakan koneksi transaksi yang sama.
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        return True
+
+
 
 
     @staticmethod
@@ -237,29 +387,117 @@ class PinjamanService:
 
 
     @staticmethod
-    def ajuan_ditolak(bank,pinjaman):
-        if pinjaman.status != StatusPinjaman.DIAJUKAN:
-            raise ValueError("Pinjaman tidak dalam status pengajuan")
+    def tolak_pinjaman(id_pinjaman,catatan_admin):
+        catatan_admin = catatan_admin.strip()
+        if not catatan_admin:
+            raise ValueError("Catatan tidak boleh kosong")
+        koneksi = buat_koneksi()
 
-        nasabah = pinjaman.pemilik
-        PinjamanService.hapus_notif_pinjaman(nasabah)
+        try:
+            data_pinjaman = (
+                PinjamanRepository.cari_pinjaman_dengan_id(
+                    id_pinjaman=id_pinjaman,
+                    koneksi=koneksi
+                )
+            )
 
-        notifikasi = Notifikasi(
-                                jenis='pinjaman',pesan='Maaf,pengajuan pinjaman Anda ditolak',
-                                referensi_id=JenisReferensiID.PINJAMAN)
+            if data_pinjaman is None:
+                raise ValueError(
+                    f"Pinjaman ber-ID {id_pinjaman} tidak ditemukan"
+                )
 
-        nasabah.notifikasi.append(notifikasi)
+            if (
+                    data_pinjaman["status"]
+                    != StatusPinjaman.DIAJUKAN.value
+            ):
+                raise ValueError(
+                    f"Pinjaman tidak dapat ditolak. "
+                    f"Status saat ini: {data_pinjaman['status']}"
+                )
+
+            data_rekening = (
+                RekeningRepository.cari_rekening_dengan_norek(
+                    norek=data_pinjaman["norek"],
+                    koneksi=koneksi
+                )
+            )
+
+            if data_rekening is None:
+                raise ValueError(
+                    f"Rekening untuk pinjaman ber-ID "
+                    f"{id_pinjaman} tidak ditemukan"
+                )
+
+            data_nasabah = (
+                NasabahRepository.cari_nasabah_dengan_nik(
+                    nik=data_rekening["nik_pemilik"],
+                    koneksi=koneksi
+                )
+            )
+
+            if data_nasabah is None:
+                raise ValueError(
+                    f"Nasabah untuk pinjaman ber-ID "
+                    f"{id_pinjaman} tidak ditemukan"
+                )
+
+            status_baru = StatusPinjaman.DITOLAK.value
+
+            jumlah_baris = (
+                PinjamanRepository.perbarui_status_pinjaman(
+                    id_pinjaman=id_pinjaman,
+                    status_baru=status_baru,
+                    koneksi=koneksi,
+                    catatan=catatan_admin
+
+                )
+            )
+
+            if jumlah_baris != 1:
+                raise ValueError(
+                    "Gagal memperbarui status pinjaman"
+                )
+
+            audit = AuditService.tambah_audit(
+                kategori="transaksi",
+                jenis="penolakan pinjaman",
+                log=(
+                    f"Pinjaman ber-ID {id_pinjaman} "
+                    f"milik {data_nasabah['nama']} telah ditolak.\n"
+                    f"Catatan admin: {catatan_admin}"
+                ),
+                nama=data_nasabah["nama"],
+                nik=data_nasabah["nik"],
+                norek=data_pinjaman["norek"]
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            # TODO: Simpan notifikasi persetujuan pinjaman
+            # menggunakan koneksi transaksi yang sama.
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        return True
 
 
-        pinjaman.status = StatusPinjaman.DITOLAK
-        AuditService.tambah_audit(bank, kategori="transaksi", jenis="pinjaman",
-                                  log=f"Pinjaman {pinjaman.pemilik.nama} ditolak", nik=pinjaman.pemilik.NIK,
-                                  norek=pinjaman.rekening.norek)
-        nasabah = pinjaman.pemilik
-        nasabah.pinjaman = None
 
 
-        return pinjaman
+
+
+
+
+
 
 
     @staticmethod

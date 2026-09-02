@@ -1,97 +1,60 @@
-import sqlite3
-
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
 class PinjamanRepository:
 
     @staticmethod
-    def tambah_pinjaman(pinjaman):
-        koneksi = buat_koneksi()
+    def tambah_pinjaman(pinjaman, koneksi):
+        tanggal_pencairan = (
+            pinjaman.tanggal_pencairan.isoformat()
+            if pinjaman.tanggal_pencairan is not None
+            else None
+        )
 
-        try:
-            tanggal_pencairan = (
-                pinjaman.tanggal_pencairan.isoformat()
-                if pinjaman.tanggal_pencairan is not None
-                else None
+        tanggal_jatuh_tempo = (
+            pinjaman.tanggal_jatuh_tempo.isoformat()
+            if pinjaman.tanggal_jatuh_tempo is not None
+            else None
+        )
+
+        cursor = koneksi.execute(
+            """
+            INSERT INTO pinjaman (
+                norek,
+                nominal_pinjaman,
+                bunga,
+                tenor,
+                cicilan_tetap,
+                sisa_pokok,
+                cicilan_terbayar,
+                status,
+                tanggal_pencairan,
+                tanggal_jatuh_tempo
             )
-
-            tanggal_jatuh_tempo = (
-                pinjaman.tanggal_jatuh_tempo.isoformat()
-                if pinjaman.tanggal_jatuh_tempo is not None
-                else None
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                pinjaman.rekening.norek,
+                pinjaman.nominal_pinjaman,
+                pinjaman.bunga,
+                pinjaman.tenor,
+                pinjaman.cicilan_tetap,
+                pinjaman.sisa_pokok,
+                pinjaman.cicilan_terbayar,
+                pinjaman.status.value,
+                tanggal_pencairan,
+                tanggal_jatuh_tempo
             )
+        )
 
-            cursor = koneksi.execute(
-                """
-                INSERT INTO pinjaman (
-                    norek,
-                    nominal_pinjaman,
-                    bunga,
-                    tenor,
-                    cicilan_tetap,
-                    sisa_pokok,
-                    cicilan_terbayar,
-                    status,
-                    tanggal_pencairan,
-                    tanggal_jatuh_tempo
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    pinjaman.rekening.norek,
-                    pinjaman.nominal_pinjaman,
-                    pinjaman.bunga,
-                    pinjaman.tenor,
-                    pinjaman.cicilan_tetap,
-                    pinjaman.sisa_pokok,
-                    pinjaman.cicilan_terbayar,
-                    pinjaman.status.value,
-                    tanggal_pencairan,
-                    tanggal_jatuh_tempo
-                )
-            )
-
-            id_pinjaman = cursor.lastrowid
-
-            koneksi.commit()
-            return id_pinjaman
-
-        except sqlite3.IntegrityError as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan pinjaman: {error}")
-            return None
-
-        except sqlite3.Error as error:
-            koneksi.rollback()
-            print(f"Gagal menyimpan pinjaman: {error}")
-            return None
-
-        finally:
-            koneksi.close()
+        return cursor.lastrowid
 
     @staticmethod
-    def cari_pinjaman_dengan_id(id_pinjaman):
-        koneksi = buat_koneksi()
+    def cari_semua_pinjaman_dengan_nik(nik, koneksi=None):
+        kelola_koneksi = koneksi is None
 
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT *
-                FROM pinjaman
-                WHERE id = ?
-                """,
-                (id_pinjaman,)
-            )
-
-            return cursor.fetchone()
-
-        finally:
-            koneksi.close()
-
-    @staticmethod
-    def cari_pinjaman_berjalan(nik):
-        koneksi = buat_koneksi()
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
 
         try:
             cursor = koneksi.execute(
@@ -101,11 +64,56 @@ class PinjamanRepository:
                 JOIN rekening
                     ON rekening.norek = pinjaman.norek
                 WHERE rekening.nik_pemilik = ?
-                  AND pinjaman.status IN (
-                      'diajukan',
-                      'disetujui',
-                      'aktif'
-                  )
+                ORDER BY pinjaman.id ASC
+                """,
+                (nik,)
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
+
+    @staticmethod
+    def cari_semua_pinjaman_diajukan(koneksi=None):
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT *
+                FROM pinjaman
+                WHERE status = 'diajukan'
+                ORDER BY id ASC
+                """
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
+
+    @staticmethod
+    def cari_pengajuan_aktif_nasabah(nik, koneksi=None):
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT pinjaman.*
+                FROM pinjaman
+                JOIN rekening
+                    ON rekening.norek = pinjaman.norek
+                WHERE rekening.nik_pemilik = ?
+                  AND pinjaman.status IN ('diajukan', 'disetujui')
                 ORDER BY pinjaman.id DESC
                 LIMIT 1
                 """,
@@ -115,52 +123,102 @@ class PinjamanRepository:
             return cursor.fetchone()
 
         finally:
-            koneksi.close()
+            if kelola_koneksi:
+                koneksi.close()
 
     @staticmethod
-    def cari_riwayat_semua_pinjaman(nik):
-        koneksi = buat_koneksi()
+    def perbarui_status_pinjaman(
+        id_pinjaman,
+        status_baru,
+        koneksi=None,
+        catatan=None
+    ):
 
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT pinjaman.*
-                FROM pinjaman
-                JOIN rekening
-                    ON pinjaman.norek = rekening.norek
-                WHERE rekening.nik_pemilik = ?
-                  AND pinjaman.status IN (
-                      'ditolak',
-                      'lunas'
-                  )
-                ORDER BY pinjaman.id DESC
-                """,
-                (nik,)
+        cursor = koneksi.execute(
+            """
+            UPDATE pinjaman
+            SET status = ?,
+            catatan_admin = ?
+            WHERE id = ?
+            AND status = 'diajukan'
+            """,
+            (
+                status_baru,
+                catatan,
+                id_pinjaman
             )
+        )
 
-            return cursor.fetchall()
+        return cursor.rowcount
 
-        finally:
-            koneksi.close()
+    @staticmethod
+    def perbarui_setelah_pencairan(pinjaman, koneksi):
+        tanggal_pencairan = (
+            pinjaman.tanggal_pencairan.isoformat()
+            if pinjaman.tanggal_pencairan is not None
+            else None
+        )
+
+        tanggal_jatuh_tempo = (
+            pinjaman.tanggal_jatuh_tempo.isoformat()
+            if pinjaman.tanggal_jatuh_tempo is not None
+            else None
+        )
+
+        cursor = koneksi.execute(
+            """
+            UPDATE pinjaman
+            SET status = ?,
+                cicilan_tetap = ?,
+                tanggal_pencairan = ?,
+                tanggal_jatuh_tempo = ?
+            WHERE id = ?
+            AND status = 'disetujui'
+            """,
+            (
+                pinjaman.status.value,
+                pinjaman.cicilan_tetap,
+                tanggal_pencairan,
+                tanggal_jatuh_tempo,
+                pinjaman.ID
+            )
+        )
+
+        return cursor.rowcount
+
+    @staticmethod
+    def perbarui_setelah_pembayaran(pinjaman, koneksi):
+        tanggal_jatuh_tempo = (
+            pinjaman.tanggal_jatuh_tempo.isoformat()
+            if pinjaman.tanggal_jatuh_tempo is not None
+            else None
+        )
+
+        cursor = koneksi.execute(
+            """
+            UPDATE pinjaman
+            SET cicilan_terbayar = ?,
+                sisa_pokok = ?,
+                status = ?,
+                tanggal_jatuh_tempo = ?
+            WHERE id = ?
+            AND status = 'aktif'
+            """,
+            (
+                pinjaman.cicilan_terbayar,
+                pinjaman.sisa_pokok,
+                pinjaman.status.value,
+                tanggal_jatuh_tempo,
+                pinjaman.ID
+            )
+        )
+
+        return cursor.rowcount
 
 
     @staticmethod
-    def cari_semua_pengajuan():
-        koneksi = buat_koneksi()
-        try:
-            cursor = koneksi.execute("""SELECT *
-            FROM pinjaman
-            WHERE status = 'diajukan'
-            ORDER BY id""")
+    def cari_pinjaman_dengan_id(id_pinjaman,koneksi=None):
 
-            return cursor.fetchall()
-
-        finally:
-            koneksi.close()
-
-
-    @staticmethod
-    def cari_pinjaman_aktif(norek,koneksi=None):
         kelola_koneksi = koneksi is None
 
         if kelola_koneksi:
@@ -169,12 +227,18 @@ class PinjamanRepository:
         try:
             cursor = koneksi.execute("""SELECT *
             FROM pinjaman
-            WHERE norek = ?
-            AND status IN ('diajukan','disetujui','aktif')
-            ORDER BY id DESC
-            LIMIT 1""",(norek,))
+            WHERE id = ?
+            """,(id_pinjaman,))
 
             return cursor.fetchone()
+
         finally:
             if kelola_koneksi:
                 koneksi.close()
+
+
+
+
+
+
+

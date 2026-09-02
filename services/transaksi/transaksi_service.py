@@ -1,6 +1,5 @@
-
-# from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
-from bank_djago.utils.utility import Utilitas
+import datetime
+from bank_djago.utils.utility import Utilitas,JenisTransaksi
 from bank_djago.services.transaksi.limit_service import LimitService
 from bank_djago.services.admin.audit_service import  AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
@@ -9,6 +8,7 @@ from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepo
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 
 
 class TransaksiService:
@@ -26,11 +26,24 @@ class TransaksiService:
             jumlah_baris =  RekeningRepository.perbarui_saldo(rekening.norek, saldo_baru, koneksi)
             if jumlah_baris != 1 :
                 raise ValueError("Rekening tidak terdaftar")
+            transaksi = {
+                "jenis": JenisTransaksi.SETOR_TUNAI,
+                "norek_tujuan": rekening.norek,
+                "nominal": nominal,
+                "saldo_tujuan_sebelum": rekening.saldo,
+                "saldo_tujuan_sesudah": saldo_baru,
+                "waktu": datetime.datetime.now()
+            }
+
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
 
             riwayat = RiwayatTemplate.setor_uang(nominal)
-            RiwayatRepository.tambah_riwayat(norek=rekening.norek, riwayat=riwayat, koneksi=koneksi)
+            RiwayatRepository.tambah_riwayat(norek=rekening.norek, riwayat=riwayat, koneksi=koneksi,id_transaksi=id_transaksi)
             audit = AuditService.tambah_audit(kategori="transaksi",jenis="setor uang",log=f"Setor uang Rp{Utilitas.format_rupiah(nominal)}",nama=rekening.pemilik.nama,nik=rekening.pemilik.NIK,norek=rekening.norek)
-            AuditRepository.tambah_audit(audit, koneksi)
+            AuditRepository.tambah_audit(audit, koneksi,id_transaksi)
 
             koneksi.commit()
 
@@ -66,10 +79,23 @@ class TransaksiService:
             jumlah_baris = RekeningRepository.perbarui_saldo(rekening.norek, saldo_baru, koneksi)
             if jumlah_baris != 1:
                 raise ValueError("Rekening tidak terdaftar")
+            transaksi = {
+                "jenis": JenisTransaksi.TARIK_TUNAI,
+                "norek_sumber": rekening.norek,
+                "nominal": nominal,
+                "saldo_sumber_sebelum": rekening.saldo,
+                "saldo_sumber_sesudah": saldo_baru,
+                "waktu": datetime.datetime.now()
+            }
+
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
             riwayat = RiwayatTemplate.tarik_uang(nominal)
-            RiwayatRepository.tambah_riwayat(rekening.norek, riwayat, koneksi)
+            RiwayatRepository.tambah_riwayat(rekening.norek, riwayat, koneksi,id_transaksi)
             audit = AuditService.tambah_audit(kategori="transaksi",jenis="tarik uang",log=f"Tarik uang Rp{Utilitas.format_rupiah(nominal)}",nama=rekening.pemilik.nama,nik=rekening.pemilik.NIK,norek=rekening.norek)
-            AuditRepository.tambah_audit(audit, koneksi)
+            AuditRepository.tambah_audit(audit, koneksi,id_transaksi)
 
             koneksi.commit()
 
@@ -113,6 +139,7 @@ class TransaksiService:
                 if limit_baru < 0:
                     raise ValueError("Limit harian telah habis")
 
+
             saldo_khusus_pengirim = pengirim.saldo - total
             saldo_khusus_penerima = penerima.saldo + nominal
 
@@ -137,6 +164,21 @@ class TransaksiService:
             if jumlah_baris_penerima != 1:
                 raise ValueError("Tidak dapat melakukan transfer")
 
+            transaksi = {
+                "jenis": JenisTransaksi.TRANSFER,
+                "norek_sumber": pengirim.norek,
+                "norek_tujuan":penerima.norek,
+                "nominal": nominal,
+                "saldo_sumber_sebelum": pengirim.saldo,
+                "saldo_sumber_sesudah": saldo_khusus_pengirim,
+                "saldo_tujuan_sebelum": penerima.saldo,
+                "saldo_tujuan_sesudah": saldo_khusus_penerima,
+                "biaya":pengirim.pajak,
+                "waktu": datetime.datetime.now()
+            }
+
+            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi=transaksi, koneksi=koneksi)
+
 
 
 
@@ -146,10 +188,10 @@ class TransaksiService:
             audit_pengirim  = AuditService.tambah_audit(kategori="transaksi",jenis="transfer",log=f"Transfer Rp{Utilitas.format_rupiah(nominal)}",nama=pengirim.pemilik.nama,nik=pengirim.pemilik.NIK,norek=pengirim.norek)
 
 
-            RiwayatRepository.tambah_riwayat(pengirim.norek,riwayat_pengirim,koneksi)
-            RiwayatRepository.tambah_riwayat(penerima.norek,riwayat_penerima,koneksi)
-            AuditRepository.tambah_audit(audit_pengirim,koneksi)
-            AuditRepository.tambah_audit(audit_penerima,koneksi)
+            RiwayatRepository.tambah_riwayat(pengirim.norek,riwayat_pengirim,koneksi,id_transaksi)
+            RiwayatRepository.tambah_riwayat(penerima.norek,riwayat_penerima,koneksi,id_transaksi)
+            AuditRepository.tambah_audit(audit_pengirim,koneksi,id_transaksi)
+            AuditRepository.tambah_audit(audit_penerima,koneksi,id_transaksi)
 
             koneksi.commit()
 

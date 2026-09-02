@@ -1,5 +1,5 @@
 import datetime
-import sqlite3
+
 
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
@@ -7,7 +7,7 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 class RiwayatRepository:
 
     @staticmethod
-    def tambah_riwayat(norek, riwayat, koneksi):
+    def tambah_riwayat(norek, riwayat, koneksi, id_transaksi=None):
 
             waktu = riwayat["waktu"]
 
@@ -22,16 +22,18 @@ class RiwayatRepository:
                     kategori,
                     jenis,
                     waktu,
-                    log
+                    log,
+                    transaksi_id
                 )
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?,?)
                 """,
                 (
                     norek,
                     riwayat["kategori"],
                     riwayat["jenis"],
                     waktu,
-                    riwayat["log"]
+                    riwayat["log"],
+                    id_transaksi
                 )
             )
 

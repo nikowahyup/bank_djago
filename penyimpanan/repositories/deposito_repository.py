@@ -1,7 +1,7 @@
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
-
+#method-method penghubung program ke database
 class DepositoRepository:
 
     @staticmethod

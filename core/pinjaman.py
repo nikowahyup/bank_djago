@@ -1,9 +1,9 @@
 from bank_djago.utils.utility import StatusPinjaman
 
-
+#blueprint untuk pinjaman
 class Pinjaman:
-    def __init__(self,ID,pemilik,rekening,nominal_pinjaman,bunga,tenor):
-        self.ID = ID
+    def __init__(self,pemilik,rekening,nominal_pinjaman,bunga,tenor,id=None):
+        self.ID = id
         self.pemilik = pemilik
         self.rekening = rekening
         self.nominal_pinjaman = nominal_pinjaman
@@ -13,10 +13,9 @@ class Pinjaman:
         self.cicilan_tetap = 0
         self.cicilan_terbayar = 0
         self.status = StatusPinjaman.DIAJUKAN
-        self.bunga_bulanan = 0
         self.tanggal_pencairan = None
         self.tanggal_jatuh_tempo = None
-        self.notifikasi_jatuh_tempo = False
+
 
 
     def ke_dict(self):
@@ -30,7 +29,6 @@ class Pinjaman:
             "cicilan_tetap": self.cicilan_tetap,
             "sisa_pokok": self.sisa_pokok,
             "cicilan_terbayar": self.cicilan_terbayar,
-            "bunga_bulanan": self.bunga_bulanan,
             "status": self.status.value,
             "tanggal_pencairan": (
                 self.tanggal_pencairan.isoformat()

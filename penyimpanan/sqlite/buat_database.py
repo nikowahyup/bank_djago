@@ -35,6 +35,7 @@ def buat_tabel_rekening():
                 saldo INTEGER NOT NULL DEFAULT 0,
                 level INTEGER NOT NULL DEFAULT 1,
                 status TEXT NOT NULL DEFAULT 'aktif',
+                waktu_dibuat TEXT NOT NULL,
                 limit_sisa INTEGER,
                 reset TEXT NOT NULL,
                 dapat_bunga TEXT NOT NULL,
@@ -131,6 +132,7 @@ def buat_tabel_pinjaman():
                 sisa_pokok INTEGER NOT NULL,
                 cicilan_terbayar INTEGER NOT NULL DEFAULT 0,
                 status TEXT NOT NULL DEFAULT 'diajukan',
+                catatan_admin TEXT
                 tanggal_pencairan TEXT,
                 tanggal_jatuh_tempo TEXT,
 
@@ -291,6 +293,253 @@ def buat_tabel_pengajuan_rekening():
     finally:
         koneksi.close()
 
+def buat_kolom_waktu_dibuat_rekening():
+    koneksi = buat_koneksi()
+
+    try:
+        daftar_kolom = koneksi.execute(
+            "PRAGMA table_info(rekening)"
+        ).fetchall()
+
+        nama_kolom = {
+            kolom["name"]
+            for kolom in daftar_kolom
+        }
+
+        if "waktu_dibuat" not in nama_kolom:
+            koneksi.execute(
+                """
+                ALTER TABLE rekening
+                ADD COLUMN waktu_dibuat TEXT
+                """
+            )
+
+            koneksi.commit()
+            print(
+                "Kolom waktu_dibuat berhasil ditambahkan"
+            )
+
+        else:
+            print(
+                "Kolom waktu_dibuat sudah tersedia"
+            )
+
+    except Exception:
+        koneksi.rollback()
+        raise
+
+    finally:
+        koneksi.close()
+
+
+def tambah_kolom_catatan_admin_pinjaman():
+    koneksi = buat_koneksi()
+
+    try:
+        daftar_kolom = koneksi.execute(
+            "PRAGMA table_info(pinjaman)"
+        ).fetchall()
+
+        nama_kolom = {
+            kolom["name"]
+            for kolom in daftar_kolom
+        }
+
+        if "catatan_admin" not in nama_kolom:
+            koneksi.execute(
+                """
+                ALTER TABLE pinjaman
+                ADD COLUMN catatan_admin TEXT
+                """
+            )
+
+            koneksi.commit()
+            print("Kolom catatan_admin berhasil ditambahkan")
+
+        else:
+            print("Kolom catatan_admin sudah tersedia")
+
+    except Exception:
+        koneksi.rollback()
+        raise
+
+    finally:
+        koneksi.close()
+
+
+
+def buat_tabel_transaksi():
+    koneksi = buat_koneksi()
+
+    try:
+        koneksi.execute(
+            """
+            CREATE TABLE IF NOT EXISTS transaksi (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                jenis TEXT NOT NULL,
+
+                norek_sumber TEXT,
+                norek_tujuan TEXT,
+
+                nominal INTEGER NOT NULL,
+                biaya INTEGER NOT NULL DEFAULT 0,
+
+                saldo_sumber_sebelum INTEGER,
+                saldo_sumber_sesudah INTEGER,
+
+                saldo_tujuan_sebelum INTEGER,
+                saldo_tujuan_sesudah INTEGER,
+
+                jenis_referensi TEXT,
+                id_referensi INTEGER,
+
+                waktu TEXT NOT NULL,
+
+                CHECK (nominal > 0),
+                CHECK (biaya >= 0),
+
+                CHECK (
+                    saldo_sumber_sebelum IS NULL
+                    OR saldo_sumber_sebelum >= 0
+                ),
+
+                CHECK (
+                    saldo_sumber_sesudah IS NULL
+                    OR saldo_sumber_sesudah >= 0
+                ),
+
+                CHECK (
+                    saldo_tujuan_sebelum IS NULL
+                    OR saldo_tujuan_sebelum >= 0
+                ),
+
+                CHECK (
+                    saldo_tujuan_sesudah IS NULL
+                    OR saldo_tujuan_sesudah >= 0
+                ),
+
+                CHECK (
+                    norek_sumber IS NOT NULL
+                    OR norek_tujuan IS NOT NULL
+                ),
+
+                CHECK (
+                    norek_sumber IS NULL
+                    OR norek_tujuan IS NULL
+                    OR norek_sumber != norek_tujuan
+                ),
+
+                FOREIGN KEY (norek_sumber)
+                REFERENCES rekening(norek)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT,
+
+                FOREIGN KEY (norek_tujuan)
+                REFERENCES rekening(norek)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT
+            )
+            """
+        )
+
+        koneksi.commit()
+        print("Tabel transaksi berhasil dibuat")
+
+    except Exception:
+        koneksi.rollback()
+        raise
+
+    finally:
+        koneksi.close()
+
+
+
+def tambah_kolom_transaksi_id_riwayat():
+    koneksi = buat_koneksi()
+
+    try:
+        daftar_kolom = koneksi.execute(
+            "PRAGMA table_info(riwayat)"
+        ).fetchall()
+
+        nama_kolom = {
+            kolom["name"]
+            for kolom in daftar_kolom
+        }
+
+        if "transaksi_id" not in nama_kolom:
+            koneksi.execute(
+                """
+                ALTER TABLE riwayat
+                ADD COLUMN transaksi_id INTEGER
+                REFERENCES transaksi(id)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT
+                """
+            )
+
+            koneksi.commit()
+            print(
+                "Kolom transaksi_id pada riwayat "
+                "berhasil ditambahkan"
+            )
+        else:
+            print(
+                "Kolom transaksi_id pada riwayat "
+                "sudah tersedia"
+            )
+
+    except Exception:
+        koneksi.rollback()
+        raise
+
+    finally:
+        koneksi.close()
+
+def tambah_kolom_transaksi_id_audit():
+    koneksi = buat_koneksi()
+
+    try:
+        daftar_kolom = koneksi.execute(
+            "PRAGMA table_info(audit)"
+        ).fetchall()
+
+        nama_kolom = {
+            kolom["name"]
+            for kolom in daftar_kolom
+        }
+
+        if "transaksi_id" not in nama_kolom:
+            koneksi.execute(
+                """
+                ALTER TABLE audit
+                ADD COLUMN transaksi_id INTEGER
+                REFERENCES transaksi(id)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT
+                """
+            )
+
+            koneksi.commit()
+            print(
+                "Kolom transaksi_id pada audit "
+                "berhasil ditambahkan"
+            )
+        else:
+            print(
+                "Kolom transaksi_id pada audit "
+                "sudah tersedia"
+            )
+
+    except Exception:
+        koneksi.rollback()
+        raise
+
+    finally:
+        koneksi.close()
+
+
 def inisialisasi_database():
     buat_database()
     buat_tabel_nasabah()
@@ -301,6 +550,10 @@ def inisialisasi_database():
     buat_tabel_riwayat()
     buat_tabel_audit()
     buat_tabel_pengajuan_rekening()
+    buat_tabel_transaksi()
+    tambah_kolom_transaksi_id_audit()
+    tambah_kolom_transaksi_id_riwayat()
+
 
 
 if __name__ == "__main__":

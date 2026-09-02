@@ -22,6 +22,7 @@ class StatusDeposito:
 
 
 class DepositoService:
+
     JANGKA_WAKTU = {
         1: 0.03,
         3: 0.035,
@@ -35,7 +36,7 @@ class DepositoService:
         Validator.amankan_rekening(rekening)
 
         if nominal < DepositoService.MIN_DEPO:
-            raise ValueError("Jumlah Depo kurang dari minimum")
+            raise ValueError("Jumlah Deposito kurang dari minimum")
 
         if rekening.saldo - nominal < rekening.saldosetor_min:
             raise ValueError(
@@ -56,6 +57,7 @@ class DepositoService:
             raise ValueError("Jenis ARO tidak tersedia")
 
         koneksi = buat_koneksi()
+
         try:
 
             bunga = DepositoService.JANGKA_WAKTU[lama_bulan]
@@ -65,6 +67,7 @@ class DepositoService:
             nasabah = rekening.pemilik
 
             saldo_baru = rekening.saldo - nominal
+
             jumlah_baris = RekeningRepository.perbarui_saldo(norek=rekening.norek, saldo_baru=saldo_baru, koneksi=koneksi)
             if jumlah_baris != 1:
                 raise ValueError("Terjadi kesalahan saat memotong saldo untuk deposito")
@@ -99,9 +102,9 @@ class DepositoService:
         Validator.amankan_rekening(deposito.rekening)
         if deposito.status != StatusDeposito.JATUH_TEMPO:
             raise ValueError(
-    f"Deposito belum dapat dicairkan. "
-    f"Status saat ini: {deposito.status}"
-)
+      f"Deposito belum dapat dicairkan. "
+      f"Status saat ini: {deposito.status}"
+     )
 
         if hari_ini < deposito.jatuh_tempo:
             raise ValueError("Deposito belum jatuh tempo")
@@ -114,13 +117,14 @@ class DepositoService:
         koneksi = buat_koneksi()
 
         try:
-            jumlah_baris_saldo = RekeningRepository.perbarui_saldo(norek=deposito.rekening.norek,saldo_baru=saldo_baru,koneksi=koneksi)
-            if jumlah_baris_saldo != 1:
-                raise ValueError("Terjadi kesalahan saat memasukkan saldo ke rekening")
 
             jumlah_baris_deposito = DepositoRepository.perbarui_status_deposito(id_deposito=deposito.ID,status_baru=StatusDeposito.DICAIRKAN,koneksi=koneksi)
             if jumlah_baris_deposito != 1:
                 raise ValueError("Terjadi kesalahan saat memperbarui status deposito")
+
+            jumlah_baris_saldo = RekeningRepository.perbarui_saldo(norek=deposito.rekening.norek,saldo_baru=saldo_baru,koneksi=koneksi)
+            if jumlah_baris_saldo != 1:
+                raise ValueError("Terjadi kesalahan saat memasukkan saldo ke rekening")
 
             riwayat = RiwayatTemplate.template(kategori="transaksi",jenis="pencairan deposito",log=f"PENCAIRAN DEPOSITO +Rp{Utilitas.format_rupiah(total_pencairan)}")
             audit = AuditService.tambah_audit(kategori="transaksi",jenis="pencairan deposito",log=f"{deposito.pemilik.nama} mencairkan depositonya",nama=deposito.pemilik.nama,nik=deposito.pemilik.NIK,norek=deposito.rekening.norek)

@@ -33,7 +33,7 @@ Masukkan sembarang simbol untuk keluar""")
             elif pilihan == "2":
                 AuditUI.menu_tampilkan_audit(bank)
             elif pilihan == "3":
-                AdminPinjaman.menu(bank)
+                AdminPinjaman.kelola_pengajuan_pinjaman()
             elif pilihan == "4":
                 PengajuanAdminUI.kelola_pengajuan()
 

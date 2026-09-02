@@ -1,5 +1,7 @@
 from bank_djago.utils.utility import JenisAro
 
+#blueprint untuk deposito
+
 class Deposito:
 
     def __init__(self,pemilik,rekening,nominal,bunga,id,lama_bulan,tanggal_buka,tanggal_jatuh_tempo):

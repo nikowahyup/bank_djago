@@ -7,7 +7,7 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 class AuditRepository:
 
     @staticmethod
-    def tambah_audit(audit, koneksi):
+    def tambah_audit(audit, koneksi, id_transaksi=None):
 
             waktu = audit["waktu"]
 
@@ -23,9 +23,10 @@ class AuditRepository:
                     log,
                     nama,
                     nik,
-                    norek
+                    norek,
+                    transaksi_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     audit["kategori"],
@@ -34,7 +35,8 @@ class AuditRepository:
                     audit["log"],
                     audit.get("nama"),
                     audit.get("nik"),
-                    audit.get("norek")
+                    audit.get("norek"),
+                    id_transaksi
                 )
             )
             return cursor.lastrowid

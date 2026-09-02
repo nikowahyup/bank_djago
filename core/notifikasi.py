@@ -1,6 +1,6 @@
 from bank_djago.utils.utility import JenisReferensiID
 
-
+#blueprint untuk notifikasi
 class Notifikasi:
     def __init__(self,jenis,pesan,jenis_referensi=None,id_objek=None):
 

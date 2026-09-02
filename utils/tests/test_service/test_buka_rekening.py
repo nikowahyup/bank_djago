@@ -1,7 +1,7 @@
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 # from bank_djago.utils.tests.test_service.test_ambil_rekening import data_rekening
-from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+# from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 
 # nasabah = NasabahRepository.cari_nasabah_dengan_nik('1111222233334444')
@@ -207,17 +207,105 @@ from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatReposi
 
 
 
-audit_pembukaan = AuditRepository.cari_audit_dengan_norek(
-    "4001518075450587"
-)
+# audit_pembukaan = AuditRepository.cari_audit_dengan_norek(
+#     "4001518075450587"
+# )
+#
+# print("Jumlah audit:", len(audit_pembukaan))
+#
+# for audit in audit_pembukaan:
+#     print("Kategori :", audit["kategori"])
+#     print("Jenis    :", audit["jenis"])
+#     print("Waktu    :", audit["waktu"])
+#     print("Log      :", audit["log"])
+#     print("Nama     :", audit["nama"])
+#     print("NIK      :", audit["nik"])
+#     print("Norek    :", audit["norek"])
 
-print("Jumlah audit:", len(audit_pembukaan))
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
-for audit in audit_pembukaan:
-    print("Kategori :", audit["kategori"])
-    print("Jenis    :", audit["jenis"])
-    print("Waktu    :", audit["waktu"])
-    print("Log      :", audit["log"])
-    print("Nama     :", audit["nama"])
-    print("NIK      :", audit["nik"])
-    print("Norek    :", audit["norek"])
+
+# def isi_waktu_dibuat_rekening_lama():
+#     koneksi = buat_koneksi()
+#
+#     try:
+#         cursor = koneksi.execute(
+#             """
+#             UPDATE rekening
+#             SET waktu_dibuat = (
+#                 SELECT MIN(audit.waktu)
+#                 FROM audit
+#                 WHERE audit.norek = rekening.norek
+#                   AND audit.jenis = 'pembukaan'
+#             )
+#             WHERE waktu_dibuat IS NULL
+#               AND EXISTS (
+#                   SELECT 1
+#                   FROM audit
+#                   WHERE audit.norek = rekening.norek
+#                     AND audit.jenis = 'pembukaan'
+#               )
+#             """
+#         )
+#
+#         koneksi.commit()
+#
+#         print(
+#             f"{cursor.rowcount} rekening lama "
+#             f"berhasil mendapatkan waktu_dibuat"
+#         )
+#
+#     except Exception:
+#         koneksi.rollback()
+#         raise
+#
+#     finally:
+#         koneksi.close()
+#
+#
+# if __name__ == "__main__":
+#     isi_waktu_dibuat_rekening_lama()
+
+
+# koneksi = buat_koneksi()
+#
+# try:
+#     daftar_rekening = koneksi.execute(
+#         """
+#         SELECT
+#             norek,
+#             waktu_dibuat
+#         FROM rekening
+#         ORDER BY norek
+#         """
+#     ).fetchall()
+#
+#     for rekening in daftar_rekening:
+#         print(
+#             rekening["norek"],
+#             rekening["waktu_dibuat"]
+#         )
+#
+# finally:
+#     koneksi.close()
+
+
+koneksi = buat_koneksi()
+
+try:
+    tanpa_waktu = koneksi.execute(
+        """
+        SELECT norek
+        FROM rekening
+        WHERE waktu_dibuat IS NULL
+        """
+    ).fetchall()
+
+    for rekening in tanpa_waktu:
+        print(
+            "Tidak memiliki audit pembukaan:",
+            rekening["norek"]
+        )
+
+finally:
+    koneksi.close()

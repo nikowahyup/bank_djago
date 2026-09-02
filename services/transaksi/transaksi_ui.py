@@ -44,8 +44,8 @@ class TransaksiUI:
         except ValueError as e:
             UI.gagal(str(e))
 
-        except sqlite3.Error:
-            print("Terjadi kesalahan saat menyimpan transaksi. Silahkan coba lagi")
+        except sqlite3.Error as error:
+            print(f"Terjadid kesalahan saat menyimpan transaksi. Silahkan coba lagi {error}")
 
     @staticmethod
     def tarik_tunai(rekening):
@@ -60,8 +60,8 @@ class TransaksiUI:
         except ValueError as e:
             UI.gagal(str(e))
 
-        except sqlite3.Error:
-            print("Terjadid kesalahan saat menyimpan transaksi. Silahkan coba lagi")
+        except sqlite3.Error as error:
+            print(f"Terjadid kesalahan saat menyimpan transaksi. Silahkan coba lagi {error}")
 
     @staticmethod
     def transfer(rekening):
@@ -84,7 +84,8 @@ class TransaksiUI:
             nominal = int(input("Masukkan nominal transfer: "))
             Utilitas.animasi("proses")
             TransaksiService.transfer(rekening,rek_penerima,nominal)
-            UI.sukses(f"Transfer berhasil! Rp{Utilitas.format_rupiah(nominal)} telah masuk ke rekening {penerima.pemilik.nama}")
+            UI.sukses(f"Transfer berhasil! Rp{Utilitas.format_rupiah(nominal)} telah masuk\n"
+                      f"ke rekening {penerima.pemilik.nama}")
 
         except ValueError as e:
 
