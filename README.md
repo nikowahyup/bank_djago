@@ -178,6 +178,8 @@ Memindahkan perubahan saldo serta perubahan jenis rekening ke transaksi database
 - [x] Memigrasikan upgrade dan downgrade rekening.
 - [x] Memuat riwayat langsung dari SQLite.
 - [x] Mempertahankan rekening tertutup untuk kebutuhan historis.
+- [x] Menambahkan tabel transaksi terstruktur untuk menyimpan nominal, biaya, rekening sumber/tujuan, serta snapshot saldo sebelum dan sesudah.
+- [x] Menghubungkan transaksi dengan riwayat dan audit melalui `transaksi_id`.
 
 ### `v1.4` - Pengajuan dan Penutupan Rekening✅
 Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
@@ -189,6 +191,9 @@ Memisahkan permintaan nasabah, keputusan admin, dan penyelesaian penutupan.
 - [x] Mencegah persetujuan ketika deposito atau pinjaman masih berjalan.
 - [x] Menyelesaikan penutupan melalui penarikan seluruh saldo.
 - [x] Menyelesaikan penutupan melalui pemindahan seluruh saldo.
+- [x] Mencatat penarikan dan pemindahan saldo penutupan sebagai transaksi terstruktur.
+- [x] Menghubungkan riwayat dan audit rekening sumber/penerima ke satu `transaksi_id` yang sama.
+- [x] Menguji penutupan metode tarik, metode transfer, dan rollback ketika proses gagal sebelum commit.
 - [x] Menyatukan pengajuan, status, dan penyelesaian dalam satu menu dinamis.
 - [x] Menyimpan riwayat serta audit penutupan.
 - [x] Tetap menyediakan riwayat rekening yang sudah ditutup.
@@ -207,7 +212,7 @@ Memindahkan seluruh lifecycle deposito dari koleksi objek/JSON menuju SQLite.
 - [x] Pengujian akhir seluruh siklus deposito.
 - [x] Menghapus penyimpanan deposito berbasis JSON beserta pengujian lamanya.
 
-**Status: selesai.** Pengembangan berikutnya berfokus pada **v1.6 – Migrasi Pinjaman**.
+**Status: selesai.** Pengembangan saat ini berfokus pada melengkapi pencatatan transaksi terstruktur untuk seluruh alur yang mengubah saldo, dimulai dari lifecycle deposito sebelum melanjutkan **v1.6 – Migrasi Pinjaman**.
 
 ### `v1.6` - Migrasi Pinjaman
 Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
@@ -342,6 +347,14 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - Mempertahankan rekening tertutup beserta riwayat dan auditnya
 - Menggabungkan pengajuan dan penyelesaian penutupan menjadi satu menu dinamis
 
+(03/09/2026)
+- Menambahkan tabel transaksi terstruktur untuk menyimpan pergerakan dana dan snapshot saldo
+- Menghubungkan riwayat serta audit dengan transaksi melalui `transaksi_id`
+- Mencatat penyelesaian penutupan rekening melalui penarikan atau pemindahan seluruh saldo
+- Menghubungkan audit dan riwayat rekening sumber serta penerima ke transaksi penutupan yang sama
+- Menguji penutupan metode tarik dan transfer beserta konsistensi saldo, status, riwayat, dan audit
+- Menguji rollback saat penyimpanan audit sengaja digagalkan sebelum commit dan memastikan tidak ada perubahan state sebagian
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -439,6 +452,21 @@ Repository membagikan struktur, kode pembuat database, dan contoh pengujian, buk
 
 Jawaban:
 Flask menyediakan komponen web secara lebih eksplisit sehingga routing, request/response, template, session, autentikasi, dan integrasi service dapat dipelajari satu per satu. Django tetap dapat dievaluasi ketika kebutuhan proyek berkembang dan manfaat fitur bawaannya menjadi lebih besar.
+
+### 20. Mengapa tabel transaksi dipisahkan dari riwayat dan audit?
+
+Jawaban:
+Tabel transaksi menyimpan fakta finansial terstruktur seperti jenis transaksi, nominal, biaya, rekening sumber dan tujuan, serta saldo sebelum dan sesudah. Riwayat tetap menjadi catatan yang dibaca nasabah, sedangkan audit tetap menjadi catatan pemantauan admin dan sistem. Pemisahan ini menjaga masing-masing tabel memiliki tujuan yang jelas sekaligus menyediakan data terstruktur untuk analisis dan pengembangan machine learning di masa depan.
+
+### 21. Mengapa riwayat dan audit menyimpan `transaksi_id`?
+
+Jawaban:
+Satu aktivitas finansial dapat menghasilkan beberapa catatan, seperti transfer yang menghasilkan riwayat dan audit untuk rekening sumber serta penerima. `transaksi_id` menghubungkan seluruh catatan tersebut ke satu transaksi induk tanpa menduplikasi data finansial. Hubungan ini juga mempermudah penelusuran, pemeriksaan integritas, dan rekonstruksi kejadian transaksi.
+
+### 22. Bagaimana transaksi penutupan rekening dijaga tetap atomik?
+
+Jawaban:
+Perubahan saldo sumber dan penerima, perubahan status rekening, penyimpanan transaksi, riwayat, serta audit menggunakan satu koneksi dan satu batas transaksi database. State objek Python baru diperbarui setelah commit berhasil. Jika salah satu proses gagal, rollback membatalkan seluruh perubahan sehingga rekening tidak dapat tertutup atau berpindah saldo secara sebagian.
 
 #### Deposito dan notifikasi
 
