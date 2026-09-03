@@ -304,3 +304,6 @@ class JenisTransaksi(Enum):
     PEMINDAHAN_SALDO_PENUTUPAN = (
         "pemindahan_saldo_penutupan"
     )
+    PENARIKAN_SALDO_PENUTUPAN = (
+        "penarikan_saldo_penutupan"
+    )

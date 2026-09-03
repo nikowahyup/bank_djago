@@ -132,7 +132,7 @@ def buat_tabel_pinjaman():
                 sisa_pokok INTEGER NOT NULL,
                 cicilan_terbayar INTEGER NOT NULL DEFAULT 0,
                 status TEXT NOT NULL DEFAULT 'diajukan',
-                catatan_admin TEXT
+                catatan_admin TEXT,
                 tanggal_pencairan TEXT,
                 tanggal_jatuh_tempo TEXT,
 

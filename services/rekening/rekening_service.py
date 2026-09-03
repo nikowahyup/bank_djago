@@ -2,15 +2,15 @@ import datetime
 import random
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
-from bank_djago.services.deposito.deposito_service import StatusDeposito
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
-from bank_djago.services.transaksi.transaksi_service import TransaksiService
-from bank_djago.utils.utility import StatusPinjaman
 from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
+from bank_djago.utils.utility import JenisTransaksi, Utilitas
+
 
 class RekeningService:
     level = {1: 'Reguler',
@@ -312,6 +312,18 @@ class RekeningService:
             rekening_baru.tambah_saldo(setor_awal)
 
             RekeningRepository.tambah_rekening(rekening_baru, koneksi)
+            transaksi = {
+                "jenis": JenisTransaksi.SETOR_AWAL,
+                "norek_tujuan": rekening_baru.norek,
+                "nominal": setor_awal,
+                "saldo_tujuan_sebelum": 0,
+                "saldo_tujuan_sesudah": setor_awal,
+                "waktu": rekening_baru.waktu_dibuat
+            }
+            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi, koneksi)
+
+            riwayat = RiwayatTemplate.template(kategori="transaksi",jenis="setor awal",log=f"SETOR AWAL | +Rp{Utilitas.format_rupiah(setor_awal)}")
+
             audit = AuditService.tambah_audit(
                 kategori="rekening",
                 jenis="pembukaan",
@@ -320,7 +332,8 @@ class RekeningService:
                 nik=nasabah.NIK,
                 norek=rekening_baru.norek
             )
-            AuditRepository.tambah_audit(audit,koneksi)
+            RiwayatRepository.tambah_riwayat(rekening_baru.norek, riwayat, koneksi, id_transaksi)
+            AuditRepository.tambah_audit(audit,koneksi,id_transaksi)
 
             if buat_baru:
                 koneksi.commit()
