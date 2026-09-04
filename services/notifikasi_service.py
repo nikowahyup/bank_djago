@@ -1,7 +1,7 @@
 from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.core.notifikasi import Notifikasi
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 
 class NotifikasiService:
@@ -96,7 +96,7 @@ class NotifikasiService:
                 f"Pengajuan pinjaman ber-ID {id_pinjaman} "
                 f"telah disetujui."
             ),
-            jenis_referensi=JenisReferensiID.PINJAMAN,
+            jenis_referensi=JenisReferensi.PINJAMAN,
             id_objek=id_pinjaman
         )
 
@@ -125,7 +125,7 @@ class NotifikasiService:
                 f"catatan Admin: {catatan_admin}"
 
             ),
-            jenis_referensi=JenisReferensiID.PINJAMAN,
+            jenis_referensi=JenisReferensi.PINJAMAN,
             id_objek=id_pinjaman
         )
 

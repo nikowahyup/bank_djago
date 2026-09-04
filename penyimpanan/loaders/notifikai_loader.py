@@ -1,5 +1,5 @@
 from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 from bank_djago.core.notifikasi import Notifikasi
 
 class NotifikasiLoader:
@@ -11,7 +11,7 @@ class NotifikasiLoader:
 
         for data_notif in daftar_notifikasi:
             jenis_referensi = (
-                JenisReferensiID(data_notif["jenis_referensi"])
+                JenisReferensi.dari_nilai(data_notif["jenis_referensi"])
                 if data_notif["jenis_referensi"] is not None
                 else None
             )

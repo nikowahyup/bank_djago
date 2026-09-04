@@ -48,10 +48,6 @@ class Bank:
                 nasabah.rekening.append(rekening)
                 rekening.pemilik = nasabah
 
-            nasabah.notifikasi = [
-                Notifikasi.dari_dict(item)
-                for item in info.get("notifikasi", [])
-            ]
 
 
             self.data_nasabah[nik] = nasabah

@@ -422,6 +422,7 @@ def buat_tabel_transaksi():
                 CHECK (
                     norek_sumber IS NOT NULL
                     OR norek_tujuan IS NOT NULL
+                    OR id_referensi IS NOT NULL
                 ),
 
                 CHECK (

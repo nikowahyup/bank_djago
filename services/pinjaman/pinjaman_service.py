@@ -10,7 +10,7 @@ from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatReposi
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensiID
+from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensi
 from bank_djago.utils.validator import Validator
 
 
@@ -337,7 +337,7 @@ class PinjamanService:
                     "🎉 Pinjaman Anda telah lunas. "
                     "Terima kasih telah mempercayai Bank Djago"
                 ),
-                referensi_id=JenisReferensiID.PINJAMAN,
+                referensi_id=JenisReferensi.PINJAMAN,
                 id_objek=pinjaman.ID
             )
 
@@ -503,7 +503,7 @@ class PinjamanService:
     @staticmethod
     def hapus_notif_pinjaman(nasabah):
         for item in nasabah.notifikasi:
-            if item.referensi_id == JenisReferensiID.PINJAMAN:
+            if item.referensi_id == JenisReferensi.PINJAMAN:
                 nasabah.notifikasi.remove(item)
                 break
 

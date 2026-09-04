@@ -8,7 +8,7 @@ from bank_djago.services.transaksi.limit_service import LimitService
 import datetime
 from bank_djago.services.notifikasi_service import NotifikasiService
 
-from bank_djago.utils.utility import StatusPinjaman, Utilitas, JenisReferensiID
+from bank_djago.utils.utility import StatusPinjaman, Utilitas, JenisReferensi
 
 
 class Scheduler:
@@ -54,7 +54,7 @@ class Scheduler:
                             nasabah=deposito.pemilik,
                             jenis="deposito",
                             pesan=pesan,
-                            jenis_referensi=JenisReferensiID.DEPOSITO,
+                            jenis_referensi=JenisReferensi.DEPOSITO,
                             id_objek=deposito.ID
                         )
 
@@ -75,7 +75,7 @@ class Scheduler:
                     nasabah=deposito.pemilik,
                     jenis="deposito",
                     pesan=pesan,
-                    jenis_referensi=JenisReferensiID.DEPOSITO,
+                    jenis_referensi=JenisReferensi.DEPOSITO,
                     id_objek=deposito.ID
                 )
 
@@ -89,7 +89,7 @@ class Scheduler:
                 ):
                     NotifikasiService.hapus_notifikasi_referensi(
                         nasabah=deposito.pemilik,
-                        jenis_referensi=JenisReferensiID.DEPOSITO,
+                        jenis_referensi=JenisReferensi.DEPOSITO,
                         id_objek=deposito.ID
                     )
 
@@ -111,7 +111,7 @@ class Scheduler:
                     nasabah=deposito.pemilik,
                     jenis="deposito",
                     pesan=pesan,
-                    jenis_referensi=JenisReferensiID.DEPOSITO,
+                    jenis_referensi=JenisReferensi.DEPOSITO,
                     id_objek=deposito.ID
                 )
 
@@ -144,7 +144,7 @@ class Scheduler:
                     notifikasi = Notifikasi(
                                             jenis="pinjaman",
                                             pesan=f"Batas pembayaran cicilan Anda periode ini akan berakhir pada {Utilitas.format_tanggal_indonesia(jatuh_tempo)}",
-                                            referensi_id=JenisReferensiID.PINJAMAN)
+                                            referensi_id=JenisReferensi.PINJAMAN)
 
                     nasabah.notifikasi.append(notifikasi)
                     pinjaman.notifikasi_jatuh_tempo = True
@@ -158,7 +158,7 @@ class Scheduler:
                                             jenis="pinjaman",
                                             pesan=f"Hari ini waktu icilan bulan {Utilitas.nama_bulan(jatuh_tempo)} terakhir.\n"
                                                   f"Cicilan sebesar Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))}",
-                                            referensi_id=JenisReferensiID.PINJAMAN)
+                                            referensi_id=JenisReferensi.PINJAMAN)
                     nasabah.notifikasi.append(notifikasi)
                     pinjaman.notifikasi_jatuh_tempo = True
 
@@ -176,7 +176,7 @@ class Scheduler:
                     pesan = (f"Cicilan Anda terlambat {hari_terlambat} hari.\n"
                         f"Masa toleransi tersisa {sisa_toleransi} hari.")
 
-                notifikasi = Notifikasi(jenis="pinjaman",pesan=pesan,referensi_id=JenisReferensiID.PINJAMAN)
+                notifikasi = Notifikasi(jenis="pinjaman",pesan=pesan,referensi_id=JenisReferensi.PINJAMAN)
                 nasabah.notifikasi.append(notifikasi)
                 pinjaman.notifikasi_jatuh_tempo = True
 
@@ -194,7 +194,7 @@ class Scheduler:
                         f"Total pembayaran saat ini "
                         f"Rp{Utilitas.format_rupiah(round(total_tagihan))}."
                     ),
-                    referensi_id=JenisReferensiID.PINJAMAN,
+                    referensi_id=JenisReferensi.PINJAMAN,
                     id_objek=pinjaman.ID
                 )
                 nasabah.notifikasi.append(notifikasi)

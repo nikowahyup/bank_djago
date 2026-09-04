@@ -1,4 +1,4 @@
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 #blueprint untuk notifikasi
 class Notifikasi:
@@ -24,7 +24,7 @@ class Notifikasi:
         if referensi in ("", None):
             referensi = None
         else:
-            referensi = JenisReferensiID(referensi)
+            referensi = JenisReferensi(referensi)
 
         return cls(
 

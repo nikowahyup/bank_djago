@@ -275,11 +275,43 @@ class StatusPinjaman(Enum):
     LUNAS = "lunas"
 
 
-class JenisReferensiID(Enum):
-    PINJAMAN = 1
-    DEPOSITO = 2
-    TRANSAKSI = 3
+class JenisReferensi(Enum):
+    PINJAMAN = "pinjaman"
+    DEPOSITO = "deposito"
+    TRANSAKSI = "transaksi"
 
+    @classmethod
+    def dari_nilai(cls, nilai):
+        """
+        Mengubah nilai referensi lama maupun baru menjadi Enum.
+
+        Format lama:
+            1 / "1" -> PINJAMAN
+            2 / "2" -> DEPOSITO
+            3 / "3" -> TRANSAKSI
+
+        Format baru:
+            "pinjaman"
+            "deposito"
+            "transaksi"
+        """
+
+        if isinstance(nilai, cls):
+            return nilai
+
+        referensi_lama = {
+            1: cls.PINJAMAN,
+            "1": cls.PINJAMAN,
+            2: cls.DEPOSITO,
+            "2": cls.DEPOSITO,
+            3: cls.TRANSAKSI,
+            "3": cls.TRANSAKSI
+        }
+
+        if nilai in referensi_lama:
+            return referensi_lama[nilai]
+
+        return cls(nilai)
 
 
 from enum import Enum
@@ -306,4 +338,7 @@ class JenisTransaksi(Enum):
     )
     PENARIKAN_SALDO_PENUTUPAN = (
         "penarikan_saldo_penutupan"
+    )
+    KAPITALISASI_BUNGA_DEPOSITO = (
+        "kapitalisasi_bunga_deposito"
     )

@@ -3,7 +3,7 @@
 
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 from bank_djago.utils.ui import UI
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 
 class NotifikasiUI:
@@ -23,10 +23,10 @@ class NotifikasiUI:
                 NotifikasiUI.lihat_notifikasi(nasabah)
 
             elif pilihan == "2":
-                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensiID.DEPOSITO)
+                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensi.DEPOSITO)
 
             elif pilihan == "3":
-                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensiID.PINJAMAN)
+                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensi.PINJAMAN)
 
 
             elif pilihan == "4":
