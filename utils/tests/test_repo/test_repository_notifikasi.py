@@ -7,7 +7,7 @@ from bank_djago.penyimpanan.repositories.nasabah_repository import (
 from bank_djago.penyimpanan.repositories.notifikasi_repository import (
     NotifikasiRepository
 )
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 
 def buat_notifikasi(
@@ -86,7 +86,7 @@ def uji_repository_notifikasi():
         notifikasi_tanpa_pemilik = buat_notifikasi(
             jenis="deposito",
             pesan="Deposito pengujian telah jatuh tempo",
-            jenis_referensi=JenisReferensiID.DEPOSITO,
+            jenis_referensi=JenisReferensi.DEPOSITO,
             id_objek=100
         )
 
@@ -117,21 +117,21 @@ def uji_repository_notifikasi():
         deposito_target = buat_notifikasi(
             jenis="deposito",
             pesan="Deposito pertama telah jatuh tempo",
-            jenis_referensi=JenisReferensiID.DEPOSITO,
+            jenis_referensi=JenisReferensi.DEPOSITO,
             id_objek=101
         )
 
         deposito_lain = buat_notifikasi(
             jenis="deposito",
             pesan="Deposito kedua akan segera jatuh tempo",
-            jenis_referensi=JenisReferensiID.DEPOSITO,
+            jenis_referensi=JenisReferensi.DEPOSITO,
             id_objek=102
         )
 
         pinjaman = buat_notifikasi(
             jenis="pinjaman",
             pesan="Cicilan pinjaman telah jatuh tempo",
-            jenis_referensi=JenisReferensiID.PINJAMAN,
+            jenis_referensi=JenisReferensi.PINJAMAN,
             id_objek=201
         )
 
@@ -147,7 +147,7 @@ def uji_repository_notifikasi():
         deposito_nasabah_kedua = buat_notifikasi(
             jenis="deposito",
             pesan="Deposito nasabah kedua telah jatuh tempo",
-            jenis_referensi=JenisReferensiID.DEPOSITO,
+            jenis_referensi=JenisReferensi.DEPOSITO,
             id_objek=101
         )
 
@@ -212,7 +212,7 @@ def uji_repository_notifikasi():
         assert hasil_id["jenis"] == "deposito"
         assert (
             hasil_id["jenis_referensi"]
-            == JenisReferensiID.DEPOSITO.value
+            == JenisReferensi.DEPOSITO.value
         )
         assert hasil_id["id_objek"] == 101
 
@@ -278,7 +278,7 @@ def uji_repository_notifikasi():
         hapus_referensi = (
             NotifikasiRepository.hapus_notifikasi_dengan_referensi(
                 nik_pemilik=nik_pertama,
-                jenis_referensi=JenisReferensiID.DEPOSITO,
+                jenis_referensi=JenisReferensi.DEPOSITO,
                 id_objek=101
             )
         )
