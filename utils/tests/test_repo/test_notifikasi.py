@@ -26,7 +26,7 @@ from bank_djago.services.deposito.deposito_service import (
     StatusDeposito
 )
 from bank_djago.core.deposito import JenisAro
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 
 NIK_PENGUJIAN = "1111222233334444"
@@ -66,7 +66,7 @@ def ambil_notifikasi_deposito(id_deposito):
         for data in semua_notifikasi
         if (
             data["jenis_referensi"]
-            == JenisReferensiID.DEPOSITO.value
+            == JenisReferensi.DEPOSITO.value
             and data["id_objek"] == id_deposito
         )
     ]
@@ -171,7 +171,7 @@ notifikasi_objek = [
     for notifikasi in nasabah_dimuat_ulang.notifikasi
     if (
         notifikasi.jenis_referensi
-        == JenisReferensiID.DEPOSITO
+        == JenisReferensi.DEPOSITO
         and notifikasi.id_objek == deposito.ID
     )
 ]
@@ -257,7 +257,7 @@ notifikasi_objek = [
     in nasabah_setelah_jatuh_tempo.notifikasi
     if (
         notifikasi.jenis_referensi
-        == JenisReferensiID.DEPOSITO
+        == JenisReferensi.DEPOSITO
         and notifikasi.id_objek == id_deposito
     )
 ]

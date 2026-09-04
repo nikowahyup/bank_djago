@@ -179,12 +179,16 @@ def buat_tabel_notifikasi():
                 nik_pemilik TEXT NOT NULL,
                 jenis TEXT NOT NULL,
                 pesan TEXT NOT NULL,
-                jenis_referensi INTEGER,
+                jenis_referensi TEXT,
                 id_objek INTEGER,
 
                 CHECK (
                     jenis_referensi IS NULL
-                    OR jenis_referensi IN (1, 2, 3)
+                    OR jenis_referensi IN (
+                        'pinjaman',
+                        'deposito',
+                        'transaksi'
+                    )
                 ),
 
                 FOREIGN KEY (nik_pemilik)

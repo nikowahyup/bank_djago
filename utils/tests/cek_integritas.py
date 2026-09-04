@@ -60,7 +60,7 @@ def cek_integritas_deposito(bank):
 
 
 
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 def cek_integritas_notifikasi(bank):
     error = []
@@ -69,7 +69,7 @@ def cek_integritas_notifikasi(bank):
 
         for notifikasi in nasabah.notifikasi:
 
-            referensi = notifikasi.referensi_id
+            referensi = notifikasi.jenis_referensi
             id_objek = notifikasi.id_objek
 
             # Notifikasi umum tidak wajib memiliki objek
@@ -84,7 +84,7 @@ def cek_integritas_notifikasi(bank):
             # =========================
             # NOTIFIKASI DEPOSITO
             # =========================
-            if referensi == JenisReferensiID.DEPOSITO:
+            if referensi == JenisReferensi.DEPOSITO:
 
                 if id_objek is None:
                     error.append(
@@ -108,7 +108,7 @@ def cek_integritas_notifikasi(bank):
             # =========================
             # NOTIFIKASI PINJAMAN
             # =========================
-            elif referensi == JenisReferensiID.PINJAMAN:
+            elif referensi == JenisReferensi.PINJAMAN:
 
                 if id_objek is None:
                     continue
@@ -369,6 +369,5 @@ def cek_integritas_rekening(bank):
                 )
 
     return error
-
 
 

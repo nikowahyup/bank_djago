@@ -24,7 +24,7 @@ class Notifikasi:
         if referensi in ("", None):
             referensi = None
         else:
-            referensi = JenisReferensi(referensi)
+            referensi = JenisReferensi.dari_nilai(referensi)
 
         return cls(
 
@@ -33,4 +33,3 @@ class Notifikasi:
             jenis_referensi=referensi,
             id_objek=data.get("ID_objek")
         )
-
