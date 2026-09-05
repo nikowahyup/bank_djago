@@ -152,18 +152,20 @@ class PinjamanRepository:
         return cursor.rowcount
 
     @staticmethod
-    def perbarui_setelah_pencairan(pinjaman, koneksi):
-        tanggal_pencairan = (
-            pinjaman.tanggal_pencairan.isoformat()
-            if pinjaman.tanggal_pencairan is not None
-            else None
-        )
+    def perbarui_setelah_pencairan(
+            id_pinjaman,
+            cicilan_tetap_baru,
+            tanggal_jatuh_tempo_baru,
+            tanggal_pencairan_baru,
+            sisa_pokok_baru,
+            status_baru,
+            koneksi
+            ):
 
-        tanggal_jatuh_tempo = (
-            pinjaman.tanggal_jatuh_tempo.isoformat()
-            if pinjaman.tanggal_jatuh_tempo is not None
-            else None
-        )
+        tanggal_pencairan = tanggal_pencairan_baru.isoformat()
+
+        tanggal_jatuh_tempo = tanggal_jatuh_tempo_baru.isoformat()
+        status_baru = status_baru.value
 
         cursor = koneksi.execute(
             """
@@ -171,29 +173,38 @@ class PinjamanRepository:
             SET status = ?,
                 cicilan_tetap = ?,
                 tanggal_pencairan = ?,
-                tanggal_jatuh_tempo = ?
+                tanggal_jatuh_tempo = ?,
+                sisa_pokok = ?
             WHERE id = ?
             AND status = 'disetujui'
             """,
             (
-                pinjaman.status.value,
-                pinjaman.cicilan_tetap,
+                status_baru,
+                cicilan_tetap_baru,
                 tanggal_pencairan,
                 tanggal_jatuh_tempo,
-                pinjaman.ID
+                sisa_pokok_baru,
+                id_pinjaman
             )
         )
 
         return cursor.rowcount
 
     @staticmethod
-    def perbarui_setelah_pembayaran(pinjaman, koneksi):
-        tanggal_jatuh_tempo = (
-            pinjaman.tanggal_jatuh_tempo.isoformat()
-            if pinjaman.tanggal_jatuh_tempo is not None
+    def perbarui_setelah_pembayaran(
+            id_pinjaman,
+            status_baru,
+            cicilan_terbayar_baru,
+            sisa_pokok_baru,
+            tanggal_jatuh_tempo_baru,
+            koneksi
+    ):
+        tanggal_jatuh_tempo_sqlite = (
+            tanggal_jatuh_tempo_baru.isoformat()
+            if tanggal_jatuh_tempo_baru is not None
             else None
         )
-
+        status_baru_sqlite = status_baru.value
         cursor = koneksi.execute(
             """
             UPDATE pinjaman
@@ -205,11 +216,11 @@ class PinjamanRepository:
             AND status = 'aktif'
             """,
             (
-                pinjaman.cicilan_terbayar,
-                pinjaman.sisa_pokok,
-                pinjaman.status.value,
-                tanggal_jatuh_tempo,
-                pinjaman.ID
+                cicilan_terbayar_baru,
+                sisa_pokok_baru,
+                status_baru_sqlite,
+                tanggal_jatuh_tempo_sqlite,
+                id_pinjaman
             )
         )
 

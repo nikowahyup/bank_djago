@@ -9,7 +9,7 @@ class Pinjaman:
         self.nominal_pinjaman = nominal_pinjaman
         self.bunga = bunga
         self.tenor = tenor
-        self.sisa_pokok = nominal_pinjaman
+        self.sisa_pokok = 0
         self.cicilan_tetap = 0
         self.cicilan_terbayar = 0
         self.status = StatusPinjaman.DIAJUKAN
