@@ -212,18 +212,24 @@ Memindahkan seluruh lifecycle deposito dari koleksi objek/JSON menuju SQLite.
 - [x] Pengujian akhir seluruh siklus deposito.
 - [x] Menghapus penyimpanan deposito berbasis JSON beserta pengujian lamanya.
 
-**Status: selesai.** Pengembangan saat ini berfokus pada melengkapi pencatatan transaksi terstruktur untuk seluruh alur yang mengubah saldo, dimulai dari lifecycle deposito sebelum melanjutkan **v1.6 – Migrasi Pinjaman**.
+**Status: selesai.** Seluruh lifecycle deposito telah menggunakan SQLite dan pencatatan transaksi terstruktur. Pengembangan dilanjutkan ke **v1.6 – Migrasi Pinjaman**.
 
-### `v1.6` - Migrasi Pinjaman
+### `v1.6` - Migrasi Pinjaman ✅
 Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
 
-- [ ] Mengajukan pinjaman menggunakan rekening dari SQLite.
-- [ ] Menampilkan dan memproses pengajuan pinjaman untuk admin.
-- [ ] Memigrasikan persetujuan, penolakan, dan pencairan.
-- [ ] Memigrasikan pembayaran cicilan dan pelunasan.
-- [ ] Memigrasikan tunggakan, masa toleransi, dan denda.
-- [ ] Menyimpan seluruh riwayat pinjaman nasabah.
-- [ ] Menguji transaksi gagal tanpa perubahan state sebagian.
+- [x] Mengajukan pinjaman menggunakan rekening dari SQLite.
+- [x] Menampilkan dan memproses pengajuan pinjaman untuk admin.
+- [x] Memigrasikan persetujuan, penolakan, dan pencairan.
+- [x] Memigrasikan pembayaran cicilan dan pelunasan.
+- [x] Memigrasikan tunggakan, masa toleransi, dan denda.
+- [x] Menyimpan seluruh riwayat pinjaman nasabah.
+- [x] Mencatat pencairan dan pembayaran cicilan sebagai transaksi terstruktur.
+- [x] Menghubungkan riwayat dan audit pinjaman ke `transaksi_id` yang sama.
+- [x] Mengintegrasikan UI dengan pemilihan dari beberapa pinjaman milik nasabah.
+- [x] Menguji pencairan, pembayaran normal, pembayaran terlambat, pelunasan, dan penolakan proses ganda.
+- [x] Menguji transaksi gagal tanpa perubahan sebagian pada database maupun objek Python.
+
+**Status: selesai.** Pengembangan selanjutnya berfokus pada migrasi proses sistem berbasis waktu sebelum menghubungkannya kembali ke scheduler.
 
 ### `v1.7` - Notifikasi dan Scheduler
 Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank` yang selalu berada di memori.
