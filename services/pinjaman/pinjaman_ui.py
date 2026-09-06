@@ -1,13 +1,13 @@
 
-
 from bank_djago.services.pinjaman.pinjaman_service import  PinjamanService
 from bank_djago.utils.utility import Utilitas,StatusPinjaman
 from bank_djago.utils.ui import UI
 
+
 class PinjamanUI:
 
     @staticmethod
-    def menu(nasabah,rekening):
+    def menu(nasabah, rekening):
         while True:
 
             UI.header("MENU PINJAMAN",UI.BIRU)
@@ -19,21 +19,19 @@ class PinjamanUI:
             print("5. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                PinjamanUI.ajukan_pinjaman(nasabah,rekening)
+                PinjamanUI.ajukan_pinjaman(nasabah, rekening)
 
             elif pilihan == "2":
-                PinjamanUI.cairkan_pinjaman(bank,nasabah)
+                PinjamanUI.cairkan_pinjaman(nasabah)
 
             elif pilihan == "3":
                 PinjamanUI.lihat_pinjaman(nasabah)
 
             elif pilihan == "4":
-                PinjamanUI.bayar_cicilan(bank,nasabah)
+                PinjamanUI.bayar_cicilan(nasabah)
 
             elif pilihan == "5":
                 break
-
-
 
 
 
@@ -95,60 +93,255 @@ class PinjamanUI:
 
 
     @staticmethod
-    def cairkan_pinjaman(bank,nasabah):
-        pinjaman = nasabah.pinjaman
+    def cairkan_pinjaman(nasabah):
+        pinjaman = PinjamanUI.pilih_pinjaman(nasabah,StatusPinjaman.DISETUJUI)
+
+        if pinjaman is None:
+            return
+
         try:
-            PinjamanService.cairkan_pinjaman(bank,pinjaman)
-            UI.sukses("Pencairan berhasil! Status pinjaman Anda kini sudah aktif")
+            PinjamanService.cairkan_pinjaman(nasabah=nasabah,id_pinjaman=pinjaman.ID)
+            UI.sukses(f"Pinjaman {pinjaman.ID} berhasil dicairkan")
+
+            UI.sukses(
+                f"Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)} telah masuk ke rekening Anda"
+                    )
         except ValueError as e:
             UI.gagal(str(e))
+
+
+
+    @staticmethod
+    def pilih_pinjaman(nasabah,status=None):
+        daftar_pinjaman = nasabah.daftar_pinjaman
+        if status is not None:
+            daftar_pinjaman = [pinjaman
+                               for pinjaman in daftar_pinjaman
+                               if pinjaman.status == status]
+
+        if not daftar_pinjaman:
+            if status is not None:
+                UI.gagal(f"Tidak ada pinjaman berstatus {status.value}")
+            else:
+                UI.gagal("Anda belum memiiliki pinjaman")
+            return None
+
+
+
+
+        print("===== SILAHKAN PILIH PINJAMAN =====")
+        print()
+        for nomor, pinjaman in enumerate(daftar_pinjaman, start=1):
+            print(f"{nomor}.")
+            print(f"Status      : {pinjaman.status.value}")
+            print(f"ID pinjaman : {pinjaman.ID}")
+            print(
+                f"Nominal     : "
+                f"Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)}"
+            )
+            print(f"Tenor       : {pinjaman.tenor} bulan")
+            print(f"Bunga       : {pinjaman.bunga * 100:.1f}% / tahun")
+            print()
+
+
+        while True:
+            try:
+                pilihan = int(
+                    input(
+                        "Pilih nomor pinjaman "
+                        "(ketik 0 untuk keluar): "
+                    )
+                )
+            except ValueError:
+                UI.gagal("Silakan pilih menggunakan angka")
+                continue
+
+            if pilihan == 0:
+                return None
+
+            if pilihan < 1 or pilihan > len(daftar_pinjaman):
+                UI.gagal("Nomor pilihan tidak tersedia")
+                continue
+
+            return daftar_pinjaman[pilihan - 1]
 
     @staticmethod
     def lihat_pinjaman(nasabah):
-        pinjaman = nasabah.pinjaman
+        pinjaman = PinjamanUI.pilih_pinjaman(nasabah=nasabah)
+
         if pinjaman is None:
-            print("Anda masih belum melakukan pinjaman")
             return
 
+        # Semua label diberi ruang selebar 17 karakter.
+        # Dengan demikian, seluruh titik dua berada di kolom yang sama.
+        def buat_baris(label, nilai):
+            return f"{label:<17}: {nilai}"
+
+        baris_informasi = [
+            buat_baris("ID pinjaman", pinjaman.ID),
+            buat_baris(
+                "Nominal awal",
+                f"Rp{Utilitas.format_rupiah(
+                    pinjaman.nominal_pinjaman
+                )}"
+            ),
+            buat_baris(
+                "Bunga",
+                f"{pinjaman.bunga * 100:.1f}% / tahun"
+            ),
+            buat_baris(
+                "Tenor",
+                f"{pinjaman.tenor} bulan"
+            ),
+            buat_baris(
+                "Status",
+                pinjaman.status.value
+            )
+        ]
 
         if pinjaman.status == StatusPinjaman.DIAJUKAN:
-            print()
-            print("⚠️ Pinjaman masih dalam proses verifikasi")
-            UI.kotak_status_pinjaman(status=pinjaman.status.value,
-                                     nominal=Utilitas.format_rupiah(pinjaman.nominal_pinjaman),
-                                     bunga=round(pinjaman.bunga*100),tenor=pinjaman.tenor)
+            baris_informasi.append(
+                buat_baris(
+                    "Keterangan",
+                    "Menunggu pemeriksaan admin"
+                )
+            )
 
+        elif pinjaman.status == StatusPinjaman.DISETUJUI:
+            baris_informasi.append(
+                buat_baris(
+                    "Keterangan",
+                    "Pinjaman siap dicairkan"
+                )
+            )
 
+        elif pinjaman.status == StatusPinjaman.DITOLAK:
+            baris_informasi.append(
+                buat_baris(
+                    "Keterangan",
+                    "Pengajuan pinjaman ditolak"
+                )
+            )
 
+        elif pinjaman.status == StatusPinjaman.AKTIF:
+            baris_informasi.extend([
+                buat_baris(
+                    "Cicilan tetap",
+                    f"Rp{Utilitas.format_rupiah(
+                        pinjaman.cicilan_tetap
+                    )}"
+                ),
+                buat_baris(
+                    "Cicilan dibayar",
+                    f"{pinjaman.cicilan_terbayar}/{pinjaman.tenor}"
+                ),
+                buat_baris(
+                    "Sisa pokok",
+                    f"Rp{Utilitas.format_rupiah(
+                        pinjaman.sisa_pokok
+                    )}"
+                ),
+                buat_baris(
+                    "Tanggal cair",
+                    Utilitas.format_tanggal_indonesia(
+                        pinjaman.tanggal_pencairan
+                    )
+                ),
+                buat_baris(
+                    "Jatuh tempo",
+                    Utilitas.format_tanggal_indonesia(
+                        pinjaman.tanggal_jatuh_tempo
+                    )
+                )
+            ])
 
-        if pinjaman.status == StatusPinjaman.AKTIF:
-            print("╔" + "═" * 35 + "╗")
-            print(  f"  STATUS : {pinjaman.status.value}\n"
-                    f"  NOMINAL AWAL     : Rp{Utilitas.format_rupiah(pinjaman.nominal_pinjaman)}\n"
-                    f"  SISA POKOK       : Rp{Utilitas.format_rupiah(round(pinjaman.sisa_pokok))}\n"
-                    f"  CICILAN TETAP    : Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))}\n"
-                    f"  CICILAN TERBAYAR : {pinjaman.cicilan_terbayar}/{pinjaman.tenor}\n"
-                    f"  BUNGA BULAN INI  : Rp{Utilitas.format_rupiah(round(pinjaman.bunga_bulanan))}")
-            print("╚" + "═" * 35 + "╝")
-            PinjamanService.hapus_notif_pinjaman(nasabah)
-            pinjaman.notifikasi_jatuh_tempo = True
+        elif pinjaman.status == StatusPinjaman.LUNAS:
+            baris_informasi.extend([
+                buat_baris(
+                    "Cicilan tetap",
+                    f"Rp{Utilitas.format_rupiah(
+                        pinjaman.cicilan_tetap
+                    )}"
+                ),
+                buat_baris(
+                    "Cicilan dibayar",
+                    f"{pinjaman.cicilan_terbayar}/{pinjaman.tenor}"
+                ),
+                buat_baris(
+                    "Sisa pokok",
+                    f"Rp{Utilitas.format_rupiah(
+                        pinjaman.sisa_pokok
+                    )}"
+                ),
+                buat_baris(
+                    "Tanggal cair",
+                    Utilitas.format_tanggal_indonesia(
+                        pinjaman.tanggal_pencairan
+                    )
+                ),
+                buat_baris(
+                    "Keterangan",
+                    "Seluruh cicilan telah dibayar"
+                )
+            ])
 
+        lebar_isi = max(
+            len(baris)
+            for baris in baris_informasi
+        )
 
+        print()
+        print("╔" + "═" * (lebar_isi + 2) + "╗")
+
+        for baris in baris_informasi:
+            print(f"║ {baris:<{lebar_isi}} ║")
+
+        print("╚" + "═" * (lebar_isi + 2) + "╝")
 
 
     @staticmethod
-    def bayar_cicilan(bank,nasabah):
-        UI.header("BAYAR CICILAN",UI.MERAH)
+    def bayar_cicilan(nasabah):
+        pinjaman = PinjamanUI.pilih_pinjaman(nasabah=nasabah,status=StatusPinjaman.AKTIF)
+
+        if pinjaman is None:
+            return
+
+        print()
+        print(f"ID pinjaman   : {pinjaman.ID}")
+        print(
+            f"Cicilan tetap : "
+            f"Rp{Utilitas.format_rupiah(pinjaman.cicilan_tetap)}"
+        )
+        print("Denda keterlambatan akan ditambahkan jika ada.")
+        print()
+
+        konfirmasi = input(
+            "Lanjutkan pembayaran cicilan? (ya/tidak): "
+        ).strip().lower()
+
+        if konfirmasi not in ("y", "ya", "iya"):
+            UI.gagal("Pembayaran cicilan dibatalkan")
+            return
+
         try:
-            konfirmasi = input("Konfirmasi pembayaran cicilan bulanan(ya/tidak): ")
-            if konfirmasi not in ("y",'ya','iya'):
-                return
-            pinjaman = nasabah.pinjaman
-            PinjamanService.bayar_cicilan(bank,pinjaman)
-            print()
-            UI.sukses(f"Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))} telah dipotong dari rekening Anda")
-            print("SETELAH BAYAR :", pinjaman.tanggal_jatuh_tempo)
+            pinjaman = PinjamanService.bayar_cicilan(nasabah=nasabah,id_pinjaman=pinjaman.ID)
+            UI.sukses(f"Pembayaran cicilan pinjaman {pinjaman.ID} berhasil")
+            if pinjaman.status == StatusPinjaman.LUNAS:
+                UI.sukses("Seluruh cicilan pinjaman telah lunas")
+            else:
+                print(
+                    "Jatuh tempo berikutnya: "
+                    f"{Utilitas.format_tanggal_indonesia(
+                        pinjaman.tanggal_jatuh_tempo
+                    )}"
+                )
+
         except ValueError as e:
             UI.gagal(str(e))
+
+
+
+
+
 
 
