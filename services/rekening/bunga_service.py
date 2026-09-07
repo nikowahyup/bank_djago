@@ -1,43 +1,158 @@
-# from getopt import long_has_args
-
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.utils.utility import Utilitas
+from bank_djago.utils.utility import Utilitas, JenisTransaksi
 import datetime
 from bank_djago.services.admin.audit_service import AuditService
+from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
+from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 
 class BungaService:
 
     @staticmethod
-    def hitung_bulan(rekening,hari_ini=None):
-        if hari_ini is None:
-            hari_ini = datetime.date.today()
+    def hitung_bulan(waktu_dapat_bunga, hari_ini):
 
-        bulan = ((hari_ini.year - rekening.dapat_bunga.year)*12 + hari_ini.month - rekening.dapat_bunga.month)
-        if hari_ini.day < rekening.dapat_bunga.day:
-            bulan -= 1
+        daftar_periode = []
 
-        return bulan
+        tanggal_berikutnya = Utilitas.tambah_bulan(waktu_dapat_bunga,1)
+
+        while tanggal_berikutnya <= hari_ini:
+            daftar_periode.append(tanggal_berikutnya)
+
+            tanggal_berikutnya = Utilitas.tambah_bulan(tanggal_berikutnya, 1)
+
+        return daftar_periode
+
+
+
 
     @staticmethod
-    def berikan_bunga(bank, rekening, hari_ini=None):
+    def berikan_bunga(rekening, hari_ini=None):
         if hari_ini is None:
             hari_ini = datetime.date.today()
-        bulan = BungaService.hitung_bulan(rekening,hari_ini)
-        if bulan <= 0:
-            return
 
-        bunga_bulanan = round(rekening.saldo*rekening.bunga/12)
-        bunga_total = round(bunga_bulanan*bulan)
+        koneksi = buat_koneksi()
 
-        rekening.tambah_saldo(bunga_total)
+        try:
+            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+                norek=rekening.norek,
+                koneksi=koneksi
+                )
 
-        rekening.dapat_bunga  = Utilitas.tambah_bulan(rekening.dapat_bunga, bulan)
-        bulan = Utilitas.nama_bulan(rekening.dapat_bunga)
-        waktu = f"{bulan.upper()} {rekening.dapat_bunga.year}"
-        log = RiwayatTemplate.template(kategori="transaksi",jenis="beri bunga",log=f"BUNGA {waktu} +Rp{Utilitas.format_rupiah(bunga_total)}")
+            if data_rekening is None:
+                raise ValueError('Data rekening tidak ditemukan')
 
-        rekening.simpan_riwayat(log)
-        AuditService.tambah_audit(bank, kategori="transaksi", jenis="beri bunga", log="Berikan bunga nasabah",nama=rekening.pemilik.nama,norek=rekening.norek)
+            if data_rekening['level'] != rekening.level:
+                raise ValueError("Level rekening pada database dengan objek python tidak sama")
+
+            if data_rekening['status'] == "tutup":
+                raise ValueError(
+                    "Bunga tidak dapat diberikan untuk rekening tutup"
+                )
+
+            saldo_sebelum = data_rekening['saldo']
+            waktu_dapat_bunga = (
+                datetime.date.fromisoformat(data_rekening['dapat_bunga'])
+                )
+            bunga = rekening.bunga
+            daftar_bunga = BungaService.hitung_bulan(waktu_dapat_bunga=waktu_dapat_bunga,hari_ini=hari_ini)
+
+            jumlah_dapat_bunga = len(daftar_bunga)
+            if jumlah_dapat_bunga == 0:
+                return 0
+
+            jumlah_satu_bunga = round(
+                saldo_sebelum * bunga / 12
+            )
+            total_bunga = jumlah_satu_bunga * jumlah_dapat_bunga
+
+            saldo_baru = saldo_sebelum + total_bunga
+
+            waktu_dapat_bunga_baru = daftar_bunga[
+                jumlah_dapat_bunga - 1
+                ]
 
 
-        return bunga_total
+            jumlah_baris = (
+                RekeningRepository.perbarui_setelah_dapat_bunga(
+                    norek=rekening.norek,
+                    waktu_dapat_bunga_baru=waktu_dapat_bunga_baru,
+                    saldo_baru=saldo_baru,
+                    koneksi=koneksi
+                )
+            )
+
+            if jumlah_baris != 1:
+                raise ValueError("Gagal memberikan bunga ke rekening")
+
+
+            riwayat = None
+
+            if total_bunga > 0:
+                transaksi = {
+                    "jenis": JenisTransaksi.BUNGA_TABUNGAN,
+                    "norek_tujuan": rekening.norek,
+                    "nominal": total_bunga,
+                    "saldo_tujuan_sebelum": saldo_sebelum,
+                    "saldo_tujuan_sesudah": saldo_baru,
+                    "waktu": datetime.datetime.now()
+                }
+
+                id_transaksi = TransaksiRepository.tambah_transaksi(
+                    transaksi,
+                    koneksi
+                )
+
+                riwayat = RiwayatTemplate.template(
+                    kategori="transaksi",
+                    jenis="bunga bulanan",
+                    log=(
+                        f"BUNGA BULANAN | "
+                        f"{jumlah_dapat_bunga} bulan | "
+                        f"+Rp{Utilitas.format_rupiah(total_bunga)}"
+                    )
+                )
+
+                audit = AuditService.tambah_audit(
+                    kategori="transaksi",
+                    jenis="dapat bunga",
+                    log=(
+                        f"Pemberian bunga bulanan "
+                        f"{jumlah_dapat_bunga} bulan sebesar "
+                        f"Rp{Utilitas.format_rupiah(total_bunga)}"
+                    ),
+                    nama=rekening.pemilik.nama,
+                    nik=rekening.pemilik.NIK,
+                    norek=rekening.norek
+                )
+
+                RiwayatRepository.tambah_riwayat(
+                    norek=rekening.norek,
+                    riwayat=riwayat,
+                    id_transaksi=id_transaksi,
+                    koneksi=koneksi
+                )
+
+                AuditRepository.tambah_audit(
+                    audit=audit,
+                    id_transaksi=id_transaksi,
+                    koneksi=koneksi
+                )
+
+            koneksi.commit()
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        rekening.set_saldo(saldo_baru)
+        rekening.dapat_bunga = waktu_dapat_bunga_baru
+        if riwayat is not None:
+            rekening.simpan_riwayat(riwayat)
+        return total_bunga
+
+
+

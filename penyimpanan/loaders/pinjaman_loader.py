@@ -1,8 +1,14 @@
 import datetime
 
+from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
+from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
+from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
 
 from bank_djago.core.pinjaman import Pinjaman
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+
 from bank_djago.utils.utility import StatusPinjaman
 
 
@@ -64,4 +70,64 @@ class PinjamanLoader:
         pinjaman.tanggal_jatuh_tempo = tanggal_jatuh_tempo
 
         return pinjaman
+
+
+    @staticmethod
+    def muat_semua_pinjaman_aktif():
+
+
+        koneksi = buat_koneksi()
+
+        nasabah_index = {}
+        rekening_index = {}
+        daftar_pinjaman_aktif = []
+
+        try:
+            daftar_pinjaman = PinjamanRepository.cari_semua_pinjaman_aktif(koneksi=koneksi)
+
+            for data_pinjaman in daftar_pinjaman:
+
+                norek = data_pinjaman['norek']
+                nik = data_pinjaman['nik_pemilik']
+
+                if nik not in nasabah_index:
+                    data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(nik,koneksi)
+
+                    if data_nasabah is None:
+                        raise ValueError(f"Nasabah untuk pinjaman {data_pinjaman['id']} tidak ditemukan")
+
+                    nasabah_index[nik] = NasabahLoader.rangkai_nasabah(data_nasabah)
+
+
+                nasabah = nasabah_index[nik]
+
+                if norek not in rekening_index:
+                    data_rekening = RekeningRepository.cari_rekening_dengan_norek(norek, koneksi)
+
+                    if data_rekening is None:
+                        raise ValueError(f"Rekening untuk pinjaman {data_pinjaman['id']} tidak ditemukan")
+
+                    rekening_index[norek] = RekeningLoader.rangkai_rekening(data_rekening, nasabah)
+
+                rekening = rekening_index[norek]
+                nasabah.rekening.append(rekening)
+
+
+                pinjaman = PinjamanLoader.rangkai_pinjaman(
+                                                            data_pinjaman=data_pinjaman,
+                                                            nasabah=nasabah,
+                                                            rekening=rekening
+                                                            )
+
+                nasabah.daftar_pinjaman.append(pinjaman)
+                daftar_pinjaman_aktif.append(pinjaman)
+
+
+            return daftar_pinjaman_aktif
+
+        finally:
+            koneksi.close()
+
+
+
 

@@ -27,9 +27,20 @@ class NotifikasiService:
                                                                        id_objek=id_objek,
                                                                        koneksi=koneksi)
 
-            notifikasi_baru = Notifikasi(jenis=jenis,pesan=pesan,jenis_referensi=jenis_referensi,id_objek=id_objek)
+            notifikasi_baru = Notifikasi(
+                jenis=jenis,
+                pesan=pesan,
+                jenis_referensi=jenis_referensi,
+                id_objek=id_objek
+            )
 
-            NotifikasiRepository.tambah_notifikasi(nik_pemilik=nasabah.NIK,notifikasi=notifikasi_baru,koneksi=koneksi)
+
+            NotifikasiRepository.tambah_notifikasi(
+                    nik_pemilik=nasabah.NIK,
+                    notifikasi=notifikasi_baru,
+                    koneksi=koneksi
+                )
+
 
             koneksi.commit()
 
@@ -42,6 +53,7 @@ class NotifikasiService:
         nasabah.notifikasi = [notifikasi
                               for notifikasi in nasabah.notifikasi if not
         (notifikasi.jenis_referensi == jenis_referensi and notifikasi.id_objek == id_objek)]
+
 
         nasabah.notifikasi.append(notifikasi_baru)
 

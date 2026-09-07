@@ -1,4 +1,6 @@
 import datetime
+from mimetypes import knownfiles
+
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.core.pinjaman import Pinjaman
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
@@ -11,6 +13,7 @@ from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensi, JenisTransaksi
 from bank_djago.utils.validator import Validator
+from  bank_djago.penyimpanan.repositories.notifikasi_repository import  NotifikasiRepository
 
 
 
@@ -508,16 +511,23 @@ class PinjamanService:
                     f"Total Rp{Utilitas.format_rupiah(total_bayar)}"
                 )
 
-            jumlah_baris_rek = RekeningRepository.perbarui_saldo(norek, saldo_baru, koneksi)
+            jumlah_baris_rek = RekeningRepository.perbarui_saldo(
+                norek=norek,
+                saldo_baru=saldo_baru,
+                koneksi=koneksi
+            )
+
             if jumlah_baris_rek != 1:
                 raise ValueError("Gagal melakukan pembayaran cicilan")
 
-            jumlah_baris_pin = PinjamanRepository.perbarui_setelah_pembayaran(id_pinjaman=id_pinjaman,
-                                                                          status_baru=status_baru,
-                                                                          cicilan_terbayar_baru=cicilan_terbayar_baru,
-                                                                          sisa_pokok_baru=sisa_pokok_baru,
-                                                                          tanggal_jatuh_tempo_baru=tanggal_jatuh_tempo_baru,
-                                                                          koneksi=koneksi)
+            jumlah_baris_pin = PinjamanRepository.perbarui_setelah_pembayaran(
+                id_pinjaman=id_pinjaman,
+                status_baru=status_baru,
+                cicilan_terbayar_baru=cicilan_terbayar_baru,
+                sisa_pokok_baru=sisa_pokok_baru,
+                tanggal_jatuh_tempo_baru=tanggal_jatuh_tempo_baru,
+                koneksi=koneksi)
+
             if jumlah_baris_pin != 1:
                 raise ValueError("Gagal memperbarui status pinjaman")
 
@@ -531,13 +541,45 @@ class PinjamanService:
                          "id_referensi": id_pinjaman,
                          "waktu": datetime.datetime.now()}
 
-            audit = AuditService.tambah_audit(kategori='transaksi', jenis='pembayaran cicilan', log=log_audit,
-                                              nama=nasabah.nama, nik=nasabah.NIK, norek=norek)
-            riwayat = RiwayatTemplate.template(kategori='transaksi', jenis='pembayaran cicilan', log=log_riwayat)
+            audit = AuditService.tambah_audit(
+                    kategori='transaksi',
+                    jenis='pembayaran cicilan',
+                    log=log_audit,
+                    nama=nasabah.nama,
+                    nik=nasabah.NIK,
+                    norek=norek
+            )
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi,koneksi)
-            RiwayatRepository.tambah_riwayat(norek, riwayat, koneksi, id_transaksi)
-            AuditRepository.tambah_audit(audit, koneksi, id_transaksi)
+            riwayat = RiwayatTemplate.template(
+                kategori='transaksi',
+                jenis='pembayaran cicilan',
+                log=log_riwayat
+            )
+
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
+
+            RiwayatRepository.tambah_riwayat(
+                norek=norek,
+                riwayat=riwayat,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
+
+            NotifikasiRepository.hapus_notifikasi_dengan_referensi(
+                nik_pemilik=nasabah.NIK,
+                jenis_referensi=JenisReferensi.PINJAMAN,
+                id_objek=id_pinjaman,
+                koneksi=koneksi
+            )
 
             koneksi.commit()
 
@@ -554,6 +596,14 @@ class PinjamanService:
         pinjaman.tanggal_jatuh_tempo = tanggal_jatuh_tempo_baru
         rekening.set_saldo(saldo_baru)
         rekening.simpan_riwayat(riwayat)
+        nasabah.notifikasi = [
+            notifikasi
+            for notifikasi in nasabah.notifikasi
+            if not (
+                    notifikasi.jenis_referensi == JenisReferensi.PINJAMAN
+                    and notifikasi.id_objek == id_pinjaman
+            )
+        ]
         return pinjaman
 
 
@@ -648,8 +698,6 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            # TODO: Simpan notifikasi persetujuan pinjaman
-            # menggunakan koneksi transaksi yang sama.
 
             koneksi.commit()
 
@@ -725,18 +773,96 @@ class PinjamanService:
 
         return round(min(denda,denda_maksimal))
 
+    @staticmethod
+    def buat_pesan_pengingat(pinjaman, hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
 
-# log_audit = (
-#     f"{pinjaman.pemilik.nama} membayar cicilan "
-#     f"pinjaman {pinjaman.ID} "
-#     f"sebesar Rp{Utilitas.format_rupiah(round(total_bayar))}"
-# )
-#
-# log_riwayat = (
-#     f"PEMBAYARAN CICILAN | "
-#     f"Cicilan Rp{Utilitas.format_rupiah(round(pinjaman.cicilan_tetap))} | "
-#     f"Denda Rp{Utilitas.format_rupiah(denda)} | "
-#     f"Terlambat {hari_terlambat} hari | "
-#     f"Total Rp{Utilitas.format_rupiah(round(total_bayar))}"
-# )
+        if pinjaman.tanggal_jatuh_tempo is None:
+            raise ValueError(
+                f"Pinjaman ID {pinjaman.ID} belum memiliki jatuh tempo"
+            )
+
+        sisa_hari = (
+                pinjaman.tanggal_jatuh_tempo - hari_ini
+        ).days
+
+        # Belum memasuki tiga hari terakhir.
+        if sisa_hari > 3:
+            return None
+
+        # Tiga hari terakhir sebelum jatuh tempo.
+        if 0 < sisa_hari <= 3:
+            tanggal_jatuh_tempo = (
+                Utilitas.format_tanggal_indonesia(
+                    pinjaman.tanggal_jatuh_tempo
+                )
+            )
+
+            return (
+                f"Batas pembayaran cicilan ke-"
+                f"{pinjaman.cicilan_terbayar + 1} "
+                f"pinjaman ID {pinjaman.ID}\n"
+                f"akan berakhir dalam {sisa_hari} hari, "
+                f"pada {tanggal_jatuh_tempo}."
+            )
+
+        # Tepat pada tanggal jatuh tempo.
+        if sisa_hari == 0:
+            return (
+                f"Hari ini adalah batas pembayaran cicilan ke-"
+                f"{pinjaman.cicilan_terbayar + 1} "
+                f"pinjaman ID {pinjaman.ID}."
+            )
+
+        # Lewat tanggal jatuh tempo.
+        hari_terlambat = abs(sisa_hari)
+
+        if hari_terlambat <= PinjamanService.BATAS_HARI_TUNGGAKAN:
+            sisa_toleransi = (
+                    PinjamanService.BATAS_HARI_TUNGGAKAN
+                    - hari_terlambat
+            )
+
+            if sisa_toleransi == 0:
+                return (
+                    f"Hari ini adalah hari terakhir masa toleransi "
+                    f"pembayaran cicilan pinjaman ID {pinjaman.ID}. "
+                    f"Denda mulai dihitung besok jika cicilan "
+                    f"belum dibayar."
+                )
+
+            return (
+                f"Cicilan pinjaman ID {pinjaman.ID} terlambat "
+                f"{hari_terlambat} hari. Masa toleransi tersisa "
+                f"{sisa_toleransi} hari."
+            )
+
+        # Masa toleransi sudah berakhir.
+        hari_denda = (
+                hari_terlambat
+                - PinjamanService.BATAS_HARI_TUNGGAKAN
+        )
+
+        denda = PinjamanService.hitung_denda(
+            tanggal_jatuh_tempo=pinjaman.tanggal_jatuh_tempo,
+            cicilan_tetap=pinjaman.cicilan_tetap,
+            hari_ini=hari_ini
+        )
+
+        total_tagihan = pinjaman.cicilan_tetap + denda
+
+        return (
+            f"Cicilan pinjaman ID {pinjaman.ID} terlambat "
+            f"{hari_terlambat} hari. Denda telah berjalan selama "
+            f"{hari_denda} hari dengan nominal "
+            f"Rp{Utilitas.format_rupiah(denda)}. "
+            f"Total pembayaran saat ini "
+            f"Rp{Utilitas.format_rupiah(total_tagihan)}."
+        )
+
+
+
+
+
 

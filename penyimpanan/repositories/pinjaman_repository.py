@@ -270,6 +270,28 @@ class PinjamanRepository:
             if kelola_koneksi:
                 koneksi.close()
 
+    @staticmethod
+    def cari_semua_pinjaman_aktif(koneksi):
+        cursor = koneksi.execute(
+            """
+            SELECT
+                pinjaman.*,
+                rekening.nik_pemilik,
+                rekening.status AS status_rekening,
+                nasabah.nama AS nama_pemilik,
+                nasabah.alamat AS alamat_pemilik
+            FROM pinjaman
+            JOIN rekening
+                ON rekening.norek = pinjaman.norek
+            JOIN nasabah
+                ON nasabah.nik = rekening.nik_pemilik
+            WHERE pinjaman.status = 'aktif'
+            ORDER BY pinjaman.id
+            """
+        )
+
+        return cursor.fetchall()
+
 
 
 

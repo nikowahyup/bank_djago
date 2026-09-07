@@ -141,9 +141,7 @@ class RekeningService:
         finally:
             koneksi.close()
 
-        pinjaman = nasabah.pinjaman
-
-        if pinjaman is not None:
+        for pinjaman in nasabah.daftar_pinjaman:
             if pinjaman.rekening is rekening_lama:
                 pinjaman.rekening = rekening_baru
 
@@ -245,8 +243,7 @@ class RekeningService:
             koneksi.close()
 
 
-        pinjaman = nasabah.pinjaman
-        if pinjaman is not None:
+        for pinjaman in nasabah.daftar_pinjaman:
             if pinjaman.rekening is rekening_lama:
                 pinjaman.rekening = rekening_baru
 

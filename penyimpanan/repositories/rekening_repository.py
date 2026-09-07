@@ -169,3 +169,82 @@ class RekeningRepository:
             """,(saldo_baru, status_baru, norek))
 
             return cursor.rowcount
+
+    @staticmethod
+    def perbarui_setelah_bayar_admin(
+            norek,
+            saldo_baru,
+            waktu_bayar_admin_baru,
+            koneksi
+    ):
+
+        waktu_bayar_admin_sqlite = (
+            waktu_bayar_admin_baru.isoformat()
+            )
+
+
+
+        cursor = koneksi.execute("""UPDATE rekening
+            SET saldo = ?,
+            waktu_bayar_admin = ?
+            WHERE norek = ?
+            AND status != 'tutup'""",
+            (
+            saldo_baru,
+            waktu_bayar_admin_sqlite,
+            norek))
+
+        return cursor.rowcount
+
+    @staticmethod
+    def cari_semua_rekening_berjalan(koneksi=None):
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT
+                    rekening.*,
+                    nasabah.nama AS nama_pemilik,
+                    nasabah.alamat AS alamat_pemilik
+                FROM rekening
+                JOIN nasabah
+                    ON nasabah.nik = rekening.nik_pemilik
+                WHERE rekening.status != 'tutup'
+                ORDER BY rekening.norek
+                """
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
+
+    @staticmethod
+    def perbarui_setelah_dapat_bunga(
+            norek,
+            waktu_dapat_bunga_baru,
+            saldo_baru,
+            koneksi
+    ):
+
+        dapat_bunga_sqlite = (
+            waktu_dapat_bunga_baru.isoformat()
+            )
+
+        cursor = koneksi.execute("""UPDATE rekening
+        SET saldo = ?,
+        dapat_bunga = ?
+        WHERE norek = ?
+        AND status != 'tutup'
+        """,(saldo_baru,
+             dapat_bunga_sqlite,
+             norek
+             )
+        )
+
+        return cursor.rowcount

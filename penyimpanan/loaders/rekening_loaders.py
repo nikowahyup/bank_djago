@@ -3,7 +3,7 @@ import datetime
 from bank_djago.core.nasabah import Nasabahh
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
-
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
 class RekeningLoader:
@@ -159,3 +159,44 @@ class RekeningLoader:
         )
 
         return rekening
+
+    @staticmethod
+    def muat_semua_rekening_berjalan():
+        koneksi = buat_koneksi()
+
+        nasabah_index = {}
+        daftar_rekening = []
+
+        try:
+            data_semua_rekening = (
+                RekeningRepository.cari_semua_rekening_berjalan(
+                    koneksi=koneksi
+                )
+            )
+
+            for data_rekening in data_semua_rekening:
+                nik = data_rekening["nik_pemilik"]
+
+                nasabah = nasabah_index.get(nik)
+
+                if nasabah is None:
+                    nasabah = Nasabahh(
+                        nama=data_rekening["nama_pemilik"],
+                        alamat=data_rekening["alamat_pemilik"],
+                        nik=nik
+                    )
+
+                    nasabah_index[nik] = nasabah
+
+                rekening = RekeningLoader.rangkai_rekening(
+                    data_rekening=data_rekening,
+                    nasabah=nasabah
+                )
+
+                nasabah.rekening.append(rekening)
+                daftar_rekening.append(rekening)
+
+        finally:
+            koneksi.close()
+
+        return daftar_rekening
