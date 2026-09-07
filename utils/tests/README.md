@@ -173,7 +173,16 @@ serta tetap benar setelah loader dijalankan.
 
 ## Tahap perapian selanjutnya
 
-Peta ini sengaja dibuat sebelum memindahkan kode. Langkah aman berikutnya adalah
-mengekstrak satu domain pada satu waktu ke file bernama berdasarkan skenario,
-misalnya `test_rollback_pencairan_deposito.py`. File jurnal asli dipertahankan
-sampai semua hasil pengujian baru cocok dengan versi lama.
+Tahap pemisahan pertama telah dilakukan. Jalur baca utama sekarang berada di
+`skenario/`, disusun dari domain, fitur, lalu kasus pengujian. Contohnya:
+
+- `skenario/pinjaman/pembayaran/test_pembayaran_terlambat.py`
+- `skenario/deposito/aro/test_rollback_pokok_bunga.py`
+- `skenario/rekening/biaya_admin/test_pembayaran_sebagian.py`
+- `skenario/notifikasi/repository/test_notifikasi_repository.py`
+
+Versi file besar sebelum pemisahan tetap dipertahankan secara utuh di
+`arsip_sumber_asli/`. Arsip tersebut berguna untuk membandingkan urutan
+eksperimen, tetapi `skenario/` adalah jalur yang disarankan untuk membaca dan
+melanjutkan pengujian. Lihat `skenario/README.md` untuk peta folder dan aturan
+menjalankannya.
