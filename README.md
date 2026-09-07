@@ -229,22 +229,22 @@ Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
 - [x] Menguji pencairan, pembayaran normal, pembayaran terlambat, pelunasan, dan penolakan proses ganda.
 - [x] Menguji transaksi gagal tanpa perubahan sebagian pada database maupun objek Python.
 
-**Status: selesai.** Pengembangan selanjutnya berfokus pada migrasi proses sistem berbasis waktu sebelum menghubungkannya kembali ke scheduler.
 
-### `v1.7` - Notifikasi dan Scheduler
+
+### `v1.7` - Notifikasi dan Scheduler ✅
 Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank` yang selalu berada di memori.
 
 - [x] Memuat target scheduler langsung dari repository.
 - [x] Memigrasikan bunga rekening dan biaya admin.
-- [ ] Memigrasikan reset limit harian.
+- [x] Memigrasikan reset limit harian berbasis waktu saat transaksi dilakukan.
 - [x] Memigrasikan jatuh tempo deposito dan pinjaman.
 - [x] Memigrasikan pembuatan serta penghapusan notifikasi.
 - [x] Menjamin scheduler aman ketika dijalankan berulang pada tanggal yang sama.
-- [ ] Mencatat satu audit sistem untuk proses global yang sesuai.
+- [x] Memastikan setiap perubahan bisnis yang dipicu scheduler memiliki audit dari service terkait.
 
-**Status: sedang berjalan.** Target rekening dan pinjaman telah dimuat langsung
-dari SQLite. Bunga, biaya admin, jatuh tempo, serta notifikasi berbasis referensi
-telah diuji, termasuk pemanggilan berulang dan isolasi beberapa pinjaman.
+**Status: selesai.** Seluruh proses berbasis waktu telah menggunakan SQLite.
+Scheduler memuat target secara mandiri, sedangkan audit perubahan bisnis tetap
+menjadi tanggung jawab masing-masing service.
 
 ### `v1.8` - Admin, Rekap, dan Pelepasan JSON
 Menjadikan SQLite satu-satunya sumber kebenaran seluruh aplikasi.
