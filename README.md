@@ -234,13 +234,17 @@ Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
 ### `v1.7` - Notifikasi dan Scheduler
 Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank` yang selalu berada di memori.
 
-- [ ] Memuat target scheduler langsung dari repository.
-- [ ] Memigrasikan bunga rekening dan biaya admin.
+- [x] Memuat target scheduler langsung dari repository.
+- [x] Memigrasikan bunga rekening dan biaya admin.
 - [ ] Memigrasikan reset limit harian.
-- [ ] Memigrasikan jatuh tempo deposito dan pinjaman.
-- [ ] Memigrasikan pembuatan serta penghapusan notifikasi.
-- [ ] Menjamin scheduler aman ketika dijalankan berulang pada tanggal yang sama.
+- [x] Memigrasikan jatuh tempo deposito dan pinjaman.
+- [x] Memigrasikan pembuatan serta penghapusan notifikasi.
+- [x] Menjamin scheduler aman ketika dijalankan berulang pada tanggal yang sama.
 - [ ] Mencatat satu audit sistem untuk proses global yang sesuai.
+
+**Status: sedang berjalan.** Target rekening dan pinjaman telah dimuat langsung
+dari SQLite. Bunga, biaya admin, jatuh tempo, serta notifikasi berbasis referensi
+telah diuji, termasuk pemanggilan berulang dan isolasi beberapa pinjaman.
 
 ### `v1.8` - Admin, Rekap, dan Pelepasan JSON
 Menjadikan SQLite satu-satunya sumber kebenaran seluruh aplikasi.
@@ -361,6 +365,18 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - Menguji penutupan metode tarik dan transfer beserta konsistensi saldo, status, riwayat, dan audit
 - Menguji rollback saat penyimpanan audit sengaja digagalkan sebelum commit dan memastikan tidak ada perubahan state sebagian
 
+(07/09/2026)
+- Memuat seluruh rekening berjalan serta pinjaman aktif langsung dari repository untuk kebutuhan scheduler
+- Memigrasikan pemberian bunga rekening dan pemotongan biaya admin ke transaksi SQLite yang atomik
+- Menguji pembayaran biaya admin satu periode, beberapa periode, pembayaran sebagian, dan rollback
+- Menguji pemberian bunga satu periode, beberapa periode, bunga nol, pemanggilan berulang, dan rollback
+- Memigrasikan pengingat jatuh tempo pinjaman menjadi notifikasi SQLite berbasis referensi
+- Memastikan perubahan pesan menggantikan notifikasi lama tanpa membuat duplikat
+- Memastikan beberapa pinjaman milik nasabah yang sama memiliki notifikasi yang terisolasi
+- Menghapus hanya notifikasi pinjaman yang telah dibayar tanpa mengganggu notifikasi pinjaman lain
+- Menguji scheduler terhadap seluruh rekening berjalan serta memastikan rekening tutup tidak ikut diproses
+- Mengelompokkan kode pengujian berdasarkan domain, fitur, dan skenario sambil mempertahankan sumber asli sebagai arsip
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -473,6 +489,65 @@ Satu aktivitas finansial dapat menghasilkan beberapa catatan, seperti transfer y
 
 Jawaban:
 Perubahan saldo sumber dan penerima, perubahan status rekening, penyimpanan transaksi, riwayat, serta audit menggunakan satu koneksi dan satu batas transaksi database. State objek Python baru diperbarui setelah commit berhasil. Jika salah satu proses gagal, rollback membatalkan seluruh perubahan sehingga rekening tidak dapat tertutup atau berpindah saldo secara sebagian.
+
+### 23. Mengapa scheduler tidak lagi menerima objek `Bank`?
+
+Jawaban:
+Scheduler merupakan proses sistem yang dapat berjalan tanpa sesi nasabah aktif.
+Karena SQLite menjadi sumber kebenaran utama, scheduler memuat sendiri seluruh
+rekening berjalan, deposito aktif, dan pinjaman aktif melalui loader. Dengan
+demikian proses berkala tidak bergantung pada objek yang kebetulan sedang berada
+di memori.
+
+### 24. Mengapa loader scheduler menggunakan identity map?
+
+Jawaban:
+Beberapa pinjaman atau deposito dapat dimiliki oleh nasabah dan rekening yang
+sama. `nasabah_index` dan `rekening_index` memastikan satu identitas database
+dirangkai menjadi satu objek Python selama satu proses pemuatan. Relasi antarmuka
+objek tetap konsisten dan objek yang sama tidak dibuat berulang kali.
+
+### 25. Mengapa jenis referensi disimpan sebagai teks?
+
+Jawaban:
+Nilai seperti `pinjaman`, `deposito`, dan `transaksi` dapat dipahami langsung
+saat database diperiksa. Angka enum memang lebih ringkas, tetapi membutuhkan
+peta tambahan dan pernah membuat nilai pada kode tidak selaras dengan CHECK
+constraint. Teks dipilih agar representasi pada enum, repository, dan SQLite
+memiliki makna yang sama.
+
+### 26. Mengapa perubahan pesan menggantikan notifikasi lama?
+
+Jawaban:
+Satu pinjaman hanya memerlukan satu notifikasi pengingat yang mewakili kondisi
+terbarunya. Jika pesannya masih sama, pemanggilan scheduler tidak membuat data
+baru. Jika kondisi tanggal berubah, notifikasi lama diganti dengan pesan baru.
+Pola ini membuat scheduler idempoten dan mencegah tumpukan reminder harian.
+
+### 27. Mengapa notifikasi pinjaman dihapus saat cicilan dibayar?
+
+Jawaban:
+Pengingat tersebut merujuk pada kewajiban periode yang baru saja diselesaikan.
+Penghapusan dilakukan dalam transaksi pembayaran yang sama dan dibatasi pada
+jenis referensi pinjaman beserta ID pinjamannya. Notifikasi milik deposito,
+rekening, atau pinjaman lain tetap dipertahankan.
+
+### 28. Mengapa bunga dan biaya admin diproses per periode yang terlewat?
+
+Jawaban:
+Scheduler mungkin tidak berjalan tepat pada setiap tanggal bulanan. Service
+menghitung seluruh periode sejak tanggal proses terakhir sampai `hari_ini`, lalu
+memperbarui tanggal terakhir yang benar-benar telah diproses. Cara ini menangani
+proses yang sempat terlewat sekaligus mencegah periode yang sama diproses dua
+kali.
+
+### 29. Mengapa rekening dengan bunga nol tetap memperbarui periode?
+
+Jawaban:
+Nilai bunga nol berarti tidak ada perpindahan dana sehingga transaksi, riwayat,
+dan audit finansial tidak perlu dibuat. Namun periodenya tetap sudah diperiksa
+oleh scheduler. Tanggal proses harus dimajukan agar periode yang sama tidak
+diperiksa dan dianggap tertunggak kembali pada pemanggilan berikutnya.
 
 #### Deposito dan notifikasi
 
