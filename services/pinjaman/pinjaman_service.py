@@ -752,28 +752,6 @@ class PinjamanService:
 
 
 
-
-
-
-
-
-
-
-    @staticmethod
-    def hapus_notif_pinjaman(nasabah):
-        for item in nasabah.notifikasi:
-            if item.referensi_id == JenisReferensi.PINJAMAN:
-                nasabah.notifikasi.remove(item)
-                break
-
-
-    @staticmethod
-    def daftar_ajuan(bank):
-        return [
-            ajuan for ajuan in bank.daftar_pinjaman
-            if ajuan.status == StatusPinjaman.DIAJUKAN
-        ]
-
     @staticmethod
     def tanggal_boleh_bayar(cicilan_terbayar,tanggal_pencairan):
 

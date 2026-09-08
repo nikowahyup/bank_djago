@@ -1,3 +1,4 @@
+from bank_djago.services.admin.admin_service import AdminService
 from bank_djago.services.admin.menu_pinjaman import AdminPinjaman
 from bank_djago.services.admin.pengajuan_admin_ui import PengajuanAdminUI
 from bank_djago.utils.utility import UI
@@ -7,14 +8,14 @@ from bank_djago.services.admin.rekap_ui  import RekapUI
 class MenuAdmin:
 
     @staticmethod
-    def menu(bank):
+    def menu():
         print()
         UI.peringatan("""PERHATIAN! Menu ini khusus Admin. 
 Nasabah tidak diperbolehkan masuk!
 Masukkan sembarang simbol untuk keluar""")
 
         password = input("Masukkan password: ")
-        if not bank.verifikasi_admin(password):
+        if not AdminService.verifikasi_password(password):
             return
 
         while True:

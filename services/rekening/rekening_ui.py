@@ -2,7 +2,6 @@ import sqlite3
 
 from bank_djago.services.rekening.pengajuan_ui import PengajuanUI
 from bank_djago.services.rekening.rekening_service import RekeningService
-from bank_djago.services.rekening.pengajuan_service import PengajuanService
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.validator import Validator
@@ -25,7 +24,8 @@ class RekeningUI:
             print("4. Blokir Rekening")
             print("5. Buka Blokir")
             print("6. Penutupan Rekening")
-            print("7. Keluar\n")
+            print("7. Ganti PIN rekening")
+            print("8. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
@@ -37,10 +37,12 @@ class RekeningUI:
             elif pilihan == "4":
                 RekeningUI.blokir_rekening(rekening)
             elif pilihan == "5":
-                RekeningUI.buka_rekening(rekening)
+                RekeningUI.buka_blokir(rekening)
             elif pilihan == "6":
                 PengajuanUI.kelola_penutupan_rekening(rekening)
             elif pilihan == "7":
+                RekeningUI.ganti_pin(rekening)
+            elif pilihan == "8":
                 break
 
 
@@ -116,8 +118,12 @@ class RekeningUI:
 
         alasan = input("Masukkan alasan pemblokiran: ")
 
+        konfirmasi = input("Apakah Anda yakin untuk mbmlokir rekening ini(ya/tidak): ").lower()
+        if konfirmasi not in('ya','iya','y'):
+            return
+
         try:
-            RekeningService.blokir_rekening(rekening,alasan)
+            RekeningService.blokir_rekening(rekening=rekening,alasan=alasan)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil diblokir")
         except ValueError as e:
             UI.gagal(str(e))
@@ -126,27 +132,96 @@ class RekeningUI:
     def buka_blokir(rekening):
         UI.header("BUKA BLOKIR REKENING",UI.MERAH)
 
-        konfirmasi = input("Apakah Anda yakin ingin membuka kembali rekening ini(ya/tidak): ").lower()
+        while True:
+            pin = input("Masukkan PIN ynag valid untuk rekening ini(ketik 0 untuk keluar): ").strip()
+
+            if pin == "0":
+                return
+
+            if len(pin) != 6 or not pin.isdigit():
+                UI.peringatan(
+                    "PIN harus berupa 6 digit angka"
+                )
+                continue
+            break
+
+        konfirmasi = input(
+            "Apakah Anda yakin ingin membuka kembali "
+            "rekening ini(ya/tidak): ").lower().strip()
+
         if konfirmasi not in('ya','y','iya'):
             return
         try:
-            RekeningService.buka_blokir(rekening)
+            RekeningService.buka_blokir(rekening=rekening,pin=pin)
             UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil dibuka kembali")
+
         except ValueError as e:
             UI.gagal(str(e))
 
     @staticmethod
-    def reset_pin(bank,rekening):
-        UI.header("RESET PIN REKENING",UI.MERAH)
+    def ganti_pin(rekening):
+        UI.header(
+            "GANTI PIN REKENING",
+            UI.MERAH
+        )
 
-        pin = input("Masukkan PIN baru: ")
-        Utilitas.animasi('Proses')
+        # Input PIN lama
+        while True:
+            pin_lama = input(
+                "Masukkan PIN lama "
+                "(ketik 0 untuk keluar): "
+            ).strip()
+
+            if pin_lama == "0":
+                return
+
+            if len(pin_lama) != 6 or not pin_lama.isdigit():
+                UI.peringatan(
+                    "PIN lama harus berupa 6 digit angka"
+                )
+                continue
+
+            break
+
+        # Input PIN baru
+        while True:
+            pin_baru = input(
+                "Silakan buat PIN baru: "
+            ).strip()
+
+            if len(pin_baru) != 6 or not pin_baru.isdigit():
+                UI.peringatan(
+                    "PIN baru harus berupa 6 digit angka"
+                )
+                continue
+
+            konfirmasi_pin = input(
+                "Konfirmasi PIN baru: "
+            ).strip()
+
+            if pin_baru != konfirmasi_pin:
+                UI.peringatan(
+                    "Konfirmasi PIN baru tidak sesuai"
+                )
+                continue
+
+            break
+
         try:
-            RekeningService.reset_pin(bank,rekening,pin)
-            UI.sukses("PIN berhasil direset dan diganti")
+            RekeningService.ganti_pin(
+                rekening=rekening,
+                pin_lama=pin_lama,
+                pin_baru=pin_baru
+            )
+
+            UI.sukses(
+                "PIN rekening berhasil diganti"
+            )
 
         except ValueError as e:
-            UI.gagal(str(e))
+            UI.gagal(
+                str(e)
+            )
 
 
 
@@ -168,7 +243,6 @@ class RekeningUI:
                         UI.peringatan("Silahkan masukkan pilihan memakai angka")
                         continue
                     break
-
                 while True:
                     pin = input("Silahkan buat PIN 6 digit angka: ")
                     try:
@@ -195,4 +269,7 @@ class RekeningUI:
 
                 except sqlite3.Error:
                     print("Terjadi kesalahan saat membuka rekening baru. Silahkan coba lagi")
+
+
+
 

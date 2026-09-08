@@ -1269,194 +1269,194 @@ def siapkan_dua_pinjaman_untuk_uji(bank):
     return nasabah, pinjaman_lama, pinjaman_baru
 
 
-# ---------------------------------------------------------------
-# def uji_save_load_dua_pinjaman(
-#     bank,
-#     nasabah,
-#     pinjaman_lunas,
-#     pinjaman_aktif
-# ):
-#     nik = nasabah.NIK
-#
-#     lokasi_asli = {
-#         "rekening": JsonStorage.file_rek,
-#         "nasabah": JsonStorage.file_nasabah,
-#         "audit": JsonStorage.file_audit,
-#         "deposito": JsonStorage.file_depo,
-#         "pinjaman": JsonStorage.file_pinjaman
-#     }
-#
-#     try:
-#         with tempfile.TemporaryDirectory() as folder_uji:
-#             JsonStorage.file_rek = os.path.join(
-#                 folder_uji,
-#                 "rekening.json"
-#             )
-#             JsonStorage.file_nasabah = os.path.join(
-#                 folder_uji,
-#                 "nasabah.json"
-#             )
-#             JsonStorage.file_audit = os.path.join(
-#                 folder_uji,
-#                 "audit.json"
-#             )
-#             JsonStorage.file_depo = os.path.join(
-#                 folder_uji,
-#                 "deposito.json"
-#             )
-#             JsonStorage.file_pinjaman = os.path.join(
-#                 folder_uji,
-#                 "pinjaman.json"
-#             )
-#
-#             # Menyimpan seluruh Bank ke JSON sementara.
-#             JsonStorage.simpan_bank(bank)
-#
-#             data_pinjaman_json = JsonStorage.muat_json(
-#                 JsonStorage.file_pinjaman,
-#                 {}
-#             )
-#
-#             # Memastikan NIK menjadi key utama.
-#             assert nik in data_pinjaman_json, (
-#                 "NIK nasabah tidak ditemukan dalam pinjaman.json"
-#             )
-#
-#             pinjaman_milik_nasabah = data_pinjaman_json[nik]
-#
-#             # Memastikan ID menjadi key cabang.
-#             assert str(pinjaman_lunas.ID) in pinjaman_milik_nasabah, (
-#                 "Pinjaman lunas tidak tersimpan berdasarkan ID"
-#             )
-#
-#             assert str(pinjaman_aktif.ID) in pinjaman_milik_nasabah, (
-#                 "Pinjaman aktif tidak tersimpan berdasarkan ID"
-#             )
-#
-#             assert len(pinjaman_milik_nasabah) == 2, (
-#                 "Jumlah pinjaman dalam JSON tidak sesuai"
-#             )
-#
-#             print("STRUKTUR JSON")
-#             print("NIK               :", nik)
-#             print(
-#                 "ID yang tersimpan :",
-#                 list(pinjaman_milik_nasabah.keys())
-#             )
-#
-#             # Memuat JSON menjadi objek Bank baru.
-#             bank_hasil_load = JsonStorage.muat_bank()
-#             nasabah_hasil_load = (
-#                 bank_hasil_load.data_nasabah[nik]
-#             )
-#
-#             daftar_hasil_load = [
-#                 pinjaman
-#                 for pinjaman in bank_hasil_load.daftar_pinjaman
-#                 if pinjaman.pemilik is nasabah_hasil_load
-#             ]
-#
-#             assert len(daftar_hasil_load) == 2, (
-#                 "Tidak semua pinjaman dimuat ke daftar Bank"
-#             )
-#
-#             pinjaman_lunas_hasil = next(
-#                 pinjaman
-#                 for pinjaman in daftar_hasil_load
-#                 if pinjaman.ID == pinjaman_lunas.ID
-#             )
-#
-#             pinjaman_aktif_hasil = next(
-#                 pinjaman
-#                 for pinjaman in daftar_hasil_load
-#                 if pinjaman.ID == pinjaman_aktif.ID
-#             )
-#
-#             assert (
-#                 pinjaman_lunas_hasil.status
-#                 == StatusPinjaman.LUNAS
-#             ), "Status pinjaman lama berubah setelah load"
-#
-#             assert (
-#                 pinjaman_aktif_hasil.status
-#                 == StatusPinjaman.AKTIF
-#             ), "Status pinjaman baru berubah setelah load"
-#
-#             # Nasabah hanya menunjuk pinjaman berjalan.
-#             assert (
-#                 nasabah_hasil_load.pinjaman
-#                 is pinjaman_aktif_hasil
-#             ), (
-#                 "Nasabah tidak menunjuk pinjaman aktif "
-#                 "hasil load"
-#             )
-#
-#             assert (
-#                 nasabah_hasil_load.pinjaman
-#                 is not pinjaman_lunas_hasil
-#             ), (
-#                 "Nasabah masih menunjuk pinjaman yang lunas"
-#             )
-#
-#             # Kedua pinjaman harus menunjuk nasabah hasil load.
-#             assert (
-#                 pinjaman_lunas_hasil.pemilik
-#                 is nasabah_hasil_load
-#             )
-#
-#             assert (
-#                 pinjaman_aktif_hasil.pemilik
-#                 is nasabah_hasil_load
-#             )
-#
-#             # Kedua pinjaman harus menggunakan objek rekening Bank.
-#             assert (
-#                 pinjaman_lunas_hasil.rekening
-#                 is bank_hasil_load.rekening_index[
-#                     pinjaman_lunas_hasil.rekening.norek
-#                 ]
-#             )
-#
-#             assert (
-#                 pinjaman_aktif_hasil.rekening
-#                 is bank_hasil_load.rekening_index[
-#                     pinjaman_aktif_hasil.rekening.norek
-#                 ]
-#             )
-#
-#             assert nasabah_hasil_load.jumlah_pinjaman == 2, (
-#                 "Penghitung jumlah pinjaman tidak dipulihkan"
-#             )
-#
-#             print()
-#             print("SETELAH LOAD")
-#
-#             for pinjaman in daftar_hasil_load:
-#                 print(
-#                     f"- Pinjaman #{pinjaman.ID} | "
-#                     f"Status: {pinjaman.status.value} | "
-#                     f"Objek: {id(pinjaman)}"
-#                 )
-#
-#             print(
-#                 "Pinjaman aktif nasabah:",
-#                 nasabah_hasil_load.pinjaman.ID
-#             )
-#             print(
-#                 "Jumlah pinjaman nasabah:",
-#                 nasabah_hasil_load.jumlah_pinjaman
-#             )
-#             print()
-#             print(
-#                 "✅ Save/load dua pinjaman berhasil"
-#             )
-#
-#     finally:
-#         JsonStorage.file_rek = lokasi_asli["rekening"]
-#         JsonStorage.file_nasabah = lokasi_asli["nasabah"]
-#         JsonStorage.file_audit = lokasi_asli["audit"]
-#         JsonStorage.file_depo = lokasi_asli["deposito"]
-#         JsonStorage.file_pinjaman = lokasi_asli["pinjaman"]
+---------------------------------------------------------------
+def uji_save_load_dua_pinjaman(
+    bank,
+    nasabah,
+    pinjaman_lunas,
+    pinjaman_aktif
+):
+    nik = nasabah.NIK
+
+    lokasi_asli = {
+        "rekening": JsonStorage.file_rek,
+        "nasabah": JsonStorage.file_nasabah,
+        "audit": JsonStorage.file_audit,
+        "deposito": JsonStorage.file_depo,
+        "pinjaman": JsonStorage.file_pinjaman
+    }
+
+    try:
+        with tempfile.TemporaryDirectory() as folder_uji:
+            JsonStorage.file_rek = os.path.join(
+                folder_uji,
+                "rekening.json"
+            )
+            JsonStorage.file_nasabah = os.path.join(
+                folder_uji,
+                "nasabah.json"
+            )
+            JsonStorage.file_audit = os.path.join(
+                folder_uji,
+                "audit.json"
+            )
+            JsonStorage.file_depo = os.path.join(
+                folder_uji,
+                "deposito.json"
+            )
+            JsonStorage.file_pinjaman = os.path.join(
+                folder_uji,
+                "pinjaman.json"
+            )
+
+            # Menyimpan seluruh Bank ke JSON sementara.
+            JsonStorage.simpan_bank(bank)
+
+            data_pinjaman_json = JsonStorage.muat_json(
+                JsonStorage.file_pinjaman,
+                {}
+            )
+
+            # Memastikan NIK menjadi key utama.
+            assert nik in data_pinjaman_json, (
+                "NIK nasabah tidak ditemukan dalam pinjaman.json"
+            )
+
+            pinjaman_milik_nasabah = data_pinjaman_json[nik]
+
+            # Memastikan ID menjadi key cabang.
+            assert str(pinjaman_lunas.ID) in pinjaman_milik_nasabah, (
+                "Pinjaman lunas tidak tersimpan berdasarkan ID"
+            )
+
+            assert str(pinjaman_aktif.ID) in pinjaman_milik_nasabah, (
+                "Pinjaman aktif tidak tersimpan berdasarkan ID"
+            )
+
+            assert len(pinjaman_milik_nasabah) == 2, (
+                "Jumlah pinjaman dalam JSON tidak sesuai"
+            )
+
+            print("STRUKTUR JSON")
+            print("NIK               :", nik)
+            print(
+                "ID yang tersimpan :",
+                list(pinjaman_milik_nasabah.keys())
+            )
+
+            # Memuat JSON menjadi objek Bank baru.
+            bank_hasil_load = JsonStorage.muat_bank()
+            nasabah_hasil_load = (
+                bank_hasil_load.data_nasabah[nik]
+            )
+
+            daftar_hasil_load = [
+                pinjaman
+                for pinjaman in bank_hasil_load.daftar_pinjaman
+                if pinjaman.pemilik is nasabah_hasil_load
+            ]
+
+            assert len(daftar_hasil_load) == 2, (
+                "Tidak semua pinjaman dimuat ke daftar Bank"
+            )
+
+            pinjaman_lunas_hasil = next(
+                pinjaman
+                for pinjaman in daftar_hasil_load
+                if pinjaman.ID == pinjaman_lunas.ID
+            )
+
+            pinjaman_aktif_hasil = next(
+                pinjaman
+                for pinjaman in daftar_hasil_load
+                if pinjaman.ID == pinjaman_aktif.ID
+            )
+
+            assert (
+                pinjaman_lunas_hasil.status
+                == StatusPinjaman.LUNAS
+            ), "Status pinjaman lama berubah setelah load"
+
+            assert (
+                pinjaman_aktif_hasil.status
+                == StatusPinjaman.AKTIF
+            ), "Status pinjaman baru berubah setelah load"
+
+            # Nasabah hanya menunjuk pinjaman berjalan.
+            assert (
+                nasabah_hasil_load.pinjaman
+                is pinjaman_aktif_hasil
+            ), (
+                "Nasabah tidak menunjuk pinjaman aktif "
+                "hasil load"
+            )
+
+            assert (
+                nasabah_hasil_load.pinjaman
+                is not pinjaman_lunas_hasil
+            ), (
+                "Nasabah masih menunjuk pinjaman yang lunas"
+            )
+
+            # Kedua pinjaman harus menunjuk nasabah hasil load.
+            assert (
+                pinjaman_lunas_hasil.pemilik
+                is nasabah_hasil_load
+            )
+
+            assert (
+                pinjaman_aktif_hasil.pemilik
+                is nasabah_hasil_load
+            )
+
+            # Kedua pinjaman harus menggunakan objek rekening Bank.
+            assert (
+                pinjaman_lunas_hasil.rekening
+                is bank_hasil_load.rekening_index[
+                    pinjaman_lunas_hasil.rekening.norek
+                ]
+            )
+
+            assert (
+                pinjaman_aktif_hasil.rekening
+                is bank_hasil_load.rekening_index[
+                    pinjaman_aktif_hasil.rekening.norek
+                ]
+            )
+
+            assert nasabah_hasil_load.jumlah_pinjaman == 2, (
+                "Penghitung jumlah pinjaman tidak dipulihkan"
+            )
+
+            print()
+            print("SETELAH LOAD")
+
+            for pinjaman in daftar_hasil_load:
+                print(
+                    f"- Pinjaman #{pinjaman.ID} | "
+                    f"Status: {pinjaman.status.value} | "
+                    f"Objek: {id(pinjaman)}"
+                )
+
+            print(
+                "Pinjaman aktif nasabah:",
+                nasabah_hasil_load.pinjaman.ID
+            )
+            print(
+                "Jumlah pinjaman nasabah:",
+                nasabah_hasil_load.jumlah_pinjaman
+            )
+            print()
+            print(
+                "✅ Save/load dua pinjaman berhasil"
+            )
+
+    finally:
+        JsonStorage.file_rek = lokasi_asli["rekening"]
+        JsonStorage.file_nasabah = lokasi_asli["nasabah"]
+        JsonStorage.file_audit = lokasi_asli["audit"]
+        JsonStorage.file_depo = lokasi_asli["deposito"]
+        JsonStorage.file_pinjaman = lokasi_asli["pinjaman"]
 
 
 

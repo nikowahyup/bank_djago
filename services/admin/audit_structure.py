@@ -9,7 +9,10 @@ STRUKTUR_AUDIT = {
             "penurunan_level_rekening",
             "pengajuan_penutupan_rekening",
             "persetujuan_penutupan_rekening",
-            "penolakan_penutupan_rekening"
+            "penolakan_penutupan_rekening",
+            "pemblokiran_rekening",
+            "pembukaan_blokir_rekening",
+            "penggantian_pin_rekening"
         ],
         "pinjaman": [
             "pengajuan_pinjaman",

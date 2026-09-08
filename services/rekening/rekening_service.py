@@ -12,6 +12,7 @@ from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRe
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
 
 
+
 class RekeningService:
     level = {1: 'Reguler',
              2: 'Prioritas',
@@ -44,20 +45,6 @@ class RekeningService:
         }
     }
 
-
-    @staticmethod
-    def autentikasi_rekening(bank,norek,pin):
-        rekening = bank.cari_rekening(norek)
-        if not rekening:
-            raise ValueError("Nomor rekening tidak terdaftar")
-
-        if rekening.status != "aktif":
-            raise ValueError(f"Rekening telah di{rekening.status}")
-
-        if not rekening.cek_pin(pin):
-            raise ValueError("PIN salah")
-
-        return rekening
 
     @staticmethod
     def upgrade_rekening(rekening_lama,target_level):
@@ -259,28 +246,176 @@ class RekeningService:
 
         return rekening_baru
 
-
     @staticmethod
-    def blokir_rekening(bank,rekening,alasan):
+    def blokir_rekening(
+            rekening,
+            alasan
+    ):
         Validator.amankan_rekening(rekening)
-        if rekening.status == "blokir":
-            raise ValueError("Rekening ini sudah diblokir")
-        if rekening.status == "tutup":
-            raise ValueError("Rekening ini telah ditutup")
-        rekening.status = "blokir"
-        rekening.alasan_blokir = alasan
-        AuditService.tambah_audit(bank,kategori="rekening",jenis="pemblokiran",log=f"{rekening.pemilik.nama} telah memblokir rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
+
+        alasan_blokir = alasan.strip()
+
+        if not alasan_blokir:
+            raise ValueError(
+                "Alasan blokir tidak boleh kosong"
+            )
+
+        status_baru = "blokir"
+
+        koneksi = buat_koneksi()
+
+        try:
+            jumlah_baris = (
+                RekeningRepository.perbarui_status_blokir(
+                    norek=rekening.norek,
+                    status_baru=status_baru,
+                    alasan_blokir=alasan_blokir,
+                    koneksi=koneksi
+                )
+            )
+
+            if jumlah_baris != 1:
+                raise ValueError(
+                    "Gagal memblokir rekening"
+                )
+
+            riwayat = RiwayatTemplate.template(
+                kategori="sistem",
+                jenis="pemblokiran rekening",
+                log=(
+                    "PEMBLOKIRAN REKENING | "
+                    f"Rekening diblokir. "
+                    f"Alasan: {alasan_blokir}"
+                )
+            )
+
+            audit = AuditService.tambah_audit(
+                kategori="administratif",
+                objek="rekening",
+                aksi="pemblokiran_rekening",
+                log=(
+                    f"{rekening.pemilik.nama} "
+                    f"memblokir rekening. "
+                    f"Alasan: {alasan_blokir}"
+                ),
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
+                norek=rekening.norek
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                koneksi=koneksi
+            )
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        rekening.status = status_baru
+        rekening.alasan_blokir = alasan_blokir
+        rekening.simpan_riwayat(riwayat)
+
 
 
 
     @staticmethod
-    def buka_blokir(bank,rekening):
+    def buka_blokir(
+            rekening,
+            pin
+    ):
+
         if rekening.status == "tutup":
-            raise ValueError("Rekening ini telah ditutup!")
+            raise ValueError(
+                "Rekening ini telah ditutup!"
+            )
+
         if rekening.status == "aktif":
-            raise ValueError("Rekening sudah dalam status aktif")
-        rekening.status = "aktif"
-        AuditService.tambah_audit(bank,kategori="rekening",jenis="buka blokir",log=f"{rekening.pemilik.nama} membuka kembali blokiran rekening",nik=rekening.pemilik.NIK,norek=rekening.norek)
+            raise ValueError(
+                "Rekening sudah dalam status aktif"
+            )
+
+        if rekening.status != "blokir":
+            raise ValueError(
+                "Rekening tidak sedang dalam status blokir"
+            )
+
+        if not rekening.cek_pin(pin):
+            raise ValueError(
+                "PIN rekening salah"
+            )
+
+        status_baru = "aktif"
+
+        koneksi = buat_koneksi()
+
+        try:
+            jumlah_baris = RekeningRepository.perbarui_status_blokir(
+                norek=rekening.norek,
+                status_baru=status_baru,
+                alasan_blokir=None,
+                koneksi=koneksi
+            )
+
+            if jumlah_baris != 1:
+                raise ValueError("Gagal membuka blokir rekening")
+
+            riwayat = RiwayatTemplate.template(
+                kategori="sistem",
+                jenis="pembukaan blokir rekening",
+                log=(
+                    "PEMBUKAAN BLOKIR REKENING | "
+                    "Rekening kembali diaktifkan"
+                )
+            )
+            audit = AuditService.tambah_audit(
+                kategori="administratif",
+                objek="rekening",
+                aksi="pembukaan_blokir_rekening",
+                log=(
+                    f"{rekening.pemilik.nama} membuka kembali blokir rekening"
+                ),
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
+                norek=rekening.norek
+            )
+
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                koneksi=koneksi
+            )
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        rekening.status = status_baru
+        rekening.alasan_blokir = None
+        rekening.simpan_riwayat(riwayat)
+
 
 
 
@@ -353,14 +488,79 @@ class RekeningService:
 
 
     @staticmethod
-    def reset_pin(bank,rekening,pin):
-        if pin == rekening.pin:
-            raise ValueError("PIN masih sama dengan PIN lama")
-        rekening.ganti_pin(pin)
-        AuditService.tambah_audit(bank, "rekening", jenis="reset pin",
-                                  log=f"{rekening.pemilik.nama} meminta reset pin pada rekeningnya",
-                                  norek=rekening.norek)
+    def ganti_pin(
+            rekening,
+            pin_lama,
+            pin_baru
+    ):
 
+        Validator.amankan_rekening(rekening)
+
+        if not rekening.cek_pin(pin_lama):
+            raise ValueError("PIN lama salah")
+
+        Validator.validasi_pin(pin_baru)
+
+        if rekening.cek_pin(pin_baru):
+            raise   ValueError(
+                "PIN baru tidak boleh sama dengan PIN lama"
+            )
+
+        koneksi = buat_koneksi()
+
+        try:
+
+            jumlah_baris = RekeningRepository.perbarui_pin(
+                norek=rekening.norek,
+                pin_baru=pin_baru,
+                koneksi=koneksi)
+
+
+            if jumlah_baris != 1:
+                raise ValueError("Gagal mengganti PIN rekening")
+
+            riwayat = RiwayatTemplate.template(
+                kategori="sistem",
+                jenis="penggantian_pin_rekening",
+                log=(
+                    "GANTI PIN REKENING | "
+                    "PIN rekening berhasil diperbarui"
+                )
+            )
+
+            audit = AuditService.tambah_audit(
+                kategori="administratif",
+                objek="rekening",
+                aksi="penggantian_pin_rekening",
+                log=(
+                    f"{rekening.pemilik.nama} melakukan pergantian PIN rekening"
+                ),
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
+                norek=rekening.norek
+            )
+
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi
+            )
+
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                koneksi=koneksi
+            )
+
+            koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+        rekening.ganti_pin(pin_baru)
+        rekening.simpan_riwayat(riwayat)
 
     @staticmethod
     def buat_norek(level, koneksi):

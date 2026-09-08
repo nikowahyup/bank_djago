@@ -1,4 +1,4 @@
-"""Skenario manual yang dipulihkan dari `utils/tests/test_service/test_pinjaman.py` (urutan 7).
+"""Skenario manual yang dipulihkan dari `utils/tests/test_service/test_pinjaman.txt` (urutan 7).
 
 File ini mempertahankan langkah pengujian asli sebagai bahan belajar.
 Jalankan hanya setelah membaca data awal dan efek mutasinya.

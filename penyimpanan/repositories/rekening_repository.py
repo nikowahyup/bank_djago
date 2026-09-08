@@ -248,3 +248,47 @@ class RekeningRepository:
         )
 
         return cursor.rowcount
+
+    @staticmethod
+    def perbarui_status_blokir(
+            norek,
+            status_baru,
+            alasan_blokir,
+            koneksi
+    ):
+
+        cursor = koneksi.execute(
+            """
+            UPDATE rekening 
+                SET status = ?,
+                alasan_blokir = ?
+                WHERE norek = ?
+                """,
+            (
+                status_baru,
+                alasan_blokir,
+                 norek)
+        )
+
+        return cursor.rowcount
+
+    @staticmethod
+    def perbarui_pin(
+            norek,
+            pin_baru,
+            koneksi
+    ):
+
+        cursor = koneksi.execute(
+            """
+            UPDATE rekening
+            SET pin = ?
+            WHERE norek = ?
+            """,
+            (
+                pin_baru,
+                norek
+            )
+        )
+
+        return cursor.rowcount
