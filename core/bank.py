@@ -1,23 +1,21 @@
 import random
 import datetime
 
-from .deposito import Deposito
 from .nasabah import Nasabahh
-from .notifikasi import Notifikasi
+
 from .pinjaman import Pinjaman
-# from ..services.scheduler import Scheduler
-from ..services.deposito.deposito_service import JenisAro
+
 from ..services.rekening.rekening_service import RekeningService
 from bank_djago.utils.utility import StatusPinjaman
 
 class Bank:
-    def __init__(self,nama,data_audit,data_nasabah=None,data_rekening=None,data_pinjaman=None):
+    def __init__(self,nama,data_nasabah=None,data_rekening=None,data_pinjaman=None):
         self.nama            = nama
         self._password_admin = "admin123"
         self.rekening_index  = {}
         self.data_nasabah    = {}
         self.daftar_pinjaman = []
-        self.audit_log = data_audit
+
 
         if data_rekening:
             self._muat_rekening(data_rekening)

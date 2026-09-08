@@ -107,8 +107,9 @@ class BiayaAdminService:
                 )
             )
             audit = AuditService.tambah_audit(
-                kategori="transaksi",
-                jenis="biaya admin",
+                kategori="finansial",
+                objek="rekening",
+                aksi="pemotongan_biaya_admin",
                 log=(
                     f"Pembayaran biaya admin "
                     f"{jumlah_periode_dibayar} bulan sebesar "
@@ -118,8 +119,18 @@ class BiayaAdminService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek
             )
-            RiwayatRepository.tambah_riwayat(norek=rekening.norek,riwayat=riwayat,id_transaksi=id_transaksi,koneksi=koneksi)
-            AuditRepository.tambah_audit(audit=audit,id_transaksi=id_transaksi,koneksi=koneksi)
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                id_transaksi=id_transaksi,
+                koneksi=koneksi
+            )
+            
+            AuditRepository.tambah_audit(
+                audit=audit,
+                id_transaksi=id_transaksi
+                ,koneksi=koneksi
+            )
 
             koneksi.commit()
 

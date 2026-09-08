@@ -10,6 +10,7 @@ from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import Pe
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
+
 from bank_djago.utils.validator import Validator
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
@@ -33,8 +34,23 @@ class PengajuanService:
             if pengajuan_sebelumnya is not None:
                 raise ValueError("Anda sudah mengajukan penutupan sebelumnya. Silahkan tunggu konfirmasi admin")
 
-            id_pengajuan = PengajuanRepository.tambah_pengajuan(norek=rekening.norek,jenis="tutup",alasan=alasan,waktu_pengajuan=datetime.datetime.now(),koneksi=koneksi)
-            audit = AuditService.tambah_audit(kategori="rekening",jenis="pengajuan penutupan",log="Pengajuan penutupan rekening",nama=rekening.pemilik.nama,nik=rekening.pemilik.NIK,norek=rekening.norek)
+            id_pengajuan = PengajuanRepository.tambah_pengajuan(
+                norek=rekening.norek,
+                jenis="tutup",
+                alasan=alasan,
+                waktu_pengajuan=datetime.datetime.now(),
+                koneksi=koneksi
+            )
+            audit = AuditService.tambah_audit(
+                kategori="administratif",
+                objek="rekening",
+                aksi="pengajuan_penutupan_rekening",
+                log=f"{rekening.pemilik.nama} mengajukan penutupan rekening {id_pengajuan}",
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
+                norek=rekening.norek
+            )
+
             AuditRepository.tambah_audit(audit,koneksi)
 
             koneksi.commit()
@@ -85,7 +101,15 @@ class PengajuanService:
             if jumlah_baris != 1:
                 raise ValueError("Gagal memperbarui status pengajuan")
 
-            audit = AuditService.tambah_audit(kategori="rekening",jenis="penolakan pengajuan",log=f"Pengajuan {cari_pengajuan['jenis']} rekening ditolak",nama=rekening.pemilik.nama,nik=rekening.pemilik.NIK,norek=rekening.norek)
+            audit = AuditService.tambah_audit(
+                kategori="administratif",
+                objek="rekening",
+                aksi="penolakan_penutupan_rekening",
+                log=f"Pengajuan {cari_pengajuan['jenis']} rekening ditolak",
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
+                norek=rekening.norek
+            )
             AuditRepository.tambah_audit(audit,koneksi)
 
             koneksi.commit()
@@ -181,8 +205,9 @@ class PengajuanService:
                 )
 
             audit = AuditService.tambah_audit(
-                kategori="rekening",
-                jenis="persetujuan pengajuan",
+                kategori="administratif",
+                objek="rekening",
+                aksi="persetujuan_penutupan_rekening",
                 log=(
                     f"Pengajuan {pengajuan['jenis']} "
                     f"rekening disetujui"
@@ -281,7 +306,7 @@ class PengajuanService:
                     f"{Utilitas.format_rupiah(nominal_penyelesaian)}"
                 )
 
-                jenis_audit = "penutupan tarik saldo"
+                aksi_audit = "penarikan_saldo_penutupan"
 
             else:
                 (
@@ -323,7 +348,7 @@ class PengajuanService:
                     f"ke rekening {penerima.norek}"
                 )
 
-                jenis_audit = "penutupan transfer saldo"
+                aksi_audit = "pemindahan_saldo_penutupan"
 
             jumlah_baris = (
                 RekeningRepository.perbarui_saldo_dan_status(
@@ -348,8 +373,9 @@ class PengajuanService:
 
             if penerima is not None:
                 audit_penerima = AuditService.tambah_audit(
-                    kategori="transaksi",
-                    jenis="terima saldo penutupan",
+                    kategori="finansial",
+                    objek="rekening",
+                    aksi="penerimaan_saldo_penutupan",
                     log=(
                         f"Menerima saldo Rp"
                         f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
@@ -394,8 +420,9 @@ class PengajuanService:
             )
 
             audit = AuditService.tambah_audit(
-                kategori="rekening",
-                jenis=jenis_audit,
+                kategori="finansial",
+                objek="rekening",
+                aksi=aksi_audit,
                 log=log_audit,
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,

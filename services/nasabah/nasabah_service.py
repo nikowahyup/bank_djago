@@ -23,8 +23,9 @@ class NasabahService:
             rekening_baru = RekeningService.buka_rekening(nasabah=nasabah_baru, pilihan=level, pin=pin, setor_awal=setor_awal,koneksi=koneksi_database)
 
             audit_pendaftaran = AuditService.tambah_audit(
-                kategori="nasabah",
-                jenis="pendaftaran nasabah",
+                kategori="administratif",
+                objek="nasabah",
+                aksi="pendaftaran_nasabah",
                 log=f"{nasabah_baru.nama} terdaftar sebagai nasabah baru",
                 nama=nasabah_baru.nama,
                 nik=nasabah_baru.NIK,

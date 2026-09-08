@@ -236,21 +236,53 @@ def buat_tabel_audit():
     koneksi = buat_koneksi()
 
     try:
-        koneksi.execute("""
+        koneksi.execute(
+            """
             CREATE TABLE IF NOT EXISTS audit (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+
                 kategori TEXT NOT NULL,
-                jenis TEXT NOT NULL,
+                objek TEXT NOT NULL,
+                aksi TEXT NOT NULL,
+
                 waktu TEXT NOT NULL,
                 log TEXT NOT NULL,
+
                 nama TEXT,
                 nik TEXT,
-                norek TEXT
+                norek TEXT,
+                transaksi_id INTEGER,
+
+                CHECK (
+                    kategori IN (
+                        'administratif',
+                        'finansial'
+                    )
+                ),
+
+                CHECK (
+                    objek IN (
+                        'nasabah',
+                        'rekening',
+                        'deposito',
+                        'pinjaman'
+                    )
+                ),
+
+                FOREIGN KEY (transaksi_id)
+                REFERENCES transaksi(id)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT
             )
-        """)
+            """
+        )
 
         koneksi.commit()
         print("Tabel audit berhasil dibuat")
+
+    except Exception:
+        koneksi.rollback()
+        raise
 
     finally:
         koneksi.close()
@@ -502,47 +534,9 @@ def tambah_kolom_transaksi_id_riwayat():
     finally:
         koneksi.close()
 
-def tambah_kolom_transaksi_id_audit():
-    koneksi = buat_koneksi()
 
-    try:
-        daftar_kolom = koneksi.execute(
-            "PRAGMA table_info(audit)"
-        ).fetchall()
 
-        nama_kolom = {
-            kolom["name"]
-            for kolom in daftar_kolom
-        }
 
-        if "transaksi_id" not in nama_kolom:
-            koneksi.execute(
-                """
-                ALTER TABLE audit
-                ADD COLUMN transaksi_id INTEGER
-                REFERENCES transaksi(id)
-                ON UPDATE CASCADE
-                ON DELETE RESTRICT
-                """
-            )
-
-            koneksi.commit()
-            print(
-                "Kolom transaksi_id pada audit "
-                "berhasil ditambahkan"
-            )
-        else:
-            print(
-                "Kolom transaksi_id pada audit "
-                "sudah tersedia"
-            )
-
-    except Exception:
-        koneksi.rollback()
-        raise
-
-    finally:
-        koneksi.close()
 
 
 def inisialisasi_database():
@@ -556,7 +550,6 @@ def inisialisasi_database():
     buat_tabel_audit()
     buat_tabel_pengajuan_rekening()
     buat_tabel_transaksi()
-    tambah_kolom_transaksi_id_audit()
     tambah_kolom_transaksi_id_riwayat()
 
 

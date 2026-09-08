@@ -121,16 +121,7 @@ class Utilitas:
 
         print()
 
-    @staticmethod
-    def menu_audit():
-        print()
-        UI.header('MENU AUDIT',UI.KUNING)
-        print()
-        print('1. Semua Aktivitas')
-        print('2. Aktivitas Transaksi')
-        print('3. Aktivitas Rekening')
-        print('4. Aktivitas Nasabah')
-        print('5. Keluar\n')
+
 
     level = {1: 'Reguler',
              2: 'Prioritas',

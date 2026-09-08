@@ -13,7 +13,7 @@ def menu():
 
     bank = JsonStorage.muat_bank()
     hari_ini = datetime.date(2026,9,29)
-    Scheduler.jalankan(bank,hari_ini)
+    Scheduler.jalankan(hari_ini)
 
     while True:
         print()

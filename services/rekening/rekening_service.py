@@ -117,8 +117,9 @@ class RekeningService:
             )
 
             audit = AuditService.tambah_audit(
-                kategori="rekening",
-                jenis="upgrade",
+                kategori="administratif",
+                objek="rekening",
+                aksi="peningkatan_level_rekening",
                 log=(
                     f"{nasabah.nama} meningkatkan rekening "
                     f"dari {rek_awal} ke {rek_tujuan}"
@@ -218,8 +219,9 @@ class RekeningService:
             )
 
             audit = AuditService.tambah_audit(
-                kategori="rekening",
-                jenis="downgrade",
+                kategori="administratif",
+                objek = "rekening",
+                aksi = "penurunan_level_rekening",
                 log=(
                     f"{nasabah.nama} menurunkan rekening "
                     f"dari {rek_awal} ke {rek_tujuan}"
@@ -322,8 +324,9 @@ class RekeningService:
             riwayat = RiwayatTemplate.template(kategori="transaksi",jenis="setor awal",log=f"SETOR AWAL | +Rp{Utilitas.format_rupiah(setor_awal)}")
 
             audit = AuditService.tambah_audit(
-                kategori="rekening",
-                jenis="pembukaan",
+                kategori="administratif",
+                objek = "rekening",
+                aksi = "pembukaan_rekening",
                 log=f"{nasabah.nama} membuka rekening baru",
                 nama=nasabah.nama,
                 nik=nasabah.NIK,

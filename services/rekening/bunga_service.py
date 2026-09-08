@@ -115,8 +115,9 @@ class BungaService:
                 )
 
                 audit = AuditService.tambah_audit(
-                    kategori="transaksi",
-                    jenis="dapat bunga",
+                    kategori="finansial",
+                    objek="rekening",
+                    aksi="pemberian_bunga_tabungan",
                     log=(
                         f"Pemberian bunga bulanan "
                         f"{jumlah_dapat_bunga} bulan sebesar "

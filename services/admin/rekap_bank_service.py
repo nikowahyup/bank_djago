@@ -1,68 +1,48 @@
+from bank_djago.penyimpanan.repositories.rekap_repository import RekapRepository
+
 
 class RekapService:
 
     @staticmethod
-    def rekap_umum(bank):
-        total_nasabah  = len(bank.data_nasabah)
-        total_rekening = len(bank.rekening_index)
-        total_saldo    = sum(rekening.saldo for rekening in bank.rekening_index.values())
+    def rekap_umum():
+
+        total_nasabah, total_rekening, total_saldo = RekapRepository.rekap_umum()
+
 
         return total_nasabah,total_rekening,total_saldo
 
     @staticmethod
-    def rekap_jumlah_rekening(bank):
-        reguler = prioritas = gold = platinum = 0
+    def rekap_jumlah_rekening():
 
-        for rekening in bank.rekening_index.values():
-            if rekening.level   == 1:
-                reguler   += 1
-            elif rekening.level == 2:
-                prioritas += 1
-            elif rekening.level == 3:
-                gold      += 1
-            elif rekening.level == 4:
-                platinum  += 1
+        reguler ,prioritas , gold , platinum = RekapRepository.jumlah_tiap_jenis_rekening()
+
         return reguler,prioritas,gold,platinum
 
     @staticmethod
-    def rekap_status_rekening(bank):
-        aktif = blokir = tutup = 0
-
-        for rekening in bank.rekening_index.values():
-            if rekening.status == "aktif":
-                aktif += 1
-            elif rekening.status == "blokir":
-                blokir += 1
-            elif rekening.status == "tutup":
-                tutup += 1
+    def rekap_status_rekening():
+        aktif ,blokir , tutup = RekapRepository.rekap_status_rekening()
 
         return aktif, blokir, tutup
 
     @staticmethod
-    def total_saldo_rekening(bank):
-        reguler = prioritas = gold = platinum = 0
+    def total_saldo_rekening():
+        reguler , prioritas ,gold ,platinum = RekapRepository.total_saldo_tiap_jenis_rekening()
 
-        for rekening in bank.rekening_index.values():
-            if rekening.level == 1:
-                reguler += rekening.saldo
 
-            elif rekening.level == 2:
-                prioritas += rekening.saldo
-
-            elif rekening.level == 3:
-                gold += rekening.saldo
-
-            elif rekening.level == 4:
-                platinum += rekening.saldo
         return reguler, prioritas, gold, platinum
 
     @staticmethod
-    def saldo_terbesar(bank):
-        rekening_besar = max(bank.rekening_index.values(),key=lambda r:r.saldo)
-        return rekening_besar
+    def saldo_terbesar():
+        saldo_terbesar = RekapRepository.cari_saldo_terbesar()
+        if saldo_terbesar is None:
+            return None
+        return saldo_terbesar
     # ------------------------------------------------------------------------------------------------------------------------------
     @staticmethod
-    def saldo_terkecil(bank):
-        rekening_kecil = min(bank.rekening_index.values(),key=lambda r:r.saldo)
-        return rekening_kecil
+    def saldo_terkecil():
+        saldo_terkecil = RekapRepository.cari_saldo_terkecil()
+
+        if saldo_terkecil is None:
+            return None
+        return saldo_terkecil
 

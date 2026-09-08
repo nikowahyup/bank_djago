@@ -1,5 +1,5 @@
 import datetime
-from mimetypes import knownfiles
+
 
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.core.pinjaman import Pinjaman
@@ -94,11 +94,13 @@ class PinjamanService:
             )
 
             audit = AuditService.tambah_audit(
-                kategori="transaksi",
-                jenis="pengajuan pinjaman",
+                kategori="administratif",
+                objek="pinjaman",
+                aksi="pengajuan_pinjaman",
                 log=(
                     f"{nasabah.nama} mengajukan pinjaman "
-                    f"sebesar Rp{Utilitas.format_rupiah(nominal)}"
+                    f"dengan ID {id_pinjaman} sebesar "
+                    f"Rp{Utilitas.format_rupiah(nominal)}"
                 ),
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
@@ -198,10 +200,11 @@ class PinjamanService:
                 )
 
             audit = AuditService.tambah_audit(
-                kategori="transaksi",
-                jenis="persetujuan pinjaman",
+                kategori="administratif",
+                objek="pinjaman",
+                aksi="persetujuan_pinjaman",
                 log=(
-                    f"Pinjaman ber-ID {id_pinjaman} "
+                    f"Pinjaman dengan ID {id_pinjaman} "
                     f"milik {data_nasabah['nama']} telah disetujui"
                 ),
                 nama=data_nasabah["nama"],
@@ -263,7 +266,10 @@ class PinjamanService:
             if data_rekening["nik_pemilik"] != nasabah.NIK:
                 raise ValueError("Nasabah ini tidak terdaftar sebagai pemilik pinjaman")
 
-            rekening = next((rekening for rekening in nasabah.rekening if rekening.norek == data_rekening['norek']),None)
+            rekening = next((
+                        rekening for rekening in nasabah.rekening
+                        if rekening.norek == data_rekening['norek']),None)
+
             if rekening is None:
                 raise ValueError("Rekening pinjaman tidak ditemukan pada data nasabah")
             if rekening.pemilik is not nasabah:
@@ -271,7 +277,9 @@ class PinjamanService:
 
             Validator.amankan_rekening(rekening)
 
-            pinjaman = next((pinjaman for pinjaman in nasabah.daftar_pinjaman if pinjaman.ID == id_pinjaman),None)
+            pinjaman = next((
+                pinjaman for pinjaman in nasabah.daftar_pinjaman
+                if pinjaman.ID == id_pinjaman),None)
 
             if pinjaman is None:
                 raise ValueError("Objek pinjaman tidak ditemukan pada data nasabah")
@@ -311,7 +319,11 @@ class PinjamanService:
                 raise ValueError('Gagal memperbarui status pinjaman')
 
 
-            jumlah_baris_rek = RekeningRepository.perbarui_saldo(norek=data_rekening['norek'],saldo_baru=saldo_baru,koneksi=koneksi)
+            jumlah_baris_rek = RekeningRepository.perbarui_saldo(
+                norek=data_rekening['norek'],
+                saldo_baru=saldo_baru,
+                koneksi=koneksi
+            )
 
             if jumlah_baris_rek != 1:
                 raise ValueError("Gagal menambah saldo rekening")
@@ -327,11 +339,36 @@ class PinjamanService:
 
             id_transaksi = TransaksiRepository.tambah_transaksi(transaksi,koneksi)
 
-            riwayat = RiwayatTemplate.template(kategori="transaksi",jenis='pencairan pinjaman',log=f"PENCAIRAN PINJAMAN {id_pinjaman} | +Rp{Utilitas.format_rupiah(nominal_pinjaman)}")
-            audit = AuditService.tambah_audit(kategori="transaksi",jenis='pencairan pinjaman',log=f"Nasabah {nasabah.nama} mencairkan pinjaman {id_pinjaman}",nama=nasabah.nama,nik=nasabah.NIK,norek=rekening.norek)
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis='pencairan pinjaman',
+                log=f"PENCAIRAN PINJAMAN {id_pinjaman} | +Rp{Utilitas.format_rupiah(nominal_pinjaman)}"
+            )
 
-            RiwayatRepository.tambah_riwayat(norek=rekening.norek, riwayat=riwayat, koneksi=koneksi, id_transaksi=id_transaksi)
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi, id_transaksi=id_transaksi)
+            audit = AuditService.tambah_audit(
+                kategori="finansial",
+                objek="pinjaman",
+                aksi="pencairan_pinjaman",
+                log=(
+                    f"Nasabah {nasabah.nama} mencairkan "
+                    f"pinjaman dengan ID {id_pinjaman} sebesar "
+                    f"Rp{Utilitas.format_rupiah(nominal_pinjaman)}"
+                ),
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening.norek
+            )
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening.norek,
+                riwayat=riwayat,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
 
             koneksi.commit()
 
@@ -542,12 +579,13 @@ class PinjamanService:
                          "waktu": datetime.datetime.now()}
 
             audit = AuditService.tambah_audit(
-                    kategori='transaksi',
-                    jenis='pembayaran cicilan',
-                    log=log_audit,
-                    nama=nasabah.nama,
-                    nik=nasabah.NIK,
-                    norek=norek
+                kategori="finansial",
+                objek="pinjaman",
+                aksi="pembayaran_cicilan_pinjaman",
+                log=log_audit,
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=norek
             )
 
             riwayat = RiwayatTemplate.template(
@@ -681,10 +719,11 @@ class PinjamanService:
                 )
 
             audit = AuditService.tambah_audit(
-                kategori="transaksi",
-                jenis="penolakan pinjaman",
+                kategori="administratif",
+                objek="pinjaman",
+                aksi="penolakan_pinjaman",
                 log=(
-                    f"Pinjaman ber-ID {id_pinjaman} "
+                    f"Pinjaman dengan ID {id_pinjaman} "
                     f"milik {data_nasabah['nama']} telah ditolak.\n"
                     f"Catatan admin: {catatan_admin}"
                 ),
@@ -730,7 +769,10 @@ class PinjamanService:
 
     @staticmethod
     def daftar_ajuan(bank):
-        return [ajuan for ajuan in bank.daftar_pinjaman if ajuan.status == StatusPinjaman.DIAJUKAN]
+        return [
+            ajuan for ajuan in bank.daftar_pinjaman
+            if ajuan.status == StatusPinjaman.DIAJUKAN
+        ]
 
     @staticmethod
     def tanggal_boleh_bayar(cicilan_terbayar,tanggal_pencairan):

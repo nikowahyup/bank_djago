@@ -5,32 +5,32 @@ from bank_djago.utils.utility import Utilitas,UI
 class RekapUI:
 
     @staticmethod
-    def menu_tampilkan_rekap(bank):
+    def menu_tampilkan_rekap():
         while True:
             Utilitas.menu_admin()
             pilihan = input("Masukkan pilihan: ")
             if pilihan == "1":
-                total_nasabah,total_rekening,total_saldo = RekapService.rekap_umum(bank)
+                total_nasabah,total_rekening,total_saldo = RekapService.rekap_umum()
                 RekapUI.rekap_umum(total_nasabah,total_rekening, total_saldo)
 
             elif pilihan == "2":
-                reguler,prioritas,gold,platinum = RekapService.rekap_jumlah_rekening(bank)
+                reguler,prioritas,gold,platinum = RekapService.rekap_jumlah_rekening()
                 RekapUI.rekap_rekening(reguler,prioritas,gold, platinum)
 
             elif pilihan == "3":
-                aktif,blokir,tutup = RekapService.rekap_status_rekening(bank)
+                aktif,blokir,tutup = RekapService.rekap_status_rekening()
                 RekapUI.rekap_status(aktif,blokir,tutup)
 
             elif pilihan == "4":
-                reguler,prioritas,gold,platinum = RekapService.total_saldo_rekening(bank)
+                reguler,prioritas,gold,platinum = RekapService.total_saldo_rekening()
                 RekapUI.total_saldo_tiap_rekening(reguler, prioritas, gold, platinum)
 
             elif pilihan == "5":
-                saldo_terbesar = RekapService.saldo_terbesar(bank)
+                saldo_terbesar = RekapService.saldo_terbesar()
                 RekapUI.saldo_besar(saldo_terbesar)
 
             elif pilihan == "6":
-                saldo_terkecil = RekapService.saldo_terkecil(bank)
+                saldo_terkecil = RekapService.saldo_terkecil()
                 RekapUI.saldo_kecil(saldo_terkecil)
 
             elif pilihan == "7":
@@ -78,12 +78,19 @@ class RekapUI:
     def saldo_besar(rekening_terbesar):
         UI.header("PEMILIK SALDO TERBESAR")
         print()
-        print(f'{rekening_terbesar.pemilik.nama}')
-        print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terbesar.saldo)}\n")
+        if rekening_terbesar is None:
+            UI.gagal("Belum ada data rekening pemilik saldo terbesar")
+            return
+        print(f"Nama pemilik : {rekening_terbesar['nama']}")
+        print(f"Jumlah saldo : Rp{Utilitas.format_rupiah(rekening_terbesar['saldo'])}")
 
     @staticmethod
     def saldo_kecil(rekening_terkecil):
         UI.header("PEMILIK SALDO TERKECIL")
         print()
-        print(f'{rekening_terkecil.pemilik.nama}')
-        print(f"Total Saldo : Rp{Utilitas.format_rupiah(rekening_terkecil.saldo)}\n")
+        if rekening_terkecil is None:
+            UI.gagal("Belum ada rekening pemilik saldo terkecil")
+            return
+        print(f"Nama pemilik : {rekening_terkecil['nama']}")
+        print(f"Jumlah saldo : Rp{Utilitas.format_rupiah(rekening_terkecil['saldo'])}")
+

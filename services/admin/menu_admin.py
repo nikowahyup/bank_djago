@@ -29,9 +29,9 @@ Masukkan sembarang simbol untuk keluar""")
             pilihan = input("Pilihan Kamu: ")
 
             if pilihan == "1":
-                RekapUI.menu_tampilkan_rekap(bank)
+                RekapUI.menu_tampilkan_rekap()
             elif pilihan == "2":
-                AuditUI.menu_tampilkan_audit(bank)
+                AuditUI.menu_tampilkan_audit()
             elif pilihan == "3":
                 AdminPinjaman.kelola_pengajuan_pinjaman()
             elif pilihan == "4":

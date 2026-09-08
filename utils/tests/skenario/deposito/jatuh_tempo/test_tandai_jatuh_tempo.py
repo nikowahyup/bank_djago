@@ -17,7 +17,7 @@ from bank_djago.services.deposito.deposito_service import (
     DepositoService,
     StatusDeposito
 )
-from bank_djago.utils.utility import JenisReferensiID
+from bank_djago.utils.utility import JenisReferensi
 
 
 NOREK = "3001781978899033"
@@ -100,7 +100,7 @@ def ambil_kondisi_database(id_deposito):
               AND id_referensi = ?
             """,
             (
-                JenisReferensiID.DEPOSITO.value,
+                JenisReferensi.DEPOSITO.value,
                 id_deposito
             )
         ).fetchone()["jumlah"]
@@ -131,7 +131,7 @@ def ambil_kondisi_database(id_deposito):
               AND id_objek = ?
             """,
             (
-                JenisReferensiID.DEPOSITO.value,
+                JenisReferensi.DEPOSITO.value,
                 id_deposito
             )
         ).fetchone()["jumlah"]
