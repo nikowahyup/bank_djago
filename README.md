@@ -14,7 +14,7 @@ Aplikasi simulasi perbankan berbasis Python untuk mengelola nasabah dan rekening
 ## 🛠️ Teknologi yang Digunakan
 * **Bahasa Pemrograman:** Python 3.x
 * **Konsep Utama:** Object-Oriented Programming (OOP), Data Encapsulation, Inheritance, Data Validation, Transaction Management, dan Relational Database
-* **Penyimpanan:** SQLite sebagai sumber data utama; JSON dipertahankan sebagai bagian dari riwayat pengembangan
+* **Penyimpanan:** SQLite sebagai satu-satunya sumber data aktif; JSON hanya dipertahankan sebagai artefak riwayat pengembangan dan pengujian legacy
 
 ---
 
@@ -31,6 +31,10 @@ Aplikasi simulasi perbankan berbasis Python untuk mengelola nasabah dan rekening
 - Audit Trail
 - Data Validation
 - JSON Persistence
+- Relational Database
+- Repository Pattern
+- Loader dan Identity Map
+- Transaction Management, Commit, dan Rollback
 - Scheduler
 - Notification System
 
@@ -46,9 +50,13 @@ bank_djago/
 │   ├── rekening/
 │   └── transaksi/
 ├── penyimpanan/
-├── tests/
+│   ├── loaders/
+│   ├── repositories/
+│   └── sqlite/
 ├── utils/
-├── Data/
+│   └── tests/
+│       ├── skenario/
+│       └── legacy/
 └── main.py
 ```
 
@@ -229,8 +237,6 @@ Memindahkan lifecycle pinjaman dan keputusan admin menuju SQLite.
 - [x] Menguji pencairan, pembayaran normal, pembayaran terlambat, pelunasan, dan penolakan proses ganda.
 - [x] Menguji transaksi gagal tanpa perubahan sebagian pada database maupun objek Python.
 
-
-
 ### `v1.7` - Notifikasi dan Scheduler ✅
 Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank` yang selalu berada di memori.
 
@@ -246,16 +252,24 @@ Menghubungkan proses waktu dengan data SQLite tanpa bergantung pada objek `Bank`
 Scheduler memuat target secara mandiri, sedangkan audit perubahan bisnis tetap
 menjadi tanggung jawab masing-masing service.
 
-### `v1.8` - Admin, Rekap, dan Pelepasan JSON
-Menjadikan SQLite satu-satunya sumber kebenaran seluruh aplikasi.
+### `v1.8` - Admin, Rekap, dan Pelepasan JSON ✅
+Menjadikan SQLite satu-satunya sumber kebenaran seluruh aplikasi dan melepaskan ketergantungan runtime terhadap objek `Bank` serta `JsonStorage`.
 
-- [ ] Memigrasikan rekap bank ke query SQLite.
-- [ ] Memigrasikan tampilan audit admin.
-- [ ] Menyelesaikan pengajuan blokir dan buka blokir.
-- [ ] Menambahkan desain pemblokiran darurat dengan verifikasi pembukaan blokir yang lebih kuat.
-- [ ] Menghapus parameter `bank` yang tidak lagi dibutuhkan.
-- [ ] Menghapus proses save/load JSON dari alur utama.
-- [ ] Memastikan data JSON lama hanya menjadi artefak riwayat pengembangan.
+- [x] Memigrasikan rekap bank ke query SQLite.
+- [x] Memigrasikan tampilan audit admin ke data SQLite.
+- [x] Menata ulang audit menjadi struktur `kategori → objek → aksi`.
+- [x] Menambahkan pemblokiran darurat rekening beserta pencatatan audit dan riwayat.
+- [x] Menambahkan pembukaan blokir rekening dengan verifikasi PIN.
+- [x] Menambahkan penggantian PIN rekening tanpa mencatat nilai PIN pada audit.
+- [x] Memindahkan verifikasi admin dari objek `Bank` ke `AdminService`.
+- [x] Menghapus parameter `bank` yang tidak lagi dibutuhkan dari alur runtime.
+- [x] Menghapus proses save/load JSON dari `main.py`.
+- [x] Menghapus `core/bank.py` dan `penyimpanan/storage.py` dari runtime.
+- [x] Memastikan aplikasi tetap dapat dimulai ulang dan memuat state dari SQLite tanpa proses penyimpanan global saat keluar.
+- [x] Mengumpulkan pengujian lama yang sudah tidak aktif ke `utils/tests/legacy/`.
+- [x] Menetapkan JSON lama sebagai artefak riwayat pengembangan, bukan sumber data aplikasi.
+
+**Status: selesai.** Runtime Bank Djago kini menggunakan SQLite sebagai sumber data aktif tanpa `Bank` sebagai wadah global dan tanpa `JsonStorage` pada alur utama. Tahap berikutnya berfokus pada stabilisasi test, perapian kontrak service, dan persiapan web.
 
 ### `v1.9` - Stabilisasi dan Persiapan Web
 Menyiapkan business logic agar dapat digunakan oleh terminal maupun web tanpa duplikasi.
@@ -297,7 +311,7 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - [x] Denda keterlambatan dan tunggakan
 - [x] Penyempurnaan testing dan validasi integritas data
 - [x] Fondasi database dan layanan utama menggunakan SQLite
-- [ ] Menyelesaikan migrasi seluruh fitur ke SQLite
+- [x] Menyelesaikan migrasi seluruh fitur runtime ke SQLite
 - [ ] Mempelajari dan mengintegrasikan Flask
 - [ ] Web Interface
 
@@ -377,6 +391,16 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - Menguji scheduler terhadap seluruh rekening berjalan serta memastikan rekening tutup tidak ikut diproses
 - Mengelompokkan kode pengujian berdasarkan domain, fitur, dan skenario sambil mempertahankan sumber asli sebagai arsip
 
+(08/09/2026)
+- Memigrasikan rekap bank dan tampilan audit admin agar membaca langsung dari SQLite
+- Mendesain ulang audit dengan struktur `kategori → objek → aksi` serta validasi struktur pada service
+- Menambahkan pemblokiran darurat, pembukaan blokir, dan penggantian PIN rekening beserta audit/riwayat yang sesuai
+- Memindahkan verifikasi admin dari objek `Bank` ke `AdminService`
+- Menghapus ketergantungan runtime terhadap objek `Bank` dan `JsonStorage`
+- Menghapus proses save/load JSON dari `main.py` dan memastikan persistence tetap berjalan setelah aplikasi dimulai ulang
+- Menghapus `core/bank.py`, `penyimpanan/storage.py`, serta utility/debug lama yang tidak lagi digunakan
+- Mengumpulkan kode pengujian legacy ke `utils/tests/legacy/` agar terpisah dari skenario SQLite aktif
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -390,10 +414,10 @@ Daripada hanya mengubah atribut level, lebih baik membuat rekening baru yang ses
 Jawaban:
 Agar logika transaksi terpusat di `TransaksiService` dan terpisah dari input serta tampilan antarmuka.
 
-### 3. Mengapa notifikasi memiliki `referensi_id` dan `id_objek`?
+### 3. Mengapa notifikasi memiliki `jenis_referensi` dan `id_objek`?
 
 Jawaban:
-`referensi_id` menunjukkan domain atau jenis objek yang dirujuk, sedangkan `id_objek` menunjukkan entitas spesifik yang memiliki notifikasi tersebut. Dengan demikian beberapa deposito milik nasabah yang sama dapat memiliki notifikasi masing-masing tanpa saling bertabrakan.
+`jenis_referensi` menunjukkan domain atau jenis objek yang dirujuk, sedangkan `id_objek` menunjukkan entitas spesifik yang memiliki notifikasi tersebut. Dengan demikian beberapa deposito atau pinjaman milik nasabah yang sama dapat memiliki notifikasi masing-masing tanpa saling bertabrakan.
 
 ### 4. Bagaimana aturan jatuh tempo pada tanggal ujung bulan?
 
@@ -510,7 +534,7 @@ objek tetap konsisten dan objek yang sama tidak dibuat berulang kali.
 ### 25. Mengapa jenis referensi disimpan sebagai teks?
 
 Jawaban:
-Nilai seperti `pinjaman`, `deposito`, dan `transaksi` dapat dipahami langsung
+Nilai seperti `PINJAMAN`, `DEPOSITO`, dan `TRANSAKSI` dapat dipahami langsung
 saat database diperiksa. Angka enum memang lebih ringkas, tetapi membutuhkan
 peta tambahan dan pernah membuat nilai pada kode tidak selaras dengan CHECK
 constraint. Teks dipilih agar representasi pada enum, repository, dan SQLite
@@ -548,6 +572,36 @@ Nilai bunga nol berarti tidak ada perpindahan dana sehingga transaksi, riwayat,
 dan audit finansial tidak perlu dibuat. Namun periodenya tetap sudah diperiksa
 oleh scheduler. Tanggal proses harus dimajukan agar periode yang sama tidak
 diperiksa dan dianggap tertunggak kembali pada pemanggilan berikutnya.
+
+### 30. Mengapa audit menggunakan struktur `kategori → objek → aksi`?
+
+Jawaban:
+Audit perlu cukup terstruktur untuk difilter dan dianalisis tanpa kehilangan konteks manusia pada kolom `log`. `kategori` membedakan aktivitas administratif dan finansial, `objek` menunjukkan domain yang dipengaruhi, dan `aksi` menjelaskan kejadian spesifik. Struktur ini juga lebih mudah dikembangkan dibanding menaruh seluruh makna audit pada satu string pesan.
+
+### 31. Mengapa daftar `aksi` audit tidak seluruhnya dijadikan CHECK constraint SQLite?
+
+Jawaban:
+Kategori dan objek memiliki himpunan kecil yang relatif stabil sehingga cocok dijaga oleh CHECK constraint. Aksi lebih sering bertambah ketika fitur baru dibuat. Validasi aksi ditempatkan pada struktur audit di service agar penambahan fitur tidak selalu memerlukan migrasi tabel, sementara database tetap menjaga bentuk dasar audit.
+
+### 32. Mengapa objek `Bank` dan `JsonStorage` akhirnya dihapus dari runtime?
+
+Jawaban:
+Setelah repository dan loader SQLite mengambil alih persistence, objek `Bank` tidak lagi menjadi sumber kebenaran dan sebagian besar tanggung jawab lamanya sudah berpindah ke service, repository, dan loader. Mempertahankannya hanya akan menciptakan state global kedua yang berisiko berbeda dengan database. `JsonStorage` juga tidak lagi diperlukan karena setiap operasi bisnis melakukan commit pada transaksi SQLite masing-masing.
+
+### 33. Mengapa state objek Python baru disinkronkan setelah commit?
+
+Jawaban:
+Database menjadi sumber kebenaran. Jika objek diubah sebelum commit lalu query berikutnya gagal, memori dapat menunjukkan kondisi yang tidak pernah tersimpan. Karena itu perubahan database, audit, riwayat, dan transaksi diselesaikan lebih dahulu dalam satu batas transaksi; setelah commit berhasil, objek aktif baru diperbarui agar keduanya konsisten.
+
+### 34. Mengapa pemblokiran, pembukaan blokir, dan penggantian PIN dicatat pada service?
+
+Jawaban:
+Ketiganya merupakan perubahan bisnis terhadap rekening, bukan sekadar update satu kolom. Service menangani validasi status dan PIN, membuka transaksi database, meminta repository memperbarui data, membuat audit/riwayat yang relevan, melakukan commit atau rollback, lalu menyinkronkan objek. PIN lama maupun PIN baru tidak pernah dimasukkan ke log audit.
+
+### 35. Mengapa pengujian legacy dikumpulkan dan banyak diubah menjadi `.txt`?
+
+Jawaban:
+Sebagian file lama masih penting sebagai jurnal proses belajar tetapi menggunakan `Bank`, `JsonStorage`, data lokal tertentu, atau pola pengujian yang sudah digantikan skenario SQLite. Menaruhnya di `utils/tests/legacy/` dan menggunakan `.txt` mencegah test runner menganggapnya sebagai pengujian aktif tanpa menghapus sejarah pengembangan. Skenario yang perilakunya masih relevan tetap dipertahankan atau dimigrasikan ke `.py` modern.
 
 #### Deposito dan notifikasi
 
