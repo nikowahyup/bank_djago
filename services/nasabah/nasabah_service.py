@@ -76,7 +76,7 @@ class NasabahService:
             audit = AuditService.tambah_audit(
                 kategori="administratif",
                 objek="nasabah",
-                aksi="penggantian alamat",
+                aksi="penggantian_alamat",
                 log=f"{nasabah.nama} mengubah alamatnya",
                 nama=nasabah.nama,
                 nik=nasabah.NIK

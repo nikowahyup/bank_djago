@@ -163,14 +163,14 @@ class NasabahUI:
 
     @staticmethod
     def ganti_alamat(nasabah):
-        UI.header("GANTI ALAMT",UI.MERAH)
+        UI.header("GANTI ALAMAT",UI.MERAH)
 
         while True:
             alamat_baru = input("Masukkan alamat baru Anda (ketik 0 untuk keluar): ")
             if alamat_baru == "0":
                 return
             if not alamat_baru.strip():
-                UI.peringatan("ALamat tidak boleh kosong")
+                UI.peringatan("Alamat tidak boleh kosong")
                 continue
             break
 
