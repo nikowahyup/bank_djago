@@ -1,7 +1,8 @@
 STRUKTUR_AUDIT = {
     "administratif": {
         "nasabah": [
-            "pendaftaran_nasabah"
+            "pendaftaran_nasabah",
+            "penggantian alamat"
         ],
         "rekening": [
             "pembukaan_rekening",

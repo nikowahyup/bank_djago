@@ -106,3 +106,80 @@ class NasabahUI:
         except sqlite3.Error:
             print("Terjadi kesalahan dalam menyimpan data. Silahkan coba lagi")
 
+    @staticmethod
+    def menu_profil(nasabah):
+
+        while True:
+
+            UI.header("MENU PROFIL",UI.KUNING)
+            print()
+            print("1. Lihat Biodata")
+            print("2. Lihat Daftar Rekening")
+            print("3. Ganti Alamat")
+            print("4. Keluar\n")
+
+            pilihan = input("Masukkan pilihan Anda: ")
+
+            if pilihan == "1":
+                NasabahUI.biodata(nasabah)
+
+            elif pilihan == "2":
+                NasabahUI.daftar_rekening(nasabah)
+
+            elif pilihan == "3":
+                NasabahUI.ganti_alamat(nasabah)
+
+            elif pilihan == "4":
+                break
+
+
+
+
+
+    @staticmethod
+    def biodata(nasabah):
+        UI.header("BIODATA",UI.MERAH)
+
+        print()
+        print(f"Nama   :{nasabah.nama}")
+        print(f"NIK    : {nasabah.NIK}")
+        print(f"Alamat : {nasabah.alamat}")
+        print()
+
+    @staticmethod
+    def daftar_rekening(nasabah):
+        UI.header("DAFTAR REKENING",UI.MERAH)
+
+        print()
+        daftar_rekening = nasabah.rekening
+
+        for nomor , rekening in enumerate(daftar_rekening,start=1):
+            print()
+            print(f"{nomor}. {rekening.jenis}")
+            print(f"💳 Nomor Rekening : {rekening.norek}")
+            print(f"📃 Status : {rekening.status}")
+            print(f"💰 Saldo  : Rp{Utilitas.format_rupiah(rekening.saldo)}")
+            print()
+
+    @staticmethod
+    def ganti_alamat(nasabah):
+        UI.header("GANTI ALAMT",UI.MERAH)
+
+        while True:
+            alamat_baru = input("Masukkan alamat baru Anda (ketik 0 untuk keluar): ")
+            if alamat_baru == "0":
+                return
+            if not alamat_baru.strip():
+                UI.peringatan("ALamat tidak boleh kosong")
+                continue
+            break
+
+        try:
+            NasabahService.ganti_alamat(
+                nasabah=nasabah,
+                alamat_baru=alamat_baru
+            )
+            UI.sukses("Alamat berhasil diubah")
+
+        except ValueError as e:
+            UI.gagal(str(e))

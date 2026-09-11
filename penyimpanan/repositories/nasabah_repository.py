@@ -51,3 +51,24 @@ class NasabahRepository:
                 koneksi.close()
 
 
+    @staticmethod
+    def ganti_alamat(
+            nik_pemilik,
+            alamat_baru,
+            koneksi
+    ):
+
+        cursor = koneksi.execute(
+            """
+            UPDATE nasabah
+             SET alamat = ?
+              WHERE nik = ?""",
+            (
+                alamat_baru,
+                nik_pemilik
+            )
+        )
+
+        return cursor.rowcount
+
+
