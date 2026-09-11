@@ -1,15 +1,14 @@
 from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 from bank_djago.penyimpanan.loaders.notifikai_loader import NotifikasiLoader
-
 from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksi_ui import TransaksiUI
 from bank_djago.services.rekening.rekening_ui import RekeningUI
 from bank_djago.services.deposito.deposito_ui import DepositoUI
-from bank_djago.services.profil_nasabah_ui import LayananNasabah
 from bank_djago.services.transaksi.riwayat.riwayat_ui import RiwayatUI
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import Utilitas
 from bank_djago.services.pinjaman.pinjaman_ui import PinjamanUI
+from bank_djago.services.nasabah.nasabah_ui import NasabahUI
 
 
 class NasabahMenu:
@@ -88,7 +87,7 @@ class NasabahMenu:
                 RiwayatUI.menu_riwayat(nasabah)
 
             elif pilihan == "6":
-                LayananNasabah.menu_profil(nasabah,rekening)
+                NasabahUI.menu_profil(nasabah)
 
             elif pilihan == "7":
                rekening = Utilitas.pilihan_rekening(nasabah)
