@@ -2,12 +2,22 @@ from bank_djago.utils.utility import JenisReferensi
 
 #blueprint untuk notifikasi
 class Notifikasi:
-    def __init__(self,jenis,pesan,jenis_referensi=None,id_objek=None):
-
+    def __init__(
+            self,
+            jenis,
+            pesan,
+            jenis_referensi=None,
+            id_objek=None,
+            sudah_dibaca=False,
+            id=None
+    ):
+        self.ID = id
         self.jenis = jenis
         self.pesan = pesan
         self.jenis_referensi = jenis_referensi
         self.id_objek = id_objek
+        self.sudah_dibaca = sudah_dibaca
+
 
     def ke_dict(self):
         return {

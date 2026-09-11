@@ -79,17 +79,6 @@ class Scheduler:
                 continue
             else:
 
-
-                if (
-                        deposito.proses_aro is not None
-                        and deposito.proses_aro < hari_ini
-                ):
-                    NotifikasiService.hapus_notifikasi_referensi(
-                        nasabah=deposito.pemilik,
-                        jenis_referensi=JenisReferensi.DEPOSITO,
-                        id_objek=deposito.ID
-                    )
-
                 if hari_ini < deposito.jatuh_tempo:
                     continue
 

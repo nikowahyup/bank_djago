@@ -1,4 +1,5 @@
 from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
+from bank_djago.penyimpanan.loaders.notifikai_loader import NotifikasiLoader
 
 from bank_djago.services.notifikasi import NotifikasiUI
 from bank_djago.services.transaksi.transaksi_ui import TransaksiUI
@@ -50,9 +51,14 @@ class NasabahMenu:
             UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
             print()
             print(f"👋Halo,{nasabah.nama}!")
-            notifikasi = nasabah.notifikasi
-            if notifikasi:
-                print(f"⚠️ Anda memiliki {len(notifikasi)} notifikasi")
+            NotifikasiLoader.muat_notifikasi(nasabah)
+            notifikasi_baru = [
+                notifikasi
+                for notifikasi in nasabah.notifikasi
+                if not notifikasi.sudah_dibaca
+            ]
+            if notifikasi_baru:
+                print(f"⚠️ Anda memiliki {len(notifikasi_baru)} notifikasi")
 
             print()
             print("1. Menu layanan Rekening")

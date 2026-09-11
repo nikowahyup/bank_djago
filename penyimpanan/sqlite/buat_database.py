@@ -181,6 +181,9 @@ def buat_tabel_notifikasi():
                 pesan TEXT NOT NULL,
                 jenis_referensi TEXT,
                 id_objek INTEGER,
+                sudah_dibaca INTEGER NOT NULL DEFAULT 0,
+                
+                CHECK (sudah_dibaca IN (0,1)),
 
                 CHECK (
                     jenis_referensi IS NULL
@@ -200,6 +203,48 @@ def buat_tabel_notifikasi():
 
         koneksi.commit()
         print("Tabel notifikasi berhasil dibuat")
+
+    finally:
+        koneksi.close()
+
+def tambah_kolom_sudah_dibaca_notifikasi():
+    koneksi = buat_koneksi()
+
+    try:
+        daftar_kolom = koneksi.execute(
+            "PRAGMA table_info(notifikasi)"
+        ).fetchall()
+
+        nama_kolom = {
+            kolom["name"]
+            for kolom in daftar_kolom
+        }
+
+        if "sudah_dibaca" not in nama_kolom:
+            koneksi.execute(
+                """
+                ALTER TABLE notifikasi
+                ADD COLUMN sudah_dibaca INTEGER
+                NOT NULL DEFAULT 0
+                CHECK (sudah_dibaca IN (0, 1))
+                """
+            )
+
+            koneksi.commit()
+            print(
+                "Kolom sudah_dibaca pada notifikasi "
+                "berhasil ditambahkan"
+            )
+
+        else:
+            print(
+                "Kolom sudah_dibaca pada notifikasi "
+                "sudah tersedia"
+            )
+
+    except Exception:
+        koneksi.rollback()
+        raise
 
     finally:
         koneksi.close()
@@ -550,7 +595,7 @@ def inisialisasi_database():
     buat_tabel_audit()
     buat_tabel_pengajuan_rekening()
     buat_tabel_transaksi()
-    tambah_kolom_transaksi_id_riwayat()
+
 
 
 

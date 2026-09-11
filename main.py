@@ -10,8 +10,8 @@ from bank_djago.services.nasabah.nasabah_ui import NasabahUI
 
 def menu():
 
-    hari_ini = datetime.date(2026,9,29)
-    Scheduler.jalankan(hari_ini)
+
+    Scheduler.jalankan()
 
     while True:
         print()
@@ -22,7 +22,6 @@ def menu():
 
         elif pilihan == "2":
             NasabahMenu.login()
-            # NasabahMenu.menu_utama(nasabah)
 
         elif pilihan == "3":
 
