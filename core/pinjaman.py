@@ -2,7 +2,15 @@ from bank_djago.utils.utility import StatusPinjaman
 
 #blueprint untuk pinjaman
 class Pinjaman:
-    def __init__(self,pemilik,rekening,nominal_pinjaman,bunga,tenor,id=None):
+    def __init__(
+            self,
+            pemilik,
+            rekening,
+            nominal_pinjaman,
+            bunga,
+            tenor,
+            id=None
+    ):
         self.ID = id
         self.pemilik = pemilik
         self.rekening = rekening

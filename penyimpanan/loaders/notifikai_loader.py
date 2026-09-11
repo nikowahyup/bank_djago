@@ -9,6 +9,8 @@ class NotifikasiLoader:
     def muat_notifikasi(nasabah):
         daftar_notifikasi = NotifikasiRepository.cari_notifikasi_nasabah(nasabah.NIK)
 
+        daftar_notifikasi_baru = []
+
         for data_notif in daftar_notifikasi:
             jenis_referensi = (
                 JenisReferensi.dari_nilai(data_notif["jenis_referensi"])
@@ -19,6 +21,13 @@ class NotifikasiLoader:
             notifikasi = Notifikasi(jenis=data_notif["jenis"],
                                     pesan=data_notif["pesan"],
                                     jenis_referensi=jenis_referensi,
-                                    id_objek=data_notif["id_objek"])
+                                    id_objek=data_notif["id_objek"],
+                                    sudah_dibaca=bool(data_notif['sudah_dibaca'])
+                                    )
 
-            nasabah.notifikasi.append(notifikasi)
+            notifikasi.ID = data_notif['id']
+
+
+            daftar_notifikasi_baru.append(notifikasi)
+
+        nasabah.notifikasi = daftar_notifikasi_baru

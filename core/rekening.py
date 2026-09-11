@@ -2,7 +2,19 @@ import datetime
 
 #blueprint untuk rekening
 class Rekening:
-    def __init__(self,norek,pin,pemilik,limit:int|None = 5000000,bunga=0.03,biaya_admin=2000,pajak=2000,level=1,minimum=500000,waktu_dibuat=None):
+    def __init__(
+            self,
+            norek,
+            pin,
+            pemilik,
+            limit:int|None = 5000000,
+            bunga=0.03,
+            biaya_admin=2000,
+            pajak=2000,
+            level=1,
+            minimum=500000,
+            waktu_dibuat=None
+    ):
 
         self.norek     = norek
         self.level     = level
@@ -156,7 +168,18 @@ class RekeningPrioritas(Rekening):
         self.saldo_min = 3_000_000
         self.limit = 15_000_000
         self.bunga = 0.05
-        super().__init__(norek,pin,pemilik,limit=self.limit,bunga=self.bunga,biaya_admin=5000,pajak=0,level=2,minimum=self.saldo_min,waktu_dibuat=waktu_dibuat)
+        super().__init__(
+            norek,
+            pin,
+            pemilik,
+            limit=self.limit,
+            bunga=self.bunga,
+            biaya_admin=5000,
+            pajak=0,
+            level=2,
+            minimum=self.saldo_min,
+            waktu_dibuat=waktu_dibuat
+        )
 
 #------------------------------------------------------------------------------------------------------------------------------
 
@@ -165,7 +188,18 @@ class RekeningGold(Rekening):
         self.saldo_min = 50_000_000
         self.limit = 200_000_000
         self.bunga = 0.07
-        super().__init__(norek,pin,pemilik,limit=self.limit,bunga=self.bunga,biaya_admin=10000,pajak=0,level=3,minimum=self.saldo_min,waktu_dibuat=waktu_dibuat)
+        super().__init__(
+            norek,
+            pin,
+            pemilik,
+            limit=self.limit,
+            bunga=self.bunga,
+            biaya_admin=10000,
+            pajak=0,
+            level=3,
+            minimum=self.saldo_min,
+            waktu_dibuat=waktu_dibuat
+        )
 
 #------------------------------------------------------------------------------------------------------------------------------
 
@@ -174,7 +208,19 @@ class RekeningPlatinum(Rekening):
     LIMIT = None
     BUNGA = 0.1
     def __init__(self,norek,pin,pemilik,waktu_dibuat=None):
-        super().__init__(norek,pin,pemilik,limit=self.LIMIT,bunga=self.BUNGA,biaya_admin=20000,pajak=0,level=4,minimum=self.SALDO_MIN,waktu_dibuat=waktu_dibuat)
+        super().__init__(
+            norek,
+            pin,
+            pemilik,
+            limit=self.LIMIT,
+            bunga=self.BUNGA,
+            biaya_admin=20000,
+            pajak=0,
+            level=4,
+            minimum=self.SALDO_MIN,
+            waktu_dibuat=waktu_dibuat
+        )
+
 
 #------------------------------------------------------------------------------------------------------------------------------
 

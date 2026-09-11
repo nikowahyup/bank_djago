@@ -14,6 +14,7 @@ from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTempla
 from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensi, JenisTransaksi
 from bank_djago.utils.validator import Validator
 from  bank_djago.penyimpanan.repositories.notifikasi_repository import  NotifikasiRepository
+from bank_djago.services.notifikasi_service import NotifikasiService
 
 
 
@@ -217,8 +218,11 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            # TODO: Simpan notifikasi persetujuan pinjaman
-            # menggunakan koneksi transaksi yang sama.
+            NotifikasiService.buat_notifikasi_persetujuan_pinjaman(
+                id_pinjaman=id_pinjaman,
+                nik_pemilik=data_nasabah['nik'],
+                koneksi=koneksi
+            )
 
             koneksi.commit()
 
@@ -370,6 +374,13 @@ class PinjamanService:
                 id_transaksi=id_transaksi
             )
 
+            NotifikasiRepository.hapus_notifikasi_dengan_referensi(
+                nik_pemilik=nasabah.NIK,
+                jenis_referensi=JenisReferensi.PINJAMAN,
+                id_objek=id_pinjaman,
+                koneksi=koneksi
+            )
+
             koneksi.commit()
 
         except Exception:
@@ -386,6 +397,12 @@ class PinjamanService:
         pinjaman.sisa_pokok = sisa_pokok
         rekening.set_saldo(saldo_baru)
         rekening.simpan_riwayat(riwayat)
+        nasabah.notifikasi = [
+            notifikasi for
+            notifikasi in nasabah.notifikasi
+            if not (notifikasi.id_objek == id_pinjaman
+            and notifikasi.jenis_referensi == JenisReferensi.PINJAMAN)
+        ]
 
         return pinjaman
 
@@ -735,6 +752,13 @@ class PinjamanService:
             AuditRepository.tambah_audit(
                 audit=audit,
                 koneksi=koneksi
+            )
+
+            NotifikasiService.buat_notifikasi_penolakan_pinjaman(
+                id_pinjaman=id_pinjaman,
+                nik_pemilik=data_nasabah['nik'],
+                koneksi=koneksi,
+                catatan_admin=catatan_admin
             )
 
 

@@ -18,16 +18,18 @@ class NotifikasiRepository:
                 jenis,
                 pesan,
                 jenis_referensi,
-                id_objek
+                id_objek,
+                sudah_dibaca
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 nik_pemilik,
                 notifikasi.jenis,
                 notifikasi.pesan,
                 jenis_referensi,
-                notifikasi.id_objek
+                notifikasi.id_objek,
+                notifikasi.sudah_dibaca
             )
         )
 
@@ -49,7 +51,8 @@ class NotifikasiRepository:
                     jenis,
                     pesan,
                     jenis_referensi,
-                    id_objek
+                    id_objek,
+                    sudah_dibaca
                 FROM notifikasi
                 WHERE nik_pemilik = ?
                 ORDER BY id DESC
@@ -140,5 +143,20 @@ class NotifikasiRepository:
             """,
             (nik_pemilik,)
         )
+
+        return cursor.rowcount
+
+
+    @staticmethod
+    def tandai_sudah_dibaca(id_notifikasi, koneksi):
+
+        cursor = koneksi.execute(
+            """
+            UPDATE 
+            notifikasi 
+                SET sudah_dibaca = 1
+                WHERE id = ?
+                """,
+            (id_notifikasi,))
 
         return cursor.rowcount

@@ -1,7 +1,12 @@
 
 #blueprint untuk nasabah
 class Nasabahh:
-    def __init__(self,nama,alamat,nik):
+    def __init__(
+            self,
+            nama,
+            alamat,
+            nik
+    ):
         self.nama     = nama.title()
         self.alamat   = alamat
         self.NIK      = nik

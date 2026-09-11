@@ -35,12 +35,11 @@ class NotifikasiService:
             )
 
 
-            NotifikasiRepository.tambah_notifikasi(
+            id_notifikasi = NotifikasiRepository.tambah_notifikasi(
                     nik_pemilik=nasabah.NIK,
                     notifikasi=notifikasi_baru,
                     koneksi=koneksi
                 )
-
 
             koneksi.commit()
 
@@ -50,9 +49,16 @@ class NotifikasiService:
         finally:
             koneksi.close()
 
-        nasabah.notifikasi = [notifikasi
-                              for notifikasi in nasabah.notifikasi if not
-        (notifikasi.jenis_referensi == jenis_referensi and notifikasi.id_objek == id_objek)]
+        notifikasi_baru.ID = id_notifikasi
+
+        nasabah.notifikasi = [
+            notifikasi
+            for notifikasi in nasabah.notifikasi
+            if not (
+                    notifikasi.jenis_referensi == jenis_referensi
+                    and notifikasi.id_objek == id_objek
+            )
+        ]
 
 
         nasabah.notifikasi.append(notifikasi_baru)
@@ -112,9 +118,8 @@ class NotifikasiService:
             id_objek=id_pinjaman
         )
 
-        id_notifikasi = NotifikasiRepository.tambah_notifikasi(nik_pemilik,notifikasi,koneksi)
+        NotifikasiRepository.tambah_notifikasi(nik_pemilik,notifikasi,koneksi)
 
-        notifikasi.ID = id_notifikasi
 
 
 
@@ -141,8 +146,44 @@ class NotifikasiService:
             id_objek=id_pinjaman
         )
 
-        id_notifikasi = NotifikasiRepository.tambah_notifikasi(nik_pemilik,notifikasi,koneksi)
+        NotifikasiRepository.tambah_notifikasi(nik_pemilik,notifikasi,koneksi)
 
-        notifikasi.ID = id_notifikasi
+
+
+
+    @staticmethod
+    def tandai_sudah_dibaca(daftar_notifikasi):
+
+        koneksi = buat_koneksi()
+        berhasil = []
+
+
+        try:
+
+            for notifikasi in daftar_notifikasi:
+
+                if notifikasi.sudah_dibaca:
+                    continue
+
+                hasil = NotifikasiRepository.tandai_sudah_dibaca(
+                    id_notifikasi=notifikasi.ID,
+                    koneksi=koneksi
+                )
+
+                if hasil == 1:
+                    berhasil.append(notifikasi)
+
+                koneksi.commit()
+
+        except Exception:
+            koneksi.rollback()
+            raise
+
+        finally:
+            koneksi.close()
+
+        for notifikasi in daftar_notifikasi:
+            notifikasi.sudah_dibaca = True
+
 
 

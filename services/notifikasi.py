@@ -1,9 +1,6 @@
-
-
-
-from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
-from bank_djago.utils.ui import UI
+from bank_djago.services.notifikasi_service import NotifikasiService
 from bank_djago.utils.utility import JenisReferensi
+from bank_djago.utils.utility import UI
 
 
 class NotifikasiUI:
@@ -20,42 +17,56 @@ class NotifikasiUI:
             print("4. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                NotifikasiUI.lihat_notifikasi(nasabah)
+                NotifikasiUI.tampilkan_notifikasi(nasabah)
 
             elif pilihan == "2":
-                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensi.DEPOSITO)
+                NotifikasiUI.tampilkan_notifikasi(nasabah,JenisReferensi.DEPOSITO)
 
             elif pilihan == "3":
-                NotifikasiUI.tampilkan_berdasarkan_referensi(nasabah,JenisReferensi.PINJAMAN)
+                NotifikasiUI.tampilkan_notifikasi(nasabah,JenisReferensi.PINJAMAN)
 
 
             elif pilihan == "4":
                 break
 
-    @staticmethod
-    def lihat_notifikasi(nasabah):
-        print(f"BANYAKNYA NOTIFIKASI {len(nasabah.notifikasi)}")
-        if not nasabah.notifikasi:
-            print("Tidak ada notifikasi.")
-            return
 
-        for i, item in enumerate(nasabah.notifikasi, start=1):
-            print(f"{i}. {item.pesan}")
+
 
     @staticmethod
-    def tampilkan_berdasarkan_referensi(nasabah, referensi_id):
+    def filter_notifikasi(nasabah,jenis_referensi=None):
 
-        daftar = [
-            item
-            for item in nasabah.notifikasi
-            if item.referensi_id == referensi_id
+        if jenis_referensi is None:
+            return [
+                notifikasi for notifikasi in
+                nasabah.notifikasi if not notifikasi.sudah_dibaca
+            ]
+
+        return [
+            notifikasi
+            for notifikasi in nasabah.notifikasi
+            if (
+                notifikasi.jenis_referensi == jenis_referensi
+                and not notifikasi.sudah_dibaca
+            )
         ]
 
-        if not daftar:
-            print("Tidak ada notifikasi.")
+
+    @staticmethod
+    def tampilkan_notifikasi(nasabah,jenis_referensi=None):
+
+        daftar_notif = NotifikasiUI.filter_notifikasi(
+            nasabah=nasabah,
+            jenis_referensi=jenis_referensi
+        )
+
+        if not daftar_notif:
+            UI.gagal("Belum ada notifikasi terbaru")
             return
 
-        for i, item in enumerate(daftar, start=1):
-            print(f"{i}. {item.pesan}")
+        for nomor,notifikasi in enumerate(daftar_notif,start=1):
+            print()
+            print(f"{nomor}. {notifikasi.pesan}")
+
+        NotifikasiService.tandai_sudah_dibaca(daftar_notifikasi=daftar_notif)
 
 
