@@ -272,4 +272,35 @@ class RekeningUI:
 
 
 
+    @staticmethod
+    def pilih_rekening(daftar_norek_aktif):
+
+        if not daftar_norek_aktif:
+            return None
+
+        if len(daftar_norek_aktif) == 1:
+            return daftar_norek_aktif[0]
+
+        while True:
+            print("Pilih nomor rekening yang ingin Anda gunakan\n")
+
+            for i, norek in enumerate(daftar_norek_aktif, start=1):
+                print(f"{i}. {norek}")
+
+            try:
+                print()
+                pilihan = int(input("Masukkan pilihan Anda: "))
+
+                if pilihan < 1 or pilihan > len(daftar_norek_aktif):
+                    UI.gagal("Pilihan tidak valid")
+                    continue
+
+            except ValueError:
+                UI.gagal("Silakan masukkan angka")
+                continue
+
+            return daftar_norek_aktif[pilihan - 1]
+
+
+
 

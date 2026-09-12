@@ -99,3 +99,17 @@ class NasabahService:
         nasabah.alamat = alamat_baru
 
 
+    @staticmethod
+    def cari_data_login(nik):
+
+        data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(nik)
+
+        if data_nasabah is None:
+            return None
+
+        return {
+            'nik':data_nasabah['nik'],
+            'nama':data_nasabah['nama']
+        }
+
+

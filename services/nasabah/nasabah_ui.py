@@ -1,6 +1,7 @@
 import sqlite3
 
 from bank_djago.services.nasabah.nasabah_service import NasabahService
+from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.validator import Validator
 from bank_djago.utils.ui import UI
@@ -107,7 +108,7 @@ class NasabahUI:
             print("Terjadi kesalahan dalam menyimpan data. Silahkan coba lagi")
 
     @staticmethod
-    def menu_profil(nasabah):
+    def menu_profil(nik):
 
         while True:
 
@@ -124,7 +125,7 @@ class NasabahUI:
                 NasabahUI.biodata(nasabah)
 
             elif pilihan == "2":
-                NasabahUI.daftar_rekening(nasabah)
+                NasabahUI.daftar_rekening(nik)
 
             elif pilihan == "3":
                 NasabahUI.ganti_alamat(nasabah)
@@ -147,18 +148,19 @@ class NasabahUI:
         print()
 
     @staticmethod
-    def daftar_rekening(nasabah):
+    def daftar_rekening(nik):
         UI.header("DAFTAR REKENING",UI.MERAH)
 
         print()
-        daftar_rekening = nasabah.rekening
+        daftar_rekening = RekeningService.cari_semua_rekening(nik)
 
-        for nomor , rekening in enumerate(daftar_rekening,start=1):
+        for nomor , data_rekening in enumerate(daftar_rekening,start=1):
+            jenis = RekeningService.level[data_rekening['level']]
             print()
-            print(f"{nomor}. {rekening.jenis}")
-            print(f"💳 Nomor Rekening : {rekening.norek}")
-            print(f"📃 Status : {rekening.status}")
-            print(f"💰 Saldo  : Rp{Utilitas.format_rupiah(rekening.saldo)}")
+            print(f"{nomor}. {jenis}")
+            print(f"💳 Nomor Rekening : {data_rekening['norek']}")
+            print(f"📃 Status : {data_rekening['status']}")
+            print(f"💰 Saldo  : Rp{Utilitas.format_rupiah(data_rekening['saldo'])}")
             print()
 
     @staticmethod

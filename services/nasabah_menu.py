@@ -1,6 +1,9 @@
 from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 from bank_djago.penyimpanan.loaders.notifikai_loader import NotifikasiLoader
+from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
+from bank_djago.services.nasabah.nasabah_service import NasabahService
 from bank_djago.services.notifikasi import NotifikasiUI
+from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.services.transaksi.transaksi_ui import TransaksiUI
 from bank_djago.services.rekening.rekening_ui import RekeningUI
 from bank_djago.services.deposito.deposito_ui import DepositoUI
@@ -23,42 +26,39 @@ class NasabahMenu:
             if nik == "0":
                 return
 
-            nasabah = NasabahLoader.muat_nasabah(nik)
+            data_login = NasabahService.cari_data_login(nik=nik)
 
-            if nasabah is None:
-                UI.gagal("NIK tidak terfdatar. Coba Lagi")
+            if data_login is None:
+                UI.gagal("Data nasabah tidak ditemukan. Coba Lagi")
                 continue
+            break
+
+        nik_aktif = data_login['nik']
 
 
-            NasabahMenu.menu_utama(nasabah)
-            return
+        daftar_norek_aktif = RekeningService.cari_norek_tersedia(nik=nik_aktif)
+
+        norek_aktif = RekeningUI.pilih_rekening(daftar_norek_aktif=daftar_norek_aktif)
+
+        sesi = {'nama': data_login['nama'],
+                'nik':nik_aktif,
+                'norek':norek_aktif}
+        NasabahMenu.menu_utama(sesi)
 
 
 
 
 
     @staticmethod
-    def menu_utama(nasabah):
+    def menu_utama(sesi):
 
-        rekening = Utilitas.pilihan_rekening(nasabah)
-        if not rekening:
-            print("Tidak ada rekening yang terdaftar")
-            return
-        print(f"nomor rekening {rekening.norek}")
+
 
         while True:
             UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
             print()
-            print(f"👋Halo,{nasabah.nama}!")
-            NotifikasiLoader.muat_notifikasi(nasabah)
-            notifikasi_baru = [
-                notifikasi
-                for notifikasi in nasabah.notifikasi
-                if not notifikasi.sudah_dibaca
-            ]
-            if notifikasi_baru:
-                print(f"⚠️ Anda memiliki {len(notifikasi_baru)} notifikasi")
-
+            print(f"👋 Halo,{sesi['nama']}!")
+            print(f"💳 Rekening Aktif : {sesi['norek']}")
             print()
             print("1. Menu layanan Rekening")
             print("2. Menu Transaksi")
@@ -75,7 +75,7 @@ class NasabahMenu:
                 RekeningUI.menu(nasabah,rekening)
                 pass
             elif pilihan == "2":
-                TransaksiUI.menu_transaksi(rekening)
+                TransaksiUI.menu_transaksi(sesi['norek'])
 
             elif pilihan == "3":
                 DepositoUI.menu_deposito(nasabah, rekening)
@@ -87,11 +87,16 @@ class NasabahMenu:
                 RiwayatUI.menu_riwayat(nasabah)
 
             elif pilihan == "6":
-                NasabahUI.menu_profil(nasabah)
+                NasabahUI.menu_profil(nik=sesi['nik'])
 
             elif pilihan == "7":
-               rekening = Utilitas.pilihan_rekening(nasabah)
-               UI.sukses("Ganti rekening berhasil!")
+                daftar_norek = RekeningService.cari_norek_tersedia(nik=sesi['nik'])
+                norek_baru = RekeningUI.pilih_rekening(daftar_norek_aktif=daftar_norek)
+
+                if norek_baru is not None:
+                    sesi['norek'] = norek_baru
+                    UI.sukses("Ganti rekening berhasil")
+\
 
 
             elif pilihan == "8":

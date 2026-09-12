@@ -577,3 +577,23 @@ class RekeningService:
 
             if rekening_terdaftar is None:
                 return norek
+
+
+    @staticmethod
+    def cari_norek_tersedia(nik):
+
+            daftar_rekening = RekeningService.cari_semua_rekening(nik=nik)
+
+            daftar_norek_aktif = []
+            for data_rekening in daftar_rekening:
+                if data_rekening['status'] != "tutup":
+                    daftar_norek_aktif.append(data_rekening['norek'])
+
+
+            return daftar_norek_aktif
+
+
+    @staticmethod
+    def cari_semua_rekening(nik):
+        return RekeningRepository.cari_rekening_dengan_nik(nik=nik)
+
