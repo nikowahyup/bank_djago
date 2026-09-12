@@ -10,7 +10,7 @@ class TransaksiUI:
 
 
     @staticmethod
-    def menu_transaksi(rekening):
+    def menu_transaksi(norek):
         while True:
             UI.header("MENU TRANSAKSI",UI.BIRU)
             print()
@@ -20,51 +20,71 @@ class TransaksiUI:
             print("4. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                TransaksiUI.setor_tunai(rekening)
+                TransaksiUI.setor_tunai(norek=norek)
             elif pilihan == "2":
-                TransaksiUI.tarik_tunai(rekening)
+                TransaksiUI.tarik_tunai(norek=norek)
             elif pilihan == "3":
-                TransaksiUI.transfer(rekening)
+                TransaksiUI.transfer(norek=norek)
             elif pilihan == "4":
                 break
 
 
 
     @staticmethod
-    def setor_tunai(rekening):
+    def setor_tunai(norek):
         print()
         UI.header("SETOR TUNAI",UI.MERAH)
         try:
              print()
              nominal  = int(input("Masukkan nominal setor: "))
+
              Utilitas.animasi("proses")
-             TransaksiService.setor_tunai(rekening, nominal)
-             UI.sukses(f"Setor tunai berhasil! Rp{Utilitas.format_rupiah(nominal)} telah ditambahkan ke rekening Anda")
+             TransaksiService.setor_tunai(
+                 norek=norek,
+                 nominal=nominal
+             )
+
+             UI.sukses(
+                 f"Setor tunai berhasil!\n"
+                 f" Rp{Utilitas.format_rupiah(nominal)} telah ditambahkan "
+                 f"ke rekening Anda"
+            )
 
         except ValueError as e:
             UI.gagal(str(e))
 
         except sqlite3.Error as error:
-            print(f"Terjadid kesalahan saat menyimpan transaksi. Silahkan coba lagi {error}")
+            print(
+                f"Terjadi kesalahan saat menyimpan transaksi.\n"
+                  f" Silahkan coba lagi {error}"
+            )
 
     @staticmethod
-    def tarik_tunai(rekening):
+    def tarik_tunai(norek):
         print()
         UI.header("TARIK TUNAI",UI.MERAH)
         try:
             print()
             nominal  = int(input("Masukkan nominal tarik: "))
             Utilitas.animasi("proses")
-            TransaksiService.tarik_tunai(rekening,nominal)
-            UI.sukses(f"Tarik tunai berhasil! Rp{Utilitas.format_rupiah(nominal)} telah dipotong dari rekening Anda")
+
+            TransaksiService.tarik_tunai(
+                norek=norek,
+                nominal=nominal
+            )
+            UI.sukses(
+                f"Tarik tunai berhasil!\n"
+                f" Rp{Utilitas.format_rupiah(nominal)} telah dipotong dari rekening Anda")
+
         except ValueError as e:
             UI.gagal(str(e))
 
         except sqlite3.Error as error:
-            print(f"Terjadid kesalahan saat menyimpan transaksi. Silahkan coba lagi {error}")
+            print(f"Terjadi kesalahan saat menyimpan transaksi. \n"
+                  f"Silahkan coba lagi {error}")
 
     @staticmethod
-    def transfer(rekening):
+    def transfer(norek):
 
         print()
         UI.header("TRANSFER SALDO",UI.MERAH)
@@ -72,7 +92,9 @@ class TransaksiUI:
             print()
             rek_penerima = input("Masukkan nomor rekening penerima: ")
             Utilitas.animasi("Mencari penerima")
-            penerima = TransaksiService.cari_penerima(rek_penerima,rekening)
+            penerima = TransaksiService.cari_penerima(
+                norek_penerima=rek_penerima,
+                norek_pengirim=norek)
             UI.sukses("Rekening ditemukan")
             UI.wadah_info(penerima.pemilik.nama,rek_penerima)
         except ValueError as e:
@@ -83,7 +105,13 @@ class TransaksiUI:
             print()
             nominal = int(input("Masukkan nominal transfer: "))
             Utilitas.animasi("proses")
-            TransaksiService.transfer(rekening,rek_penerima,nominal)
+
+            TransaksiService.transfer(
+                norek_pengirim=norek,
+                norek_penerima=rek_penerima,
+                nominal=nominal
+            )
+
             UI.sukses(f"Transfer berhasil! Rp{Utilitas.format_rupiah(nominal)} telah masuk\n"
                       f"ke rekening {penerima.pemilik.nama}")
 
