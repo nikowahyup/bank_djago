@@ -34,7 +34,7 @@ Masukkan sembarang simbol untuk keluar""")
             elif pilihan == "2":
                 AuditUI.menu_tampilkan_audit()
             elif pilihan == "3":
-                AdminPinjaman.kelola_pengajuan_pinjaman()
+                AdminPinjaman.proses_pengajuan()
             elif pilihan == "4":
                 PengajuanAdminUI.kelola_pengajuan()
 

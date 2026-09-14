@@ -10,11 +10,14 @@ from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatReposi
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.services.admin.audit_service import AuditService
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+
 from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensi, JenisTransaksi
 from bank_djago.utils.validator import Validator
 from  bank_djago.penyimpanan.repositories.notifikasi_repository import  NotifikasiRepository
 from bank_djago.services.notifikasi_service import NotifikasiService
+from bank_djago.penyimpanan.loaders.pinjaman_loader import PinjamanLoader
+from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
+from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
 
 
 
@@ -35,24 +38,51 @@ class PinjamanService:
     MAKSIMAL_PERSENTASE_DENDA = 0.1
 
     @staticmethod
-    def ajukan_pinjaman(nasabah, rekening, nominal, tenor):
-        Validator.amankan_rekening(rekening)
-
-        if rekening.pemilik is not nasabah:
-            raise ValueError("Rekening bukan milik nasabah")
+    def ajukan_pinjaman(
+            nik,
+            norek,
+            nominal,
+            tenor
+    ):
 
         if nominal < PinjamanService.MIN_PINJAMAN:
-            raise ValueError("Nominal pinjaman di bawah batas minimal")
+            raise ValueError(
+                "Nominal pinjaman di bawah batas minimal"
+            )
 
         if nominal > PinjamanService.MAX_PINJAMAN:
-            raise ValueError("Nominal pinjaman melebihi batas maksimal")
+            raise ValueError(
+                "Nominal pinjaman melebihi batas maksimal"
+            )
 
         if tenor not in PinjamanService.TENOR:
-            raise ValueError("Pilihan tenor pinjaman tidak tersedia")
+            raise ValueError(
+                "Pilihan tenor pinjaman tidak tersedia"
+            )
 
         koneksi = buat_koneksi()
 
         try:
+
+            rekening = RekeningLoader.muat_rekening(
+                norek=norek,
+                koneksi=koneksi
+            )
+
+            if rekening is None:
+                raise ValueError(
+                    "Nomor rekening tidak terdaftar"
+                )
+
+            nasabah = rekening.pemilik
+
+            if nasabah.NIK != nik:
+                raise ValueError(
+                    "NIK nasabah tidak terdaftar sebagai pemilik rekening"
+                )
+
+            Validator.amankan_rekening(rekening)
+
             pengajuan_aktif = (
                 PinjamanRepository.cari_pengajuan_aktif_nasabah(
                     nik=nasabah.NIK,
@@ -65,7 +95,6 @@ class PinjamanService:
                     "Anda masih memiliki pengajuan pinjaman "
                     "yang sedang menunggu proses"
                 )
-
             bunga = PinjamanService.TENOR[tenor]
 
             pinjaman = Pinjaman(
@@ -76,19 +105,17 @@ class PinjamanService:
                 tenor=tenor,
                 id=None
             )
-
             id_pinjaman = PinjamanRepository.tambah_pinjaman(
                 pinjaman=pinjaman,
                 koneksi=koneksi
             )
 
-            pinjaman.ID = id_pinjaman
 
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
                 jenis="pinjaman",
                 log=(
-                    f"PENGAJUAN PINJAMAN | ID {pinjaman.ID} | "
+                    f"PENGAJUAN PINJAMAN | ID {id_pinjaman} | "
                     f"Rp{Utilitas.format_rupiah(nominal)} | "
                     f"Tenor {tenor} bulan"
                 )
@@ -128,13 +155,20 @@ class PinjamanService:
         finally:
             koneksi.close()
 
-        nasabah.daftar_pinjaman.append(pinjaman)
-        rekening.simpan_riwayat(riwayat)
-
-        return pinjaman
+        return id_pinjaman
 
     @staticmethod
     def setujui_pinjaman(id_pinjaman):
+
+        if not isinstance(id_pinjaman, int):
+            raise TypeError(
+                "ID pinjaman harus berupa angka"
+            )
+
+        if id_pinjaman <= 0:
+            raise ValueError(
+                "ID pinjaman tidak valid"
+            )
         koneksi = buat_koneksi()
 
         try:
@@ -158,32 +192,16 @@ class PinjamanService:
                     f"Pinjaman tidak dapat disetujui. "
                     f"Status saat ini: {data_pinjaman['status']}"
                 )
+            norek = data_pinjaman['norek']
+            rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
-            data_rekening = (
-                RekeningRepository.cari_rekening_dengan_norek(
-                    norek=data_pinjaman["norek"],
-                    koneksi=koneksi
-                )
-            )
-
-            if data_rekening is None:
+            if rekening is None:
                 raise ValueError(
                     f"Rekening untuk pinjaman ber-ID "
                     f"{id_pinjaman} tidak ditemukan"
                 )
 
-            data_nasabah = (
-                NasabahRepository.cari_nasabah_dengan_nik(
-                    nik=data_rekening["nik_pemilik"],
-                    koneksi=koneksi
-                )
-            )
-
-            if data_nasabah is None:
-                raise ValueError(
-                    f"Nasabah untuk pinjaman ber-ID "
-                    f"{id_pinjaman} tidak ditemukan"
-                )
+            nasabah = rekening.pemilik
 
             status_baru = StatusPinjaman.DISETUJUI.value
 
@@ -206,11 +224,11 @@ class PinjamanService:
                 aksi="persetujuan_pinjaman",
                 log=(
                     f"Pinjaman dengan ID {id_pinjaman} "
-                    f"milik {data_nasabah['nama']} telah disetujui"
+                    f"milik {nasabah.nama} telah disetujui"
                 ),
-                nama=data_nasabah["nama"],
-                nik=data_nasabah["nik"],
-                norek=data_pinjaman["norek"]
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening.norek
             )
 
             AuditRepository.tambah_audit(
@@ -220,7 +238,7 @@ class PinjamanService:
 
             NotifikasiService.buat_notifikasi_persetujuan_pinjaman(
                 id_pinjaman=id_pinjaman,
-                nik_pemilik=data_nasabah['nik'],
+                nik_pemilik=nasabah.NIK,
                 koneksi=koneksi
             )
 
@@ -239,11 +257,14 @@ class PinjamanService:
 
 
     @staticmethod
-    def cairkan_pinjaman(nasabah, id_pinjaman,hari_ini=None):
+    def cairkan_pinjaman(
+            nik,
+            id_pinjaman,
+            hari_ini=None
+    ):
+
         if hari_ini is None:
             hari_ini = datetime.date.today()
-        if nasabah is None:
-            raise ValueError("Nasabah tidak tersedia")
 
         if not isinstance(id_pinjaman, int):
             raise TypeError("ID pinjaman harus berupa angka")
@@ -253,57 +274,67 @@ class PinjamanService:
 
 
         koneksi = buat_koneksi()
+
         try:
-            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman, koneksi)
+            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
+                id_pinjaman=id_pinjaman,
+                koneksi=koneksi
+            )
 
             if data_pinjaman is None:
-                raise   ValueError("Pinjaman tidak ditemukan")
+                raise   ValueError(
+                    "Pinjaman tidak ditemukan"
+                )
 
-            if data_pinjaman['status'] != StatusPinjaman.DISETUJUI.value:
-                raise ValueError("Pinjaman belum disetujui")
 
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(data_pinjaman["norek"], koneksi)
+            norek = data_pinjaman['norek']
 
-            if data_rekening is None:
-                raise ValueError("Rekening untuk pinjaman ini tidak ditemukan")
-
-            if data_rekening["nik_pemilik"] != nasabah.NIK:
-                raise ValueError("Nasabah ini tidak terdaftar sebagai pemilik pinjaman")
-
-            rekening = next((
-                        rekening for rekening in nasabah.rekening
-                        if rekening.norek == data_rekening['norek']),None)
+            rekening = RekeningLoader.muat_rekening(
+                norek=norek,
+                koneksi=koneksi
+            )
 
             if rekening is None:
-                raise ValueError("Rekening pinjaman tidak ditemukan pada data nasabah")
-            if rekening.pemilik is not nasabah:
-                raise ValueError("Pemilik objek rekening tidak sesuai")
+                raise ValueError(
+                    "Rekening tidak ditemukan"
+                )
 
+            nasabah = rekening.pemilik
+
+            if nasabah.NIK != nik:
+                raise ValueError(
+                    "NIK ini tidak terdaftar sebagai pemilik pinjaman"
+                )
             Validator.amankan_rekening(rekening)
 
-            pinjaman = next((
-                pinjaman for pinjaman in nasabah.daftar_pinjaman
-                if pinjaman.ID == id_pinjaman),None)
+            if data_pinjaman['status'] != StatusPinjaman.DISETUJUI.value:
+                raise ValueError(
+                    "Pinjaman belum disetujui"
+                )
 
-            if pinjaman is None:
-                raise ValueError("Objek pinjaman tidak ditemukan pada data nasabah")
 
-            if pinjaman.pemilik is not nasabah:
-                raise ValueError("Pinjaman tidak terdaftar di daftar pinjaman nasabah")
+            pinjaman = PinjamanLoader.rangkai_pinjaman(
+                data_pinjaman=data_pinjaman,
+                nasabah=nasabah,
+                rekening=rekening
+            )
 
-            if pinjaman.rekening is not rekening:
-                raise ValueError("Objek rekening pada pinjaman tidak sesuai")
 
-            bunga = data_pinjaman['bunga']
-            tenor = data_pinjaman['tenor']
-            nominal_pinjaman = data_pinjaman['nominal_pinjaman']
+
+
+
+            bunga = pinjaman.bunga
+            tenor = pinjaman.tenor
+            nominal_pinjaman = pinjaman.nominal_pinjaman
             persentase_bunga = bunga / 12
             sisa_pokok = nominal_pinjaman
 
-            saldo_sebelum = data_rekening['saldo']
+            saldo_sebelum = rekening.saldo
             saldo_baru = saldo_sebelum + nominal_pinjaman
-            cicilan_tetap = round((nominal_pinjaman * persentase_bunga * ((1 + persentase_bunga) ** tenor)) /
-                                  ((1 + persentase_bunga) ** tenor - 1))
+            cicilan_tetap = round(
+                (nominal_pinjaman * persentase_bunga *
+                 ((1 + persentase_bunga) ** tenor)) /
+                 ((1 + persentase_bunga) ** tenor - 1))
 
             status_baru = StatusPinjaman.AKTIF
             tanggal_pencairan = hari_ini
@@ -320,17 +351,21 @@ class PinjamanService:
                                                                          )
 
             if jumlah_baris != 1:
-                raise ValueError('Gagal memperbarui status pinjaman')
+                raise ValueError(
+                    'Gagal memperbarui status pinjaman'
+                )
 
 
             jumlah_baris_rek = RekeningRepository.perbarui_saldo(
-                norek=data_rekening['norek'],
+                norek=norek,
                 saldo_baru=saldo_baru,
                 koneksi=koneksi
             )
 
             if jumlah_baris_rek != 1:
-                raise ValueError("Gagal menambah saldo rekening")
+                raise ValueError(
+                    "Gagal menambah saldo rekening"
+                )
 
             transaksi = {"jenis":JenisTransaksi.PENCAIRAN_PINJAMAN,
                          "norek_tujuan":rekening.norek,
@@ -341,12 +376,16 @@ class PinjamanService:
                          "id_referensi":id_pinjaman,
                          "waktu":datetime.datetime.now()}
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi,koneksi)
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
 
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
                 jenis='pencairan pinjaman',
-                log=f"PENCAIRAN PINJAMAN {id_pinjaman} | +Rp{Utilitas.format_rupiah(nominal_pinjaman)}"
+                log=f"PENCAIRAN PINJAMAN {id_pinjaman} | "
+                    f"+Rp{Utilitas.format_rupiah(nominal_pinjaman)}"
             )
 
             audit = AuditService.tambah_audit(
@@ -390,32 +429,22 @@ class PinjamanService:
         finally:
             koneksi.close()
 
-        pinjaman.cicilan_tetap = cicilan_tetap
-        pinjaman.tanggal_pencairan = tanggal_pencairan
-        pinjaman.status = status_baru
-        pinjaman.tanggal_jatuh_tempo = tanggal_jatuh_tempo
-        pinjaman.sisa_pokok = sisa_pokok
-        rekening.set_saldo(saldo_baru)
-        rekening.simpan_riwayat(riwayat)
-        nasabah.notifikasi = [
-            notifikasi for
-            notifikasi in nasabah.notifikasi
-            if not (notifikasi.id_objek == id_pinjaman
-            and notifikasi.jenis_referensi == JenisReferensi.PINJAMAN)
-        ]
 
-        return pinjaman
+        return True
 
 
 
 
     @staticmethod
-    def bayar_cicilan(nasabah,id_pinjaman,hari_ini=None):
+    def bayar_cicilan(
+            nik,
+            norek_pembayaran,
+            id_pinjaman,
+            hari_ini=None
+    ):
+
         if hari_ini is None:
             hari_ini = datetime.date.today()
-
-        if nasabah is None:
-            raise ValueError("Nasabah tidak tersedia")
 
         if not isinstance(id_pinjaman, int):
             raise TypeError("ID pinjaman harus berupa angka")
@@ -427,70 +456,85 @@ class PinjamanService:
         koneksi = buat_koneksi()
 
         try:
-            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman, koneksi)
+            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
+                id_pinjaman=id_pinjaman,
+                koneksi=koneksi
+            )
 
             if data_pinjaman is None:
                 raise ValueError("Pinjaman tidak ditemukan")
 
-            if data_pinjaman['status'] != StatusPinjaman.AKTIF.value:
-                raise ValueError("Pinjaman sedang tidak aktif")
 
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(data_pinjaman["norek"], koneksi)
+            norek = data_pinjaman['norek']
 
-            if data_rekening is None:
-                raise ValueError("Rekening untuk pinjaman ini tidak ditemukan")
+            if norek != norek_pembayaran:
+                raise ValueError(
+                    "Pinjaman tidak terdaftar pada rekening yang sedang digunakan"
+                )
 
-            if data_rekening["nik_pemilik"] != nasabah.NIK:
-                raise ValueError("Nasabah ini tidak terdaftar sebagai pemilik pinjaman")
+            rekening = RekeningLoader.muat_rekening(
+                norek=norek,
+                koneksi=koneksi
+            )
 
-            rekening = next((rekening for rekening in nasabah.rekening if rekening.norek == data_rekening['norek']),
-                            None)
             if rekening is None:
-                raise ValueError("Rekening pinjaman tidak ditemukan pada data nasabah")
-            if rekening.pemilik is not nasabah:
-                raise ValueError("Pemilik objek rekening tidak sesuai")
+                raise ValueError(
+                    "Rekening untuk pinjaman ini tidak ditemukan"
+                )
 
-            Validator.amankan_rekening(rekening)
+            nasabah = rekening.pemilik
 
-            pinjaman = next((pinjaman for pinjaman in nasabah.daftar_pinjaman if pinjaman.ID == id_pinjaman), None)
+            if nik != nasabah.NIK:
+                raise ValueError(
+                    "Nasabah ini tidak terdaftar sebagai pemilik pinjaman"
+                )
+            if data_pinjaman['status'] != StatusPinjaman.AKTIF.value:
+                raise ValueError(
+                    "Pinjaman sedang tidak aktif"
+                )
 
-            if pinjaman is None:
-                raise ValueError("Objek pinjaman tidak ditemukan pada data nasabah")
+            Validator.amankan_rekening(rekening=rekening)
 
-            if pinjaman.pemilik is not nasabah:
-                raise ValueError("Pinjaman tidak terdaftar di daftar pinjaman nasabah")
-
-            if pinjaman.rekening is not rekening:
-                raise ValueError("Objek rekening pada pinjaman tidak sesuai")
-
-            if data_pinjaman["sisa_pokok"] <= 0:
-                raise ValueError("Pinjaman tidak memiliki sisa pokok")
-
-            if data_pinjaman["cicilan_terbayar"] >= data_pinjaman["tenor"]:
-                raise ValueError("Seluruh cicilan pinjaman telah dibayar")
-
-            if data_pinjaman["tanggal_pencairan"] is None:
-                raise ValueError("Pinjaman belum memiliki tanggal pencairan")
-
-            if data_pinjaman["tanggal_jatuh_tempo"] is None:
-                raise ValueError("Jadwal pembayaran pinjaman belum tersedia")
-
-            norek = data_rekening['norek']
-            saldo_sebelum = data_rekening["saldo"]
-
-            tenor = data_pinjaman["tenor"]
-            bunga = data_pinjaman["bunga"]
-            cicilan_tetap = data_pinjaman["cicilan_tetap"]
-            cicilan_terbayar = data_pinjaman["cicilan_terbayar"]
-            sisa_pokok = data_pinjaman["sisa_pokok"]
-
-            tanggal_pencairan = datetime.date.fromisoformat(
-                data_pinjaman["tanggal_pencairan"]
+            pinjaman = PinjamanLoader.rangkai_pinjaman(
+                data_pinjaman=data_pinjaman,
+                nasabah=nasabah,
+                rekening=rekening
             )
 
-            tanggal_jatuh_tempo = datetime.date.fromisoformat(
-                data_pinjaman["tanggal_jatuh_tempo"]
-            )
+            if pinjaman.sisa_pokok <= 0:
+                raise ValueError(
+                    "Pinjaman tidak memiliki sisa pokok"
+                )
+
+
+            if pinjaman.cicilan_terbayar >= pinjaman.tenor:
+                raise ValueError(
+                    "Seluruh cicilan pinjaman telah dibayar"
+                )
+
+
+            if pinjaman.tanggal_pencairan is None:
+                raise ValueError(
+                    "Pinjaman belum memiliki tanggal pencairan"
+                )
+
+            if pinjaman.tanggal_jatuh_tempo is None:
+                raise ValueError(
+                    "Jadwal pembayaran pinjaman belum tersedia"
+                )
+
+
+            saldo_sebelum = rekening.saldo
+
+            tenor = pinjaman.tenor
+            bunga = pinjaman.bunga
+            cicilan_tetap = pinjaman.cicilan_tetap
+            cicilan_terbayar = pinjaman.cicilan_terbayar
+            sisa_pokok = pinjaman.sisa_pokok
+
+            tanggal_pencairan = pinjaman.tanggal_pencairan
+
+            tanggal_jatuh_tempo = pinjaman.tanggal_jatuh_tempo
 
 
             tanggal_boleh_bayar = PinjamanService.tanggal_boleh_bayar(
@@ -501,7 +545,10 @@ class PinjamanService:
                 raise ValueError(f"Cicilan selanjutnya baru boleh dibayar mulai "
                                  f"{Utilitas.format_tanggal_indonesia(tanggal_boleh_bayar)}")
 
-            hari_terlambat = PinjamanService.hitung_hari_terlambat(tanggal_jatuh_tempo, hari_ini)
+            hari_terlambat = PinjamanService.hitung_hari_terlambat(
+                tanggal_jatuh_tempo=tanggal_jatuh_tempo,
+                hari_ini=hari_ini
+            )
 
             denda = PinjamanService.hitung_denda(
                     tanggal_jatuh_tempo=tanggal_jatuh_tempo,
@@ -516,13 +563,16 @@ class PinjamanService:
 
 
             if saldo_baru < rekening.saldosetor_min:
-                raise ValueError("Saldo tidak cukup untuk membayar cicilan dan denda")
+                raise ValueError(
+                    "Saldo tidak cukup untuk membayar cicilan dan denda"
+                )
 
             cicilan_terbayar_baru = cicilan_terbayar + 1
 
             pinjaman_lunas = cicilan_terbayar_baru >= tenor
 
             if pinjaman_lunas:
+                tanggal_bayar_selanjutnya = None
 
                 status_baru = StatusPinjaman.LUNAS
                 sisa_pokok_baru = 0
@@ -546,10 +596,16 @@ class PinjamanService:
                 )
 
             else:
+                tanggal_bayar_selanjutnya = PinjamanService.tanggal_boleh_bayar(
+                    cicilan_terbayar=cicilan_terbayar_baru,
+                    tanggal_pencairan=tanggal_pencairan
+                )
 
                 sisa_pokok_baru = sisa_pokok - pokok_saja
                 status_baru = StatusPinjaman.AKTIF
-                tanggal_jatuh_tempo_baru = Utilitas.tambah_bulan(tanggal_jatuh_tempo, 1)
+                tanggal_jatuh_tempo_baru = Utilitas.tambah_bulan(
+                    tanggal=tanggal_jatuh_tempo,
+                    bulan=1)
 
                 log_audit = (
                     f"{nasabah.nama} membayar cicilan "
@@ -572,7 +628,9 @@ class PinjamanService:
             )
 
             if jumlah_baris_rek != 1:
-                raise ValueError("Gagal melakukan pembayaran cicilan")
+                raise ValueError(
+                    "Gagal melakukan pembayaran cicilan"
+                )
 
             jumlah_baris_pin = PinjamanRepository.perbarui_setelah_pembayaran(
                 id_pinjaman=id_pinjaman,
@@ -645,21 +703,15 @@ class PinjamanService:
         finally:
             koneksi.close()
 
-        pinjaman.status = status_baru
-        pinjaman.sisa_pokok = sisa_pokok_baru
-        pinjaman.cicilan_terbayar = cicilan_terbayar_baru
-        pinjaman.tanggal_jatuh_tempo = tanggal_jatuh_tempo_baru
-        rekening.set_saldo(saldo_baru)
-        rekening.simpan_riwayat(riwayat)
-        nasabah.notifikasi = [
-            notifikasi
-            for notifikasi in nasabah.notifikasi
-            if not (
-                    notifikasi.jenis_referensi == JenisReferensi.PINJAMAN
-                    and notifikasi.id_objek == id_pinjaman
+        return {
+            "id_pinjaman": id_pinjaman,
+            "status": status_baru,
+            "tanggal_bayar_selanjutnya": (
+                None
+                if pinjaman_lunas
+                else tanggal_bayar_selanjutnya
             )
-        ]
-        return pinjaman
+        }
 
 
 
@@ -905,8 +957,97 @@ class PinjamanService:
             f"Rp{Utilitas.format_rupiah(total_tagihan)}."
         )
 
+    @staticmethod
+    def cari_pinjaman_nasabah(nik):
+
+        daftar_pinjaman = (
+            PinjamanRepository.cari_semua_pinjaman_dengan_nik(
+                nik=nik
+            )
+        )
+
+        return [
+            PinjamanService._normalisasi_data_pinjaman(
+                data_pinjaman
+            )
+            for data_pinjaman in daftar_pinjaman
+        ]
 
 
 
 
 
+
+
+
+
+    @staticmethod
+    def _normalisasi_data_pinjaman(data_pinjaman):
+
+        data_pinjaman = dict(data_pinjaman)
+
+        data_pinjaman['status'] = StatusPinjaman(data_pinjaman['status'])
+
+        if data_pinjaman['tanggal_pencairan'] is not None:
+            data_pinjaman['tanggal_pencairan'] = (
+                datetime.date.fromisoformat(data_pinjaman['tanggal_pencairan']
+                                            )
+            )
+
+        if data_pinjaman['tanggal_jatuh_tempo'] is not None:
+            data_pinjaman['tanggal_jatuh_tempo'] = (
+                datetime.date.fromisoformat(data_pinjaman['tanggal_jatuh_tempo']
+                                            )
+            )
+
+        return data_pinjaman
+
+
+    @staticmethod
+    def cari_semua_pinjaman_diajukan():
+        daftar_pinjaman = PinjamanRepository.cari_semua_pinjaman_diajukan()
+
+        return [
+            PinjamanService._normalisasi_data_pinjaman(data_pinjaman=data_pinjaman)
+                for data_pinjaman in daftar_pinjaman]
+
+
+
+    @staticmethod
+    def detail_pinjaman(id_pinjaman):
+
+        data_pinjaman = PinjamanRepository.cari_detail_pinjaman(
+            id_pinjaman=id_pinjaman
+        )
+
+        if data_pinjaman is None:
+            return None
+
+        detail_pinjaman = PinjamanService._normalisasi_data_pinjaman(
+            data_pinjaman=data_pinjaman['detail_pinjaman']
+        )
+
+        pinjaman_aktif = dict(data_pinjaman['pinjaman_aktif'])
+
+        return {
+            "detail_pinjaman":detail_pinjaman,
+            "pinjaman_aktif":pinjaman_aktif
+        }
+
+    @staticmethod
+    def cari_semua_pinjaman_dengan_norek(
+            norek,
+            status
+    ):
+
+        daftar_pinjaman = (
+            PinjamanRepository.cari_semua_pinjaman_dengan_norek(
+                norek=norek,
+                status=status
+            )
+        )
+
+        return [
+            PinjamanService._normalisasi_data_pinjaman(data_pinjaman)
+            for data_pinjaman in daftar_pinjaman
+        ]
