@@ -33,3 +33,6 @@ htmlcov/
 
 # Konfigurasi IDE lokal
 .idea/
+
+# Manual / exploratory tests
+utils/tests/
