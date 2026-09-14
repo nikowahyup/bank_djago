@@ -81,7 +81,7 @@ class NasabahMenu:
                 DepositoUI.menu_deposito(nasabah, rekening)
 
             elif pilihan == "4":
-                PinjamanUI.menu(nasabah, rekening)
+                PinjamanUI.menu(nik=sesi['nik'],norek=sesi['norek'])
 
             elif pilihan == "5":
                 RiwayatUI.menu_riwayat(nasabah)

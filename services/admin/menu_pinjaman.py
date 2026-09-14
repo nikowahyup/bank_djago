@@ -4,6 +4,7 @@ from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahReposi
 from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
+from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import Utilitas
 
@@ -13,185 +14,136 @@ from bank_djago.utils.utility import Utilitas
 class AdminPinjaman:
 
     @staticmethod
-    def kelola_pengajuan_pinjaman():
-        daftar_pengajuan = (
-            PinjamanRepository.cari_semua_pinjaman_diajukan()
-        )
+    def pilih_pengajuan():
+        daftar_pengajuan = PinjamanService.cari_semua_pinjaman_diajukan()
 
         if not daftar_pengajuan:
-            print("Belum ada pengajuan pinjaman")
+            UI.gagal("Belum ada pengajuan pinjaman")
             return
 
-        UI.header("DAFTAR PENGAJUAN PINJAMAN", UI.BIRU)
+        UI.header("PILIH PENGAJUAN PINJAMAN",UI.MERAH)
+        print()
 
-        for nomor, data_pinjaman in enumerate(
-                daftar_pengajuan,
-                start=1
-        ):
-            data_rekening = (
-                RekeningRepository.cari_rekening_dengan_norek(
-                    norek=data_pinjaman["norek"]
-                )
-            )
-
-            if data_rekening is None:
-                UI.gagal(
-                    f"Rekening untuk pinjaman ber-ID "
-                    f"{data_pinjaman['id']} tidak ditemukan"
-                )
-                return
-
-            data_nasabah = (
-                NasabahRepository.cari_nasabah_dengan_nik(
-                    nik=data_rekening["nik_pemilik"]
-                )
-            )
-
-            if data_nasabah is None:
-                UI.gagal(
-                    f"Nasabah untuk pinjaman ber-ID "
-                    f"{data_pinjaman['id']} tidak ditemukan"
-                )
-                return
-
+        for nomor ,data_pinjaman in enumerate(daftar_pengajuan, start=1):
             print()
-            print(f"{nomor}. Pinjaman #{data_pinjaman['id']}")
-            print(f"   Nasabah : {data_nasabah['nama']}")
-            print(f"   NIK     : {data_nasabah['nik']}")
-            print(f"   Norek   : {data_pinjaman['norek']}")
+            print(f"{nomor}.")
+            print(f"Nama     : {data_pinjaman['nama_pemilik']}")
+            print(f"Rekening : {data_pinjaman['norek']}")
+            print(f"Nominal  : Rp{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])}")
+            print(f"Tenor    : {data_pinjaman['tenor']} bulan")
+            print(f"Bunga    : {data_pinjaman['bunga'] * 100 :.1f}% / tahun")
 
-
-        daftar_id = {
-            data_pinjaman["id"]
-            for data_pinjaman in daftar_pengajuan
-        }
-
+        print()
         while True:
             try:
-                id_pinjaman = int(
-                    input(
-                        "\nMasukkan ID yang ingin diproses "
-                        "(ketik 0 untuk keluar): "
-                    )
-                )
+                pilihan = int(input("Masukkan pilihan (ketik 0 untuk keluar): "))
 
             except ValueError:
                 UI.gagal("Pilih menggunakan angka")
                 continue
 
-            if id_pinjaman == 0:
+            if pilihan == 0:
                 return
 
-            if id_pinjaman not in daftar_id:
-                UI.gagal("ID tidak ditemukan dalam daftar pengajuan")
+            if pilihan < 0 or pilihan > len(daftar_pengajuan):
+                UI.gagal("Pilihan tidak valid")
                 continue
-
             break
 
-        data_pinjaman = (
-            PinjamanRepository.cari_pinjaman_dengan_id(
-                id_pinjaman=id_pinjaman
-            )
-        )
+
+        return daftar_pengajuan[pilihan - 1]
+
+    @staticmethod
+    def proses_pengajuan():
+
+        pengajuan_terpilih = AdminPinjaman.pilih_pengajuan()
+
+        if pengajuan_terpilih is None:
+            return
+
+
+        id_pinjaman = pengajuan_terpilih['id']
+
+
+        data_pinjaman = PinjamanService.detail_pinjaman(id_pinjaman=id_pinjaman)
 
         if data_pinjaman is None:
-            UI.gagal("Pinjaman tidak ditemukan")
+            UI.gagal("Data pinjaman tidak ditemukan")
             return
 
-        data_rekening = (
-            RekeningRepository.cari_rekening_dengan_norek(
-                norek=data_pinjaman["norek"]
-            )
-        )
-
-        if data_rekening is None:
-            UI.gagal("Rekening pinjaman tidak ditemukan")
-            return
-
-        data_nasabah = (
-            NasabahRepository.cari_nasabah_dengan_nik(
-                nik=data_rekening["nik_pemilik"]
-            )
-        )
-
-        if data_nasabah is None:
-            UI.gagal("Nasabah pemilik pinjaman tidak ditemukan")
-            return
+        detail = data_pinjaman['detail_pinjaman']
+        beban = data_pinjaman['pinjaman_aktif']
 
         print()
-        UI.header("DETAIL PENGAJUAN PINJAMAN", UI.MERAH)
+        print("╔" +"═"*17, "DETAIL PINJAMAN" ,"═"*17 + "╗")
+        print()
+        print(f"  ID pinjaman : {id_pinjaman}")
+        print(f"  Nama        : {detail['nama_pemilik']}")
+        print(f"  Rekening    : {detail['norek']}")
+        print(f"  Nominal     : Rp{Utilitas.format_rupiah(detail['nominal_pinjaman'])}")
+        print(f"  Tenor       : {detail['tenor']} bulan")
+        print(f"  Bunga       : {detail['bunga'] * 100 :.1f}% / tahun\n")
+
+        jenis_rekening = RekeningService.level[detail['level_rekening']]
+        print( '-'*15 + "REKENING PEMBAYARAN" + '-'*15)
         print()
 
-        print(f"ID Pinjaman : {data_pinjaman['id']}")
-        print(f"Nasabah     : {data_nasabah['nama']}")
-        print(f"NIK         : {data_nasabah['nik']}")
-        print(f"Rekening    : {data_rekening['norek']}")
-        print(
-            f"Nominal     : Rp"
-            f"{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])}"
-        )
-        print(
-            f"Bunga       : "
-            f"{data_pinjaman['bunga'] * 100}% per tahun"
-        )
-        print(f"Tenor       : {data_pinjaman['tenor']} bulan")
-        print(f"Status      : {data_pinjaman['status']}")
+        print(f"  Nomor Rekening : {detail['norek']}")
+        print(f"  Jenis          : {jenis_rekening}")
+        print(f"  Status         : {detail['status_rekening']}")
+        print(f"  Saldo          : Rp{Utilitas.format_rupiah(detail['saldo_rekening'])}\n")
+
+        print( '-'*17 + "BEBAN REKENING" + '-'*17)
+        print()
+        print(f"  Pinjaman Aktif Rekening : {beban['jumlah_pinjaman_aktif']}")
+        print(f"  Total Cicilan           : Rp{Utilitas.format_rupiah(beban['total_cicilan_tetap'])}")
+        print(f"  Total Sisa Pokok        : Rp{Utilitas.format_rupiah(beban['total_sisa_pokok'])}\n")
+        print("╚" + "═" * 46 + "╝")
+        print()
 
         while True:
             print()
             print("1. Setujui Pinjaman")
             print("2. Tolak Pinjaman")
-            print("3. Tunda/kembali")
+            print("3. Keluar\n")
+            pilihan = input(
+                "Berikan Keputusan (pilih menggunakan angka): "
+            )
 
-            proses = input("Pilih proses pengajuan: ")
+            if not pilihan.isdigit():
+                UI.gagal("Pilih menggunakan angka")
+                continue
 
-            if proses == "1":
+            elif pilihan == "1":
                 try:
-                    PinjamanService.setujui_pinjaman(
-                        id_pinjaman=id_pinjaman
-                    )
+                    PinjamanService.setujui_pinjaman(id_pinjaman=id_pinjaman)
 
                     UI.sukses(
-                        "Pengajuan pinjaman berhasil disetujui"
+                        f"Pinjaman berhasil disetujui"
                     )
+                    return
 
-                except ValueError as error:
-                    UI.gagal(str(error))
+                except ValueError as e:
+                    UI.gagal(str(e))
 
-                except sqlite3.Error as error:
-                    UI.gagal(
-                        f"Terjadi kesalahan pada database: {error}"
-                    )
-
-                return
-
-            elif proses == "2":
-                catatan_admin = input(
-                    "Berikan catatan kepada nasabah: "
-                )
+            elif pilihan == "2":
+                catatan = input("Berikan catatan pada nasabah: ")
 
                 try:
+
                     PinjamanService.tolak_pinjaman(
+
                         id_pinjaman=id_pinjaman,
-                        catatan_admin=catatan_admin
+                        catatan_admin=catatan
                     )
+                    UI.gagal("Pinjaman berhasil ditolak")
+                    return
 
-                    UI.sukses(
-                        "Pengajuan pinjaman berhasil ditolak"
-                    )
+                except ValueError as e:
+                    UI.gagal(str(e))
 
-                except ValueError as error:
-                    UI.gagal(str(error))
-
-                except sqlite3.Error as error:
-                    UI.gagal(
-                        f"Terjadi kesalahan pada database: {error}"
-                    )
-
+            elif pilihan == '3':
                 return
 
-            elif proses == "3":
-                return
 
-            else:
-                UI.gagal("Pilihan tidak tersedia")
+

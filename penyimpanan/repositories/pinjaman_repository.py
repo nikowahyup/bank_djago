@@ -75,28 +75,6 @@ class PinjamanRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-    @staticmethod
-    def cari_semua_pinjaman_diajukan(koneksi=None):
-        kelola_koneksi = koneksi is None
-
-        if kelola_koneksi:
-            koneksi = buat_koneksi()
-
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT *
-                FROM pinjaman
-                WHERE status = 'diajukan'
-                ORDER BY id ASC
-                """
-            )
-
-            return cursor.fetchall()
-
-        finally:
-            if kelola_koneksi:
-                koneksi.close()
 
     @staticmethod
     def cari_pengajuan_aktif_nasabah(nik, koneksi=None):
@@ -294,5 +272,126 @@ class PinjamanRepository:
 
 
 
+    @staticmethod
+    def cari_semua_pinjaman_diajukan(koneksi=None):
+
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            cursor = koneksi.execute(
+                """
+                SELECT pinjaman.*,
+                    rekening.nik_pemilik,
+                    nasabah.nama AS nama_pemilik
+                FROM pinjaman
+                JOIN rekening 
+                ON rekening.norek = pinjaman.norek 
+                JOIN nasabah 
+                ON rekening.nik_pemilik = nasabah.nik
+                WHERE pinjaman.status = 'diajukan'
+                ORDER BY pinjaman.id ASC
+                """
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
+
+
+    @staticmethod
+    def cari_detail_pinjaman(
+            id_pinjaman,
+            koneksi=None
+    ):
+
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+            detail_pinjaman = koneksi.execute(
+                """
+                SELECT pinjaman.*,
+                rekening.nik_pemilik,
+                nasabah.nama AS nama_pemilik,
+                rekening.saldo AS saldo_rekening,
+                rekening.status AS status_rekening,
+                rekening.level AS level_rekening
+                FROM pinjaman 
+                JOIN rekening
+                ON rekening.norek = pinjaman.norek
+                JOIN nasabah
+                ON rekening.nik_pemilik = nasabah.nik
+                WHERE pinjaman.id = ?
+                """,
+                (id_pinjaman,)
+            ).fetchone()
+
+            if detail_pinjaman is None:
+                return None
+
+
+            ringkasan_pinjaman_aktif = koneksi.execute(
+                """
+                SELECT
+                    COUNT(*) AS jumlah_pinjaman_aktif,
+                    COALESCE(SUM(sisa_pokok) ,0) AS total_sisa_pokok,
+                    COALESCE(SUM(cicilan_tetap), 0) AS total_cicilan_tetap
+                FROM pinjaman
+                WHERE norek = ?
+                AND status = 'aktif'
+            """
+            ,(detail_pinjaman['norek'],)
+            ).fetchone()
+
+            return {
+                "detail_pinjaman":detail_pinjaman,
+                "pinjaman_aktif":ringkasan_pinjaman_aktif
+                    }
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
+
+
+    @staticmethod
+    def cari_semua_pinjaman_dengan_norek(
+            norek,
+            status,
+            koneksi=None
+    ):
+
+        kelola_koneksi = koneksi is None
+
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+
+            cursor = koneksi.execute(
+                """
+                SELECT *
+                 FROM pinjaman
+                WHERE norek = ?
+                AND status = ?
+                ORDER BY id ASC
+                """,
+                (
+                    norek,
+                    status.value
+                )
+            )
+
+            return cursor.fetchall()
+
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
 
 
