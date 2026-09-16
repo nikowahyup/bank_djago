@@ -122,3 +122,35 @@ class DepositoLoader:
 
         finally:
             koneksi.close()
+
+
+    @staticmethod
+    def rangkai_deposito(data_deposito, nasabah, rekening):
+
+        tanggal_buka = datetime.date.fromisoformat(data_deposito["tanggal_buka"])
+        tanggal_jatuh_tempo = datetime.date.fromisoformat(data_deposito["jatuh_tempo"])
+
+
+        deposito = Deposito(
+            pemilik=nasabah,
+            rekening=rekening,
+            nominal=data_deposito['nominal'],
+            bunga=data_deposito['bunga'],
+            id=data_deposito['id'],
+            lama_bulan=data_deposito['lama_bulan'],
+            tanggal_buka=tanggal_buka,
+            tanggal_jatuh_tempo=tanggal_jatuh_tempo
+        )
+
+        deposito.status = data_deposito["status"]
+        deposito.jenis_aro = data_deposito["jenis_aro"]
+        deposito.lama_aro = data_deposito["lama_aro"]
+
+        proses_aro = data_deposito["proses_aro"]
+        deposito.proses_aro = (
+            datetime.date.fromisoformat(proses_aro)
+            if proses_aro is not None
+            else None
+        )
+
+        return deposito

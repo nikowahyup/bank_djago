@@ -43,6 +43,7 @@ class NasabahMenu:
         sesi = {'nama': data_login['nama'],
                 'nik':nik_aktif,
                 'norek':norek_aktif}
+
         NasabahMenu.menu_utama(sesi)
 
 
@@ -78,7 +79,7 @@ class NasabahMenu:
                 TransaksiUI.menu_transaksi(sesi['norek'])
 
             elif pilihan == "3":
-                DepositoUI.menu_deposito(nasabah, rekening)
+                DepositoUI.menu_deposito(nik=sesi['nik'], norek=sesi['norek'])
 
             elif pilihan == "4":
                 PinjamanUI.menu(nik=sesi['nik'],norek=sesi['norek'])

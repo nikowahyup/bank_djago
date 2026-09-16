@@ -1,108 +1,43 @@
 from bank_djago.services.deposito.deposito_service import DepositoService, JenisAro
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import Utilitas
-
+import sqlite3
 
 class DepositoUI:
 
+    BATAL = object()
+
 
     @staticmethod
-    def menu_deposito(nasabah,rekening):
+    def menu_deposito(nik, norek):
+
         while True:
             UI.header("MENU DEPOSITO",UI.KUNING)
+            UI.info_rekening(norek)
             print()
             print("1. Buka Deposito")
             print("2. Cairkan Deposito")
             print("3. Lihat Info Deposito")
-
-            print("4. Keluar\n")
+            print("4. Hentikan ARO Deposito")
+            print("5. Keluar\n")
             pilihan = input("Masukkan pilihan Anda: ")
             if pilihan == "1":
-                DepositoUI.buka_deposito(rekening)
+                DepositoUI.buka_deposito(nik=nik, norek=norek)
             elif pilihan == "2":
-                DepositoUI.cairkan_deposito(nasabah)
+                DepositoUI.cairkan_deposito(nik=nik, norek=norek)
             elif pilihan == "3":
-                DepositoUI.lihat_deposito(nasabah)
+                DepositoUI.lihat_deposito(nik=nik)
             elif pilihan == "4":
+                DepositoUI.hentikan_aro(nik=nik, norek=norek)
+
+            elif pilihan == '5':
                 break
 
-
-
     @staticmethod
-    def lihat_deposito(nasabah):
-            UI.header("LIHAT DEPOSITO ANDA", UI.MERAH)
-
-
-            deposito = nasabah.deposito
-
-            if not deposito:
-                print("Anda belum melakukan deposito")
-                return
-
-            for i, daftar in enumerate(deposito, start=1):
-                print(
-                    f"{i}. Rp{Utilitas.format_rupiah(daftar.nominal)}"
-                    f" | Waktu {daftar.lama_bulan} bulan"
-                    f" | Status {daftar.status}"
-                )
-
-            try:
-                pilihan = int(input("Masukkan pilihan Anda: "))
-
-                if pilihan < 1 or pilihan > len(deposito):
-                    print("Pilihan tidak tersedia")
-                    return
-
-            except ValueError:
-                print("Masukkan nomor pilihan yang valid")
-                return
-
-            depo = deposito[pilihan - 1]
-
-            UI.info_deposito(depo)
-
-
-
-    @staticmethod
-    def cairkan_deposito(nasabah):
-        UI.header("CAIRKAN DEPOSITO", UI.MERAH)
-
-
-        deposito = nasabah.deposito
-
-        if not deposito:
-            print("Anda belum melakukan deposito")
-            return
-
-        for i, daftar in enumerate(deposito, start=1):
-            print(
-                f"{i}. Rp{Utilitas.format_rupiah(daftar.nominal)}"
-                f" | Waktu {daftar.lama_bulan} bulan"
-                f" | Status {daftar.status}"
-            )
-
-        try:
-            pilihan = int(input("Masukkan pilihan Anda: "))
-
-        except ValueError:
-            print("Masukkan nomor pilihan yang valid")
-            return
-        if pilihan < 1 or pilihan > len(deposito):
-            print("Pilihan tidak tersedia")
-            return
-
-        try:
-            Utilitas.animasi("Proses")
-            depo = deposito[pilihan - 1]
-            total_deposito = DepositoService.cairkan_deposito(depo)
-            UI.sukses(f"Pencairan berhasil! Rp{Utilitas.format_rupiah(total_deposito)} masuk ke rekening Anda")
-        except ValueError as e:
-            UI.gagal(str(e))
-
-
-    @staticmethod
-    def buka_deposito(rekening):
+    def buka_deposito(nik, norek):
         UI.header("BUKA DEPOSITO", UI.MERAH)
+        UI.info_rekening(norek)
+        print()
 
         print("Pilihan jangka waktu deposito:\n")
 
@@ -130,8 +65,18 @@ class DepositoUI:
             nominal = int(input("Masukkan nominal deposito: "))
             jenis_aro,lama_aro = DepositoUI.tanya_aro()
             Utilitas.animasi("Membuka deposito")
-            DepositoService.buka_deposito(rekening,nominal,lama_bulan,jenis_aro,lama_aro)
-            UI.sukses("Deposito berhasil dibuka!")
+
+            id_deposito = DepositoService.buka_deposito(
+                nik=nik,
+                norek=norek,
+                nominal=nominal,
+                lama_bulan=lama_bulan,
+                jenis_aro=jenis_aro,
+                lama_aro=lama_aro
+            )
+
+            UI.sukses(f"Deposito berhasil dibuka! ID deposito: {id_deposito} ")
+
         except ValueError as e:
             UI.gagal(str(e))
 
@@ -175,6 +120,181 @@ class DepositoUI:
 
             except ValueError:
                 print("Masukkan angka yang valid.")
+
+
+    @staticmethod
+    def pilih_deposito(daftar_deposito):
+
+
+        print('========== PILIH DEPOSITO ==========')
+
+        for nomor, data_deposito in enumerate(daftar_deposito ,start=1):
+
+            print()
+            print(f'{nomor}.')
+            print(f"ID DEPOSITO : {data_deposito['id']}")
+            print(f"Status     : {data_deposito['status']}")
+            print(f"Rekening   : {data_deposito['norek']}")
+            print(f"Nominal    : Rp{Utilitas.format_rupiah(data_deposito['nominal'])}")
+            print(f"Tenor      : {data_deposito['lama_bulan']} bulan")
+            if data_deposito['jenis_aro'] == 'tidak':
+                print(f" ARO        : TIDAK")
+            elif data_deposito['jenis_aro'] == 'pokok':
+                print(f" ARO        : POKOK")
+            else:
+                print(f" ARO        :  POKOK BUNGA")
+
+
+        while True:
+            try:
+                pilihan = int(input("Masukkan pilihan Anda ( ketik 0 untuk keluar): "))
+            except ValueError:
+                UI.gagal("Silakan pilih menggunakan angka")
+                continue
+
+            if pilihan == 0:
+                return DepositoUI.BATAL
+
+            if pilihan < 1 or pilihan > (len(daftar_deposito)):
+                UI.gagal("Pilihan tidak tersedia")
+                continue
+
+
+            return daftar_deposito[pilihan - 1]
+
+
+    @staticmethod
+    def lihat_deposito(nik):
+            UI.header("LIHAT DEPOSITO ANDA", UI.MERAH)
+
+
+            daftar_deposito = (
+                DepositoService.cari_deposito_nasabah(nik=nik)
+            )
+
+            if not daftar_deposito:
+                print("Anda belum melakukan deposito")
+                return
+            data_deposito = DepositoUI.pilih_deposito(daftar_deposito)
+
+            if data_deposito is DepositoUI.BATAL:
+                return
+
+
+            UI.info_deposito(data_deposito)
+
+
+
+    @staticmethod
+    def cairkan_deposito(nik, norek):
+        UI.header("CAIRKAN DEPOSITO", UI.MERAH)
+
+
+        daftar_deposito = DepositoService.cari_deposito_jatuh_tempo_dengan_norek(norek=norek)
+
+        if not daftar_deposito:
+            print("Belum ada deposito yang jatuh tempo")
+            return
+
+        data_deposito = DepositoUI.pilih_deposito(daftar_deposito=daftar_deposito)
+
+        if data_deposito is DepositoUI.BATAL:
+            return
+
+
+        try:
+            Utilitas.animasi("Proses")
+            total_pencairan = DepositoService.cairkan_deposito(
+                nik=nik,
+                norek_pencairan=norek,
+                id_deposito=data_deposito['id']
+            )
+
+            UI.sukses(
+                f"Pencairan berhasil!"
+                f" Rp{Utilitas.format_rupiah(total_pencairan)} "
+                f"masuk ke rekening {norek}"
+            )
+
+        except ValueError as e:
+            UI.gagal(str(e))
+
+        except sqlite3.Error as e:
+            UI.gagal(
+                f"Terjadi kesalahan saat pencairan deposito: {e}"
+            )
+
+
+
+
+
+
+    @staticmethod
+    def hentikan_aro(nik, norek):
+        UI.header("HENTIKAN ARO DEPOSITO", UI.MERAH)
+        UI.info_rekening(norek)
+
+        daftar_deposito = (
+            DepositoService.cari_deposito_aro_aktif_dengan_norek(
+                norek=norek
+            )
+        )
+
+        if not daftar_deposito:
+            UI.gagal(
+                "Rekening ini tidak memiliki deposito ARO aktif"
+            )
+            return
+
+        data_deposito = DepositoUI.pilih_deposito(
+            daftar_deposito=daftar_deposito
+        )
+
+        if data_deposito is DepositoUI.BATAL:
+            return
+
+        print()
+        print(
+            "Deposito tetap berjalan hingga jatuh tempo: "
+            f"{Utilitas.format_tanggal_indonesia(
+                data_deposito['jatuh_tempo']
+            )}"
+        )
+        print(
+            "Setelah ARO dihentikan, deposito tidak akan "
+            "diperpanjang otomatis."
+        )
+        print()
+
+        konfirmasi = input(
+            "Hentikan ARO deposito ini? (ya/tidak): "
+        ).strip().lower()
+
+        if konfirmasi not in ("y", "ya", "iya"):
+            UI.gagal("Penghentian ARO dibatalkan")
+            return
+
+        try:
+            DepositoService.hentikan_aro(
+                nik=nik,
+                norek_pemberhentian=norek,
+                id_deposito=data_deposito["id"]
+            )
+
+            UI.sukses(
+                f"ARO deposito {data_deposito['id']} berhasil dihentikan"
+            )
+
+            print(
+                "Deposito tetap aktif hingga "
+                f"{Utilitas.format_tanggal_indonesia(
+                    data_deposito['jatuh_tempo']
+                )}"
+            )
+
+        except ValueError as e:
+            UI.gagal(str(e))
+
 
 
 

@@ -20,10 +20,27 @@ class Deposito:
         self.proses_aro = None
 
 
+    @staticmethod
+    def hitung_total_pencairan(
+            nominal,
+            bunga,
+            lama_bulan
+    ):
+        bunga_deposito = (
+            nominal * bunga * lama_bulan / 12
+        )
+
+        return round(
+            nominal + bunga_deposito
+        )
+
     @property
     def total_pencairan(self):
-        bunga = (self.nominal*self.bunga*self.lama_bulan/12)
-        return round(self.nominal + bunga)
+        return Deposito.hitung_total_pencairan(
+            nominal=self.nominal,
+            bunga=self.bunga,
+            lama_bulan=self.lama_bulan
+        )
 
 
 
