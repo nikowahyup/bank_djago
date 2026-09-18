@@ -2,7 +2,7 @@ import datetime
 import random
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
 from bank_djago.utils.validator import Validator
@@ -10,6 +10,7 @@ from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepo
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca
 
 
 
@@ -425,9 +426,9 @@ class RekeningService:
     @staticmethod
     def buka_rekening(nasabah,pilihan,pin,setor_awal,koneksi=None):
 
-        buat_baru = koneksi is None
+        buat_baru_diluar_daftar = koneksi is None
 
-        if buat_baru:
+        if buat_baru_diluar_daftar:
             koneksi = buat_koneksi()
 
         try:
@@ -456,7 +457,10 @@ class RekeningService:
             }
             id_transaksi = TransaksiRepository.tambah_transaksi(transaksi, koneksi)
 
-            riwayat = RiwayatTemplate.template(kategori="transaksi",jenis="setor awal",log=f"SETOR AWAL | +Rp{Utilitas.format_rupiah(setor_awal)}")
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="setor awal",
+                log=f"SETOR AWAL | +Rp{Utilitas.format_rupiah(setor_awal)}")
 
             audit = AuditService.tambah_audit(
                 kategori="administratif",
@@ -467,23 +471,39 @@ class RekeningService:
                 nik=nasabah.NIK,
                 norek=rekening_baru.norek
             )
-            RiwayatRepository.tambah_riwayat(rekening_baru.norek, riwayat, koneksi, id_transaksi)
+            riwayat_buka = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis='pembukaan rekening',
+                log=f"BUKA REKENING | {norek}"
+            )
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening_baru.norek,
+                riwayat=riwayat_buka,
+                koneksi=koneksi
+            )
+            RiwayatRepository.tambah_riwayat(
+                norek=rekening_baru.norek,
+                riwayat=riwayat,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
+
             AuditRepository.tambah_audit(audit,koneksi,id_transaksi)
 
-            if buat_baru:
+            if buat_baru_diluar_daftar:
                 koneksi.commit()
                 nasabah.rekening.append(rekening_baru)
 
             return rekening_baru
 
         except Exception:
-            if buat_baru:
+            if buat_baru_diluar_daftar:
                 koneksi.rollback()
 
             raise
 
         finally:
-            if buat_baru:
+            if buat_baru_diluar_daftar:
                 koneksi.close()
 
 
@@ -595,5 +615,18 @@ class RekeningService:
 
     @staticmethod
     def cari_semua_rekening(nik):
-        return RekeningRepository.cari_rekening_dengan_nik(nik=nik)
 
+        with buat_koneksi_baca() as koneksi:
+            return RekeningRepository.cari_rekening_dengan_nik(nik=nik, koneksi=koneksi)
+
+
+
+    @staticmethod
+    def cari_semua_rekening_untuk_riwayat(nik):
+
+        daftar_rekening_nasabah = RekeningService.cari_semua_rekening(nik=nik)
+
+        return {
+            data['norek'] : data['status']
+            for data in daftar_rekening_nasabah
+        }
