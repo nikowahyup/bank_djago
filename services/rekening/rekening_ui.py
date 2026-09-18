@@ -302,5 +302,47 @@ class RekeningUI:
             return daftar_norek_aktif[pilihan - 1]
 
 
+    @staticmethod
+    def pilih_rekening_untuk_riwayat(daftar_rekening):
+
+        if not daftar_rekening:
+            return None
+
+
+        while True:
+            print("Pilih nomor rekening yang ingin Anda cek riwayatnya\n")
+
+            for nomor, (norek, status) in enumerate(daftar_rekening.items(), start=1):
+                print(f"{nomor}. {norek} | {status}")
+
+
+            try:
+                print()
+                pilihan = int(input("Masukkan pilihan Anda(ketik 0 untuk keluar): "))
+
+            except ValueError:
+                UI.gagal("Silakan masukkan angka")
+                continue
+
+            if pilihan == 0:
+                return
+
+            if pilihan < 1 or pilihan > len(daftar_rekening):
+                UI.gagal("Pilihan tidak valid")
+                continue
+
+
+            daftar_norek = list(daftar_rekening)
+
+            norek_pilihan = daftar_norek[pilihan - 1]
+
+            return norek_pilihan
+
+
+
+
+
+
+
 
 
