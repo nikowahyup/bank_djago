@@ -1,5 +1,5 @@
-from bank_djago.core.rekening import kelas_rekening
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis, buat_koneksi_baca
 
 
 #method-method penghubung program ke database
@@ -145,54 +145,71 @@ class DepositoRepository:
 
     #untuk proses deposito(cairkan,jatuh tempo)
     @staticmethod
-    def perbarui_status_deposito(id_deposito, status_baru, koneksi):
+    def perbarui_status_deposito(
+            id_deposito,
+            status_baru,
+            status_lama,
+            koneksi
+    ):
+        sql = """UPDATE deposito
+        SET status = ?
+        WHERE id = ? AND status = ?"""
 
-        cursor = koneksi.execute("""UPDATE deposito
-                                SET status = ?
-                                WHERE id = ?
-                                """,(status_baru, id_deposito))
+        cursor = koneksi.execute(
+            sql,
+            (
+                status_baru,
+                id_deposito,
+                status_lama
+            )
+        )
 
         return cursor.rowcount
 
 
     # untuk scheduler
     @staticmethod
-    def perbarui_setelah_aro( id_deposito,
-                             nominal_baru,
-                             bunga_baru,
-                             lama_bulan_baru,
-                             tanggal_buka_baru,
-                             jatuh_tempo_baru,
-                             status_baru,
-                             proses_aro,
-                              koneksi):
-
+    def perbarui_setelah_aro(
+            id_deposito,
+            nominal_baru,
+            bunga_baru,
+            lama_bulan_baru,
+            tanggal_buka_baru,
+            jatuh_tempo_baru,
+            status_baru,
+            proses_aro,
+            jatuh_tempo_lama,
+            koneksi
+    ):
         tanggal_buka_baru = tanggal_buka_baru.isoformat()
         jatuh_tempo_baru = jatuh_tempo_baru.isoformat()
+        jatuh_tempo_lama = jatuh_tempo_lama.isoformat()
+        proses_aro = proses_aro.isoformat() if proses_aro is not None else None
 
-        proses_aro = (
-            proses_aro.isoformat()
-            if proses_aro is not None
-            else None
-        )
-
-        cursor = koneksi.execute("""UPDATE deposito
+        sql = """UPDATE deposito
         SET nominal = ?,
-        bunga = ?,
-        lama_bulan = ?,
-        tanggal_buka = ?,
-        jatuh_tempo = ?,
-        status = ?,
-        proses_aro = ?
-        WHERE id = ?
-        """,(nominal_baru,
-             bunga_baru,
-             lama_bulan_baru,
-             tanggal_buka_baru,
-             jatuh_tempo_baru,
-             status_baru,
-             proses_aro,
-             id_deposito))
+            bunga = ?,
+            lama_bulan = ?,
+            tanggal_buka = ?,
+            jatuh_tempo = ?,
+            status = ?,
+            proses_aro = ?
+        WHERE id = ? AND jatuh_tempo = ?"""
+
+        cursor = koneksi.execute(
+            sql,
+            (
+                nominal_baru,
+                bunga_baru,
+                lama_bulan_baru,
+                tanggal_buka_baru,
+                jatuh_tempo_baru,
+                status_baru,
+                proses_aro,
+                id_deposito,
+                jatuh_tempo_lama
+            )
+        )
 
         return cursor.rowcount
 
@@ -280,14 +297,14 @@ class DepositoRepository:
 
 
 
-            cursor = koneksi.execute(
-                """
-                UPDATE deposito
-                SET jenis_aro = 'tidak',
-                lama_aro = NULL
-                WHERE id = ?
-            """,
-                (id_deposito,)
-            )
+            sql = """UPDATE deposito
+            SET jenis_aro = 'tidak'
+            WHERE id = ? 
+            AND status = 'aktif' 
+            AND jenis_aro IN ('pokok', 'pokok_bunga')"""
+
+
+            cursor = koneksi.execute(sql,(id_deposito,))
+
 
             return cursor.rowcount

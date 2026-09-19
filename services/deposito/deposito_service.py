@@ -2,18 +2,23 @@ import datetime
 from bank_djago.core.deposito import Deposito
 from bank_djago.penyimpanan.loaders.deposito_loader import DepositoLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
-from bank_djago.penyimpanan.repositories.deposito_repository import DepositoRepository
-from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
-from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis
 from bank_djago.services.admin.audit_service import AuditService
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-from bank_djago.utils.utility import Utilitas, JenisAro, JenisReferensi,JenisTransaksi
-from bank_djago.utils.validator import Validator
-from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+from bank_djago.utils.validator import Validator
 
+from bank_djago.utils.utility import Utilitas
+from bank_djago.utils.utility import JenisTransaksi
+from bank_djago.utils.utility import JenisReferensi
+from bank_djago.utils.utility import JenisAro
+
+
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
+from bank_djago.penyimpanan.repositories.deposito_repository import DepositoRepository
+from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
 
 class StatusDeposito:
     AKTIF = "aktif"
@@ -76,9 +81,7 @@ class DepositoService:
                 "Jenis ARO tidak tersedia"
             )
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
@@ -98,22 +101,22 @@ class DepositoService:
 
             Validator.amankan_rekening(rekening)
 
-            if rekening.saldo - nominal < rekening.saldosetor_min:
-                raise ValueError(
-                    "Saldo tidak mencukupi untuk membuka deposito"
-                )
 
-            saldo_baru = rekening.saldo - nominal
+            saldo_minimal = rekening.saldosetor_min
 
-            jumlah_baris = RekeningRepository.perbarui_saldo(
+            jumlah_baris = RekeningRepository.kurangi_saldo(
                 norek=rekening.norek,
-                saldo_baru=saldo_baru,
+                nominal=nominal,
+                saldo_minimal=saldo_minimal,
                 koneksi=koneksi
             )
             if jumlah_baris != 1:
                 raise ValueError(
                     "Terjadi kesalahan saat memotong saldo untuk deposito"
                 )
+
+            saldo_baru = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi)
+
             bunga = DepositoService.JANGKA_WAKTU[lama_bulan]
             tanggal_buka = hari_ini
             jatuh_tempo = Utilitas.tambah_bulan(
@@ -169,7 +172,7 @@ class DepositoService:
             )
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
-                jenis="deposito",
+                jenis="pembukaan deposito",
                 log=f"DEPOSITO | tenor {lama_bulan} bulan | Rp{Utilitas.format_rupiah(nominal)}")
 
             AuditRepository.tambah_audit(
@@ -185,13 +188,7 @@ class DepositoService:
                 id_transaksi=id_transaksi
             )
 
-            koneksi.commit()
-        except Exception:
-            koneksi.rollback()
-            raise
 
-        finally:
-            koneksi.close()
 
         return id_deposito
 
@@ -215,9 +212,7 @@ class DepositoService:
                 "ID deposito tidak valid"
             )
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             data_deposito = DepositoRepository.cari_deposito_dengan_id(
                 id_deposito=id_deposito,
@@ -225,7 +220,9 @@ class DepositoService:
             )
 
             if data_deposito is None:
-                raise ValueError("Data deposito tidak ditemukan")
+                raise ValueError(
+                    "Data deposito tidak ditemukan"
+                )
 
             norek = data_deposito['norek']
 
@@ -233,6 +230,7 @@ class DepositoService:
                 raise ValueError(
                     f"Rekening ini tidak terdaftar sebagai rekening deposito"
                 )
+
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
                 koneksi=koneksi)
@@ -263,26 +261,32 @@ class DepositoService:
             if hari_ini < deposito.jatuh_tempo:
                 raise ValueError("Deposito belum jatuh tempo")
 
+            status_lama = StatusDeposito.JATUH_TEMPO
+            status_baru = StatusDeposito.DICAIRKAN
+
             jumlah_baris_deposito = DepositoRepository.perbarui_status_deposito(
                 id_deposito=id_deposito,
-                status_baru=StatusDeposito.DICAIRKAN,
+                status_baru=status_baru,
+                status_lama=status_lama,
                 koneksi=koneksi
             )
-            saldo_baru = rekening.saldo + deposito.total_pencairan
-            total_pencairan = deposito.total_pencairan
+
             if jumlah_baris_deposito != 1:
                 raise ValueError(
                     "Terjadi kesalahan saat memperbarui status deposito"
                 )
 
-            jumlah_baris_saldo = RekeningRepository.perbarui_saldo(
+            total_pencairan = deposito.total_pencairan
+
+            jumlah_baris_saldo = RekeningRepository.tambah_saldo(
                 norek=rekening.norek,
-                saldo_baru=saldo_baru,
+                nominal=total_pencairan,
                 koneksi=koneksi
             )
-
             if jumlah_baris_saldo != 1:
                 raise ValueError("Terjadi kesalahan saat memasukkan saldo ke rekening")
+
+            saldo_baru = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi)
 
             transaksi = {
                         "jenis":JenisTransaksi.PENCAIRAN_DEPOSITO,
@@ -303,7 +307,7 @@ class DepositoService:
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
                 jenis="pencairan deposito",
-                log=f"PENCAIRAN DEPOSITO +Rp{Utilitas.format_rupiah(deposito.nominal)}"
+                log=f"PENCAIRAN DEPOSITO +Rp{Utilitas.format_rupiah(total_pencairan)}"
             )
 
             audit = AuditService.tambah_audit(
@@ -311,8 +315,8 @@ class DepositoService:
                 objek="deposito",
                 aksi="pencairan_deposito",
                 log=(
-                    f"{deposito.pemilik.nama} mencairkan "
-                    f"deposito dengan ID {deposito.ID}"
+                    f"{nasabah.nama} mencairkan "
+                    f"deposito dengan ID {id_deposito}"
                 ),
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
@@ -339,14 +343,6 @@ class DepositoService:
             )
 
 
-            koneksi.commit()
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
         return total_pencairan
 
     @staticmethod
@@ -364,12 +360,7 @@ class DepositoService:
                 "ID deposito tidak valid"
             )
 
-
-
-
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             data_deposito = DepositoRepository.cari_deposito_dengan_id(
                 id_deposito=id_deposito,
@@ -401,7 +392,8 @@ class DepositoService:
 
             deposito = DepositoLoader.rangkai_deposito(
                 data_deposito=data_deposito,
-                nasabah=nasabah, rekening=rekening
+                nasabah=nasabah,
+                rekening=rekening
             )
 
             if deposito.status != StatusDeposito.AKTIF:
@@ -420,7 +412,9 @@ class DepositoService:
                     JenisAro.POKOK,
                     JenisAro.POKOK_BUNGA
             ):
-                raise ValueError("Jenis ARO tidak valid")
+                raise ValueError(
+                    "Jenis ARO tidak valid"
+                )
 
             if deposito.lama_aro not in (
                     DepositoService.JANGKA_WAKTU
@@ -438,11 +432,66 @@ class DepositoService:
             saldo_sebelum = rekening.saldo
 
             if deposito.jenis_aro == JenisAro.POKOK:
-
                 nominal_baru = deposito.nominal
 
+            else:
+                nominal_baru = total
 
-                saldo_baru = saldo_sebelum + bunga_periode_ini
+            lama_bulan_baru = deposito.lama_aro
+
+            bunga_baru = (
+                DepositoService.JANGKA_WAKTU[
+                    lama_bulan_baru
+                ]
+            )
+
+            jatuh_tempo_lama = deposito.jatuh_tempo
+
+            tanggal_buka_baru = deposito.jatuh_tempo
+
+            jatuh_tempo_baru = Utilitas.tambah_bulan(
+                tanggal_buka_baru,
+                lama_bulan_baru
+            )
+
+            status_baru = StatusDeposito.AKTIF
+            proses_aro = hari_ini
+
+            jumlah_baris_deposito = (
+                DepositoRepository.perbarui_setelah_aro(
+                    id_deposito=id_deposito,
+                    nominal_baru=nominal_baru,
+                    bunga_baru=bunga_baru,
+                    lama_bulan_baru=lama_bulan_baru,
+                    tanggal_buka_baru=tanggal_buka_baru,
+                    jatuh_tempo_baru=jatuh_tempo_baru,
+                    status_baru=status_baru,
+                    proses_aro=proses_aro,
+                    jatuh_tempo_lama=jatuh_tempo_lama,
+                    koneksi=koneksi
+                )
+            )
+
+            if jumlah_baris_deposito != 1:
+                raise ValueError(
+                    "Terjadi kesalahan saat memperbarui ARO"
+                )
+
+
+
+            if deposito.jenis_aro == JenisAro.POKOK:
+
+                jumlah_baris_rekening = RekeningRepository.tambah_saldo(
+                    norek=rekening.norek,
+                    nominal=bunga_periode_ini,
+                    koneksi=koneksi
+                )
+
+                if jumlah_baris_rekening != 1:
+                    raise ValueError(
+                        "Gagal menambahkan bunga ke rekening"
+                    )
+                saldo_baru = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi)
 
                 transaksi = {
                     "jenis": JenisTransaksi.BUNGA_DEPOSITO,
@@ -468,10 +517,6 @@ class DepositoService:
 
             else:
 
-                nominal_baru = total
-
-                saldo_baru = saldo_sebelum
-
                 transaksi = {
                     "jenis": (
                         JenisTransaksi
@@ -494,60 +539,6 @@ class DepositoService:
                     )
                 )
 
-            lama_bulan_baru = deposito.lama_aro
-
-            bunga_baru = (
-                DepositoService.JANGKA_WAKTU[
-                    lama_bulan_baru
-                ]
-            )
-
-
-            tanggal_buka_baru = deposito.jatuh_tempo
-
-            jatuh_tempo_baru = Utilitas.tambah_bulan(
-                tanggal_buka_baru,
-                lama_bulan_baru
-            )
-
-            status_baru = StatusDeposito.AKTIF
-            proses_aro = hari_ini
-
-            if deposito.jenis_aro == JenisAro.POKOK:
-                jumlah_baris_rekening = (
-                    RekeningRepository.perbarui_saldo(
-                        norek=deposito.rekening.norek,
-                        saldo_baru=saldo_baru,
-                        koneksi=koneksi
-                    )
-                )
-
-                if jumlah_baris_rekening != 1:
-                    raise ValueError(
-                        "Terjadi kesalahan saat "
-                        "memperbarui saldo rekening"
-                    )
-
-
-            jumlah_baris_deposito = (
-                DepositoRepository.perbarui_setelah_aro(
-                    id_deposito=id_deposito,
-                    nominal_baru=nominal_baru,
-                    bunga_baru=bunga_baru,
-                    lama_bulan_baru=lama_bulan_baru,
-                    tanggal_buka_baru=tanggal_buka_baru,
-                    jatuh_tempo_baru=jatuh_tempo_baru,
-                    status_baru=status_baru,
-                    proses_aro=proses_aro,
-                    koneksi=koneksi
-                )
-            )
-
-            if jumlah_baris_deposito != 1:
-                raise ValueError(
-                    "Terjadi kesalahan saat memperbarui ARO"
-                )
-
 
             id_transaksi = (
                 TransaksiRepository.tambah_transaksi(
@@ -567,7 +558,7 @@ class DepositoService:
                 jenis="perpanjang deposito",
                 log=(
                     f"PERPANJANG DEPOSITO | "
-                    f"ID {deposito.ID} | "
+                    f"ID {id_deposito} | "
                     f"Rp"
                     f"{Utilitas.format_rupiah(nominal_baru)}"
                 )
@@ -578,16 +569,16 @@ class DepositoService:
                 objek="deposito",
                 aksi="perpanjangan_deposito_aro",
                 log=(
-                    f"Deposito dengan ID {deposito.ID} "
+                    f"Deposito dengan ID {id_deposito} "
                     f"diperpanjang otomatis"
                 ),
-                nama=deposito.pemilik.nama,
-                nik=deposito.pemilik.NIK,
-                norek=deposito.rekening.norek
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening.norek
             )
 
             RiwayatRepository.tambah_riwayat(
-                norek=deposito.rekening.norek,
+                norek=rekening.norek,
                 riwayat=riwayat_aro,
                 koneksi=koneksi,
                 id_transaksi=id_transaksi
@@ -598,15 +589,6 @@ class DepositoService:
                 koneksi=koneksi,
                 id_transaksi=id_transaksi
             )
-
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
 
         return True
@@ -636,9 +618,7 @@ class DepositoService:
                 "ID deposito tidak valid"
             )
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
             data_deposito = DepositoRepository.cari_deposito_dengan_id(
                 id_deposito=id_deposito,
                 koneksi=koneksi
@@ -666,27 +646,21 @@ class DepositoService:
                     "Deposito belum jatuh tempo"
                 )
 
-
+            status_lama = data_deposito['status']
             status_baru = StatusDeposito.JATUH_TEMPO
 
             jumlah_baris = DepositoRepository.perbarui_status_deposito(
                 id_deposito=id_deposito,
                 status_baru=status_baru,
+                status_lama=status_lama,
                 koneksi=koneksi
             )
+
 
             if jumlah_baris != 1:
                 raise ValueError(
                     "Gagal memperbarui status deposito"
                 )
-
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-        finally:
-            koneksi.close()
 
 
         return True
@@ -778,10 +752,7 @@ class DepositoService:
             )
 
 
-        koneksi = buat_koneksi()
-
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             data_deposito = (
                 DepositoRepository.cari_deposito_dengan_id(
@@ -868,7 +839,7 @@ class DepositoService:
             )
             riwayat = RiwayatTemplate.template(
                 kategori="sistem",
-                jenis="penghentian_aro_deposito",
+                jenis="penghentian aro deposito",
                 log=(
                     f"HENTIKAN ARO DEPOSITO | "
                     f"ID {id_deposito} | "
@@ -886,15 +857,6 @@ class DepositoService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
-
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
 
         return True

@@ -1,3 +1,4 @@
+from bank_djago.core.rekening import kelas_rekening
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
@@ -77,13 +78,10 @@ class PinjamanRepository:
 
 
     @staticmethod
-    def cari_pengajuan_aktif_nasabah(nik, koneksi=None):
-        kelola_koneksi = koneksi is None
+    def cari_pengajuan_aktif_nasabah(nik, koneksi):
 
-        if kelola_koneksi:
-            koneksi = buat_koneksi()
 
-        try:
+
             cursor = koneksi.execute(
                 """
                 SELECT pinjaman.*
@@ -100,26 +98,25 @@ class PinjamanRepository:
 
             return cursor.fetchone()
 
-        finally:
-            if kelola_koneksi:
-                koneksi.close()
+
 
     @staticmethod
     def perbarui_status_pinjaman(
         id_pinjaman,
         status_baru,
-        koneksi=None,
+        koneksi,
         catatan=None
     ):
 
-        cursor = koneksi.execute(
-            """
-            UPDATE pinjaman
+        sql = """UPDATE pinjaman
             SET status = ?,
             catatan_admin = ?
             WHERE id = ?
-            AND status = 'diajukan'
-            """,
+            AND status = 'diajukan'"""
+
+        cursor = koneksi.execute(
+            sql,
+
             (
                 status_baru,
                 catatan,
@@ -145,8 +142,7 @@ class PinjamanRepository:
         tanggal_jatuh_tempo = tanggal_jatuh_tempo_baru.isoformat()
         status_baru = status_baru.value
 
-        cursor = koneksi.execute(
-            """
+        sql ="""
             UPDATE pinjaman
             SET status = ?,
                 cicilan_tetap = ?,
@@ -155,7 +151,10 @@ class PinjamanRepository:
                 sisa_pokok = ?
             WHERE id = ?
             AND status = 'disetujui'
-            """,
+            """
+
+        cursor = koneksi.execute(
+                sql,
             (
                 status_baru,
                 cicilan_tetap_baru,
@@ -174,31 +173,42 @@ class PinjamanRepository:
             status_baru,
             cicilan_terbayar_baru,
             sisa_pokok_baru,
+            tanggal_jatuh_tempo_lama,
             tanggal_jatuh_tempo_baru,
             koneksi
     ):
-        tanggal_jatuh_tempo_sqlite = (
+        tanggal_jatuh_tempo_baru = (
             tanggal_jatuh_tempo_baru.isoformat()
             if tanggal_jatuh_tempo_baru is not None
             else None
         )
-        status_baru_sqlite = status_baru.value
-        cursor = koneksi.execute(
-            """
+        tanggal_jatuh_tempo_lama = (
+            tanggal_jatuh_tempo_lama.isoformat()
+            if tanggal_jatuh_tempo_lama is not None
+            else None
+        )
+
+        status_baru = status_baru.value
+
+        sql = """
             UPDATE pinjaman
             SET cicilan_terbayar = ?,
                 sisa_pokok = ?,
                 status = ?,
                 tanggal_jatuh_tempo = ?
             WHERE id = ?
-            AND status = 'aktif'
-            """,
+            AND status = 'aktif' AND tanggal_jatuh_tempo = ?
+            """
+
+        cursor = koneksi.execute(
+                sql,
             (
                 cicilan_terbayar_baru,
                 sisa_pokok_baru,
-                status_baru_sqlite,
-                tanggal_jatuh_tempo_sqlite,
-                id_pinjaman
+                status_baru,
+                tanggal_jatuh_tempo_baru,
+                id_pinjaman,
+                tanggal_jatuh_tempo_lama
             )
         )
 

@@ -1,7 +1,17 @@
+import datetime
+
+
+
+from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.utility import StatusPinjaman
 
 #blueprint untuk pinjaman
 class Pinjaman:
+
+    BATAS_HARI_TUNGGAKAN = 7
+    PERSENTASE_DENDA_HARIAN = 0.001
+    MAKSIMAL_PERSENTASE_DENDA = 0.1
+
     def __init__(
             self,
             pemilik,
@@ -46,5 +56,39 @@ class Pinjaman:
                             if self.tanggal_jatuh_tempo
                             else None)
         }
+
+
+    def tanggal_boleh_bayar(self):
+        if self.cicilan_terbayar:
+            return self.tanggal_pencairan
+
+        jatuh_tempo_sebelumnya = Utilitas.tambah_bulan(tanggal=self.tanggal_pencairan, bulan=1)
+
+        for _ in range(self.cicilan_terbayar - 1):
+            jatuh_tempo_sebelumnya = Utilitas.tambah_bulan(tanggal=jatuh_tempo_sebelumnya, bulan=1)
+
+        return (
+            jatuh_tempo_sebelumnya +
+            datetime.timedelta(days=1)
+        )
+
+
+    def hitung_hari_terlambat(self, hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
+        return max(0,(hari_ini - self.tanggal_jatuh_tempo).days)
+
+
+    def hitung_denda(self, hari_ini=None):
+        hari_terlambat = self.hitung_hari_terlambat(hari_ini)
+        hari_denda = max(0,hari_terlambat - self.BATAS_HARI_TUNGGAKAN)
+
+        denda = self.cicilan_tetap*hari_denda*self.PERSENTASE_DENDA_HARIAN
+
+        denda_maksimal = self.cicilan_tetap*self.MAKSIMAL_PERSENTASE_DENDA
+
+        return round(min(denda, denda_maksimal))
+
+
 
 

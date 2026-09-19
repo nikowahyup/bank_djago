@@ -35,7 +35,7 @@ def buat_tabel_rekening():
                 saldo INTEGER NOT NULL DEFAULT 0,
                 level INTEGER NOT NULL DEFAULT 1,
                 status TEXT NOT NULL DEFAULT 'aktif',
-                waktu_dibuat TEXT NOT NULL,
+                waktu_dibuat TEXT,
                 limit_sisa INTEGER,
                 reset TEXT NOT NULL,
                 dapat_bunga TEXT NOT NULL,
@@ -262,6 +262,7 @@ def buat_tabel_riwayat():
                 jenis TEXT NOT NULL,
                 waktu TEXT NOT NULL,
                 log TEXT NOT NULL,
+                transaksi_id INTEGER,
 
                 FOREIGN KEY (norek)
                 REFERENCES rekening(norek)
@@ -292,6 +293,7 @@ def buat_tabel_audit():
 
                 waktu TEXT NOT NULL,
                 log TEXT NOT NULL,
+            
 
                 nama TEXT,
                 nik TEXT,
@@ -537,47 +539,6 @@ def buat_tabel_transaksi():
 
 
 
-def tambah_kolom_transaksi_id_riwayat():
-    koneksi = buat_koneksi()
-
-    try:
-        daftar_kolom = koneksi.execute(
-            "PRAGMA table_info(riwayat)"
-        ).fetchall()
-
-        nama_kolom = {
-            kolom["name"]
-            for kolom in daftar_kolom
-        }
-
-        if "transaksi_id" not in nama_kolom:
-            koneksi.execute(
-                """
-                ALTER TABLE riwayat
-                ADD COLUMN transaksi_id INTEGER
-                REFERENCES transaksi(id)
-                ON UPDATE CASCADE
-                ON DELETE RESTRICT
-                """
-            )
-
-            koneksi.commit()
-            print(
-                "Kolom transaksi_id pada riwayat "
-                "berhasil ditambahkan"
-            )
-        else:
-            print(
-                "Kolom transaksi_id pada riwayat "
-                "sudah tersedia"
-            )
-
-    except Exception:
-        koneksi.rollback()
-        raise
-
-    finally:
-        koneksi.close()
 
 
 
@@ -585,7 +546,6 @@ def tambah_kolom_transaksi_id_riwayat():
 
 
 def inisialisasi_database():
-    buat_database()
     buat_tabel_nasabah()
     buat_tabel_rekening()
     buat_tabel_deposito()

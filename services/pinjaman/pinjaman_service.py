@@ -1,24 +1,30 @@
 import datetime
 
 
-from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
-from bank_djago.core.pinjaman import Pinjaman
-from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
-from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
-from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
-from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
-from bank_djago.services.admin.audit_service import AuditService
 
-from bank_djago.utils.utility import Utilitas, StatusPinjaman, JenisReferensi, JenisTransaksi
+from bank_djago.core.pinjaman import Pinjaman
+
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
+from bank_djago.services.admin.audit_service import AuditService
+from bank_djago.utils.utility import Utilitas
+from bank_djago.utils.utility import StatusPinjaman
+from bank_djago.utils.utility import JenisReferensi
+from bank_djago.utils.utility import JenisTransaksi
 from bank_djago.utils.validator import Validator
-from  bank_djago.penyimpanan.repositories.notifikasi_repository import  NotifikasiRepository
+
 from bank_djago.services.notifikasi_service import NotifikasiService
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
+
+
+from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
+from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
+from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
+from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
+from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
+
 from bank_djago.penyimpanan.loaders.pinjaman_loader import PinjamanLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
-
 
 
 
@@ -60,9 +66,7 @@ class PinjamanService:
                 "Pilihan tenor pinjaman tidak tersedia"
             )
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
@@ -116,7 +120,7 @@ class PinjamanService:
                 jenis="pinjaman",
                 log=(
                     f"PENGAJUAN PINJAMAN | ID {id_pinjaman} | "
-                    f"Rp{Utilitas.format_rupiah(nominal)} | "
+                    f"Rp{Utilitas.format_rupiah(nominal)} s| "
                     f"Tenor {tenor} bulan"
                 )
             )
@@ -146,14 +150,7 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
         return id_pinjaman
 
@@ -169,9 +166,7 @@ class PinjamanService:
             raise ValueError(
                 "ID pinjaman tidak valid"
             )
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
             data_pinjaman = (
                 PinjamanRepository.cari_pinjaman_dengan_id(
                     id_pinjaman=id_pinjaman,
@@ -242,15 +237,6 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
         return True
 
 
@@ -259,6 +245,7 @@ class PinjamanService:
     @staticmethod
     def cairkan_pinjaman(
             nik,
+            norek_pencairan,
             id_pinjaman,
             hari_ini=None
     ):
@@ -273,9 +260,7 @@ class PinjamanService:
             raise ValueError("ID pinjaman tidak valid")
 
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
                 id_pinjaman=id_pinjaman,
                 koneksi=koneksi
@@ -288,6 +273,11 @@ class PinjamanService:
 
 
             norek = data_pinjaman['norek']
+
+            if norek != norek_pencairan:
+                raise ValueError(
+                    "Rekening ini tidak terdaftar sebagai pemilik pinjaman"
+                )
 
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
@@ -321,8 +311,6 @@ class PinjamanService:
 
 
 
-
-
             bunga = pinjaman.bunga
             tenor = pinjaman.tenor
             nominal_pinjaman = pinjaman.nominal_pinjaman
@@ -330,7 +318,7 @@ class PinjamanService:
             sisa_pokok = nominal_pinjaman
 
             saldo_sebelum = rekening.saldo
-            saldo_baru = saldo_sebelum + nominal_pinjaman
+
             cicilan_tetap = round(
                 (nominal_pinjaman * persentase_bunga *
                  ((1 + persentase_bunga) ** tenor)) /
@@ -356,9 +344,9 @@ class PinjamanService:
                 )
 
 
-            jumlah_baris_rek = RekeningRepository.perbarui_saldo(
-                norek=norek,
-                saldo_baru=saldo_baru,
+            jumlah_baris_rek = RekeningRepository.tambah_saldo(
+                norek=rekening.norek,
+                nominal=pinjaman.nominal_pinjaman,
                 koneksi=koneksi
             )
 
@@ -366,6 +354,8 @@ class PinjamanService:
                 raise ValueError(
                     "Gagal menambah saldo rekening"
                 )
+
+            saldo_baru = RekeningRepository.ambil_saldo(norek=rekening.norek, koneksi=koneksi)
 
             transaksi = {"jenis":JenisTransaksi.PENCAIRAN_PINJAMAN,
                          "norek_tujuan":rekening.norek,
@@ -420,15 +410,6 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
 
         return True
 
@@ -452,10 +433,8 @@ class PinjamanService:
         if id_pinjaman <= 0:
             raise ValueError("ID pinjaman tidak valid")
 
+        with buat_koneksi_tulis() as koneksi:
 
-        koneksi = buat_koneksi()
-
-        try:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
                 id_pinjaman=id_pinjaman,
                 koneksi=koneksi
@@ -501,10 +480,6 @@ class PinjamanService:
                 rekening=rekening
             )
 
-            if pinjaman.sisa_pokok <= 0:
-                raise ValueError(
-                    "Pinjaman tidak memiliki sisa pokok"
-                )
 
 
             if pinjaman.cicilan_terbayar >= pinjaman.tenor:
@@ -534,38 +509,30 @@ class PinjamanService:
 
             tanggal_pencairan = pinjaman.tanggal_pencairan
 
-            tanggal_jatuh_tempo = pinjaman.tanggal_jatuh_tempo
+            tanggal_jatuh_tempo_lama = pinjaman.tanggal_jatuh_tempo
 
 
-            tanggal_boleh_bayar = PinjamanService.tanggal_boleh_bayar(
-                                                    cicilan_terbayar=cicilan_terbayar,
-                                                    tanggal_pencairan=tanggal_pencairan)
+            tanggal_boleh_bayar = pinjaman.tanggal_boleh_bayar()
 
             if hari_ini < tanggal_boleh_bayar:
                 raise ValueError(f"Cicilan selanjutnya baru boleh dibayar mulai "
                                  f"{Utilitas.format_tanggal_indonesia(tanggal_boleh_bayar)}")
 
-            hari_terlambat = PinjamanService.hitung_hari_terlambat(
-                tanggal_jatuh_tempo=tanggal_jatuh_tempo,
-                hari_ini=hari_ini
-            )
+            hari_terlambat = pinjaman.hitung_hari_terlambat(hari_ini=hari_ini)
 
-            denda = PinjamanService.hitung_denda(
-                    tanggal_jatuh_tempo=tanggal_jatuh_tempo,
-                    cicilan_tetap=cicilan_tetap,
-                    hari_ini=hari_ini)
+            denda = pinjaman.hitung_denda(hari_ini=hari_ini)
 
             persentase_bunga = bunga / 12
             total_bayar = cicilan_tetap + denda
             bunga_bulanan = round(sisa_pokok * persentase_bunga)
             pokok_saja = cicilan_tetap - bunga_bulanan
-            saldo_baru = saldo_sebelum - total_bayar
 
 
-            if saldo_baru < rekening.saldosetor_min:
+            if rekening.saldo - total_bayar < rekening.saldosetor_min:
                 raise ValueError(
-                    "Saldo tidak cukup untuk membayar cicilan dan denda"
+                    "Saldo Anda tidak cukup untuk melakukan pembayaran cicilan"
                 )
+
 
             cicilan_terbayar_baru = cicilan_terbayar + 1
 
@@ -576,7 +543,7 @@ class PinjamanService:
 
                 status_baru = StatusPinjaman.LUNAS
                 sisa_pokok_baru = 0
-                tanggal_jatuh_tempo_baru = tanggal_jatuh_tempo
+                tanggal_jatuh_tempo_baru = tanggal_jatuh_tempo_lama
 
                 log_audit = (
                     f"{nasabah.nama} telah melunasi "
@@ -604,7 +571,7 @@ class PinjamanService:
                 sisa_pokok_baru = sisa_pokok - pokok_saja
                 status_baru = StatusPinjaman.AKTIF
                 tanggal_jatuh_tempo_baru = Utilitas.tambah_bulan(
-                    tanggal=tanggal_jatuh_tempo,
+                    tanggal=tanggal_jatuh_tempo_lama,
                     bulan=1)
 
                 log_audit = (
@@ -621,27 +588,41 @@ class PinjamanService:
                     f"Total Rp{Utilitas.format_rupiah(total_bayar)}"
                 )
 
-            jumlah_baris_rek = RekeningRepository.perbarui_saldo(
+
+            jumlah_baris_pinjaman = (
+                PinjamanRepository.perbarui_setelah_pembayaran(
+                id_pinjaman=id_pinjaman,
+                status_baru=status_baru,
+                cicilan_terbayar_baru=cicilan_terbayar_baru,
+                sisa_pokok_baru=sisa_pokok_baru,
+                tanggal_jatuh_tempo_lama=tanggal_jatuh_tempo_lama,
+                tanggal_jatuh_tempo_baru=tanggal_jatuh_tempo_baru,
+                koneksi=koneksi
+                )
+
+            )
+
+
+
+            if jumlah_baris_pinjaman != 1:
+                raise ValueError("Gagal memperbarui status pinjaman")
+
+            saldo_minimal = rekening.saldosetor_min
+
+            jumlah_baris_rek = RekeningRepository.kurangi_saldo(
                 norek=norek,
-                saldo_baru=saldo_baru,
+                nominal=total_bayar,
+                saldo_minimal=saldo_minimal,
                 koneksi=koneksi
             )
+
 
             if jumlah_baris_rek != 1:
                 raise ValueError(
                     "Gagal melakukan pembayaran cicilan"
                 )
 
-            jumlah_baris_pin = PinjamanRepository.perbarui_setelah_pembayaran(
-                id_pinjaman=id_pinjaman,
-                status_baru=status_baru,
-                cicilan_terbayar_baru=cicilan_terbayar_baru,
-                sisa_pokok_baru=sisa_pokok_baru,
-                tanggal_jatuh_tempo_baru=tanggal_jatuh_tempo_baru,
-                koneksi=koneksi)
-
-            if jumlah_baris_pin != 1:
-                raise ValueError("Gagal memperbarui status pinjaman")
+            saldo_baru = RekeningRepository.ambil_saldo(norek=rekening.norek, koneksi=koneksi)
 
             transaksi = {"jenis": JenisTransaksi.PEMBAYARAN_CICILAN,
                          "norek_sumber": norek,
@@ -652,6 +633,7 @@ class PinjamanService:
                          "jenis_referensi": JenisReferensi.PINJAMAN,
                          "id_referensi": id_pinjaman,
                          "waktu": datetime.datetime.now()}
+
 
             audit = AuditService.tambah_audit(
                 kategori="finansial",
@@ -694,15 +676,6 @@ class PinjamanService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
         return {
             "id_pinjaman": id_pinjaman,
             "status": status_baru,
@@ -720,9 +693,17 @@ class PinjamanService:
         catatan_admin = catatan_admin.strip()
         if not catatan_admin:
             raise ValueError("Catatan tidak boleh kosong")
-        koneksi = buat_koneksi()
 
-        try:
+        if not isinstance(id_pinjaman, int):
+            raise TypeError("ID pinjaman harus berupa angka")
+        if id_pinjaman <= 0:
+            raise ValueError("ID pinjaman tidak valid")
+
+
+
+
+
+        with buat_koneksi_tulis() as koneksi:
             data_pinjaman = (
                 PinjamanRepository.cari_pinjaman_dengan_id(
                     id_pinjaman=id_pinjaman,
@@ -744,31 +725,16 @@ class PinjamanService:
                     f"Status saat ini: {data_pinjaman['status']}"
                 )
 
-            data_rekening = (
-                RekeningRepository.cari_rekening_dengan_norek(
-                    norek=data_pinjaman["norek"],
-                    koneksi=koneksi
-                )
-            )
+            norek = data_pinjaman['norek']
+            rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
-            if data_rekening is None:
+            if rekening is None:
                 raise ValueError(
                     f"Rekening untuk pinjaman ber-ID "
                     f"{id_pinjaman} tidak ditemukan"
                 )
 
-            data_nasabah = (
-                NasabahRepository.cari_nasabah_dengan_nik(
-                    nik=data_rekening["nik_pemilik"],
-                    koneksi=koneksi
-                )
-            )
-
-            if data_nasabah is None:
-                raise ValueError(
-                    f"Nasabah untuk pinjaman ber-ID "
-                    f"{id_pinjaman} tidak ditemukan"
-                )
+            nasabah = rekening.pemilik
 
             status_baru = StatusPinjaman.DITOLAK.value
 
@@ -793,12 +759,12 @@ class PinjamanService:
                 aksi="penolakan_pinjaman",
                 log=(
                     f"Pinjaman dengan ID {id_pinjaman} "
-                    f"milik {data_nasabah['nama']} telah ditolak.\n"
+                    f"milik {nasabah.nama} ditolak.\n"
                     f"Catatan admin: {catatan_admin}"
                 ),
-                nama=data_nasabah["nama"],
-                nik=data_nasabah["nik"],
-                norek=data_pinjaman["norek"]
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening.norek
             )
 
             AuditRepository.tambah_audit(
@@ -808,20 +774,11 @@ class PinjamanService:
 
             NotifikasiService.buat_notifikasi_penolakan_pinjaman(
                 id_pinjaman=id_pinjaman,
-                nik_pemilik=data_nasabah['nik'],
+                nik_pemilik=nasabah.NIK,
                 koneksi=koneksi,
                 catatan_admin=catatan_admin
             )
 
-
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
         return True
 
@@ -850,24 +807,7 @@ class PinjamanService:
                 + datetime.timedelta(days=1)
         )
 
-    @staticmethod
-    def hitung_hari_terlambat(tanggal_jatuh_tempo,hari_ini=None):
-        if hari_ini is None:
-            hari_ini = datetime.date.today()
-        return  max(0,(hari_ini - tanggal_jatuh_tempo).days)
 
-
-    @staticmethod
-    def hitung_denda(tanggal_jatuh_tempo,cicilan_tetap,hari_ini=None):
-        hari_terlambat = PinjamanService.hitung_hari_terlambat(tanggal_jatuh_tempo, hari_ini)
-
-        hari_denda = max(0,hari_terlambat-PinjamanService.BATAS_HARI_TUNGGAKAN)
-
-        denda = cicilan_tetap*hari_denda*PinjamanService.PERSENTASE_DENDA_HARIAN
-
-        denda_maksimal =cicilan_tetap*PinjamanService.MAKSIMAL_PERSENTASE_DENDA
-
-        return round(min(denda,denda_maksimal))
 
     @staticmethod
     def buat_pesan_pengingat(pinjaman, hari_ini=None):
@@ -940,11 +880,7 @@ class PinjamanService:
                 - PinjamanService.BATAS_HARI_TUNGGAKAN
         )
 
-        denda = PinjamanService.hitung_denda(
-            tanggal_jatuh_tempo=pinjaman.tanggal_jatuh_tempo,
-            cicilan_tetap=pinjaman.cicilan_tetap,
-            hari_ini=hari_ini
-        )
+        denda = pinjaman.hitung_denda(hari_ini=hari_ini)
 
         total_tagihan = pinjaman.cicilan_tetap + denda
 
@@ -972,12 +908,6 @@ class PinjamanService:
             )
             for data_pinjaman in daftar_pinjaman
         ]
-
-
-
-
-
-
 
 
 
