@@ -58,68 +58,82 @@ class RekeningRepository:
         return True
 
     @staticmethod
-    def cari_rekening_dengan_norek(norek, koneksi=None):
-        kelola_koneksi = koneksi is None
-        if kelola_koneksi:
-            koneksi = buat_koneksi()
+    def cari_rekening_dengan_norek(norek, koneksi):
 
-        try:
-            cursor = koneksi.execute("""
+
+
+        cursor = koneksi.execute("""
                 SELECT *
                 FROM rekening
                 WHERE norek = ?
             """, (norek,))
 
-            return cursor.fetchone()
+        return cursor.fetchone()
 
-        finally:
-            if kelola_koneksi:
-             koneksi.close()
+
 
     @staticmethod
-    def cari_rekening_dengan_nik(nik):
-        koneksi = buat_koneksi()
+    def cari_rekening_dengan_nik(nik, koneksi):
 
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT
-                    norek,
-                    nik_pemilik,
-                    pin,
-                    saldo,
-                    level,
-                    status,
-                    waktu_dibuat,
-                    limit_sisa,
-                    reset,
-                    dapat_bunga,
-                    waktu_bayar_admin,
-                    terakhir_ubah_rekening,
-                    alasan_blokir
+            sql ="""
+                SELECT *
                 FROM rekening
                 WHERE nik_pemilik = ?
                 ORDER BY norek
-                """,
+                """
+
+            cursor = koneksi.execute(
+                sql,
+
                 (nik,)
             )
 
             return cursor.fetchall()
 
-        finally:
-            koneksi.close()
 
 
     @staticmethod
-    def perbarui_saldo(norek, saldo_baru, koneksi):
+    def kurangi_saldo(norek, nominal, saldo_minimal, koneksi):
 
-        cursor = koneksi.execute("""UPDATE rekening
-        SET saldo = ?
-        WHERE norek = ?""",(saldo_baru, norek))
+        sql = """UPDATE rekening 
+        SET saldo = saldo - ?
+        WHERE norek = ? AND (saldo - ?) >= ?"""
+
+        cursor = koneksi.execute(
+            sql,
+            (
+                nominal,
+                norek,
+                nominal,
+                saldo_minimal
+            )
+        )
+
+        return cursor.rowcount
+
+    @staticmethod
+    def tambah_saldo(norek ,nominal, koneksi):
+
+        sql = """UPDATE rekening
+        SET saldo = saldo + ?
+        WHERE norek = ?"""
+
+        cursor = koneksi.execute(sql,(nominal, norek))
 
         return cursor.rowcount
 
 
+    @staticmethod
+    def ambil_saldo(norek ,koneksi):
+
+        sql = """SELECT saldo FROM rekening
+        WHERE norek = ?"""
+
+        cursor = koneksi.execute(sql,(norek,))
+
+        hasil = cursor.fetchone()
+
+        return hasil['saldo']
 
     @staticmethod
     def perbarui_limit(limit_baru,reset_baru, norek, koneksi):
@@ -288,6 +302,48 @@ class RekeningRepository:
             (
                 pin_baru,
                 norek
+            )
+        )
+
+        return cursor.rowcount
+
+
+    @staticmethod
+    def ubah_state_setelah_upgrade_atau_downgrade(
+            norek,
+            limit_sisa_baru,
+            level_baru,
+            terakhir_ubah_rekening_lama,
+            terakhir_ubah_rekening_baru,
+            koneksi
+    ):
+
+        terakhir_ubah_rekening_baru = terakhir_ubah_rekening_baru.isoformat()
+        terakhir_ubah_rekening_lama = (
+            terakhir_ubah_rekening_lama.isoformat()
+            if terakhir_ubah_rekening_lama is not None
+            else None
+        )
+
+        sql = """UPDATE rekening
+        SET limit_sisa = ?,
+        level = ?,
+        terakhir_ubah_rekening = ?
+        WHERE norek = ? AND (terakhir_ubah_rekening = ? 
+        OR (? IS NULL AND terakhir_ubah_rekening IS NULL)
+        )
+        """
+
+
+        cursor = koneksi.execute(
+            sql,
+            (
+                limit_sisa_baru,
+                level_baru,
+                terakhir_ubah_rekening_baru,
+                norek,
+                terakhir_ubah_rekening_lama,
+                terakhir_ubah_rekening_lama
             )
         )
 

@@ -1,13 +1,15 @@
 import datetime
 import random
+
+from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.admin.audit_service import AuditService
-from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas,RekeningGold,RekeningPlatinum
+from bank_djago.core.rekening import RekeningReguler, RekeningPrioritas, RekeningGold, RekeningPlatinum
 from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca
@@ -48,58 +50,100 @@ class RekeningService:
 
 
     @staticmethod
-    def upgrade_rekening(rekening_lama,target_level):
+    def upgrade_rekening(
+            nik,
+            norek,
+            target_level
+    ):
 
-        if not rekening_lama.boleh_ubah_level:
-            raise ValueError("Perubahan rekening hanya bisa dilakukan 1 kali sehari")
+        if not isinstance(target_level, int):
+            raise TypeError(
+                "Level rekening harus berupa angka"
+            )
+
+
 
         if target_level not in RekeningService.jenis_rekening:
-            raise ValueError("Level rekening tidak tersedia")
-
-        if target_level <= rekening_lama.level:
-            raise  ValueError("Level upgrade rekening harus lebih tinggi dari level saat ini")
-
-        Validator.amankan_rekening(rekening_lama)
-        info = RekeningService.jenis_rekening[target_level]
-        kelas = info["kelas"]
-
-        if rekening_lama.saldo < info["minimal_upgrade"]:
-            raise ValueError("Saldo kini tidak memenuhi saldo minimum rekening tujuan")
-
-        nasabah = rekening_lama.pemilik
-
-        try:
-            indeks = nasabah.rekening.index(rekening_lama)
-        except ValueError:
             raise ValueError(
-                "Rekening lama tidak ditemukan dalam daftar rekening nasabah"
+                "Level rekening tidak tersedia"
             )
-        koneksi = buat_koneksi()
-        try:
 
-            rek_awal = RekeningService.level[rekening_lama.level]
-            rek_tujuan = RekeningService.level[target_level]
 
-            rekening_baru = kelas(norek=rekening_lama.norek,pin=rekening_lama.pin,pemilik=nasabah,waktu_dibuat=rekening_lama.waktu_dibuat)
-            rekening_baru.set_saldo(rekening_lama.saldo)
-            rekening_baru.riwayat = list(rekening_lama.riwayat)
-            rekening_baru.waktu_bayar_admin = rekening_lama.waktu_bayar_admin
-            rekening_baru.dapat_bunga = rekening_lama.dapat_bunga
-            rekening_baru.terakhir_ubah_rekening = datetime.date.today()
-            rekening_baru.reset = rekening_lama.reset
+        with buat_koneksi_tulis() as koneksi:
 
-            jumlah_baris = RekeningRepository.perbarui_level_rekening(rekening_baru,koneksi)
+            rekening = RekeningLoader.muat_rekening(
+                norek=norek,
+                koneksi=koneksi)
+
+            if rekening is None:
+                raise ValueError(
+                    "Rekening tidak ditemukan"
+                )
+
+            nasabah = rekening.pemilik
+
+            if nasabah.NIK != nik:
+                raise  ValueError(
+                    "NIK ini tidak terdaftar sebagai pemilik rekening"
+                )
+            if not rekening.boleh_ubah_level:
+                raise ValueError(
+                    "Perubahan rekening hanya bisa dilakukan 1 kali sehari"
+                )
+            if target_level <= rekening.level:
+                raise ValueError(
+                    "Level upgrade rekening harus lebih tinggi dari level saat ini"
+                )
+
+            info = RekeningService.jenis_rekening[target_level]
+
+            Validator.amankan_rekening(rekening=rekening)
+
+            if rekening.saldo < info["minimal_upgrade"]:
+                raise ValueError(
+                    "Saldo kini tidak memenuhi saldo minimum rekening tujuan"
+                )
+
+            kelas_rekening = RekeningService.jenis_rekening[target_level]['kelas']
+
+            konfigurasi_target = kelas_rekening(
+                norek=rekening.norek,
+                pin=rekening.pin,
+                pemilik=nasabah
+            )
+
+            rek_awal = rekening.jenis
+            rek_tujuan = konfigurasi_target.jenis
+
+            terakhir_ubah_rekening_lama = rekening.terakhir_ubah_rekening
+            terakhir_ubah_rekening_baru = datetime.date.today()
+            limit_sisa_baru = konfigurasi_target.limit_harian # sebenarnya bisa juga menggunakan rekening_baru.limit-sisa
+
+
+            jumlah_baris = (
+                RekeningRepository.ubah_state_setelah_upgrade_atau_downgrade(
+                    norek=rekening.norek,
+                    limit_sisa_baru=limit_sisa_baru,
+                    level_baru=target_level,
+                    terakhir_ubah_rekening_lama=terakhir_ubah_rekening_lama,
+                    terakhir_ubah_rekening_baru=terakhir_ubah_rekening_baru,
+                    koneksi=koneksi
+                )
+            )
 
             if jumlah_baris != 1:
-                raise ValueError("Rekening tidak ditemukan")
+                raise ValueError(
+                    "Gagal melakukan peningkatan rekening"
+                )
 
-            riwayat = RiwayatTemplate.upgrade_rekening(
-                sebelum=rek_awal,
-                sesudah=rek_tujuan
-            )
+
+            riwayat = RiwayatTemplate.template(
+                kategori="rekening",
+                jenis="peningkatan rekening",
+                log=f"PENINGKATAN REKENING | Rekening awal {rek_awal} ke Rekening {rek_tujuan}")
 
             RiwayatRepository.tambah_riwayat(
-                norek=rekening_baru.norek,
+                norek=rekening.norek,
                 riwayat=riwayat,
                 koneksi=koneksi
             )
@@ -114,7 +158,7 @@ class RekeningService:
                 ),
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
-                norek=rekening_baru.norek
+                norek=konfigurasi_target.norek
             )
 
             AuditRepository.tambah_audit(
@@ -122,86 +166,97 @@ class RekeningService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-        finally:
-            koneksi.close()
-
-        for pinjaman in nasabah.daftar_pinjaman:
-            if pinjaman.rekening is rekening_lama:
-                pinjaman.rekening = rekening_baru
-
-
-        for deposito in nasabah.deposito:
-            if deposito.rekening is rekening_lama:
-                deposito.rekening = rekening_baru
-
-
-
-        nasabah.rekening[indeks] = rekening_baru
-        rekening_baru.simpan_riwayat(riwayat)
-
-
-        return rekening_baru
 
 
 
     @staticmethod
-    def downgrade_rekening(rekening_lama,target_level):
+    def downgrade_rekening(
+            nik,
+            norek,
+            target_level
+    ):
 
-        Validator.amankan_rekening(rekening_lama)
-        if not rekening_lama.boleh_ubah_level:
-            raise  ValueError("Perubahan rekening hanya bisa dilakukan 1 kali sehari")
+        if not isinstance(target_level, int):
+            raise TypeError(
+                "Level rekening harus berupa angka"
+            )
 
         if target_level not in RekeningService.jenis_rekening:
             raise ValueError("Level rekening tidak tersedia")
 
-        if target_level >= rekening_lama.level:
-            raise ValueError("Pilihan level rekening harus lebih rendah dari level saat ini")
 
-        nasabah = rekening_lama.pemilik
+        with buat_koneksi_tulis() as koneksi:
 
-        try:
-            indeks = nasabah.rekening.index(rekening_lama)
-        except ValueError:
-            raise ValueError(
-                "Rekening lama tidak ditemukan dalam daftar rekening nasabah")
-
-        koneksi = buat_koneksi()
-
-        try:
-
-            rek_awal = RekeningService.level[rekening_lama.level]
-            rek_tujuan = RekeningService.level[target_level]
-            info = RekeningService.jenis_rekening[target_level]
-
-
-            rekening_baru = info["kelas"](
-                norek=rekening_lama.norek,
-                pin=rekening_lama.pin,
-                pemilik=rekening_lama.pemilik,
-                waktu_dibuat=rekening_lama.waktu_dibuat)
-
-            rekening_baru.set_saldo(rekening_lama.saldo)
-            rekening_baru.riwayat = list(rekening_lama.riwayat)
-            rekening_baru.waktu_bayar_admin = rekening_lama.waktu_bayar_admin
-            rekening_baru.dapat_bunga = rekening_lama.dapat_bunga
-            rekening_baru.terakhir_ubah_rekening = datetime.date.today()
-            rekening_baru.reset = rekening_lama.reset
-            jumlah_baris = RekeningRepository.perbarui_level_rekening(rekening_baru,koneksi)
-            if jumlah_baris != 1:
-                raise ValueError("Rekening tidak ditemukan")
-
-            riwayat = RiwayatTemplate.downgrade_rekening(
-                sebelum=rek_awal,
-                sesudah=rek_tujuan
+            rekening = RekeningLoader.muat_rekening(
+                norek=norek,
+                koneksi=koneksi
             )
 
+            if rekening is None:
+                raise ValueError(
+                    "Rekening tidak ditemukan"
+                )
+
+            nasabah = rekening.pemilik
+
+            if nasabah.NIK != nik:
+                raise ValueError(
+                    "NIK ini tidak terdaftar sebagai pemilik rekening"
+                )
+
+            if not rekening.boleh_ubah_level:
+                raise ValueError(
+                    "Perubahan rekening hanya bisa dilakukan 1 kali sehari"
+                )
+
+            if target_level >= rekening.level:
+                raise ValueError(
+                    "Pilihan level rekening harus lebih rendah dari level saat ini"
+                )
+
+            Validator.amankan_rekening(rekening=rekening)
+
+
+            kelas_rekening = RekeningService.jenis_rekening[target_level]['kelas']
+
+            konfigurasi_target = kelas_rekening(
+                norek=rekening.norek,
+                pin=rekening.pin,
+                pemilik=nasabah
+
+            )
+
+            limit_sisa_baru = konfigurasi_target.limit_harian
+            terakhir_ubah_rekening_lama = rekening.terakhir_ubah_rekening
+            terakhir_ubah_rekening_baru = datetime.date.today()
+
+
+            jumlah_baris = (
+                RekeningRepository.ubah_state_setelah_upgrade_atau_downgrade(
+                    norek=rekening.norek,
+                    limit_sisa_baru=limit_sisa_baru,
+                    level_baru=target_level,
+                    terakhir_ubah_rekening_lama=terakhir_ubah_rekening_lama,
+                    terakhir_ubah_rekening_baru=terakhir_ubah_rekening_baru,
+                    koneksi=koneksi
+                )
+            )
+            if jumlah_baris != 1:
+                raise ValueError(
+                    "Gagal melakukan penurunan rekening"
+                )
+            rek_awal = rekening.jenis
+            rek_tujuan = konfigurasi_target.jenis
+
+
+            riwayat = RiwayatTemplate.template(
+                kategori="rekening",
+                jenis="penurunan rekening",
+                log=f" PENURUNAN REKENING | Rekening Awal {rek_awal} ke Rekening {rek_tujuan}")
+
             RiwayatRepository.tambah_riwayat(
-                norek=rekening_baru.norek,
+                norek=rekening.norek,
                 riwayat=riwayat,
                 koneksi=koneksi
             )
@@ -216,7 +271,7 @@ class RekeningService:
                 ),
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
-                norek=rekening_baru.norek
+                norek=rekening.norek
             )
 
             AuditRepository.tambah_audit(
@@ -224,28 +279,7 @@ class RekeningService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
-        except Exception:
-            koneksi.rollback()
-            raise
 
-        finally:
-            koneksi.close()
-
-
-        for pinjaman in nasabah.daftar_pinjaman:
-            if pinjaman.rekening is rekening_lama:
-                pinjaman.rekening = rekening_baru
-
-
-        for deposito in nasabah.deposito:
-            if deposito.rekening is rekening_lama:
-                deposito.rekening = rekening_baru
-
-        nasabah.rekening[indeks] = rekening_baru
-        rekening_baru.simpan_riwayat(riwayat)
-
-        return rekening_baru
 
     @staticmethod
     def blokir_rekening(
@@ -630,3 +664,13 @@ class RekeningService:
             data['norek'] : data['status']
             for data in daftar_rekening_nasabah
         }
+
+
+    @staticmethod
+    def cari_rekening_untuk_diubah(norek):
+     with buat_koneksi_baca() as koneksi:
+
+        return RekeningRepository.cari_rekening_dengan_norek(
+            norek=norek,
+            koneksi=koneksi
+        )

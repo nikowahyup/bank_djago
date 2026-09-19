@@ -13,7 +13,7 @@ class RekeningUI:
              3: 'Gold',
              4: 'Platinum'}
     @staticmethod
-    def menu(nasabah,rekening):
+    def menu_rekening(nik, norek):
 
         while True:
             UI.header("MENU LAYANAN REKENING", UI.KUNING)
@@ -31,9 +31,9 @@ class RekeningUI:
             if pilihan == "1":
                 RekeningUI.buka_rekening(nasabah)
             elif pilihan == "2":
-                rekening = RekeningUI.upgrade_rekening(rekening)
+                RekeningUI.upgrade_rekening(nik, norek)
             elif pilihan == "3":
-                rekening = RekeningUI.downgrade_rekening(rekening)
+                RekeningUI.downgrade_rekening(nik, norek)
             elif pilihan == "4":
                 RekeningUI.blokir_rekening(rekening)
             elif pilihan == "5":
@@ -47,22 +47,32 @@ class RekeningUI:
 
 
     @staticmethod
-    def upgrade_rekening(rekening):
+    def upgrade_rekening(nik, norek):
         UI.header("TINGKATKAN REKENING",UI.MERAH)
         print()
-        if rekening.level == 4:
+        data_rekening = RekeningService.cari_rekening_untuk_diubah(norek=norek)
+
+        if data_rekening is None:
+            UI.gagal("Rekening tidak terdaftar")
+            return
+
+        if data_rekening['level'] == 4:
             print("Rekening ini sudah platinum")
-            return rekening
+            return
+
         print("Mau tingkatkan ke mana: ")
-        opsi = list(range(rekening.level+1,5))
+        opsi = list(range(data_rekening['level']
+                          +1,len(RekeningUI.level) + 1))
         while True:
             for i in opsi:
                 print(f"{i}. {RekeningUI.level[i]}")
             try:
-                pilihan = int(input("Masukkan pilihan: "))
+                pilihan = int(input("Masukkan pilihan Anda(ketik 0 untuk keluar): "))
             except ValueError:
-                print("Tolong masukkan angka")
+                UI.gagal("Silahkan pilih menggunakan angka")
                 continue
+            if pilihan == 0:
+                return
             if pilihan not in opsi:
                 print("Pilihan tidak valid")
                 continue
@@ -70,48 +80,77 @@ class RekeningUI:
             break
 
         try:
-            rekening_baru = RekeningService.upgrade_rekening(rekening,pilihan)
+            RekeningService.upgrade_rekening(
+                nik=nik,
+                norek=norek,
+                target_level=pilihan
+            )
+
             UI.sukses('Peningkatan Sukses!')
             UI.sukses(f"Rekening telah ditingkatkan ke {RekeningUI.level[pilihan]}")
-            return rekening_baru
+
         except ValueError as e:
             UI.gagal("Peningkatan Gagal")
             UI.gagal(str(e))
-            return rekening
+
+        except sqlite3.Error as e:
+            UI.gagal("Peningkatan Gagal")
+            UI.gagal(str(e))
+
 
     @staticmethod
-    def downgrade_rekening(rekening):
+    def downgrade_rekening(nik, norek):
         UI.header("TURUNKAN REKENING",UI.MERAH)
 
-        print(f"Rekening saat ini : {RekeningUI.level[rekening.level]}")
-        if rekening.level == 1:
-            print("Rekening sudah reguler")
-            return rekening
+        data_rekening = RekeningService.cari_rekening_untuk_diubah(norek=norek)
+
+        if data_rekening is None:
+            UI.gagal("Rekening tidak terdaftar")
+            return
+
+        if data_rekening['level'] == 1:
+            print("Rekening ini sudah reguler")
+            return
+
+        print("Mau turunkan ke mana: ")
+
         while True:
-            print("Mau turunkan ke mana: ")
-            opsi = list(range(1,rekening.level))
-            for i in opsi:
-                print(f"{i}. {RekeningUI.level[i]}")
+
+            opsi = list(range(1, data_rekening['level']))
+            while True:
+                for i in opsi:
+                    print(f"{i}. {RekeningUI.level[i]}")
+                try:
+                    pilihan = int(input("Masukkan pilihan Anda(ketik 0 untuk keluar): "))
+                except ValueError:
+                    UI.gagal("Silahkan pilih menggunakan angka")
+                    continue
+                if pilihan == 0:
+                    return
+                if pilihan not in opsi:
+                    print("Pilihan tidak valid")
+                    continue
+
+                break
+
             try:
-                pilihan = int(input("Masukkan pilihan: "))
-            except ValueError:
-                print("Tolong masukkan angka")
-                continue
-            if pilihan not in opsi:
-                print("Pilihan tidak valid")
-                continue
+                RekeningService.downgrade_rekening(
+                    nik=nik,
+                    norek=norek,
+                    target_level=pilihan
+                )
 
-            break
+                UI.sukses('Peningkatan Sukses!')
+                UI.sukses(f"Rekening telah ditingkatkan ke {RekeningUI.level[pilihan]}")
 
-        try:
-            rekening_baru = RekeningService.downgrade_rekening(rekening,pilihan)
-            UI.sukses('Penurunan Sukses!')
-            UI.sukses(f"Rekening telah diturunkan ke {RekeningUI.level[pilihan]}")
-            return rekening_baru
-        except ValueError as e:
-            UI.gagal("Penurunan Gagal!")
-            UI.gagal(str(e))
-            return rekening
+            except ValueError as e:
+                UI.gagal("Penurunan Gagal")
+                UI.gagal(str(e))
+
+            except sqlite3.Error as e:
+                UI.gagal("Penurunan Gagal")
+                UI.gagal(str(e))
+
     @staticmethod
     def blokir_rekening(rekening):
         UI.header("BLOKIR REKENING",UI.MERAH)
