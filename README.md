@@ -400,7 +400,13 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - Menghapus proses save/load JSON dari `main.py` dan memastikan persistence tetap berjalan setelah aplikasi dimulai ulang
 - Menghapus `core/bank.py`, `penyimpanan/storage.py`, serta utility/debug lama yang tidak lagi digunakan
 - Mengumpulkan kode pengujian legacy ke `utils/tests/legacy/` agar terpisah dari skenario SQLite aktif
-
+(10/9/2026 - 19/9/2026)
+- membuat helper context manager untuk menghilangkan duplikasi pola try-excpet-finally di service
+- mengubah desain riwayat dengan pencarian riwayat berdasarkan 4 kategori,rekening,deposito,pinjaman dan transaksi
+- membuat sebagian service menggunakan helper context manager(deposito dan pinjaman)
+- memindahkan beberapa method penghitung seperti hitung denda,tanggal boleh bayar selanjutnya ke class entity pinjaman
+- mengubah alur upgrade dan downgrade mengikuti pola SQLite-first
+- mulai membuat file pengujian berbasis pytest
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -603,6 +609,18 @@ Ketiganya merupakan perubahan bisnis terhadap rekening, bukan sekadar update sat
 Jawaban:
 Sebagian file lama masih penting sebagai jurnal proses belajar tetapi menggunakan `Bank`, `JsonStorage`, data lokal tertentu, atau pola pengujian yang sudah digantikan skenario SQLite. Menaruhnya di `utils/tests/legacy/` dan menggunakan `.txt` mencegah test runner menganggapnya sebagai pengujian aktif tanpa menghapus sejarah pengembangan. Skenario yang perilakunya masih relevan tetap dipertahankan atau dimigrasikan ke `.py` modern.
 
+### 36. Mengapa desain upgrade dan downgrade diubah menjadi tidak menghasilkan objek rekening baru?
+
+Jawaban:
+Desain seperti itu sudah tidak relevan pada desain saat ini karena sekarang desain bank ini mengutamakan update terbaru dari database(SQLite). Membuat objek rekening baru dan terus berjalan selama program aktif menentang desain ini.
+
+### 37. Apa yang membuat saya beralih desain dari meload objek pada saat login lalu menggunakan desain SQLite-first?
+
+Jawaban:
+Masalah dimulai ketika saya menguji alur transfer. saat itu saya mencoba melakukan transfer pada dua rekening yang dimiliki oleh nasabah yang sama. Begitu transfer selesai dan saya mengecek saldo terkini,ternyata saldo tidak terupdate langsung. Untuk melihat perubahannya,saya harus menjalankan ulang program sehingga rekening kembali diload dan menggunakan data terbaru dari database.
+
+Ini membuat saya bertanya-tanya,memang hanya saya yang menjalankan programmnya,jadi saya bisa me-refresh programmnya untuk melihat perubahan. Desain ini tidak cocok untuk digunakan multi-user. Itu sebabnya saya mengubah desain program saya yang berbasis objek/state memori menjadi SQLite-first.
+
 #### Deposito dan notifikasi
 
 - SQLite menjadi satu-satunya sumber data aktif untuk deposito.
@@ -616,6 +634,8 @@ Sebagian file lama masih penting sebagai jurnal proses belajar tetapi menggunaka
 - Notifikasi hasil pemrosesan ARO hanya berlaku pada hari pemrosesan dan dihapus pada hari berikutnya.
 - Notifikasi dikenali melalui kombinasi NIK pemilik, jenis referensi, dan ID objek agar tidak tercampur dengan objek domain lain.
 - Kode dan data deposito JSON lama dihapus setelah alur SQLite berhasil diuji.
+
+  
 
   
 # Refactor Besar
