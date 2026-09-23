@@ -3,6 +3,8 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 class NotifikasiRepository:
 
+
+    # method simpan data notifikasi ke database
     @staticmethod
     def tambah_notifikasi(nik_pemilik, notifikasi, koneksi):
         jenis_referensi = (
@@ -35,6 +37,7 @@ class NotifikasiRepository:
 
         return cursor.lastrowid
 
+    # method untuk emncari tiap notifikasi nasabah
     @staticmethod
     def cari_notifikasi_nasabah(nik_pemilik, koneksi=None):
         kelola_koneksi = koneksi is None
@@ -160,3 +163,33 @@ class NotifikasiRepository:
             (id_notifikasi,))
 
         return cursor.rowcount
+
+
+
+
+
+    @staticmethod
+    def cari_notifikasi_belum_dibaca(nik, koneksi):
+
+        sql = """
+                SELECT
+            n.*,
+            COALESCE(d.norek, p.norek) AS norek
+        FROM notifikasi n
+        
+        LEFT JOIN deposito d
+            ON n.jenis_referensi = 'deposito'
+            AND n.id_objek = d.id
+        
+        LEFT JOIN pinjaman p
+            ON n.jenis_referensi = 'pinjaman'
+            AND n.id_objek = p.id
+        
+        WHERE n.nik_pemilik = ?
+        AND n.sudah_dibaca = 0
+        """
+
+
+        cursor = koneksi.execute(sql, (nik,))
+
+        return cursor.fetchall()

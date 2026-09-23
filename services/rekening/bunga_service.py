@@ -1,7 +1,9 @@
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+
+from bank_djago.services.exceptions import RekeningTidakDitemukan,StatusTidakValid, \
+    PenambahanSaldoGagal, LevelRekeningTidakValid
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 import datetime
 from bank_djago.services.admin.audit_service import AuditService
@@ -28,26 +30,28 @@ class BungaService:
 
 
     @staticmethod
-    def berikan_bunga(rekening, hari_ini=None):
-        if hari_ini is None:
-            hari_ini = datetime.date.today()
+    def berikan_bunga(rekening, koneksi,hari_ini=None,):
+            if hari_ini is None:
+                hari_ini = datetime.date.today()
 
-        koneksi = buat_koneksi()
 
-        try:
             data_rekening = RekeningRepository.cari_rekening_dengan_norek(
                 norek=rekening.norek,
                 koneksi=koneksi
                 )
 
             if data_rekening is None:
-                raise ValueError('Data rekening tidak ditemukan')
+                raise RekeningTidakDitemukan(
+                    'Rekening tidak terdaftar'
+                )
 
             if data_rekening['level'] != rekening.level:
-                raise ValueError("Level rekening pada database dengan objek python tidak sama")
+                raise LevelRekeningTidakValid(
+                    "Level rekening pada database dengan objek python tidak sama"
+                )
 
             if data_rekening['status'] == "tutup":
-                raise ValueError(
+                raise StatusTidakValid(
                     "Bunga tidak dapat diberikan untuk rekening tutup"
                 )
 
@@ -55,8 +59,13 @@ class BungaService:
             waktu_dapat_bunga = (
                 datetime.date.fromisoformat(data_rekening['dapat_bunga'])
                 )
+
             bunga = rekening.bunga
-            daftar_bunga = BungaService.hitung_bulan(waktu_dapat_bunga=waktu_dapat_bunga,hari_ini=hari_ini)
+
+            daftar_bunga = BungaService.hitung_bulan(
+                waktu_dapat_bunga=waktu_dapat_bunga,
+                hari_ini=hari_ini
+            )
 
             jumlah_dapat_bunga = len(daftar_bunga)
             if jumlah_dapat_bunga == 0:
@@ -67,27 +76,31 @@ class BungaService:
             )
             total_bunga = jumlah_satu_bunga * jumlah_dapat_bunga
 
-            saldo_baru = saldo_sebelum + total_bunga
 
+            waktu_dapat_bunga_lama = waktu_dapat_bunga
             waktu_dapat_bunga_baru = daftar_bunga[
                 jumlah_dapat_bunga - 1
                 ]
 
 
-            jumlah_baris = (
-                RekeningRepository.perbarui_setelah_dapat_bunga(
-                    norek=rekening.norek,
-                    waktu_dapat_bunga_baru=waktu_dapat_bunga_baru,
-                    saldo_baru=saldo_baru,
-                    koneksi=koneksi
-                )
+            jumlah_baris = RekeningRepository.perbarui_setelah_dapat_bunga(
+                norek=rekening.norek,
+                waktu_dapat_bunga_lama=waktu_dapat_bunga_lama,
+                waktu_dapat_bunga_baru=waktu_dapat_bunga_baru,
+                nominal=total_bunga,
+                koneksi=koneksi
             )
 
+
             if jumlah_baris != 1:
-                raise ValueError("Gagal memberikan bunga ke rekening")
+                raise PenambahanSaldoGagal(
+                    "Gagal memberikan bunga ke rekening"
+                )
 
+            saldo_baru = RekeningRepository.ambil_saldo(
+                norek=rekening.norek,
+                koneksi=koneksi)
 
-            riwayat = None
 
             if total_bunga > 0:
                 transaksi = {
@@ -141,19 +154,8 @@ class BungaService:
                     koneksi=koneksi
                 )
 
-            koneksi.commit()
-        except Exception:
-            koneksi.rollback()
-            raise
+            return total_bunga
 
-        finally:
-            koneksi.close()
-
-        rekening.set_saldo(saldo_baru)
-        rekening.dapat_bunga = waktu_dapat_bunga_baru
-        if riwayat is not None:
-            rekening.simpan_riwayat(riwayat)
-        return total_bunga
 
 
 

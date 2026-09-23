@@ -1,12 +1,13 @@
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 from bank_djago.services.admin.audit_service import AuditService
 import datetime
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
+from bank_djago.services.exceptions import RekeningTidakDitemukan, StatusTidakValid, LevelRekeningTidakValid, \
+    PenguranganSaldoGagal, OperasiGagal
 from bank_djago.utils.utility import JenisTransaksi
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas
 
 
@@ -37,22 +38,29 @@ class BiayaAdminService:
 
 
     @staticmethod
-    def potong_admin(rekening,hari_ini=None):
-        if hari_ini is None:
-            hari_ini = datetime.date.today()
+    def potong_admin(rekening,koneksi,hari_ini=None):
+            if hari_ini is None:
+                hari_ini = datetime.date.today()
 
-        koneksi = buat_koneksi()
-        try:
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(norek=rekening.norek,koneksi=koneksi)
+            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+                norek=rekening.norek,
+                koneksi=koneksi
+            )
 
             if data_rekening is None:
-                raise   ValueError("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan(
+                    "Rekening tidak ditemukan"
+                )
 
             if data_rekening['level'] != rekening.level:
-                raise ValueError("Level rekening database dan objek python tidak sama")
+                raise LevelRekeningTidakValid(
+                    "Level rekening database dan objek python tidak sama"
+                )
 
             if data_rekening["status"] == "tutup":
-                raise ValueError("Tidak dapat memotong saldo dari rekening tutup")
+                raise StatusTidakValid(
+                    "Tidak dapat memotong saldo dari rekening tutup"
+                )
 
 
             saldo_sebelum = data_rekening['saldo']
@@ -63,8 +71,12 @@ class BiayaAdminService:
             biaya_admin = rekening.biaya_admin
 
             if biaya_admin <= 0:
-                raise ValueError("Biaya admin rekening tidak valid")
-            daftar_periode = BiayaAdminService.cari_periode_admin(waktu_bayar_admin=waktu_bayar_admin,hari_ini=hari_ini)
+                raise StatusTidakValid("Biaya admin rekening tidak valid")
+
+            daftar_periode = BiayaAdminService.cari_periode_admin(
+                waktu_bayar_admin=waktu_bayar_admin,
+                hari_ini=hari_ini
+            )
             jumlah_periode_tertunggak = len(daftar_periode)
             if jumlah_periode_tertunggak == 0:
                 return 0
@@ -78,13 +90,23 @@ class BiayaAdminService:
             saldo_baru = saldo_sebelum - total_bayar
             waktu_bayar_admin_baru = daftar_periode[jumlah_periode_dibayar - 1]
 
-            jumlah_baris = RekeningRepository.perbarui_setelah_bayar_admin(norek=rekening.norek,
-                                                                           saldo_baru=saldo_baru,
-                                                                           waktu_bayar_admin_baru=waktu_bayar_admin_baru,
-                                                                           koneksi=koneksi)
+            waktu_bayar_admin_lama = waktu_bayar_admin
+
+            jumlah_baris = (
+                RekeningRepository.perbarui_setelah_bayar_admin(
+                    norek=rekening.norek,
+                    nominal=total_bayar,
+                    waktu_bayar_admin_lama=waktu_bayar_admin_lama,
+                    waktu_bayar_admin_baru=waktu_bayar_admin_baru,
+                    koneksi=koneksi
+                )
+            )
+
 
             if jumlah_baris != 1:
-                raise ValueError("Gagal melakukan pembayaran biaya admin")
+                raise PenguranganSaldoGagal(
+                    "Gagal melakukan pembayaran biaya admin"
+                )
 
             transaksi = {
                 "jenis": JenisTransaksi.BIAYA_ADMIN,
@@ -95,7 +117,10 @@ class BiayaAdminService:
                 "waktu": datetime.datetime.now()
             }
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi, koneksi)
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
 
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
@@ -132,19 +157,8 @@ class BiayaAdminService:
                 ,koneksi=koneksi
             )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
-        rekening.set_saldo(saldo_baru)
-        rekening.waktu_bayar_admin = waktu_bayar_admin_baru
-        rekening.simpan_riwayat(riwayat)
-        return total_bayar
+            return total_bayar
 
 
 
