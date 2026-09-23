@@ -325,7 +325,7 @@ class RekeningUI:
                     )
                     print(f"Selamat! Rekening dengan nomor {rekening_baru.norek} telah dibuka!")
 
-                except ValueError as e:
+                except BankException as e:
                     UI.gagal(str(e))
 
                 except sqlite3.Error:
