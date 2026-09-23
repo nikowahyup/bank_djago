@@ -1,4 +1,5 @@
 from bank_djago.services.deposito.deposito_service import DepositoService, JenisAro
+from bank_djago.services.exceptions import BankException
 from bank_djago.utils.ui import UI
 from bank_djago.utils.utility import Utilitas
 import sqlite3
@@ -77,8 +78,11 @@ class DepositoUI:
 
             UI.sukses(f"Deposito berhasil dibuka! ID deposito: {id_deposito} ")
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
+
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat menyimpan data. Silakan coba lagi")
 
 
     @staticmethod
@@ -133,10 +137,10 @@ class DepositoUI:
             print()
             print(f'{nomor}.')
             print(f"ID DEPOSITO : {data_deposito['id']}")
-            print(f"Status     : {data_deposito['status']}")
-            print(f"Rekening   : {data_deposito['norek']}")
-            print(f"Nominal    : Rp{Utilitas.format_rupiah(data_deposito['nominal'])}")
-            print(f"Tenor      : {data_deposito['lama_bulan']} bulan")
+            print(f"Status      : {data_deposito['status']}")
+            print(f"Rekening    : {data_deposito['norek']}")
+            print(f"Nominal     : Rp{Utilitas.format_rupiah(data_deposito['nominal'])}")
+            print(f"Tenor       : {data_deposito['lama_bulan']} bulan")
             if data_deposito['jenis_aro'] == 'tidak':
                 print(f" ARO        : TIDAK")
             elif data_deposito['jenis_aro'] == 'pokok':
@@ -216,12 +220,12 @@ class DepositoUI:
                 f"masuk ke rekening {norek}"
             )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
 
-        except sqlite3.Error as e:
-            UI.gagal(
-                f"Terjadi kesalahan saat pencairan deposito: {e}"
+        except sqlite3.Error:
+            UI.peringatan(
+                f"Terjadi kesalahan saat pencairan deposito. Silakan coba lagi  "
             )
 
 
@@ -292,8 +296,11 @@ class DepositoUI:
                 )}"
             )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
+
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat memperbarui status deposito. Silakan coba lagi")
 
 
 
