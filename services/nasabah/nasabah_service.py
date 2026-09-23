@@ -1,6 +1,7 @@
-
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis, buat_koneksi_baca
 from bank_djago.core.nasabah import Nasabahh
+from bank_djago.services.exceptions import InputTidakValid, NasabahTidakDitemukan, PerbaruiStatusGagal
 from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
@@ -9,19 +10,35 @@ from bank_djago.services.admin.audit_service import AuditService
 class NasabahService:
 
     @staticmethod
-    def daftar_dan_buka_rekening(nik, nama, alamat, pin, setor_awal, level):
-        validasi_nik = NasabahRepository.cari_nasabah_dengan_nik(nik)
-        if validasi_nik is not None:
-            raise ValueError("NIK sudah terdaftar. Silahkan pilih opsi buka rekening untuk nasabah lama")
+    def daftar_dan_buka_rekening(
+            nik,
+            nama,
+            alamat,
+            pin,
+            setor_awal,
+            level
+    ):
 
-        nasabah_baru = Nasabahh(nama=nama,alamat=alamat,nik=nik)
 
-        koneksi_database = buat_koneksi()
+        with buat_koneksi_tulis() as koneksi:
+            validasi_nik = NasabahRepository.cari_nasabah_dengan_nik(nik=nik, koneksi=koneksi)
 
-        try:
-            NasabahRepository.tambah_nasabah(nasabah_baru, koneksi_database)
+            if validasi_nik is not None:
+                raise InputTidakValid(
+                    "NIK sudah terdaftar. Silahkan pilih opsi buka rekening untuk nasabah lama"
+                )
 
-            rekening_baru = RekeningService.buka_rekening(nasabah=nasabah_baru, pilihan=level, pin=pin, setor_awal=setor_awal,koneksi=koneksi_database)
+            nasabah_baru = Nasabahh(nama=nama, alamat=alamat, nik=nik)
+
+            NasabahRepository.tambah_nasabah(nasabah=nasabah_baru, koneksi=koneksi)
+
+            rekening_baru = RekeningService.buka_rekening(
+                nik=nasabah_baru.NIK,
+                pilihan=level,
+                pin=pin,
+                setor_awal=setor_awal,
+                koneksi=koneksi
+            )
 
             audit_pendaftaran = AuditService.tambah_audit(
                 kategori="administratif",
@@ -32,46 +49,57 @@ class NasabahService:
                 nik=nasabah_baru.NIK,
                 norek=rekening_baru.norek
             )
-            AuditRepository.tambah_audit(audit_pendaftaran,koneksi_database)
-            koneksi_database.commit()
-            nasabah_baru.rekening.append(rekening_baru)
+            AuditRepository.tambah_audit(audit=audit_pendaftaran,koneksi=koneksi)
 
-            return nasabah_baru, rekening_baru
+        return nasabah_baru, rekening_baru
 
-        except Exception:
-            koneksi_database.rollback()
-            raise
-
-        finally:
-                koneksi_database.close()
 
     @staticmethod
     def ganti_alamat(
-            nasabah,
+            nik,
             alamat_baru
     ):
 
         alamat_baru = alamat_baru.strip()
 
         if not alamat_baru:
-            raise ValueError("Alamat baru tidak boleh kosong")
+            raise InputTidakValid(
+                "Alamat baru tidak boleh kosong"
+            )
 
-        if nasabah.alamat == alamat_baru:
-            raise ValueError("Alamat baru tidak boleh sama dengan alamat lama")
 
-        koneksi = buat_koneksi()
 
-        try:
-            data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(nik=nasabah.NIK,koneksi=koneksi)
+        with buat_koneksi_tulis() as koneksi:
+
+            data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(
+                nik=nik,
+                koneksi=koneksi
+            )
 
             if data_nasabah is None:
-                raise ValueError("Nasabah tidak terdaftar")
+                raise NasabahTidakDitemukan(
+                    "Nasabah tidak terdaftar"
+                )
 
+            nasabah = NasabahLoader.rangkai_nasabah(data_nasabah=data_nasabah)
+            alamat_lama = nasabah.alamat
 
-            jumlah_baris = NasabahRepository.ganti_alamat(nik_pemilik=nasabah.NIK,alamat_baru=alamat_baru,koneksi=koneksi)
+            if nasabah.alamat == alamat_baru:
+                raise InputTidakValid(
+                    "Alamat baru tidak boleh sama dengan alamat lama"
+                )
+
+            jumlah_baris = NasabahRepository.ganti_alamat(
+                nik_pemilik=nasabah.NIK,
+                alamat_lama=alamat_lama,
+                alamat_baru=alamat_baru,
+                koneksi=koneksi
+            )
 
             if jumlah_baris != 1:
-                raise ValueError("Gagal memperbarui alamat nasabah")
+                raise PerbaruiStatusGagal(
+                    "Gagal memperbarui alamat nasabah"
+                )
 
             audit = AuditService.tambah_audit(
                 kategori="administratif",
@@ -87,17 +115,11 @@ class NasabahService:
                 koneksi=koneksi
             )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
-        nasabah.alamat = alamat_baru
-
+    @staticmethod
+    def cari_nik_terdaftar(nik):
+        with buat_koneksi_baca() as koneksi:
+            return NasabahRepository.cari_nasabah_dengan_nik(nik=nik, koneksi=koneksi)
 
     @staticmethod
     def cari_data_login(nik):

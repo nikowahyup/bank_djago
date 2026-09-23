@@ -5,7 +5,7 @@ from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.utils.utility import Utilitas
 from bank_djago.utils.validator import Validator
 from bank_djago.utils.ui import UI
-
+from bank_djago.services.exceptions import BankException
 
 class NasabahUI:
 
@@ -19,6 +19,11 @@ class NasabahUI:
             pin = input("Silakan buat PIN 6 digit: ")
 
             Utilitas.animasi("Memeriksa data")
+            data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
+            if data_nasabah is not None:
+                UI.gagal("NIK sudah terdaftar. Silahkan pilih opsi buka rekening di menu layanan rekening"
+                )
+                return
             print()
 
             try:
@@ -100,12 +105,11 @@ class NasabahUI:
 
 
 
-        except ValueError as error:
+        except BankException as error:
 
             UI.gagal(str(error))
 
-        except sqlite3.Error:
-            print("Terjadi kesalahan dalam menyimpan data. Silahkan coba lagi")
+
 
     @staticmethod
     def menu_profil(nik):
@@ -122,13 +126,13 @@ class NasabahUI:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                NasabahUI.biodata(nasabah)
+                NasabahUI.biodata(nik)
 
             elif pilihan == "2":
                 NasabahUI.daftar_rekening(nik)
 
             elif pilihan == "3":
-                NasabahUI.ganti_alamat(nasabah)
+                NasabahUI.ganti_alamat(nik)
 
             elif pilihan == "4":
                 break
@@ -138,13 +142,18 @@ class NasabahUI:
 
 
     @staticmethod
-    def biodata(nasabah):
+    def biodata(nik):
         UI.header("BIODATA",UI.MERAH)
 
+        data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
+        if data_nasabah is None:
+            UI.gagal("NIK tidak terdaftar")
+            return
+
         print()
-        print(f"Nama   :{nasabah.nama}")
-        print(f"NIK    : {nasabah.NIK}")
-        print(f"Alamat : {nasabah.alamat}")
+        print(f"Nama   :{data_nasabah['nama']}")
+        print(f"NIK    : {data_nasabah['nik']}")
+        print(f"Alamat : {data_nasabah['alamat']}")
         print()
 
     @staticmethod
@@ -152,7 +161,11 @@ class NasabahUI:
         UI.header("DAFTAR REKENING",UI.MERAH)
 
         print()
-        daftar_rekening = RekeningService.cari_semua_rekening(nik)
+        daftar_rekening = RekeningService.cari_semua_rekening(nik=nik)
+
+        if not daftar_rekening:
+            UI.gagal("Anda belum memiliki rekening")
+            return
 
         for nomor , data_rekening in enumerate(daftar_rekening,start=1):
             jenis = RekeningService.level[data_rekening['level']]
@@ -164,8 +177,14 @@ class NasabahUI:
             print()
 
     @staticmethod
-    def ganti_alamat(nasabah):
+    def ganti_alamat(nik):
         UI.header("GANTI ALAMAT",UI.MERAH)
+
+        data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
+
+        if data_nasabah is None:
+            UI.gagal("NIK tidak terdaftar")
+            return
 
         while True:
             alamat_baru = input("Masukkan alamat baru Anda (ketik 0 untuk keluar): ")
@@ -178,10 +197,16 @@ class NasabahUI:
 
         try:
             NasabahService.ganti_alamat(
-                nasabah=nasabah,
+                nik=data_nasabah['nik'],
                 alamat_baru=alamat_baru
             )
-            UI.sukses("Alamat berhasil diubah")
+            UI.sukses(
+                "Alamat berhasil diubah"
+            )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
+
+
+        except sqlite3.Error:
+            UI.gagal("Terjadi kesalahan saat memperbarui alamat. Silakan coba lagi")
