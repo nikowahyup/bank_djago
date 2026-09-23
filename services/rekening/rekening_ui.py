@@ -1,5 +1,6 @@
 import sqlite3
 
+from bank_djago.services.exceptions import BankException
 from bank_djago.services.rekening.pengajuan_ui import PengajuanUI
 from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.utils.ui import UI
@@ -13,7 +14,7 @@ class RekeningUI:
              3: 'Gold',
              4: 'Platinum'}
     @staticmethod
-    def menu_rekening(nik, norek):
+    def menu_rekening(nik, norek, nama):
 
         while True:
             UI.header("MENU LAYANAN REKENING", UI.KUNING)
@@ -29,19 +30,19 @@ class RekeningUI:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                RekeningUI.buka_rekening(nasabah)
+                RekeningUI.buka_rekening(nik=nik, nama=nama)
             elif pilihan == "2":
-                RekeningUI.upgrade_rekening(nik, norek)
+                RekeningUI.upgrade_rekening(nik=nik, norek=norek)
             elif pilihan == "3":
-                RekeningUI.downgrade_rekening(nik, norek)
+                RekeningUI.downgrade_rekening(nik=nik, norek=norek)
             elif pilihan == "4":
-                RekeningUI.blokir_rekening(rekening)
+                RekeningUI.blokir_rekening(nik=nik, norek=norek)
             elif pilihan == "5":
-                RekeningUI.buka_blokir(rekening)
+                RekeningUI.buka_blokir(nik=nik, norek=norek)
             elif pilihan == "6":
-                PengajuanUI.kelola_penutupan_rekening(rekening)
+                PengajuanUI.kelola_penutupan_rekening(nik=nik, norek=norek)
             elif pilihan == "7":
-                RekeningUI.ganti_pin(rekening)
+                RekeningUI.ganti_pin(nik=nik, norek=norek)
             elif pilihan == "8":
                 break
 
@@ -50,7 +51,7 @@ class RekeningUI:
     def upgrade_rekening(nik, norek):
         UI.header("TINGKATKAN REKENING",UI.MERAH)
         print()
-        data_rekening = RekeningService.cari_rekening_untuk_diubah(norek=norek)
+        data_rekening = RekeningService.cari_rekening_untuk_diubah_atau_untuk_pangajuan(norek=norek)
 
         if data_rekening is None:
             UI.gagal("Rekening tidak terdaftar")
@@ -89,7 +90,7 @@ class RekeningUI:
             UI.sukses('Peningkatan Sukses!')
             UI.sukses(f"Rekening telah ditingkatkan ke {RekeningUI.level[pilihan]}")
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal("Peningkatan Gagal")
             UI.gagal(str(e))
 
@@ -102,7 +103,7 @@ class RekeningUI:
     def downgrade_rekening(nik, norek):
         UI.header("TURUNKAN REKENING",UI.MERAH)
 
-        data_rekening = RekeningService.cari_rekening_untuk_diubah(norek=norek)
+        data_rekening = RekeningService.cari_rekening_untuk_diubah_atau_untuk_pangajuan(norek=norek)
 
         if data_rekening is None:
             UI.gagal("Rekening tidak terdaftar")
@@ -143,7 +144,7 @@ class RekeningUI:
                 UI.sukses('Peningkatan Sukses!')
                 UI.sukses(f"Rekening telah ditingkatkan ke {RekeningUI.level[pilihan]}")
 
-            except ValueError as e:
+            except BankException as e:
                 UI.gagal("Penurunan Gagal")
                 UI.gagal(str(e))
 
@@ -152,7 +153,7 @@ class RekeningUI:
                 UI.gagal(str(e))
 
     @staticmethod
-    def blokir_rekening(rekening):
+    def blokir_rekening(nik, norek):
         UI.header("BLOKIR REKENING",UI.MERAH)
 
         alasan = input("Masukkan alasan pemblokiran: ")
@@ -162,13 +163,22 @@ class RekeningUI:
             return
 
         try:
-            RekeningService.blokir_rekening(rekening=rekening,alasan=alasan)
-            UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil diblokir")
-        except ValueError as e:
+            RekeningService.blokir_rekening(
+                nik=nik,
+                norek=norek,
+                alasan=alasan
+            )
+
+            UI.sukses(f"Rekening dengan nomor {norek} berhasil diblokir")
+
+        except BankException as e:
             UI.gagal(str(e))
 
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat memblokir rekening. Silakan coba lagi")
+
     @staticmethod
-    def buka_blokir(rekening):
+    def buka_blokir(nik, norek):
         UI.header("BUKA BLOKIR REKENING",UI.MERAH)
 
         while True:
@@ -191,14 +201,17 @@ class RekeningUI:
         if konfirmasi not in('ya','y','iya'):
             return
         try:
-            RekeningService.buka_blokir(rekening=rekening,pin=pin)
-            UI.sukses(f"Rekening dengan nomor {rekening.norek} berhasil dibuka kembali")
+            RekeningService.buka_blokir(nik=nik, norek=norek, pin=pin)
+            UI.sukses(f"Rekening dengan nomor {norek} berhasil dibuka kembali")
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
 
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat membuka blokir rekening. Silakan coba lagi")
+
     @staticmethod
-    def ganti_pin(rekening):
+    def ganti_pin(nik, norek):
         UI.header(
             "GANTI PIN REKENING",
             UI.MERAH
@@ -248,7 +261,8 @@ class RekeningUI:
 
         try:
             RekeningService.ganti_pin(
-                rekening=rekening,
+                nik=nik,
+                norek=norek,
                 pin_lama=pin_lama,
                 pin_baru=pin_baru
             )
@@ -257,17 +271,20 @@ class RekeningUI:
                 "PIN rekening berhasil diganti"
             )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(
                 str(e)
             )
 
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat memperbarui PIN rekening. Silakan coba lagi")
+
 
 
     @staticmethod
-    def buka_rekening(nasabah):
+    def buka_rekening(nik, nama):
 
-                print(f"Halo,{nasabah.nama}!")
+                print(f"Halo,{nama}!")
 
                 Utilitas.keuntungan_rekening()
 
@@ -300,14 +317,21 @@ class RekeningUI:
                     return
 
                 try:
-                    rekening_baru = RekeningService.buka_rekening(nasabah=nasabah,pilihan=pilihan,pin=pin,setor_awal=setor_awal)
+                    rekening_baru = RekeningService.buka_rekening(
+                        nik=nik,
+                        pilihan=
+                        pilihan,pin=pin,
+                        setor_awal=setor_awal
+                    )
                     print(f"Selamat! Rekening dengan nomor {rekening_baru.norek} telah dibuka!")
 
                 except ValueError as e:
                     UI.gagal(str(e))
 
                 except sqlite3.Error:
-                    print("Terjadi kesalahan saat membuka rekening baru. Silahkan coba lagi")
+                    print(
+                        "Terjadi kesalahan saat membuka rekening baru. Silahkan coba lagi"
+                    )
 
 
 

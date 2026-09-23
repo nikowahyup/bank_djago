@@ -3,6 +3,7 @@ import sqlite3
 
 from bank_djago.penyimpanan.repositories.deposito_repository import DepositoRepository
 from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
+from bank_djago.services.exceptions import BankException
 from bank_djago.services.rekening.pengajuan_service import PengajuanService
 
 from bank_djago.utils.ui import UI
@@ -15,7 +16,7 @@ class PengajuanAdminUI:
     @staticmethod
     def kelola_pengajuan():
         UI.header("KELOLA PENGAJUAN",UI.MERAH)
-        daftar_pengajuan = PengajuanRepository.cari_semua_pengajuan_diajukan()
+        daftar_pengajuan = PengajuanService.cari_semua_pengajuan_diajukan()
         if not daftar_pengajuan:
             print("Masih belum ada pengajuan")
             return
@@ -113,7 +114,7 @@ class PengajuanAdminUI:
             try:
                 PengajuanService.setujui_pengajuan(id_pengajuan=id_pengajuan,catatan_admin=catatan)
                 UI.sukses("Penyetujuan pengajuan berhasil")
-            except ValueError as e:
+            except  BankException as e:
                 UI.gagal(str(e))
 
             except sqlite3.Error as e:
@@ -124,7 +125,7 @@ class PengajuanAdminUI:
                 catatan = input("Buat catatan untuk nasabah: ")
                 PengajuanService.tolak_pengajuan(id_pengajuan=id_pengajuan,catatan_admin=catatan)
                 UI.sukses("Penolakan pengajuan berhasil")
-            except ValueError as e:
+            except BankException as e:
                 UI.gagal(str(e))
 
             except sqlite3.Error as e:

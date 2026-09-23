@@ -18,13 +18,9 @@ class PengajuanRepository:
 
 
     @staticmethod
-    def cari_pengajuan_aktif(norek, jenis, koneksi=None):
-        kelola_koneksi = koneksi is None
+    def cari_pengajuan_aktif(norek, jenis, koneksi):
 
-        if kelola_koneksi:
-            koneksi = buat_koneksi()
 
-        try:
             cursor = koneksi.execute("""SELECT * 
                 FROM pengajuan_rekening
                 WHERE norek = ?
@@ -34,15 +30,12 @@ class PengajuanRepository:
                 LIMIT 1""",(norek,jenis))
 
             return cursor.fetchone()
-        finally:
-            if kelola_koneksi:
-                koneksi.close()
+
 
 
     @staticmethod
-    def cari_semua_pengajuan_diajukan():
-        koneksi = buat_koneksi()
-        try:
+    def cari_semua_pengajuan_diajukan(koneksi):
+
             cursor = koneksi.execute("""SELECT * 
             FROM pengajuan_rekening
             WHERE status = 'diajukan'
@@ -50,8 +43,7 @@ class PengajuanRepository:
 
             return cursor.fetchall()
 
-        finally:
-            koneksi.close()
+
 
 
     @staticmethod

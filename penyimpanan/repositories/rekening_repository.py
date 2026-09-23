@@ -5,6 +5,7 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 class RekeningRepository:
 
+    # method simpan data rekening baru ke database
     @staticmethod
     def tambah_rekening(rekening, koneksi):
         terakhir_ubah = (
@@ -71,7 +72,7 @@ class RekeningRepository:
         return cursor.fetchone()
 
 
-
+    # method cari data rekening dengan nik
     @staticmethod
     def cari_rekening_dengan_nik(nik, koneksi):
 
@@ -91,9 +92,14 @@ class RekeningRepository:
             return cursor.fetchall()
 
 
-
+    # method Update-Lock untuk pengurangan saldo
     @staticmethod
-    def kurangi_saldo(norek, nominal, saldo_minimal, koneksi):
+    def kurangi_saldo(
+            norek,
+            nominal,
+            saldo_minimal,
+            koneksi
+    ):
 
         sql = """UPDATE rekening 
         SET saldo = saldo - ?
@@ -111,18 +117,30 @@ class RekeningRepository:
 
         return cursor.rowcount
 
+
+    # method Update-Lock untuk tambah saldo
     @staticmethod
-    def tambah_saldo(norek ,nominal, koneksi):
+    def tambah_saldo(
+            norek,
+            nominal,
+            koneksi
+    ):
 
         sql = """UPDATE rekening
         SET saldo = saldo + ?
         WHERE norek = ?"""
 
-        cursor = koneksi.execute(sql,(nominal, norek))
+        cursor = koneksi.execute(
+            sql,
+            (
+                nominal,
+                norek
+            )
+        )
 
         return cursor.rowcount
 
-
+    # method untuk melihat perubahan saldo setelah tambah/kurang
     @staticmethod
     def ambil_saldo(norek ,koneksi):
 
@@ -135,6 +153,7 @@ class RekeningRepository:
 
         return hasil['saldo']
 
+    # method untuk perbarui waktu limit
     @staticmethod
     def perbarui_limit(limit_baru,reset_baru, norek, koneksi):
         reset_baru = reset_baru.isoformat()
@@ -145,71 +164,110 @@ class RekeningRepository:
 
         return cursor.rowcount
 
+
+
+
+
+    # method khusus penutupan rekening(mengubah saldo jadi 0 dan status jadi tutup)
     @staticmethod
-    def perbarui_level_rekening(rekening, koneksi):
-        terakhir_ubah = (
-            rekening.terakhir_ubah_rekening.isoformat()
-            if rekening.terakhir_ubah_rekening is not None
-            else None
-        )
+    def perbarui_saldo_dan_status_untuk_penutupan(
+            norek,
+            saldo_baru,
+            status_lama,
+            status_baru,
+            koneksi
+    ):
 
-        cursor = koneksi.execute(
-            """
-            UPDATE rekening
-            SET level = ?,
-                limit_sisa = ?,
-                terakhir_ubah_rekening = ?
-            WHERE norek = ?
-            """,
-            (
-                rekening.level,
-                rekening.limit_sisa,
-                terakhir_ubah,
-                rekening.norek
-            )
-        )
-
-        return cursor.rowcount
-
-
-
-    @staticmethod
-    def perbarui_saldo_dan_status(norek, saldo_baru, status_baru, koneksi):
-
-            cursor = koneksi.execute("""UPDATE rekening
+            sql = """UPDATE rekening
             SET saldo = ?,
             status = ?
             WHERE norek = ?
-            """,(saldo_baru, status_baru, norek))
+            AND status = ?
+            """
+            cursor = koneksi.execute(
+                sql,
+                (
+                    saldo_baru,
+                    status_baru,
+                    norek,
+                    status_lama
+                )
+            )
 
             return cursor.rowcount
 
     @staticmethod
     def perbarui_setelah_bayar_admin(
             norek,
-            saldo_baru,
+            nominal,
+            waktu_bayar_admin_lama,
             waktu_bayar_admin_baru,
             koneksi
     ):
 
+
+        waktu_bayar_admin_lama = (
+            waktu_bayar_admin_lama.isoformat()
+        )
         waktu_bayar_admin_sqlite = (
             waktu_bayar_admin_baru.isoformat()
             )
 
 
-
-        cursor = koneksi.execute("""UPDATE rekening
-            SET saldo = ?,
+        sql = """UPDATE rekening
+            SET saldo = saldo - ?,
             waktu_bayar_admin = ?
             WHERE norek = ?
-            AND status != 'tutup'""",
+            AND status != 'tutup' AND waktu_bayar_admin = ?"""
+
+        cursor = koneksi.execute(sql,
             (
-            saldo_baru,
+            nominal,
             waktu_bayar_admin_sqlite,
-            norek))
+            norek,
+            waktu_bayar_admin_lama
+            )
+                                 )
 
         return cursor.rowcount
 
+
+    @staticmethod
+    def perbarui_setelah_dapat_bunga(
+            norek,
+            waktu_dapat_bunga_lama,
+            waktu_dapat_bunga_baru,
+            nominal,
+            koneksi
+    ):
+
+        dapat_bunga_lama =(
+            waktu_dapat_bunga_lama.isoformat()
+        )
+        dapat_bunga_sqlite = (
+            waktu_dapat_bunga_baru.isoformat()
+            )
+
+        sql = """UPDATE rekening
+        SET saldo = saldo + ?,
+        dapat_bunga = ?
+        WHERE norek = ?
+        AND status != 'tutup'
+        AND dapat_bunga = ?
+        """
+
+        cursor = koneksi.execute(
+            sql,
+            (
+             nominal,
+             dapat_bunga_sqlite,
+             norek,
+             dapat_bunga_lama
+             )
+        )
+
+        return cursor.rowcount
+    # method untuk rekening loader
     @staticmethod
     def cari_semua_rekening_berjalan(koneksi=None):
         kelola_koneksi = koneksi is None
@@ -238,76 +296,65 @@ class RekeningRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-    @staticmethod
-    def perbarui_setelah_dapat_bunga(
-            norek,
-            waktu_dapat_bunga_baru,
-            saldo_baru,
-            koneksi
-    ):
 
-        dapat_bunga_sqlite = (
-            waktu_dapat_bunga_baru.isoformat()
-            )
 
-        cursor = koneksi.execute("""UPDATE rekening
-        SET saldo = ?,
-        dapat_bunga = ?
-        WHERE norek = ?
-        AND status != 'tutup'
-        """,(saldo_baru,
-             dapat_bunga_sqlite,
-             norek
-             )
-        )
-
-        return cursor.rowcount
-
+    # method untuk perbarui status rekening(blokir dan buka blokir)
     @staticmethod
     def perbarui_status_blokir(
             norek,
+            status_lama,
             status_baru,
             alasan_blokir,
             koneksi
     ):
 
-        cursor = koneksi.execute(
-            """
+        sql ="""
             UPDATE rekening 
                 SET status = ?,
                 alasan_blokir = ?
                 WHERE norek = ?
-                """,
+                AND status = ?
+                """
+        cursor = koneksi.execute(
+                sql,
             (
                 status_baru,
                 alasan_blokir,
-                 norek)
+                 norek,
+                status_lama
+            )
         )
 
         return cursor.rowcount
 
+    # method untuk perbarui pin
     @staticmethod
     def perbarui_pin(
             norek,
+            pin_lama,
             pin_baru,
             koneksi
     ):
 
-        cursor = koneksi.execute(
-            """
+        sql ="""
             UPDATE rekening
             SET pin = ?
             WHERE norek = ?
-            """,
+            AND pin = ?
+            """
+        cursor = koneksi.execute(
+                sql,
             (
                 pin_baru,
-                norek
+                norek,
+                pin_lama
             )
         )
 
         return cursor.rowcount
 
 
+    # method Update-Lock untuk perubahan hasil upgrade/downgrade rekening
     @staticmethod
     def ubah_state_setelah_upgrade_atau_downgrade(
             norek,
@@ -348,3 +395,4 @@ class RekeningRepository:
         )
 
         return cursor.rowcount
+
