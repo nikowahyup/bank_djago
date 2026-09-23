@@ -1,12 +1,12 @@
 
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis, buat_koneksi_baca
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
 #method-method penghubung program ke database
 class DepositoRepository:
 
 
-    # untuk menyimpan data
+    # method tambah data deposito ke database
     @staticmethod
     def tambah_deposito(deposito, koneksi):
 
@@ -51,7 +51,7 @@ class DepositoRepository:
 
 
 
-
+    # method untuk pengecekan ID deposito valid
     @staticmethod
     def cari_deposito_dengan_id(id_deposito, koneksi=None):
         kelola_koneksi = koneksi is None
@@ -75,28 +75,10 @@ class DepositoRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-    @staticmethod
-    def cari_deposito_dengan_norek(norek):
-        koneksi = buat_koneksi()
-
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT *
-                FROM deposito
-                WHERE norek = ?
-                ORDER BY id
-                """,
-                (norek,)
-            )
-
-            return cursor.fetchall()
-
-        finally:
-            koneksi.close()
 
 
-    #untuk menu lihat deposito
+
+    # method untuk mencari semua deposito nasabah di menu lihat deposito
     @staticmethod
     def cari_deposito_dengan_nik(nik):
         koneksi = buat_koneksi()
@@ -121,7 +103,7 @@ class DepositoRepository:
 
 
 
-    #untuk pengajuan penutupan rekening
+    # method untuk pengajuan sebagai bahan pertimbangan admin
     @staticmethod
     def cari_deposito_aktif(norek, koneksi=None):
         kelola_koneksi = koneksi is None
@@ -143,7 +125,7 @@ class DepositoRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-    #untuk proses deposito(cairkan,jatuh tempo)
+    # method untuk proses deposito(cairkan,jatuh tempo)
     @staticmethod
     def perbarui_status_deposito(
             id_deposito,
@@ -236,7 +218,7 @@ class DepositoRepository:
                 koneksi.close()
 
 
-    #untuk menu cairkan deposito
+    # method untuk mencari semua deposito yang sudah jatuh tempo
     @staticmethod
     def cari_deposito_jatuh_tempo_dengan_norek(norek, koneksi=None):
 
@@ -292,6 +274,7 @@ class DepositoRepository:
                 koneksi.close()
 
 
+    # method untuk mengubah jenis aro deposito ke non-aro
     @staticmethod
     def hentikan_aro(id_deposito, koneksi):
 

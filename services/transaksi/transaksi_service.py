@@ -4,45 +4,66 @@ from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.utils.utility import Utilitas,JenisTransaksi
 from bank_djago.services.transaksi.limit_service import LimitService
 from bank_djago.services.admin.audit_service import  AuditService
-from bank_djago.services.transaksi.riwayat.riwayat_template import RiwayatTemplate
+from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 
+from bank_djago.services.exceptions import (
+    InputTidakValid, RekeningTidakDitemukan, PenambahanSaldoGagal,
+    StatusTidakValid, PerbaruiStatusGagal, PenguranganSaldoGagal, NikTidakSesuai
+)
 
 class TransaksiService:
 
     @staticmethod
-    def setor_tunai(norek ,nominal):
+    def setor_tunai(nik_masuk,norek ,nominal):
 
         if nominal < 10000:
-            raise ValueError("Minimal setor adalah Rp10.000")
+            raise InputTidakValid(
+                "Minimal setor adalah Rp10.000"
+            )
 
-        koneksi = buat_koneksi()
+        with buat_koneksi_tulis() as koneksi:
 
-        try:
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
                 koneksi=koneksi
             )
             if rekening is None:
-                raise ValueError("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan(
+                    "Rekening tidak ditemukan"
+                )
 
-            Validator.amankan_rekening(rekening)
+            nasabah = rekening.pemilik
 
-            saldo_baru = rekening.saldo + nominal
+            if nasabah.NIK != nik_masuk:
+                raise NikTidakSesuai(
+                    "NIK ini tidak terdaftar sebagai pemilik rekening"
+                )
 
-            jumlah_baris =  RekeningRepository.perbarui_saldo(
+            Validator.amankan_rekening(rekening=rekening)
+
+
+            jumlah_baris =  RekeningRepository.tambah_saldo(
                 norek=norek,
-                saldo_baru=saldo_baru,
+                nominal=nominal,
                 koneksi=koneksi
             )
 
+
             if jumlah_baris != 1 :
-                raise ValueError("Gagal melakukan setor tunai")
+                raise PenambahanSaldoGagal(
+                    "Gagal melakukan setor tunai"
+                )
+
+            saldo_baru = RekeningRepository.ambil_saldo(
+                norek=rekening.norek,
+                koneksi=koneksi
+            )
 
             transaksi = {
                 "jenis": JenisTransaksi.SETOR_TUNAI,
@@ -58,7 +79,11 @@ class TransaksiService:
                 koneksi=koneksi
             )
 
-            riwayat = RiwayatTemplate.setor_uang(nominal)
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="setor uang",
+                log=f"SETOR UANG | +Rp{Utilitas.format_rupiah(nominal)}"
+            )
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek,
@@ -76,57 +101,71 @@ class TransaksiService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek
             )
-            AuditRepository.tambah_audit(audit, koneksi,id_transaksi)
+            AuditRepository.tambah_audit(
+                audit=audit,
+                koneksi=koneksi,
+                id_transaksi=id_transaksi
+            )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
         return True
 
     #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def tarik_tunai(norek, nominal):
+    def tarik_tunai(nik_masuk,norek, nominal):
 
         if nominal < 10000:
-            raise ValueError("Minimal tarik adalah Rp10.000")
+            raise InputTidakValid(
+                "Minimal tarik adalah Rp10.000"
+            )
 
-        koneksi = buat_koneksi()
+        with buat_koneksi_tulis() as koneksi:
 
-        try:
             rekening = RekeningLoader.muat_rekening(
                 norek=norek,
                 koneksi=koneksi
             )
 
             if rekening is None:
-                raise ValueError("Rekening tidak terdaftar")
+                raise RekeningTidakDitemukan(
+                    "Rekening tidak terdaftar"
+                )
 
+            nasabah = rekening.pemilik
 
-            Validator.amankan_rekening(rekening)
+            if nasabah.NIK != nik_masuk:
+                raise NikTidakSesuai(
+                    "NIK ini tidak terdaftar sebagai pemilik rekening"
+                )
+
+            Validator.amankan_rekening(rekening=rekening)
 
             if rekening.saldo - nominal < rekening.saldosetor_min:
-                raise ValueError(
+                raise StatusTidakValid(
                     f"Saldo tidak memenuhi saldo minimum jika Anda\n"
                     f" menarik sebesar Rp{Utilitas.format_rupiah(nominal)}"
                 )
 
-            saldo_baru = rekening.saldo - nominal
+            saldo_minimal = rekening.saldosetor_min
 
-            jumlah_baris = RekeningRepository.perbarui_saldo(
-                norek=norek,
-                saldo_baru=saldo_baru,
+            jumlah_baris = RekeningRepository.kurangi_saldo(
+                norek=rekening.norek,
+                nominal=nominal,
+                saldo_minimal=saldo_minimal,
                 koneksi=koneksi
             )
-            if jumlah_baris != 1:
-                raise ValueError("Gagal melakukan tarik tunai")
 
+            if jumlah_baris != 1:
+                raise PenguranganSaldoGagal(
+                    "Gagal melakukan tarik tunai"
+                )
+
+            saldo_baru = RekeningRepository.ambil_saldo(
+                norek=norek,
+                koneksi=koneksi
+            )
 
             transaksi = {
                 "jenis": JenisTransaksi.TARIK_TUNAI,
@@ -141,7 +180,11 @@ class TransaksiService:
                 transaksi=transaksi,
                 koneksi=koneksi
             )
-            riwayat = RiwayatTemplate.tarik_uang(nominal)
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="tarik uang",
+                log=f"TARIK UANG | -Rp{Utilitas.format_rupiah(nominal)}"
+            )
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek,
@@ -165,34 +208,24 @@ class TransaksiService:
                 id_transaksi=id_transaksi
             )
 
-            koneksi.commit()
-
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
-
 
         return True
+
     #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
     def transfer(
+            nik_masuk,
             norek_pengirim,
             norek_penerima,
             nominal
     ):
 
         if nominal < 10000:
-            raise ValueError(
+            raise InputTidakValid(
                 "Minimal transfer adalah Rp10.000"
             )
-        koneksi = buat_koneksi()
-
-
-        try:
+        with buat_koneksi_tulis() as koneksi:
 
             pengirim = RekeningLoader.muat_rekening(
                 norek=norek_pengirim,
@@ -200,10 +233,16 @@ class TransaksiService:
             )
 
             if pengirim is None:
-                raise ValueError(
+                raise RekeningTidakDitemukan(
                     "Rekening pengirim tidak terdaftar"
                 )
 
+            nasabah = pengirim.pemilik
+
+            if nasabah.NIK != nik_masuk:
+                raise NikTidakSesuai(
+                    "NIK ini tidak terdaftar sebagai pemilik rekening"
+                )
 
             Validator.amankan_rekening(pengirim)
 
@@ -213,27 +252,30 @@ class TransaksiService:
                 koneksi=koneksi
             )
 
-            limit_sekarang,reset_baru,reset_terjadi = LimitService.hitung_limit_saat_ini(pengirim)
+            limit_sisa,reset_baru,is_reset = LimitService.hitung_limit_saat_ini(pengirim)
 
             total = nominal + pengirim.pajak
 
             if pengirim.saldo - total < pengirim.saldosetor_min:
-                raise ValueError(
+                raise StatusTidakValid(
                     "Saldo Anda tidak cukup untuk melakukan transfer"
                 )
 
-            if limit_sekarang is None:
+            if limit_sisa is None:
                 limit_baru = None
             else:
-                limit_baru = limit_sekarang - total
+                limit_baru = limit_sisa - total
                 if limit_baru < 0:
-                    raise ValueError("Limit harian telah habis")
+                    raise StatusTidakValid(
+                        "Limit harian telah habis"
+                    )
 
 
-            saldo_khusus_pengirim = pengirim.saldo - total
-            saldo_khusus_penerima = penerima.saldo + nominal
+            pengurangan_saldo_pengirim = total
+            penambahan_saldo_penerima =  nominal
+            saldo_minimal_pengirim = pengirim.saldosetor_min
 
-            if reset_terjadi:
+            if is_reset:
                 riwayat_reset = RiwayatTemplate.template(
                     kategori="sistem",
                     jenis="reset limit",
@@ -247,16 +289,19 @@ class TransaksiService:
 
 
 
-            jumlah_baris_pengirim = RekeningRepository.perbarui_saldo(
+            jumlah_baris_pengirim = RekeningRepository.kurangi_saldo(
                 norek=pengirim.norek,
-                saldo_baru=saldo_khusus_pengirim,
+                nominal=pengurangan_saldo_pengirim,
+                saldo_minimal=saldo_minimal_pengirim,
                 koneksi=koneksi
             )
-            jumlah_baris_penerima = RekeningRepository.perbarui_saldo(
+
+            jumlah_baris_penerima = RekeningRepository.tambah_saldo(
                 norek=penerima.norek,
-                saldo_baru=saldo_khusus_penerima,
+                nominal=penambahan_saldo_penerima,
                 koneksi=koneksi
             )
+
             jumlah_baris_limit =RekeningRepository.perbarui_limit(
                 limit_baru=limit_baru,
                 reset_baru=reset_baru,
@@ -266,14 +311,30 @@ class TransaksiService:
 
 
             if jumlah_baris_pengirim != 1:
-                raise ValueError("Tidak dapat melakukan transfer")
+                raise PenguranganSaldoGagal(
+                    "Tidak dapat melakukan transfer"
+                )
 
             if jumlah_baris_limit != 1:
-                raise ValueError("Terjadi kesalahan saat memperbarui limit")
+                raise PerbaruiStatusGagal(
+                    "Terjadi kesalahan saat memperbarui limit"
+                )
 
 
             if jumlah_baris_penerima != 1:
-                raise ValueError("Tidak dapat melakukan transfer")
+                raise PenambahanSaldoGagal(
+                    "Tidak dapat melakukan transfer"
+                )
+
+            saldo_setelah_pengirim = RekeningRepository.ambil_saldo(
+                norek=pengirim.norek,
+                koneksi=koneksi
+            )
+
+            saldo_setelah_penerima = RekeningRepository.ambil_saldo(
+                norek=penerima.norek,
+                koneksi=koneksi
+            )
 
             transaksi = {
                 "jenis": JenisTransaksi.TRANSFER,
@@ -281,18 +342,29 @@ class TransaksiService:
                 "norek_tujuan":penerima.norek,
                 "nominal": nominal,
                 "saldo_sumber_sebelum": pengirim.saldo,
-                "saldo_sumber_sesudah": saldo_khusus_pengirim,
+                "saldo_sumber_sesudah": saldo_setelah_pengirim,
                 "saldo_tujuan_sebelum": penerima.saldo,
-                "saldo_tujuan_sesudah": saldo_khusus_penerima,
+                "saldo_tujuan_sesudah": saldo_setelah_penerima,
                 "biaya":pengirim.pajak,
                 "waktu": datetime.datetime.now()
             }
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi=transaksi, koneksi=koneksi)
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi,
+                koneksi=koneksi
+            )
 
 
-            riwayat_pengirim = RiwayatTemplate.transfer_kirim(nominal,penerima)
-            riwayat_penerima = RiwayatTemplate.transfer_terima(nominal,pengirim)
+            riwayat_pengirim = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="transer saldo",
+                log=f"TRANSFER UANG | -Rp{Utilitas.format_rupiah(nominal)} | Penerima {penerima.pemilik.nama} "
+            )
+            riwayat_penerima = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="terima saldo",
+                log=f"TERIMA UANG | +Rp{Utilitas.format_rupiah(nominal)} | Dari {pengirim.pemilik.nama}"
+            )
             
             audit_penerima = AuditService.tambah_audit(
                 kategori="finansial",
@@ -340,30 +412,10 @@ class TransaksiService:
                 id_transaksi=id_transaksi
             )
 
-            koneksi.commit()
 
-        except Exception:
-            koneksi.rollback()
-            raise
-
-        finally:
-            koneksi.close()
 
         return True
 
-    @staticmethod
-    def tarik_semua_uang(rekening):
-        Validator.amankan_rekening(rekening)
-        total = rekening.saldo
-        rekening.kurangi_saldo(total)
-
-
-    @staticmethod
-    def transfer_semua_uang(rekening,penerima):
-        Validator.amankan_rekening(rekening)
-        total = rekening.saldo
-        rekening.kurangi_saldo(total)
-        penerima.tambah_saldo(total)
 
 
     @staticmethod
@@ -376,7 +428,10 @@ class TransaksiService:
         from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 
         if norek_penerima == norek_pengirim:
-                raise ValueError("Tidak dapat transfer ke nomor rekening sendiri")
+                raise StatusTidakValid(
+                    "Tidak dapat transfer ke nomor rekening sendiri"
+                )
+
         kelola_koneksi = koneksi is None
 
         if kelola_koneksi:
@@ -384,13 +439,17 @@ class TransaksiService:
 
         try:
 
-            penerima = RekeningLoader.muat_rekening(norek_penerima,koneksi)
+            penerima = RekeningLoader.muat_rekening(norek=norek_penerima,koneksi=koneksi)
 
             if penerima is None:
-                raise ValueError("Rekening penerima tidak terdaftar")
+                raise RekeningTidakDitemukan(
+                    "Rekening penerima tidak terdaftar"
+                )
 
             if penerima.status != "aktif":
-                    raise ValueError(f"Rekening penerima sudah/telah di{penerima.status}")
+                    raise StatusTidakValid(
+                        f"Rekening penerima saat ini sedang di{penerima.status}"
+                    )
 
             return penerima
 
@@ -402,7 +461,12 @@ class TransaksiService:
 
 
     @staticmethod
-    def transfer_semua_saldo(rekening_asal, norek_penerima, koneksi):
+    def transfer_semua_saldo(
+            rekening_asal,
+            norek_penerima,
+            koneksi
+    ):
+
         penerima = TransaksiService.cari_penerima(
             norek_penerima=norek_penerima,
             norek_pengirim=rekening_asal,
@@ -410,24 +474,22 @@ class TransaksiService:
         )
 
         nominal_transfer = rekening_asal.saldo
-        saldo_baru_penerima = penerima.saldo + nominal_transfer
 
-        jumlah_baris_asal = RekeningRepository.perbarui_saldo(
-            norek=rekening_asal.norek,
-            saldo_baru=0,
-            koneksi=koneksi
+        jumlah_baris_penerima = (
+            RekeningRepository.tambah_saldo(
+                norek=penerima.norek,
+                nominal=nominal_transfer,
+                koneksi=koneksi
+            )
         )
-
-        jumlah_baris_penerima = RekeningRepository.perbarui_saldo(
-            norek=penerima.norek,
-            saldo_baru=saldo_baru_penerima,
-            koneksi=koneksi
-        )
-
-        if jumlah_baris_asal != 1:
-            raise ValueError("Gagal mengosongkan saldo rekening yang akan ditutup")
 
         if jumlah_baris_penerima != 1:
-            raise ValueError("Gagal memindahkan saldo ke rekening penerima")
+            raise PenambahanSaldoGagal(
+                "Gagal memindahkan saldo ke rekening penerima"
+            )
+        saldo_baru_penerima = RekeningRepository.ambil_saldo(
+            norek=penerima.norek,
+            koneksi=koneksi
+        )
 
         return penerima, nominal_transfer, saldo_baru_penerima

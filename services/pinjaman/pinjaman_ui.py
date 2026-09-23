@@ -3,6 +3,7 @@ import sqlite3
 from bank_djago.services.pinjaman.pinjaman_service import  PinjamanService
 from bank_djago.utils.utility import Utilitas,StatusPinjaman
 from bank_djago.utils.ui import UI
+from bank_djago.services.exceptions import BankException
 
 
 class PinjamanUI:
@@ -86,10 +87,70 @@ class PinjamanUI:
                 f"Mohon tunggu persetujuan admin untuk mencairkan pinjaman"
             )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
 
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat membuka ajuan pinjaman. Silakan coba lagi")
 
+
+    @staticmethod
+    def pilih_pinjaman(nik,norek=None,status=None):
+
+        if norek is not None:
+
+            daftar_pinjaman = (
+                PinjamanService.cari_semua_pinjaman_dengan_norek(
+                    norek=norek,
+                    status=status
+                )
+            )
+        else:
+            daftar_pinjaman = (
+                PinjamanService.cari_pinjaman_nasabah(nik=nik)
+            )
+
+        if not daftar_pinjaman:
+            return None
+
+
+
+        print("===== SILAHKAN PILIH PINJAMAN =====")
+        print()
+        for nomor, data_pinjaman in enumerate(daftar_pinjaman, start=1):
+            print(f"{nomor}.")
+            print(f"Rekening    : {data_pinjaman['norek']}")
+            print(f"Status      : {data_pinjaman['status'].value}")
+            print(f"ID pinjaman : {data_pinjaman['id']}")
+            print(
+                f"Nominal     : "
+                f"Rp{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])}"
+            )
+            print(f"Tenor       : {data_pinjaman['tenor']} bulan")
+            print(f"Bunga       : {data_pinjaman['bunga'] * 100:.1f}% / tahun")
+            print()
+
+
+        while True:
+            try:
+                pilihan = int(
+                    input(
+                        "Pilih nomor pinjaman "
+                        "(ketik 0 untuk keluar): "
+                    )
+                )
+            except ValueError:
+                UI.gagal("Silakan pilih menggunakan angka")
+                continue
+
+            if pilihan == 0:
+                return PinjamanUI.BATAL
+
+            if pilihan < 1 or pilihan > len(daftar_pinjaman):
+                UI.gagal("Nomor pilihan tidak tersedia")
+                continue
+
+            return daftar_pinjaman[pilihan - 1]
 
 
 
@@ -125,8 +186,11 @@ class PinjamanUI:
                 f"Rp{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])} telah masuk "
                 f"ke rekening {data_pinjaman['norek']}"
                     )
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
+
+        except sqlite3.Error:
+            UI.peringatan("Terjadi kesalahan saat mencairkan pinjaman. Silakan coba lagi")
 
 
 
@@ -188,71 +252,14 @@ class PinjamanUI:
                     )}"
                 )
 
-        except ValueError as e:
+        except BankException as e:
             UI.gagal(str(e))
 
-        except sqlite3.Error as e:
-            UI.gagal(f"Terjadi kesalahan saat pembayaran: {e}")
+        except sqlite3.Error:
+            UI.gagal(f"Terjadi kesalahan saat pembayaran. Silakan coba lagi")
 
 
 
-    @staticmethod
-    def pilih_pinjaman(nik,norek=None,status=None):
-
-        if norek is not None:
-
-            daftar_pinjaman = (
-                PinjamanService.cari_semua_pinjaman_dengan_norek(
-                    norek=norek,
-                    status=status
-                )
-            )
-        else:
-            daftar_pinjaman = (
-                PinjamanService.cari_pinjaman_nasabah(nik=nik)
-            )
-
-        if not daftar_pinjaman:
-            return None
-
-
-
-        print("===== SILAHKAN PILIH PINJAMAN =====")
-        print()
-        for nomor, data_pinjaman in enumerate(daftar_pinjaman, start=1):
-            print(f"{nomor}.")
-            print(f"Rekening    : {data_pinjaman['norek']}")
-            print(f"Status      : {data_pinjaman['status'].value}")
-            print(f"ID pinjaman : {data_pinjaman['id']}")
-            print(
-                f"Nominal     : "
-                f"Rp{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])}"
-            )
-            print(f"Tenor       : {data_pinjaman['tenor']} bulan")
-            print(f"Bunga       : {data_pinjaman['bunga'] * 100:.1f}% / tahun")
-            print()
-
-
-        while True:
-            try:
-                pilihan = int(
-                    input(
-                        "Pilih nomor pinjaman "
-                        "(ketik 0 untuk keluar): "
-                    )
-                )
-            except ValueError:
-                UI.gagal("Silakan pilih menggunakan angka")
-                continue
-
-            if pilihan == 0:
-                return PinjamanUI.BATAL
-
-            if pilihan < 1 or pilihan > len(daftar_pinjaman):
-                UI.gagal("Nomor pilihan tidak tersedia")
-                continue
-
-            return daftar_pinjaman[pilihan - 1]
 
 
 

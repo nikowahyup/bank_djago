@@ -1,9 +1,10 @@
-from bank_djago.core.rekening import kelas_rekening
+
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
 class PinjamanRepository:
 
+    # method simpan data pinjaman ke database
     @staticmethod
     def tambah_pinjaman(pinjaman, koneksi):
         tanggal_pencairan = (
@@ -50,6 +51,7 @@ class PinjamanRepository:
 
         return cursor.lastrowid
 
+    # method untuk mencari semua pinjaman nasabah
     @staticmethod
     def cari_semua_pinjaman_dengan_nik(nik, koneksi=None):
         kelola_koneksi = koneksi is None
@@ -76,7 +78,7 @@ class PinjamanRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-
+    # method untuk mengecek apakah nasabah masih punya pinjaman belum dicairkan
     @staticmethod
     def cari_pengajuan_aktif_nasabah(nik, koneksi):
 
@@ -99,7 +101,7 @@ class PinjamanRepository:
             return cursor.fetchone()
 
 
-
+    # method Update-Lock untuk perubahan status pinjaman karena keputusan admin
     @staticmethod
     def perbarui_status_pinjaman(
         id_pinjaman,
@@ -126,6 +128,7 @@ class PinjamanRepository:
 
         return cursor.rowcount
 
+    # method Update-Lock untuk perubahan state pinjaman setelah pencairan
     @staticmethod
     def perbarui_setelah_pencairan(
             id_pinjaman,
@@ -167,6 +170,7 @@ class PinjamanRepository:
 
         return cursor.rowcount
 
+    # method Update_lock untuk perubahan setelah pembayaran cicilan pinjaman
     @staticmethod
     def perbarui_setelah_pembayaran(
             id_pinjaman,
@@ -313,6 +317,7 @@ class PinjamanRepository:
                 koneksi.close()
 
 
+    # method khusus admin untuk melihat statistik pinjaman yang dimilik nasabah
     @staticmethod
     def cari_detail_pinjaman(
             id_pinjaman,
@@ -369,7 +374,7 @@ class PinjamanRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-
+    # method filter untuk kebutuhan UI
     @staticmethod
     def cari_semua_pinjaman_dengan_norek(
             norek,
