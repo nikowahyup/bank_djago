@@ -3,7 +3,7 @@ import datetime
 from bank_djago.core.nasabah import Nasabahh
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
 
 
 class RekeningLoader:
@@ -51,15 +51,17 @@ class RekeningLoader:
             waktu_dibuat=waktu_dibuat
         )
 
+        # Helper kecil untuk parse tanggal aman dari None
+        def parse_date(val):
+            return datetime.date.fromisoformat(val) if val is not None else None
+
+        rekening.reset = parse_date(data_rekening["reset"])
+        rekening.waktu_bayar_admin = parse_date(data_rekening["waktu_bayar_admin"])
+        rekening.dapat_bunga = parse_date(data_rekening["dapat_bunga"])
         rekening.set_saldo(data_rekening["saldo"])
-        rekening.reset = datetime.date.fromisoformat(data_rekening["reset"])
         rekening.status = data_rekening["status"]
-        rekening.waktu_bayar_admin = datetime.date.fromisoformat(data_rekening["waktu_bayar_admin"])
-        rekening.dapat_bunga = datetime.date.fromisoformat(data_rekening["dapat_bunga"])
         rekening.alasan_blokir = data_rekening["alasan_blokir"]
         rekening.limit_sisa = data_rekening["limit_sisa"]
-
-
         terakhir_ubah = data_rekening["terakhir_ubah_rekening"]
         rekening.terakhir_ubah_rekening = datetime.date.fromisoformat(terakhir_ubah) if terakhir_ubah is not None else None
 
@@ -162,12 +164,12 @@ class RekeningLoader:
 
     @staticmethod
     def muat_semua_rekening_berjalan():
-        koneksi = buat_koneksi()
+
 
         nasabah_index = {}
         daftar_rekening = []
 
-        try:
+        with buat_koneksi_tulis() as koneksi:
             data_semua_rekening = (
                 RekeningRepository.cari_semua_rekening_berjalan(
                     koneksi=koneksi
@@ -196,7 +198,9 @@ class RekeningLoader:
                 nasabah.rekening.append(rekening)
                 daftar_rekening.append(rekening)
 
-        finally:
-            koneksi.close()
+
 
         return daftar_rekening
+
+
+

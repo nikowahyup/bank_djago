@@ -1,14 +1,16 @@
+from bank_djago import RekeningService
 from bank_djago.utils.utility import UI,Utilitas
 import sqlite3
 from bank_djago.services.rekening.pengajuan_service import PengajuanService
 from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
+from bank_djago.services.exceptions import BankException
 
 
 class PengajuanUI:
 
 
     @staticmethod
-    def ajukan_penutupan(rekening):
+    def ajukan_penutupan(nik, norek):
         print()
         UI.header("PENGAJUAN PENUTUPAN REKENING", UI.MERAH)
         print()
@@ -46,11 +48,11 @@ class PengajuanUI:
         try:
             Utilitas.animasi("Mengirim pengajuan")
 
-            id_pengajuan = (
-                PengajuanService.ajukan_penutupan(
-                    rekening=rekening,
-                    alasan=alasan
-                )
+            id_pengajuan = (PengajuanService.ajukan_penutupan(
+                nik=nik,
+                norek=norek,
+                alasan=alasan
+            )
             )
 
             UI.sukses(
@@ -62,7 +64,7 @@ class PengajuanUI:
                 "menunggu keputusan admin."
             )
 
-        except ValueError as error:
+        except BankException as error:
             UI.gagal(str(error))
 
         except sqlite3.Error:
@@ -72,15 +74,15 @@ class PengajuanUI:
             )
 
     @staticmethod
-    def selesaikan_penutupan(rekening):
+    def selesaikan_penutupan(nik, norek):
         print()
         UI.header("SELESAIKAN PENUTUPAN REKENING", UI.MERAH)
         print()
-
-        print(f"Nomor rekening : {rekening.norek}")
+        data_rekening = RekeningService.cari_rekening_untuk_diubah_atau_untuk_pangajuan(norek=norek)
+        print(f"Nomor rekening : {data_rekening['norek']}")
         print(
             f"Saldo           : "
-            f"Rp{Utilitas.format_rupiah(rekening.saldo)}"
+            f"Rp{Utilitas.format_rupiah(data_rekening['saldo'])}"
         )
         print()
         print("1. Transfer seluruh saldo")
@@ -118,7 +120,8 @@ class PengajuanUI:
             Utilitas.animasi("Menyelesaikan penutupan")
 
             nominal = PengajuanService.selesaikan_penutupan(
-                rekening=rekening,
+                nik=nik,
+                norek=norek,
                 metode=metode,
                 norek_penerima=norek_penerima
             )
@@ -139,7 +142,7 @@ class PengajuanUI:
                     f"berhasil ditarik"
                 )
 
-        except ValueError as error:
+        except BankException as error:
             UI.gagal(str(error))
 
         except sqlite3.Error as error:
@@ -150,22 +153,22 @@ class PengajuanUI:
 
 
     @staticmethod
-    def kelola_penutupan_rekening(rekening):
-        pengajuan = PengajuanRepository.cari_penutupan_terbaru(norek=rekening.norek)
+    def kelola_penutupan_rekening(nik, norek):
+        pengajuan = PengajuanRepository.cari_penutupan_terbaru(norek=norek)
         if pengajuan is None:
             UI.gagal("Anda masih belum melakukan pengajuan")
-            PengajuanUI.ajukan_penutupan(rekening=rekening)
+            PengajuanUI.ajukan_penutupan(nik=nik, norek=norek)
             return
 
         if pengajuan["status"] == "diajukan":
             UI.gagal("Status pengajuan terbaru Anda masih menunggu persetujuan Admin. Mohon menunggu")
             return
         if pengajuan["status"] == "disetujui":
-            PengajuanUI.selesaikan_penutupan(rekening=rekening)
+            PengajuanUI.selesaikan_penutupan(nik=nik, norek=norek)
             return
 
         if pengajuan["status"] == "ditolak":
             UI.gagal(
                 f"Pengajuan sebelumnya ditolak. "
                 f"Catatan admin: {pengajuan['catatan_admin']}")
-            PengajuanUI.ajukan_penutupan(rekening)
+            PengajuanUI.ajukan_penutupan(nik=nik, norek=norek)
