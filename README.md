@@ -406,7 +406,14 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
 - membuat sebagian service menggunakan helper context manager(deposito dan pinjaman)
 - memindahkan beberapa method penghitung seperti hitung denda,tanggal boleh bayar selanjutnya ke class entity pinjaman
 - mengubah alur upgrade dan downgrade mengikuti pola SQLite-first
-- mulai membuat file pengujian berbasis pytest
+
+
+  (20/09/2026 - 24/09/2026)
+  - fokus refactor bagian yang belum diubah ke desain SQLite-first
+  - Membuat dan mengaplikasikan custom Exception
+  - Mulai membuat file test menggunakan pytest
+
+
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
@@ -620,6 +627,11 @@ Jawaban:
 Masalah dimulai ketika saya menguji alur transfer. saat itu saya mencoba melakukan transfer pada dua rekening yang dimiliki oleh nasabah yang sama. Begitu transfer selesai dan saya mengecek saldo terkini,ternyata saldo tidak terupdate langsung. Untuk melihat perubahannya,saya harus menjalankan ulang program sehingga rekening kembali diload dan menggunakan data terbaru dari database.
 
 Ini membuat saya bertanya-tanya,memang hanya saya yang menjalankan programmnya,jadi saya bisa me-refresh programmnya untuk melihat perubahan. Desain ini tidak cocok untuk digunakan multi-user. Itu sebabnya saya mengubah desain program saya yang berbasis objek/state memori menjadi SQLite-first.
+
+36. Mengapa validasi jenis_aro dan lama_aro tetap dipertahankan di perpanjangan() meski sudah dijaga oleh CHECK constraint database?
+
+Jawaban:
+Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu valid, sehingga kedua pengecekan ini secara praktis tidak akan pernah terpicu selama skema database tidak berubah. Validasi tetap dipertahankan sebagai lapisan pertahanan kedua (defensive programming) — bukan untuk menangani kondisi yang mungkin terjadi hari ini, melainkan untuk mengantisipasi jika constraint database suatu saat diubah, dilonggarkan, atau service ini dipanggil dari jalur yang melewati constraint (misalnya migrasi data manual). Baris ini juga berfungsi sebagai dokumentasi implisit tentang nilai yang dianggap valid oleh business logic. Karena kondisi ini bergantung pada kegagalan lapisan lain yang sengaja dijaga tetap ketat, baris ini tidak dapat diuji secara realistis melalui pytest selama constraint database masih diberlakukan.
 
 #### Deposito dan notifikasi
 
