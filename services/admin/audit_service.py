@@ -1,19 +1,22 @@
-
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_baca
 from bank_djago.services.admin.audit_structure import STRUKTUR_AUDIT
+from bank_djago.services.exceptions import InputTidakValid
 
 from bank_djago.utils.utility import Utilitas
+
+
 class AuditService:
 
+    # method  template untuk audit
     @staticmethod
-    def tambah_audit(kategori,objek,aksi,log,nama=None,nik=None,norek=None):
+    def tambah_audit(kategori, objek, aksi, log, nama=None, nik=None, norek=None):
         audit = {
-            "kategori":kategori,
-            "objek":objek,
-            "aksi":aksi,
-            "waktu":Utilitas.waktu_sekarang(),
-            "log":log
+            "kategori": kategori,
+            "objek": objek,
+            "aksi": aksi,
+            "waktu": Utilitas.waktu_sekarang(),
+            "log": log,
         }
         if nik is not None:
             audit["nik"] = nik
@@ -24,54 +27,31 @@ class AuditService:
 
         return audit
 
-
+    # method pemfilter audit
     @staticmethod
-    def cari_audit(
-        kategori=None,
-        objek=None,
-        aksi=None
-    ):
+    def cari_audit(kategori=None, objek=None, aksi=None):
 
         if kategori is not None:
             if kategori not in STRUKTUR_AUDIT:
-                raise ValueError(
-                    "Kategori audit tidak terdaftar"
-                )
+                raise InputTidakValid("Kategori audit tidak terdaftar")
 
         if objek is not None:
             if kategori is None:
-                raise ValueError(
-                    "Kategori harus dipilih sebelum objek"
-                )
+                raise InputTidakValid("Kategori harus dipilih sebelum objek")
 
             if objek not in STRUKTUR_AUDIT[kategori]:
-                raise ValueError(
-                    "Objek audit tidak terdaftar"
-                )
+                raise InputTidakValid("Objek audit tidak terdaftar")
 
         if aksi is not None:
             if objek is None:
-                raise ValueError(
-                    "Objek harus dipilih sebelum aksi"
-                )
+                raise InputTidakValid("Objek harus dipilih sebelum aksi")
 
             if aksi not in STRUKTUR_AUDIT[kategori][objek]:
-                raise ValueError(
-                    "Aksi audit tidak terdaftar"
-                )
+                raise InputTidakValid("Aksi audit tidak terdaftar")
 
-        koneksi = buat_koneksi()
-
-        try:
+        with buat_koneksi_baca() as koneksi:
             data_audit = AuditRepository.cari_audit(
-                koneksi=koneksi,
-                kategori=kategori,
-                objek=objek,
-                aksi=aksi
+                koneksi=koneksi, kategori=kategori, objek=objek, aksi=aksi
             )
 
             return data_audit
-
-        finally:
-            koneksi.close()
-

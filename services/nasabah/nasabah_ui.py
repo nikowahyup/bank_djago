@@ -7,6 +7,7 @@ from bank_djago.utils.validator import Validator
 from bank_djago.utils.ui import UI
 from bank_djago.services.exceptions import BankException
 
+
 class NasabahUI:
 
     @staticmethod
@@ -21,18 +22,14 @@ class NasabahUI:
             Utilitas.animasi("Memeriksa data")
             data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
             if data_nasabah is not None:
-                UI.gagal("NIK sudah terdaftar. Silahkan pilih opsi buka rekening di menu layanan rekening"
+                UI.gagal(
+                    "NIK sudah terdaftar. Silahkan pilih opsi buka rekening di menu layanan rekening"
                 )
                 return
             print()
 
             try:
-                Validator.validasi_nasabah(
-                    nama,
-                    nik,
-                    alamat,
-                    pin
-                )
+                Validator.validasi_nasabah(nama, nik, alamat, pin)
 
             except ValueError as error:
                 daftar_pesan = error.args[0]
@@ -47,40 +44,28 @@ class NasabahUI:
 
             break
 
-
         print()
         Utilitas.keuntungan_rekening()
 
         while True:
             try:
                 print()
-                pilihan = int(
-                    input("Masukkan pilihan Anda: ")
-                )
+                pilihan = int(input("Masukkan pilihan Anda: "))
 
                 if pilihan not in (1, 2, 3, 4):
-                    UI.gagal(
-                        "Tolong pilih pilihan yang tersedia"
-                    )
+                    UI.gagal("Tolong pilih pilihan yang tersedia")
                     continue
 
                 break
 
             except ValueError:
-                UI.gagal(
-                    "Silakan masukkan pilihan yang valid"
-                )
-
+                UI.gagal("Silakan masukkan pilihan yang valid")
 
         while True:
             try:
-                UI.peringatan(
-                    "Anda wajib menyetorkan uang setoran awal"
-                )
+                UI.peringatan("Anda wajib menyetorkan uang setoran awal")
 
-                setor_awal = int(
-                    input("Masukkan nominal: ")
-                )
+                setor_awal = int(input("Masukkan nominal: "))
 
                 break
 
@@ -90,33 +75,27 @@ class NasabahUI:
         Utilitas.animasi("Memproses pendaftaran")
 
         try:
-            nasabah, rekening = (
-                NasabahService.daftar_dan_buka_rekening(
-                    nik=nik,
-                    nama=nama,
-                    alamat=alamat,
-                    pin=pin,
-                    setor_awal=setor_awal,
-                    level=pilihan
-                )
+            nasabah, rekening = NasabahService.daftar_dan_buka_rekening(
+                nik=nik,
+                nama=nama,
+                alamat=alamat,
+                pin=pin,
+                setor_awal=setor_awal,
+                level=pilihan,
             )
 
             Utilitas.sapaan(nasabah, rekening)
 
-
-
         except BankException as error:
 
             UI.gagal(str(error))
-
-
 
     @staticmethod
     def menu_profil(nik):
 
         while True:
 
-            UI.header("MENU PROFIL",UI.KUNING)
+            UI.header("MENU PROFIL", UI.KUNING)
             print()
             print("1. Lihat Biodata")
             print("2. Lihat Daftar Rekening")
@@ -137,13 +116,9 @@ class NasabahUI:
             elif pilihan == "4":
                 break
 
-
-
-
-
     @staticmethod
     def biodata(nik):
-        UI.header("BIODATA",UI.MERAH)
+        UI.header("BIODATA", UI.MERAH)
 
         data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
         if data_nasabah is None:
@@ -158,7 +133,7 @@ class NasabahUI:
 
     @staticmethod
     def daftar_rekening(nik):
-        UI.header("DAFTAR REKENING",UI.MERAH)
+        UI.header("DAFTAR REKENING", UI.MERAH)
 
         print()
         daftar_rekening = RekeningService.cari_semua_rekening(nik=nik)
@@ -167,8 +142,8 @@ class NasabahUI:
             UI.gagal("Anda belum memiliki rekening")
             return
 
-        for nomor , data_rekening in enumerate(daftar_rekening,start=1):
-            jenis = RekeningService.level[data_rekening['level']]
+        for nomor, data_rekening in enumerate(daftar_rekening, start=1):
+            jenis = RekeningService.level[data_rekening["level"]]
             print()
             print(f"{nomor}. {jenis}")
             print(f"💳 Nomor Rekening : {data_rekening['norek']}")
@@ -178,7 +153,7 @@ class NasabahUI:
 
     @staticmethod
     def ganti_alamat(nik):
-        UI.header("GANTI ALAMAT",UI.MERAH)
+        UI.header("GANTI ALAMAT", UI.MERAH)
 
         data_nasabah = NasabahService.cari_nik_terdaftar(nik=nik)
 
@@ -197,16 +172,12 @@ class NasabahUI:
 
         try:
             NasabahService.ganti_alamat(
-                nik=data_nasabah['nik'],
-                alamat_baru=alamat_baru
+                nik=data_nasabah["nik"], alamat_baru=alamat_baru
             )
-            UI.sukses(
-                "Alamat berhasil diubah"
-            )
+            UI.sukses("Alamat berhasil diubah")
 
         except BankException as e:
             UI.gagal(str(e))
-
 
         except sqlite3.Error:
             UI.gagal("Terjadi kesalahan saat memperbarui alamat. Silakan coba lagi")

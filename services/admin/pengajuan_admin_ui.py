@@ -7,7 +7,9 @@ from bank_djago.services.exceptions import BankException
 from bank_djago.services.rekening.pengajuan_service import PengajuanService
 
 from bank_djago.utils.ui import UI
-from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
+from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import (
+    PengajuanRepository,
+)
 from bank_djago.utils.utility import Utilitas
 
 
@@ -15,26 +17,30 @@ class PengajuanAdminUI:
 
     @staticmethod
     def kelola_pengajuan():
-        UI.header("KELOLA PENGAJUAN",UI.MERAH)
+        UI.header("KELOLA PENGAJUAN", UI.MERAH)
         daftar_pengajuan = PengajuanService.cari_semua_pengajuan_diajukan()
         if not daftar_pengajuan:
             print("Masih belum ada pengajuan")
             return
 
-        for i,data in enumerate( daftar_pengajuan, start=1):
-            print(f'{i}.')
-            print('---------------------------------')
+        for i, data in enumerate(daftar_pengajuan, start=1):
+            print(f"{i}.")
+            print("---------------------------------")
             print(f"ID Pengajuan    : {data["id"]}")
             print(f"Nomor Rekening  : {data["norek"]}")
             print(f"Jenis Pengajuan : {data["jenis"]}")
             print(f"Alasan          : {data["alasan"]}")
-            print(f"Waktu Pengajuan : {Utilitas.format_waktu(data["waktu_pengajuan"])}\n")
+            print(
+                f"Waktu Pengajuan : {Utilitas.format_waktu(data["waktu_pengajuan"])}\n"
+            )
 
         id_pengajuan_valid = [data["id"] for data in daftar_pengajuan]
 
         while True:
             try:
-             id_pengajuan = int(input("Masukkan ID yang ingin diproses(ketik 0 untuk keluar) :"))
+                id_pengajuan = int(
+                    input("Masukkan ID yang ingin diproses(ketik 0 untuk keluar) :")
+                )
 
             except ValueError:
                 UI.gagal("Pilih menggunakan angka")
@@ -75,12 +81,16 @@ class PengajuanAdminUI:
             if pinjaman_aktif is None:
                 pesan_pinjaman = "Pinjaman berjalan : tidak ada"
             else:
-                pesan_pinjaman = f"Pinjaman berjalan : ada — status {pinjaman_aktif["status"]}"
+                pesan_pinjaman = (
+                    f"Pinjaman berjalan : ada — status {pinjaman_aktif["status"]}"
+                )
 
             if deposito_aktif is None:
                 pesan_deposito = "Deposito berjalan : tidak ada"
             else:
-                pesan_deposito = f"Deposito berjalan : ada — status {deposito_aktif["status"]} "
+                pesan_deposito = (
+                    f"Deposito berjalan : ada — status {deposito_aktif["status"]} "
+                )
 
             if pinjaman_aktif is None and deposito_aktif is None:
                 pesan = "Rekening memenuhi syarat penutupan"
@@ -104,7 +114,7 @@ class PengajuanAdminUI:
             except ValueError:
                 UI.gagal("Pilih menggunakan angka")
                 continue
-            if pilihan not in(1,2,3):
+            if pilihan not in (1, 2, 3):
                 UI.gagal("Pilihan tidak valid")
                 continue
             break
@@ -112,9 +122,11 @@ class PengajuanAdminUI:
         if pilihan == 1:
             catatan = input("Buat catatan untuk nasabah: ")
             try:
-                PengajuanService.setujui_pengajuan(id_pengajuan=id_pengajuan,catatan_admin=catatan)
+                PengajuanService.setujui_pengajuan(
+                    id_pengajuan=id_pengajuan, catatan_admin=catatan
+                )
                 UI.sukses("Penyetujuan pengajuan berhasil")
-            except  BankException as e:
+            except BankException as e:
                 UI.gagal(str(e))
 
             except sqlite3.Error as e:
@@ -123,7 +135,9 @@ class PengajuanAdminUI:
         elif pilihan == 2:
             try:
                 catatan = input("Buat catatan untuk nasabah: ")
-                PengajuanService.tolak_pengajuan(id_pengajuan=id_pengajuan,catatan_admin=catatan)
+                PengajuanService.tolak_pengajuan(
+                    id_pengajuan=id_pengajuan, catatan_admin=catatan
+                )
                 UI.sukses("Penolakan pengajuan berhasil")
             except BankException as e:
                 UI.gagal(str(e))
@@ -135,5 +149,3 @@ class PengajuanAdminUI:
 
         else:
             UI.gagal("Masukkan opsi yang valid")
-
-

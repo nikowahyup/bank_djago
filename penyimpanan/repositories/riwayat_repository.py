@@ -1,22 +1,18 @@
 import datetime
 
 
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi
-
-
 class RiwayatRepository:
 
     @staticmethod
     def tambah_riwayat(norek, riwayat, koneksi, id_transaksi=None):
 
-            waktu = riwayat["waktu"]
+        waktu = riwayat["waktu"]
 
+        if isinstance(waktu, (datetime.date, datetime.datetime)):
+            waktu = waktu.isoformat()
 
-            if isinstance(waktu, (datetime.date, datetime.datetime)):
-                waktu = waktu.isoformat()
-
-            cursor = koneksi.execute(
-                """
+        cursor = koneksi.execute(
+            """
                 INSERT INTO riwayat (
                     norek,
                     kategori,
@@ -27,60 +23,26 @@ class RiwayatRepository:
                 )
                 VALUES (?, ?, ?, ?, ?,?)
                 """,
-                (
-                    norek,
-                    riwayat["kategori"],
-                    riwayat["jenis"],
-                    waktu,
-                    riwayat["log"],
-                    id_transaksi
-                )
-            )
+            (
+                norek,
+                riwayat["kategori"],
+                riwayat["jenis"],
+                waktu,
+                riwayat["log"],
+                id_transaksi,
+            ),
+        )
 
-            return cursor.lastrowid
-
-
+        return cursor.lastrowid
 
     @staticmethod
-    def cari_seluruh_riwayat(norek):
-        koneksi = buat_koneksi()
+    def cari_riwayat_dengan_kategori(norek, kategori, koneksi):
 
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT *
-                FROM riwayat
-                WHERE norek = ?
-                ORDER BY id DESC
-                """,
-                (norek,)
-            )
+        sql = """SELECT * FROM riwayat
+            WHERE norek = ? 
+            AND kategori = ?
+            ORDER BY id DESC"""
 
-            return cursor.fetchall()
+        cursor = koneksi.execute(sql, (norek, kategori))
 
-        finally:
-            koneksi.close()
-
-    @staticmethod
-    def cari_riwayat_berdasarkan_jenis(norek, jenis):
-        koneksi = buat_koneksi()
-
-        try:
-            cursor = koneksi.execute(
-                """
-                SELECT *
-                FROM riwayat
-                WHERE norek = ?
-                  AND jenis = ?
-                ORDER BY id DESC
-                """,
-                (
-                    norek,
-                    jenis
-                )
-            )
-
-            return cursor.fetchall()
-
-        finally:
-            koneksi.close()
+        return cursor.fetchall()

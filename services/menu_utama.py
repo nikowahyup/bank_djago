@@ -30,37 +30,31 @@ class NasabahMenu:
                 continue
             break
 
-        nik_aktif = data_login['nik']
-
+        nik_aktif = data_login["nik"]
 
         daftar_norek_aktif = RekeningService.cari_norek_tersedia(nik=nik_aktif)
 
         norek_aktif = RekeningUI.pilih_rekening(daftar_norek_aktif=daftar_norek_aktif)
 
-        sesi = {'nama': data_login['nama'],
-                'nik':nik_aktif,
-                'norek':norek_aktif}
-
+        sesi = {"nama": data_login["nama"], "nik": nik_aktif, "norek": norek_aktif}
 
         NasabahMenu.menu_utama(sesi)
-
-
-
-
 
     @staticmethod
     def menu_utama(sesi):
 
-
-
         while True:
-            UI.header("SELAMAT DATANG DI BANK DJAGO",UI.BIRU)
+            UI.header("SELAMAT DATANG DI BANK DJAGO", UI.BIRU)
             print()
             print(f"👋 Halo,{sesi['nama']}!")
             print(f"💳 Rekening Aktif : {sesi['norek']}")
-            daftar_notifikasi = NotifikasiService.cari_semua_notifikasi_belum_dibaca(nik=sesi['nik'])
+            daftar_notifikasi = NotifikasiService.cari_semua_notifikasi_belum_dibaca(
+                nik=sesi["nik"]
+            )
             if daftar_notifikasi:
-                print(f"⚠️ Anda memiliki {len(daftar_notifikasi)} notifikasi belum dibaca")
+                print(
+                    f"⚠️ Anda memiliki {len(daftar_notifikasi)} notifikasi belum dibaca"
+                )
             print()
             print("1. Menu layanan Rekening")
             print("2. Menu Transaksi")
@@ -74,48 +68,35 @@ class NasabahMenu:
             pilihan = input("Masukkan pilihan Anda: ")
 
             if pilihan == "1":
-                RekeningUI.menu_rekening(nik=sesi['nik'], norek=sesi['norek'],nama=sesi['nama'])
+                RekeningUI.menu_rekening(
+                    nik=sesi["nik"], norek=sesi["norek"], nama=sesi["nama"]
+                )
                 pass
             elif pilihan == "2":
-                TransaksiUI.menu_transaksi(nik=sesi['nik'], norek=sesi['norek'])
+                TransaksiUI.menu_transaksi(nik=sesi["nik"], norek=sesi["norek"])
 
             elif pilihan == "3":
-                DepositoUI.menu_deposito(nik=sesi['nik'], norek=sesi['norek'])
+                DepositoUI.menu_deposito(nik=sesi["nik"], norek=sesi["norek"])
 
             elif pilihan == "4":
-                PinjamanUI.menu(nik=sesi['nik'],norek=sesi['norek'])
+                PinjamanUI.menu(nik=sesi["nik"], norek=sesi["norek"])
 
             elif pilihan == "5":
-                RiwayatUI.menu_riwayat(nik=sesi['nik'], nama=sesi['nama'])
+                RiwayatUI.menu_riwayat(nik=sesi["nik"], nama=sesi["nama"])
 
             elif pilihan == "6":
-                NasabahUI.menu_profil(nik=sesi['nik'])
+                NasabahUI.menu_profil(nik=sesi["nik"])
 
             elif pilihan == "7":
-                daftar_norek = RekeningService.cari_norek_tersedia(nik=sesi['nik'])
+                daftar_norek = RekeningService.cari_norek_tersedia(nik=sesi["nik"])
                 norek_baru = RekeningUI.pilih_rekening(daftar_norek_aktif=daftar_norek)
 
                 if norek_baru is not None:
-                    sesi['norek'] = norek_baru
+                    sesi["norek"] = norek_baru
                     UI.sukses("Ganti rekening berhasil")
 
-
-
             elif pilihan == "8":
-                NotifikasiUI.menu(nik=sesi['nik'])
+                NotifikasiUI.menu(nik=sesi["nik"])
 
             elif pilihan == "9":
                 break
-
-
-
-
-
-
-
-
-
-
-
-
-

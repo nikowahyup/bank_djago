@@ -7,13 +7,12 @@ from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 from bank_djago.services.notifikasi.notifikasi_service import NotifikasiService
-from bank_djago.services.rekening.biaya_admin_service import  BiayaAdminService
-from bank_djago.services.deposito.deposito_service import DepositoService,JenisAro
+from bank_djago.services.rekening.biaya_admin_service import BiayaAdminService
+from bank_djago.services.deposito.deposito_service import DepositoService, JenisAro
 from bank_djago.services.rekening.bunga_service import BungaService
 
 
-
-from bank_djago.utils.utility import  JenisReferensi
+from bank_djago.utils.utility import JenisReferensi
 
 
 class Scheduler:
@@ -23,8 +22,6 @@ class Scheduler:
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
-
-
 
         daftar_rekening = RekeningLoader.muat_semua_rekening_berjalan()
         total_pendapatan_untuk_admin = 0
@@ -39,16 +36,11 @@ class Scheduler:
 
                 try:
                     total_bayar_bunga = BungaService.berikan_bunga(
-                        rekening=rekening,
-                        koneksi=koneksi,
-                        hari_ini=hari_ini
+                        rekening=rekening, koneksi=koneksi, hari_ini=hari_ini
                     )
 
-
                     total_bayar_admin = BiayaAdminService.potong_admin(
-                        rekening=rekening,
-                        koneksi=koneksi,
-                        hari_ini=hari_ini
+                        rekening=rekening, koneksi=koneksi, hari_ini=hari_ini
                     )
                     total_pendapatan_untuk_admin += total_bayar_admin
                     total_pengeluaran_untuk_bunga += total_bayar_bunga
@@ -59,8 +51,6 @@ class Scheduler:
                     jumlah_gagal += 1
                     continue
 
-
-
         daftar_deposito = DepositoLoader.muat_semua_deposito_aktif()
         jumlah_deposito_jatuh_tempo = 0
         jumlah_deposito_perpanjangan = 0
@@ -69,7 +59,6 @@ class Scheduler:
             nasabah = deposito.pemilik
 
             sisa_hari = (deposito.jatuh_tempo - hari_ini).days
-
 
             if deposito.jenis_aro == JenisAro.TIDAK:
                 if sisa_hari > 3:
@@ -81,13 +70,13 @@ class Scheduler:
                         if sisa_hari <= 0:
 
                             DepositoService.tandai_jatuh_tempo(
-                                deposito=deposito,
-                                koneksi=koneksi,
-                                hari_ini=hari_ini
+                                deposito=deposito, koneksi=koneksi, hari_ini=hari_ini
                             )
                             jumlah_deposito_jatuh_tempo += 1
 
-                        pesan = DepositoService.buat_pesan_pengingat(deposito=deposito, hari_ini=hari_ini)
+                        pesan = DepositoService.buat_pesan_pengingat(
+                            deposito=deposito, hari_ini=hari_ini
+                        )
 
                         NotifikasiService.simpan_notifikasi_referensi(
                             nasabah=nasabah,
@@ -95,15 +84,10 @@ class Scheduler:
                             pesan=pesan,
                             jenis_referensi=JenisReferensi.DEPOSITO,
                             id_objek=deposito.ID,
-                            koneksi=koneksi
-
+                            koneksi=koneksi,
                         )
                 except Exception:
                     continue
-
-
-
-
 
             else:
 
@@ -114,64 +98,47 @@ class Scheduler:
                     with buat_koneksi_tulis() as koneksi:
 
                         DepositoService.perpanjangan(
-                                deposito=deposito,
-                                koneksi=koneksi,
-                                hari_ini=hari_ini
-                            )
+                            deposito=deposito, koneksi=koneksi, hari_ini=hari_ini
+                        )
                         pesan = DepositoService.buat_pesan_pengingat(
-                                deposito=deposito,
-                                hari_ini=hari_ini
-                            )
+                            deposito=deposito, hari_ini=hari_ini
+                        )
 
                         NotifikasiService.simpan_notifikasi_referensi(
-                                nasabah=nasabah,
-                                jenis="deposito",
-                                pesan=pesan,
-                                jenis_referensi=JenisReferensi.DEPOSITO,
-                                id_objek=deposito.ID,
-                                koneksi=koneksi
-
-                            )
+                            nasabah=nasabah,
+                            jenis="deposito",
+                            pesan=pesan,
+                            jenis_referensi=JenisReferensi.DEPOSITO,
+                            id_objek=deposito.ID,
+                            koneksi=koneksi,
+                        )
 
                         jumlah_deposito_perpanjangan += 1
 
                 except Exception:
                     continue
 
-
-
-
-
-
         daftar_pinjaman = PinjamanLoader.muat_semua_pinjaman_aktif()
 
         for pinjaman in daftar_pinjaman:
             nasabah = pinjaman.pemilik
 
-
             try:
                 pesan = PinjamanService.buat_pesan_pengingat(
-                    pinjaman=pinjaman,
-                    hari_ini=hari_ini
+                    pinjaman=pinjaman, hari_ini=hari_ini
                 )
                 if pesan is None:
                     continue
 
                 with buat_koneksi_tulis() as koneksi:
                     NotifikasiService.simpan_notifikasi_referensi(
-                            nasabah=nasabah,
-                            jenis="pinjaman",
-                            pesan=pesan,
-                            jenis_referensi=JenisReferensi.PINJAMAN,
-                            id_objek=pinjaman.ID,
-                            koneksi=koneksi
-
-                        )
+                        nasabah=nasabah,
+                        jenis="pinjaman",
+                        pesan=pesan,
+                        jenis_referensi=JenisReferensi.PINJAMAN,
+                        id_objek=pinjaman.ID,
+                        koneksi=koneksi,
+                    )
 
             except Exception:
                 continue
-
-
-
-
-

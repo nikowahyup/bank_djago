@@ -1,11 +1,10 @@
-from bank_djago.penyimpanan.sqlite.database import (
-    buat_database,
-    buat_koneksi
-)
+import bank_djago.penyimpanan.sqlite.database as db_module
+
+
 #
 #
 def buat_tabel_nasabah():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
         koneksi.execute("""
@@ -24,7 +23,7 @@ def buat_tabel_nasabah():
 
 
 def buat_tabel_rekening():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
         koneksi.execute("""
@@ -63,8 +62,7 @@ def buat_tabel_rekening():
 
 
 def buat_tabel_deposito():
-    koneksi = buat_koneksi()
-
+    koneksi = db_module.buat_koneksi()
     try:
         koneksi.execute("""
             CREATE TABLE IF NOT EXISTS deposito (
@@ -118,7 +116,7 @@ def buat_tabel_deposito():
 
 
 def buat_tabel_pinjaman():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
         koneksi.execute("""
@@ -170,7 +168,7 @@ def buat_tabel_pinjaman():
 
 
 def buat_tabel_notifikasi():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
         koneksi.execute("""
@@ -207,40 +205,28 @@ def buat_tabel_notifikasi():
     finally:
         koneksi.close()
 
+
 def tambah_kolom_sudah_dibaca_notifikasi():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
-        daftar_kolom = koneksi.execute(
-            "PRAGMA table_info(notifikasi)"
-        ).fetchall()
+        daftar_kolom = koneksi.execute("PRAGMA table_info(notifikasi)").fetchall()
 
-        nama_kolom = {
-            kolom["name"]
-            for kolom in daftar_kolom
-        }
+        nama_kolom = {kolom["name"] for kolom in daftar_kolom}
 
         if "sudah_dibaca" not in nama_kolom:
-            koneksi.execute(
-                """
+            koneksi.execute("""
                 ALTER TABLE notifikasi
                 ADD COLUMN sudah_dibaca INTEGER
                 NOT NULL DEFAULT 0
                 CHECK (sudah_dibaca IN (0, 1))
-                """
-            )
+                """)
 
             koneksi.commit()
-            print(
-                "Kolom sudah_dibaca pada notifikasi "
-                "berhasil ditambahkan"
-            )
+            print("Kolom sudah_dibaca pada notifikasi " "berhasil ditambahkan")
 
         else:
-            print(
-                "Kolom sudah_dibaca pada notifikasi "
-                "sudah tersedia"
-            )
+            print("Kolom sudah_dibaca pada notifikasi " "sudah tersedia")
 
     except Exception:
         koneksi.rollback()
@@ -251,8 +237,7 @@ def tambah_kolom_sudah_dibaca_notifikasi():
 
 
 def buat_tabel_riwayat():
-    koneksi = buat_koneksi()
-
+    koneksi = db_module.buat_koneksi()
     try:
         koneksi.execute("""
             CREATE TABLE IF NOT EXISTS riwayat (
@@ -279,11 +264,9 @@ def buat_tabel_riwayat():
 
 
 def buat_tabel_audit():
-    koneksi = buat_koneksi()
-
+    koneksi = db_module.buat_koneksi()
     try:
-        koneksi.execute(
-            """
+        koneksi.execute("""
             CREATE TABLE IF NOT EXISTS audit (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -321,8 +304,7 @@ def buat_tabel_audit():
                 ON UPDATE CASCADE
                 ON DELETE RESTRICT
             )
-            """
-        )
+            """)
 
         koneksi.commit()
         print("Tabel audit berhasil dibuat")
@@ -334,12 +316,12 @@ def buat_tabel_audit():
     finally:
         koneksi.close()
 
+
 def buat_tabel_pengajuan_rekening():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
-        koneksi.execute(
-            """
+        koneksi.execute("""
             CREATE TABLE IF NOT EXISTS pengajuan_rekening (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 norek TEXT NOT NULL,
@@ -367,8 +349,7 @@ def buat_tabel_pengajuan_rekening():
                 ON UPDATE CASCADE
                 ON DELETE RESTRICT
             )
-            """
-        )
+            """)
 
         koneksi.commit()
         print("Tabel pengajuan rekening berhasil dibuat")
@@ -376,36 +357,26 @@ def buat_tabel_pengajuan_rekening():
     finally:
         koneksi.close()
 
+
 def buat_kolom_waktu_dibuat_rekening():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
-        daftar_kolom = koneksi.execute(
-            "PRAGMA table_info(rekening)"
-        ).fetchall()
+        daftar_kolom = koneksi.execute("PRAGMA table_info(rekening)").fetchall()
 
-        nama_kolom = {
-            kolom["name"]
-            for kolom in daftar_kolom
-        }
+        nama_kolom = {kolom["name"] for kolom in daftar_kolom}
 
         if "waktu_dibuat" not in nama_kolom:
-            koneksi.execute(
-                """
+            koneksi.execute("""
                 ALTER TABLE rekening
                 ADD COLUMN waktu_dibuat TEXT
-                """
-            )
+                """)
 
             koneksi.commit()
-            print(
-                "Kolom waktu_dibuat berhasil ditambahkan"
-            )
+            print("Kolom waktu_dibuat berhasil ditambahkan")
 
         else:
-            print(
-                "Kolom waktu_dibuat sudah tersedia"
-            )
+            print("Kolom waktu_dibuat sudah tersedia")
 
     except Exception:
         koneksi.rollback()
@@ -416,25 +387,18 @@ def buat_kolom_waktu_dibuat_rekening():
 
 
 def tambah_kolom_catatan_admin_pinjaman():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
-        daftar_kolom = koneksi.execute(
-            "PRAGMA table_info(pinjaman)"
-        ).fetchall()
+        daftar_kolom = koneksi.execute("PRAGMA table_info(pinjaman)").fetchall()
 
-        nama_kolom = {
-            kolom["name"]
-            for kolom in daftar_kolom
-        }
+        nama_kolom = {kolom["name"] for kolom in daftar_kolom}
 
         if "catatan_admin" not in nama_kolom:
-            koneksi.execute(
-                """
+            koneksi.execute("""
                 ALTER TABLE pinjaman
                 ADD COLUMN catatan_admin TEXT
-                """
-            )
+                """)
 
             koneksi.commit()
             print("Kolom catatan_admin berhasil ditambahkan")
@@ -450,13 +414,11 @@ def tambah_kolom_catatan_admin_pinjaman():
         koneksi.close()
 
 
-
 def buat_tabel_transaksi():
-    koneksi = buat_koneksi()
+    koneksi = db_module.buat_koneksi()
 
     try:
-        koneksi.execute(
-            """
+        koneksi.execute("""
             CREATE TABLE IF NOT EXISTS transaksi (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -524,8 +486,7 @@ def buat_tabel_transaksi():
                 ON UPDATE CASCADE
                 ON DELETE RESTRICT
             )
-            """
-        )
+            """)
 
         koneksi.commit()
         print("Tabel transaksi berhasil dibuat")
@@ -536,13 +497,6 @@ def buat_tabel_transaksi():
 
     finally:
         koneksi.close()
-
-
-
-
-
-
-
 
 
 def inisialisasi_database():
@@ -557,16 +511,12 @@ def inisialisasi_database():
     buat_tabel_transaksi()
 
 
-
-
 if __name__ == "__main__":
     inisialisasi_database()
 
 
-
 def lihat_daftar_tabel():
-    koneksi = buat_koneksi()
-
+    koneksi = db_module.buat_koneksi()
     try:
         cursor = koneksi.execute("""
             SELECT name
@@ -579,7 +529,6 @@ def lihat_daftar_tabel():
 
     finally:
         koneksi.close()
-
 
 
 for tabel in lihat_daftar_tabel():

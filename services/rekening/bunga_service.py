@@ -1,14 +1,19 @@
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 
-from bank_djago.services.exceptions import RekeningTidakDitemukan,StatusTidakValid, \
-    PenambahanSaldoGagal, LevelRekeningTidakValid
+from bank_djago.services.exceptions import (
+    RekeningTidakDitemukan,
+    StatusTidakValid,
+    PenambahanSaldoGagal,
+    LevelRekeningTidakValid,
+)
 from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 import datetime
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
+
 
 class BungaService:
 
@@ -17,7 +22,7 @@ class BungaService:
 
         daftar_periode = []
 
-        tanggal_berikutnya = Utilitas.tambah_bulan(waktu_dapat_bunga,1)
+        tanggal_berikutnya = Utilitas.tambah_bulan(waktu_dapat_bunga, 1)
 
         while tanggal_berikutnya <= hari_ini:
             daftar_periode.append(tanggal_berikutnya)
@@ -26,136 +31,109 @@ class BungaService:
 
         return daftar_periode
 
-
-
-
     @staticmethod
-    def berikan_bunga(rekening, koneksi,hari_ini=None,):
-            if hari_ini is None:
-                hari_ini = datetime.date.today()
+    def berikan_bunga(
+        rekening,
+        koneksi,
+        hari_ini=None,
+    ):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
 
+        data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+            norek=rekening.norek, koneksi=koneksi
+        )
 
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
-                norek=rekening.norek,
-                koneksi=koneksi
-                )
+        if data_rekening is None:
+            raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
-            if data_rekening is None:
-                raise RekeningTidakDitemukan(
-                    'Rekening tidak terdaftar'
-                )
-
-            if data_rekening['level'] != rekening.level:
-                raise LevelRekeningTidakValid(
-                    "Level rekening pada database dengan objek python tidak sama"
-                )
-
-            if data_rekening['status'] == "tutup":
-                raise StatusTidakValid(
-                    "Bunga tidak dapat diberikan untuk rekening tutup"
-                )
-
-            saldo_sebelum = data_rekening['saldo']
-            waktu_dapat_bunga = (
-                datetime.date.fromisoformat(data_rekening['dapat_bunga'])
-                )
-
-            bunga = rekening.bunga
-
-            daftar_bunga = BungaService.hitung_bulan(
-                waktu_dapat_bunga=waktu_dapat_bunga,
-                hari_ini=hari_ini
+        if data_rekening["level"] != rekening.level:
+            raise LevelRekeningTidakValid(
+                "Level rekening pada database dengan objek python tidak sama"
             )
 
-            jumlah_dapat_bunga = len(daftar_bunga)
-            if jumlah_dapat_bunga == 0:
-                return 0
+        if data_rekening["status"] == "tutup":
+            raise StatusTidakValid("Bunga tidak dapat diberikan untuk rekening tutup")
 
-            jumlah_satu_bunga = round(
-                saldo_sebelum * bunga / 12
+        saldo_sebelum = data_rekening["saldo"]
+        waktu_dapat_bunga = datetime.date.fromisoformat(data_rekening["dapat_bunga"])
+
+        bunga = rekening.bunga
+
+        daftar_bunga = BungaService.hitung_bulan(
+            waktu_dapat_bunga=waktu_dapat_bunga, hari_ini=hari_ini
+        )
+
+        jumlah_dapat_bunga = len(daftar_bunga)
+        if jumlah_dapat_bunga == 0:
+            return 0
+
+        jumlah_satu_bunga = round(saldo_sebelum * bunga / 12)
+        total_bunga = jumlah_satu_bunga * jumlah_dapat_bunga
+
+        waktu_dapat_bunga_lama = waktu_dapat_bunga
+        waktu_dapat_bunga_baru = daftar_bunga[jumlah_dapat_bunga - 1]
+
+        jumlah_baris = RekeningRepository.perbarui_setelah_dapat_bunga(
+            norek=rekening.norek,
+            waktu_dapat_bunga_lama=waktu_dapat_bunga_lama,
+            waktu_dapat_bunga_baru=waktu_dapat_bunga_baru,
+            nominal=total_bunga,
+            koneksi=koneksi,
+        )
+
+        if jumlah_baris != 1:
+            raise PenambahanSaldoGagal("Gagal memberikan bunga ke rekening")
+
+        saldo_baru = RekeningRepository.ambil_saldo(
+            norek=rekening.norek, koneksi=koneksi
+        )
+
+        if total_bunga > 0:
+            transaksi = {
+                "jenis": JenisTransaksi.BUNGA_TABUNGAN,
+                "norek_tujuan": rekening.norek,
+                "nominal": total_bunga,
+                "saldo_tujuan_sebelum": saldo_sebelum,
+                "saldo_tujuan_sesudah": saldo_baru,
+                "waktu": datetime.datetime.now(),
+            }
+
+            id_transaksi = TransaksiRepository.tambah_transaksi(transaksi, koneksi)
+
+            riwayat = RiwayatTemplate.template(
+                kategori="transaksi",
+                jenis="bunga bulanan",
+                log=(
+                    f"BUNGA BULANAN | "
+                    f"{jumlah_dapat_bunga} bulan | "
+                    f"+Rp{Utilitas.format_rupiah(total_bunga)}"
+                ),
             )
-            total_bunga = jumlah_satu_bunga * jumlah_dapat_bunga
 
-
-            waktu_dapat_bunga_lama = waktu_dapat_bunga
-            waktu_dapat_bunga_baru = daftar_bunga[
-                jumlah_dapat_bunga - 1
-                ]
-
-
-            jumlah_baris = RekeningRepository.perbarui_setelah_dapat_bunga(
+            audit = AuditService.tambah_audit(
+                kategori="finansial",
+                objek="rekening",
+                aksi="pemberian_bunga_tabungan",
+                log=(
+                    f"Pemberian bunga bulanan "
+                    f"{jumlah_dapat_bunga} bulan sebesar "
+                    f"Rp{Utilitas.format_rupiah(total_bunga)}"
+                ),
+                nama=rekening.pemilik.nama,
+                nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
-                waktu_dapat_bunga_lama=waktu_dapat_bunga_lama,
-                waktu_dapat_bunga_baru=waktu_dapat_bunga_baru,
-                nominal=total_bunga,
-                koneksi=koneksi
             )
 
-
-            if jumlah_baris != 1:
-                raise PenambahanSaldoGagal(
-                    "Gagal memberikan bunga ke rekening"
-                )
-
-            saldo_baru = RekeningRepository.ambil_saldo(
+            RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek,
-                koneksi=koneksi)
+                riwayat=riwayat,
+                id_transaksi=id_transaksi,
+                koneksi=koneksi,
+            )
 
+            AuditRepository.tambah_audit(
+                audit=audit, id_transaksi=id_transaksi, koneksi=koneksi
+            )
 
-            if total_bunga > 0:
-                transaksi = {
-                    "jenis": JenisTransaksi.BUNGA_TABUNGAN,
-                    "norek_tujuan": rekening.norek,
-                    "nominal": total_bunga,
-                    "saldo_tujuan_sebelum": saldo_sebelum,
-                    "saldo_tujuan_sesudah": saldo_baru,
-                    "waktu": datetime.datetime.now()
-                }
-
-                id_transaksi = TransaksiRepository.tambah_transaksi(
-                    transaksi,
-                    koneksi
-                )
-
-                riwayat = RiwayatTemplate.template(
-                    kategori="transaksi",
-                    jenis="bunga bulanan",
-                    log=(
-                        f"BUNGA BULANAN | "
-                        f"{jumlah_dapat_bunga} bulan | "
-                        f"+Rp{Utilitas.format_rupiah(total_bunga)}"
-                    )
-                )
-
-                audit = AuditService.tambah_audit(
-                    kategori="finansial",
-                    objek="rekening",
-                    aksi="pemberian_bunga_tabungan",
-                    log=(
-                        f"Pemberian bunga bulanan "
-                        f"{jumlah_dapat_bunga} bulan sebesar "
-                        f"Rp{Utilitas.format_rupiah(total_bunga)}"
-                    ),
-                    nama=rekening.pemilik.nama,
-                    nik=rekening.pemilik.NIK,
-                    norek=rekening.norek
-                )
-
-                RiwayatRepository.tambah_riwayat(
-                    norek=rekening.norek,
-                    riwayat=riwayat,
-                    id_transaksi=id_transaksi,
-                    koneksi=koneksi
-                )
-
-                AuditRepository.tambah_audit(
-                    audit=audit,
-                    id_transaksi=id_transaksi,
-                    koneksi=koneksi
-                )
-
-            return total_bunga
-
-
-
-
+        return total_bunga

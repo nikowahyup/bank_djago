@@ -1,17 +1,16 @@
 import datetime
 
-from bank_djago.services.nasabah_menu import NasabahMenu
+from bank_djago.services.menu_utama import NasabahMenu
 from bank_djago.services.scheduler import Scheduler
 from bank_djago.utils.utility import Utilitas
 from bank_djago.services.admin.menu_admin import MenuAdmin
 from bank_djago.services.nasabah.nasabah_ui import NasabahUI
 
 
-
 def menu():
 
-
-    Scheduler.jalankan()
+    hari_ini = datetime.date(2026, 10, 24)
+    Scheduler.jalankan(hari_ini)
 
     while True:
         print()
@@ -31,25 +30,6 @@ def menu():
         elif pilihan == "0":
             MenuAdmin.menu()
 
+
 if __name__ == "__main__":
     menu()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

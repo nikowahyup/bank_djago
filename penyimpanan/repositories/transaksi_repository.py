@@ -1,4 +1,3 @@
-
 import datetime
 
 from bank_djago.utils.utility import JenisTransaksi
@@ -6,21 +5,17 @@ from bank_djago.utils.utility import JenisTransaksi
 
 class TransaksiRepository:
 
+    # method simpan data transaksi ke database
     @staticmethod
     def tambah_transaksi(transaksi, koneksi):
         jenis = transaksi["jenis"]
 
         if not isinstance(jenis, JenisTransaksi):
-            raise ValueError(
-                "Jenis transaksi harus menggunakan JenisTransaksi"
-            )
+            raise ValueError("Jenis transaksi harus menggunakan JenisTransaksi")
 
         waktu = transaksi["waktu"]
 
-        if isinstance(
-            waktu,
-            (datetime.date, datetime.datetime)
-        ):
+        if isinstance(waktu, (datetime.date, datetime.datetime)):
             waktu = waktu.isoformat()
 
         jenis_referensi = transaksi.get("jenis_referensi")
@@ -58,8 +53,8 @@ class TransaksiRepository:
                 transaksi.get("saldo_tujuan_sesudah"),
                 jenis_referensi,
                 transaksi.get("id_referensi"),
-                waktu
-            )
+                waktu,
+            ),
         )
 
         return cursor.lastrowid
