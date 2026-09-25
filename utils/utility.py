@@ -3,18 +3,17 @@ import time
 from bank_djago.utils.ui import UI
 
 
-
 class Utilitas:
 
     @staticmethod
-    def sapaan(nasabah,rekening):
-        format_rek = f'{rekening.norek[0:4]}-{rekening.norek[4:8]}-{rekening.norek[8:12]}-{rekening.norek[12:16]}'
-        print("="*41)
+    def sapaan(nasabah, rekening):
+        format_rek = f"{rekening.norek[0:4]}-{rekening.norek[4:8]}-{rekening.norek[8:12]}-{rekening.norek[12:16]}"
+        print("=" * 41)
         print("SELAMAT DATANG DI BANK DJAGO".center(40))
-        print("="*41,'\n')
+        print("=" * 41, "\n")
         print("Pendaftaran Berhasil!🎉\n")
-        print(f'👋 Halo,{nasabah.nama}.')
-        print('Terima kasih telah mempercayai Bank Djago.\n')
+        print(f"👋 Halo,{nasabah.nama}.")
+        print("Terima kasih telah mempercayai Bank Djago.\n")
         print("Informasi tentang rekening pertama Anda\n")
         print(f"Jenis rekening : {rekening.jenis}")
         print(f"Nomor rekening : {format_rek}\n")
@@ -22,9 +21,8 @@ class Utilitas:
 
     @staticmethod
     def format_rupiah(nominal):
-        rupiah = f"{nominal:,}".replace(",",'.')
+        rupiah = f"{nominal:,}".replace(",", ".")
         return rupiah
-
 
     @staticmethod
     def pilihan_menu():
@@ -39,8 +37,6 @@ class Utilitas:
 
             return pilihan
 
-
-
         print()
 
     def debug_bunga(self, bulan=1):
@@ -48,8 +44,6 @@ class Utilitas:
             rekening.dapat_bunga -= datetime.timedelta(days=bulan * 31)
 
     @staticmethod
-
-
     @staticmethod
     def format_waktu(iso):
         BULAN = {
@@ -64,7 +58,7 @@ class Utilitas:
             9: "September",
             10: "Oktober",
             11: "November",
-            12: "Desember"
+            12: "Desember",
         }
         waktu = datetime.fromisoformat(iso)
 
@@ -83,25 +77,31 @@ class Utilitas:
         print(f"{'- Setoran awal : Rp500.000':<40}{'- Setoran awal : Rp3.000.000'}")
         print(f"{'- Bunga     : 3%/tahun':<40}{'- Bunga     : 5%/tahun'}")
         print(f"{'- Admin     : Rp2.000/bulan':<40}{'- Admin     : Rp5.000/bulan'}")
-        print(f"{'- Limit transfer : Rp5.000.000/hari':<39}{' - Limit transfer : Rp15.000.0000/hari'}")
+        print(
+            f"{'- Limit transfer : Rp5.000.000/hari':<39}{' - Limit transfer : Rp15.000.0000/hari'}"
+        )
         print()
 
         print(f"{'3. GOLD':<40}{'4. PLATINUM'}")
         print(f"{'-'*15:<40}{'-'*15}")
         print(f"{'- Saldo Min : Rp50.000.000':<40}{'- Saldo Min : Rp200.000.000'}")
-        print(f"{'- Setoran awal : Rp50.000.000':<40}{'- Setoran awal : Rp200.000.000'}")
+        print(
+            f"{'- Setoran awal : Rp50.000.000':<40}{'- Setoran awal : Rp200.000.000'}"
+        )
         print(f"{'- Bunga     : 7%/tahun':<40}{'- Bunga     : 10%/tahun'}")
         print(f"{'- Admin     : Rp10.000/bulan':<40}{'- Admin     : Rp20.000/bulan'}")
-        print(f"{'- Limit transfer : Rp200.000.000/hari':<39}{' - Limit transfer : Tidak Terbatas'}")
+        print(
+            f"{'- Limit transfer : Rp200.000.000/hari':<39}{' - Limit transfer : Tidak Terbatas'}"
+        )
 
     @staticmethod
     def info_rekening(rekening):
-        print("="*30)
+        print("=" * 30)
         print(f"👋 Halo,{rekening.pemilik.nama}!")
-        print(f'🏦 Rekening : {rekening.jenis}')
+        print(f"🏦 Rekening : {rekening.jenis}")
         print(f"💳 No.Rek   : {rekening.norek}")
         print(f"💰 Saldo    : Rp{rekening.cek_saldo()}")
-        print("="*30)
+        print("=" * 30)
 
     @staticmethod
     def waktu_sekarang():
@@ -109,47 +109,32 @@ class Utilitas:
 
     @staticmethod
     def menu_admin():
-        UI.header("MENU REKAP",UI.KUNING)
+        UI.header("MENU REKAP", UI.KUNING)
         print()
-        print('1. Lihat Rekap Umum')
-        print('2. Lihat Rekap Rekening')
-        print('3. Lihat Rekap Status Rekening')
-        print('4. Lihat Rekap Total Saldo')
-        print('5. Lihat Rekap Saldo Terbesar')
-        print('6. Lihat Rekap Saldo Terkecil')
+        print("1. Lihat Rekap Umum")
+        print("2. Lihat Rekap Rekening")
+        print("3. Lihat Rekap Status Rekening")
+        print("4. Lihat Rekap Total Saldo")
+        print("5. Lihat Rekap Saldo Terbesar")
+        print("6. Lihat Rekap Saldo Terkecil")
         print("7. Keluar")
 
         print()
 
-
-
-    level = {1: 'Reguler',
-             2: 'Prioritas',
-             3: 'Gold',
-             4: 'Platinum'}
+    level = {1: "Reguler", 2: "Prioritas", 3: "Gold", 4: "Platinum"}
 
     @staticmethod
-    def menu_cs():
-        print("1. Buka Rekening")
-        print("2. Tingkatkan Rekening")
-        print("3. Turunkan Rekening")
-        print("4. Blokir Rekening")
-        print("5. Buka Blokir Rekening")
-        print("6. Reset PIN")
-        print("7. Tutup Rekening")
-        print("8. Keluar")
-
-    @staticmethod
-    def tambah_bulan(tanggal,bulan):
+    def tambah_bulan(tanggal, bulan):
         import datetime
         import calendar
+
         bulan_baru = tanggal.month + bulan
 
-        tahun = tanggal.year + (bulan_baru-1)//12
-        bulan = (bulan_baru - 1)%12 + 1
-        hari = min(tanggal.day,calendar.monthrange(tahun,bulan)[1])
+        tahun = tanggal.year + (bulan_baru - 1) // 12
+        bulan = (bulan_baru - 1) % 12 + 1
+        hari = min(tanggal.day, calendar.monthrange(tahun, bulan)[1])
 
-        return datetime.date(tahun,bulan,hari)
+        return datetime.date(tahun, bulan, hari)
 
     @staticmethod
     def animasi(pencarian):
@@ -162,9 +147,7 @@ class Utilitas:
     @staticmethod
     def pilihan_rekening(nasabah):
         daftar_rekening = [
-            rekening
-            for rekening in nasabah.rekening
-            if rekening.status != "tutup"
+            rekening for rekening in nasabah.rekening if rekening.status != "tutup"
         ]
 
         if not daftar_rekening:
@@ -196,9 +179,18 @@ class Utilitas:
     @staticmethod
     def format_tanggal_indonesia(tanggal):
         bulan = [
-            "Januari", "Februari", "Maret", "April",
-            "Mei", "Juni", "Juli", "Agustus",
-            "September", "Oktober", "November", "Desember"
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
         ]
 
         return f"{tanggal.day} {bulan[tanggal.month - 1]} {tanggal.year}"
@@ -217,7 +209,7 @@ class Utilitas:
             "September",
             "Oktober",
             "November",
-            "Desember"
+            "Desember",
         ]
 
         return f"{bulan[tanggal.month - 1]}"
@@ -228,13 +220,17 @@ class Utilitas:
         if not daftar_rekening:
             print("Anda masih belum punya rekening")
             return
-        for i,data in enumerate(daftar_rekening,start=1):
+        for i, data in enumerate(daftar_rekening, start=1):
             print(f"{i}. {data.norek} | {data.status}")
 
         print()
         while True:
             try:
-                pilihan = int(input("Pilih rekening yang ingin Anda cek riwayatnya(ketik 0 untuk keluar) : "))
+                pilihan = int(
+                    input(
+                        "Pilih rekening yang ingin Anda cek riwayatnya(ketik 0 untuk keluar) : "
+                    )
+                )
                 if pilihan == 0:
                     return
                 if pilihan < 0 or pilihan > len(daftar_rekening):
@@ -244,19 +240,17 @@ class Utilitas:
                 UI.gagal("Tolong pilih menggunakan angka")
                 continue
 
-
             return daftar_rekening[pilihan - 1]
 
 
-
-
-
 class JenisAro:
-        TIDAK = "tidak"
-        POKOK = "pokok"
-        POKOK_BUNGA = "pokok_bunga"
+    TIDAK = "tidak"
+    POKOK = "pokok"
+    POKOK_BUNGA = "pokok_bunga"
+
 
 from enum import Enum
+
 
 class StatusPinjaman(Enum):
     DIAJUKAN = "diajukan"
@@ -296,7 +290,7 @@ class JenisReferensi(Enum):
             2: cls.DEPOSITO,
             "2": cls.DEPOSITO,
             3: cls.TRANSAKSI,
-            "3": cls.TRANSAKSI
+            "3": cls.TRANSAKSI,
         }
 
         if nilai in referensi_lama:
@@ -324,12 +318,6 @@ class JenisTransaksi(Enum):
     PENCAIRAN_PINJAMAN = "pencairan_pinjaman"
     PEMBAYARAN_CICILAN = "pembayaran_cicilan"
 
-    PEMINDAHAN_SALDO_PENUTUPAN = (
-        "pemindahan_saldo_penutupan"
-    )
-    PENARIKAN_SALDO_PENUTUPAN = (
-        "penarikan_saldo_penutupan"
-    )
-    KAPITALISASI_BUNGA_DEPOSITO = (
-        "kapitalisasi_bunga_deposito"
-    )
+    PEMINDAHAN_SALDO_PENUTUPAN = "pemindahan_saldo_penutupan"
+    PENARIKAN_SALDO_PENUTUPAN = "penarikan_saldo_penutupan"
+    KAPITALISASI_BUNGA_DEPOSITO = "kapitalisasi_bunga_deposito"

@@ -1,23 +1,19 @@
-
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 
-#method-method penghubung program ke database
+# method-method penghubung program ke database
 class DepositoRepository:
-
 
     # method tambah data deposito ke database
     @staticmethod
     def tambah_deposito(deposito, koneksi):
 
-            proses_aro = (
-                deposito.proses_aro.isoformat()
-                if deposito.proses_aro is not None
-                else None
-            )
+        proses_aro = (
+            deposito.proses_aro.isoformat() if deposito.proses_aro is not None else None
+        )
 
-            cursor = koneksi.execute(
-                """
+        cursor = koneksi.execute(
+            """
                 INSERT INTO deposito (
                     norek,
                     nominal,
@@ -32,24 +28,21 @@ class DepositoRepository:
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (
-                    deposito.rekening.norek,
-                    deposito.nominal,
-                    deposito.bunga,
-                    deposito.lama_bulan,
-                    deposito.tanggal_buka.isoformat(),
-                    deposito.jatuh_tempo.isoformat(),
-                    deposito.status,
-                    deposito.jenis_aro,
-                    deposito.lama_aro,
-                    proses_aro
-                )
-            )
+            (
+                deposito.rekening.norek,
+                deposito.nominal,
+                deposito.bunga,
+                deposito.lama_bulan,
+                deposito.tanggal_buka.isoformat(),
+                deposito.jatuh_tempo.isoformat(),
+                deposito.status,
+                deposito.jenis_aro,
+                deposito.lama_aro,
+                proses_aro,
+            ),
+        )
 
-            return  cursor.lastrowid
-
-
-
+        return cursor.lastrowid
 
     # method untuk pengecekan ID deposito valid
     @staticmethod
@@ -66,7 +59,7 @@ class DepositoRepository:
                 FROM deposito
                 WHERE id = ?
                 """,
-                (id_deposito,)
+                (id_deposito,),
             )
 
             return cursor.fetchone()
@@ -74,9 +67,6 @@ class DepositoRepository:
         finally:
             if kelola_koneksi:
                 koneksi.close()
-
-
-
 
     # method untuk mencari semua deposito nasabah di menu lihat deposito
     @staticmethod
@@ -93,15 +83,13 @@ class DepositoRepository:
                 WHERE rekening.nik_pemilik = ?
                 ORDER BY deposito.id
                 """,
-                (nik,)
+                (nik,),
             )
 
             return cursor.fetchall()
 
         finally:
             koneksi.close()
-
-
 
     # method untuk pengajuan sebagai bahan pertimbangan admin
     @staticmethod
@@ -112,12 +100,15 @@ class DepositoRepository:
             koneksi = buat_koneksi()
 
         try:
-            cursor = koneksi.execute("""SELECT *
+            cursor = koneksi.execute(
+                """SELECT *
             FROM deposito
             WHERE norek = ?
             AND status IN ('aktif','jatuh tempo')
              ORDER BY id DESC
-             LIMIT 1""",(norek,))
+             LIMIT 1""",
+                (norek,),
+            )
 
             return cursor.fetchone()
 
@@ -127,41 +118,28 @@ class DepositoRepository:
 
     # method untuk proses deposito(cairkan,jatuh tempo)
     @staticmethod
-    def perbarui_status_deposito(
-            id_deposito,
-            status_baru,
-            status_lama,
-            koneksi
-    ):
+    def perbarui_status_deposito(id_deposito, status_baru, status_lama, koneksi):
         sql = """UPDATE deposito
         SET status = ?
         WHERE id = ? AND status = ?"""
 
-        cursor = koneksi.execute(
-            sql,
-            (
-                status_baru,
-                id_deposito,
-                status_lama
-            )
-        )
+        cursor = koneksi.execute(sql, (status_baru, id_deposito, status_lama))
 
         return cursor.rowcount
-
 
     # untuk scheduler
     @staticmethod
     def perbarui_setelah_aro(
-            id_deposito,
-            nominal_baru,
-            bunga_baru,
-            lama_bulan_baru,
-            tanggal_buka_baru,
-            jatuh_tempo_baru,
-            status_baru,
-            proses_aro,
-            jatuh_tempo_lama,
-            koneksi
+        id_deposito,
+        nominal_baru,
+        bunga_baru,
+        lama_bulan_baru,
+        tanggal_buka_baru,
+        jatuh_tempo_baru,
+        status_baru,
+        proses_aro,
+        jatuh_tempo_lama,
+        koneksi,
     ):
         tanggal_buka_baru = tanggal_buka_baru.isoformat()
         jatuh_tempo_baru = jatuh_tempo_baru.isoformat()
@@ -189,27 +167,30 @@ class DepositoRepository:
                 status_baru,
                 proses_aro,
                 id_deposito,
-                jatuh_tempo_lama
-            )
+                jatuh_tempo_lama,
+            ),
         )
 
         return cursor.rowcount
 
-
-    #untuk daftar deposito yang masih aktif dan diproses ARO
+    # untuk daftar deposito yang masih aktif dan diproses ARO
     @staticmethod
     def cari_semua_deposito_aktif(koneksi=None):
         from bank_djago.services.deposito.deposito_service import StatusDeposito
+
         kelola_koneksi = koneksi is None
 
         if kelola_koneksi:
             koneksi = buat_koneksi()
         try:
-            cursor = koneksi.execute("""SELECT *
+            cursor = koneksi.execute(
+                """SELECT *
             FROM deposito
             WHERE status = ?
             ORDER BY id
-            """,(StatusDeposito.AKTIF,))
+            """,
+                (StatusDeposito.AKTIF,),
+            )
 
             return cursor.fetchall()
 
@@ -217,11 +198,9 @@ class DepositoRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-
     # method untuk mencari semua deposito yang sudah jatuh tempo
     @staticmethod
     def cari_deposito_jatuh_tempo_dengan_norek(norek, koneksi=None):
-
 
         kelola_koneksi = koneksi is None
 
@@ -234,9 +213,8 @@ class DepositoRepository:
                 from deposito 
                 WHERE norek = ?
                 AND status = 'jatuh tempo'
-                """,(
-                    norek,
-                )
+                """,
+                (norek,),
             )
 
             return cursor.fetchall()
@@ -245,9 +223,8 @@ class DepositoRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-
     @staticmethod
-    def cari_deposito_aro_aktif_dengan_norek(norek ,koneksi=None):
+    def cari_deposito_aro_aktif_dengan_norek(norek, koneksi=None):
 
         kelola_koneksi = koneksi is None
 
@@ -263,9 +240,8 @@ class DepositoRepository:
                 AND  status = 'aktif'
                 AND jenis_aro IN ('pokok','pokok_bunga')
             ORDER BY id""",
-                (norek,)
+                (norek,),
             )
-
 
             return cursor.fetchall()
 
@@ -273,21 +249,16 @@ class DepositoRepository:
             if kelola_koneksi:
                 koneksi.close()
 
-
     # method untuk mengubah jenis aro deposito ke non-aro
     @staticmethod
     def hentikan_aro(id_deposito, koneksi):
 
-
-
-            sql = """UPDATE deposito
+        sql = """UPDATE deposito
             SET jenis_aro = 'tidak'
             WHERE id = ? 
             AND status = 'aktif' 
             AND jenis_aro IN ('pokok', 'pokok_bunga')"""
 
+        cursor = koneksi.execute(sql, (id_deposito,))
 
-            cursor = koneksi.execute(sql,(id_deposito,))
-
-
-            return cursor.rowcount
+        return cursor.rowcount

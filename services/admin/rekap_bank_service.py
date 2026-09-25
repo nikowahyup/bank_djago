@@ -8,26 +8,28 @@ class RekapService:
 
         total_nasabah, total_rekening, total_saldo = RekapRepository.rekap_umum()
 
-
-        return total_nasabah,total_rekening,total_saldo
+        return total_nasabah, total_rekening, total_saldo
 
     @staticmethod
     def rekap_jumlah_rekening():
 
-        reguler ,prioritas , gold , platinum = RekapRepository.jumlah_tiap_jenis_rekening()
+        reguler, prioritas, gold, platinum = (
+            RekapRepository.jumlah_tiap_jenis_rekening()
+        )
 
-        return reguler,prioritas,gold,platinum
+        return reguler, prioritas, gold, platinum
 
     @staticmethod
     def rekap_status_rekening():
-        aktif ,blokir , tutup = RekapRepository.rekap_status_rekening()
+        aktif, blokir, tutup = RekapRepository.rekap_status_rekening()
 
         return aktif, blokir, tutup
 
     @staticmethod
     def total_saldo_rekening():
-        reguler , prioritas ,gold ,platinum = RekapRepository.total_saldo_tiap_jenis_rekening()
-
+        reguler, prioritas, gold, platinum = (
+            RekapRepository.total_saldo_tiap_jenis_rekening()
+        )
 
         return reguler, prioritas, gold, platinum
 
@@ -37,6 +39,7 @@ class RekapService:
         if saldo_terbesar is None:
             return None
         return saldo_terbesar
+
     # ------------------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def saldo_terkecil():
@@ -45,4 +48,3 @@ class RekapService:
         if saldo_terkecil is None:
             return None
         return saldo_terkecil
-

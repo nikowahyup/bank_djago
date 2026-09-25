@@ -1,7 +1,7 @@
 import sqlite3
 
-from bank_djago.services.pinjaman.pinjaman_service import  PinjamanService
-from bank_djago.utils.utility import Utilitas,StatusPinjaman
+from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
+from bank_djago.utils.utility import Utilitas, StatusPinjaman
 from bank_djago.utils.ui import UI
 from bank_djago.services.exceptions import BankException
 
@@ -11,10 +11,10 @@ class PinjamanUI:
     BATAL = object()
 
     @staticmethod
-    def menu(nik ,norek):
+    def menu(nik, norek):
         while True:
 
-            UI.header("MENU PINJAMAN",UI.BIRU)
+            UI.header("MENU PINJAMAN", UI.BIRU)
             print()
             print("1. Ajukan Pinjaman")
             print("2. Cairkan Pinjaman")
@@ -37,10 +37,6 @@ class PinjamanUI:
             elif pilihan == "5":
                 break
 
-
-
-
-
     @staticmethod
     def ajukan_pinjaman(nik, norek):
         UI.header("AJUKAN PINJAMAN", UI.MERAH)
@@ -55,10 +51,7 @@ class PinjamanUI:
         print("Pilihan Tenor dan Bunga\n")
 
         for tenor, bunga in PinjamanService.TENOR.items():
-            print(
-                f"{tenor} bulan dengan bunga "
-                f"{round(bunga * 100)}% / tahun"
-            )
+            print(f"{tenor} bulan dengan bunga " f"{round(bunga * 100)}% / tahun")
 
         print()
 
@@ -77,10 +70,7 @@ class PinjamanUI:
 
         try:
             id_pinjaman = PinjamanService.ajukan_pinjaman(
-                nik=nik,
-                norek=norek,
-                nominal=nominal,
-                tenor=tenor
+                nik=nik, norek=norek, nominal=nominal, tenor=tenor
             )
             UI.sukses(
                 f"Pengajuan berhasil! ID pinjaman : {id_pinjaman}\n"
@@ -91,29 +81,23 @@ class PinjamanUI:
             UI.gagal(str(e))
 
         except sqlite3.Error:
-            UI.peringatan("Terjadi kesalahan saat membuka ajuan pinjaman. Silakan coba lagi")
-
+            UI.peringatan(
+                "Terjadi kesalahan saat membuka ajuan pinjaman. Silakan coba lagi"
+            )
 
     @staticmethod
-    def pilih_pinjaman(nik,norek=None,status=None):
+    def pilih_pinjaman(nik, norek=None, status=None):
 
         if norek is not None:
 
-            daftar_pinjaman = (
-                PinjamanService.cari_semua_pinjaman_dengan_norek(
-                    norek=norek,
-                    status=status
-                )
+            daftar_pinjaman = PinjamanService.cari_semua_pinjaman_dengan_norek(
+                norek=norek, status=status
             )
         else:
-            daftar_pinjaman = (
-                PinjamanService.cari_pinjaman_nasabah(nik=nik)
-            )
+            daftar_pinjaman = PinjamanService.cari_pinjaman_nasabah(nik=nik)
 
         if not daftar_pinjaman:
             return None
-
-
 
         print("===== SILAHKAN PILIH PINJAMAN =====")
         print()
@@ -130,15 +114,9 @@ class PinjamanUI:
             print(f"Bunga       : {data_pinjaman['bunga'] * 100:.1f}% / tahun")
             print()
 
-
         while True:
             try:
-                pilihan = int(
-                    input(
-                        "Pilih nomor pinjaman "
-                        "(ketik 0 untuk keluar): "
-                    )
-                )
+                pilihan = int(input("Pilih nomor pinjaman " "(ketik 0 untuk keluar): "))
             except ValueError:
                 UI.gagal("Silakan pilih menggunakan angka")
                 continue
@@ -152,18 +130,10 @@ class PinjamanUI:
 
             return daftar_pinjaman[pilihan - 1]
 
-
-
-
-
     @staticmethod
     def cairkan_pinjaman(nik, norek):
-        data_pinjaman = (
-            PinjamanUI.pilih_pinjaman(
-                nik=nik,
-                norek=norek,
-                status=StatusPinjaman.DISETUJUI
-            )
+        data_pinjaman = PinjamanUI.pilih_pinjaman(
+            nik=nik, norek=norek, status=StatusPinjaman.DISETUJUI
         )
         if data_pinjaman is PinjamanUI.BATAL:
             return
@@ -175,36 +145,27 @@ class PinjamanUI:
         try:
 
             PinjamanService.cairkan_pinjaman(
-                nik=nik,
-                id_pinjaman=data_pinjaman['id']
+                nik=nik, norek_pencairan=norek, id_pinjaman=data_pinjaman["id"]
             )
-            UI.sukses(
-                f"Pinjaman {data_pinjaman['id']} berhasil dicairkan"
-            )
+
+            UI.sukses(f"Pinjaman {data_pinjaman['id']} berhasil dicairkan")
 
             UI.sukses(
                 f"Rp{Utilitas.format_rupiah(data_pinjaman['nominal_pinjaman'])} telah masuk "
                 f"ke rekening {data_pinjaman['norek']}"
-                    )
+            )
         except BankException as e:
             UI.gagal(str(e))
 
         except sqlite3.Error:
-            UI.peringatan("Terjadi kesalahan saat mencairkan pinjaman. Silakan coba lagi")
-
-
-
-
-
+            UI.peringatan(
+                "Terjadi kesalahan saat mencairkan pinjaman. Silakan coba lagi"
+            )
 
     @staticmethod
     def bayar_cicilan(nik, norek):
-        data_pinjaman = (
-            PinjamanUI.pilih_pinjaman(
-                nik=nik,
-                norek=norek,
-                status=StatusPinjaman.AKTIF
-            )
+        data_pinjaman = PinjamanUI.pilih_pinjaman(
+            nik=nik, norek=norek, status=StatusPinjaman.AKTIF
         )
 
         if data_pinjaman is PinjamanUI.BATAL:
@@ -220,14 +181,10 @@ class PinjamanUI:
             f"Cicilan tetap : "
             f"Rp{Utilitas.format_rupiah(data_pinjaman['cicilan_tetap'])}"
         )
-        print(
-            "Denda keterlambatan akan ditambahkan jika ada."
-        )
+        print("Denda keterlambatan akan ditambahkan jika ada.")
         print()
 
-        konfirmasi = input(
-            "Lanjutkan pembayaran cicilan? (ya/tidak): "
-        ).strip().lower()
+        konfirmasi = input("Lanjutkan pembayaran cicilan? (ya/tidak): ").strip().lower()
 
         if konfirmasi not in ("y", "ya", "iya"):
             UI.gagal("Pembayaran cicilan dibatalkan")
@@ -235,18 +192,17 @@ class PinjamanUI:
 
         try:
             hasil = PinjamanService.bayar_cicilan(
-                nik=nik,
-                norek_pembayaran=norek,
-                id_pinjaman=data_pinjaman['id']
+                nik=nik, norek_pembayaran=norek, id_pinjaman=data_pinjaman["id"]
             )
-            UI.sukses(f"Pembayaran cicilan pinjaman"
-                      f" {hasil['id_pinjaman']} berhasil")
+            UI.sukses(
+                f"Pembayaran cicilan pinjaman" f" {hasil['id_pinjaman']} berhasil"
+            )
 
-            if hasil['status'] == StatusPinjaman.LUNAS:
+            if hasil["status"] == StatusPinjaman.LUNAS:
                 UI.sukses("Seluruh cicilan pinjaman telah lunas")
             else:
                 print(
-                    "Cicilan selanjutnya bisa dibayar mulai: "
+                    f"Cicilan ke-{hasil['cicilan selanjutnya']} bisa dibayar mulai: "
                     f"{Utilitas.format_tanggal_indonesia(
                         hasil['tanggal_bayar_selanjutnya']
                     )}"
@@ -257,11 +213,6 @@ class PinjamanUI:
 
         except sqlite3.Error:
             UI.gagal(f"Terjadi kesalahan saat pembayaran. Silakan coba lagi")
-
-
-
-
-
 
     @staticmethod
     def lihat_pinjaman(nik):
@@ -278,118 +229,80 @@ class PinjamanUI:
             return f"{label:<17}: {nilai}"
 
         baris_informasi = [
-            buat_baris("ID pinjaman", data_pinjaman['id']),
-
-            buat_baris(
-                "Nominal awal",
-                f"Rp{Utilitas.format_rupiah(
+            buat_baris("ID pinjaman", data_pinjaman["id"]),
+            buat_baris("Nominal awal", f"Rp{Utilitas.format_rupiah(
                     data_pinjaman['nominal_pinjaman']
-                )}"
-            ),
-            buat_baris(
-                "Bunga",
-                f"{data_pinjaman['bunga'] * 100:.1f}% / tahun"
-            ),
-            buat_baris(
-                "Tenor",
-                f"{data_pinjaman['tenor']} bulan"
-            ),
-            buat_baris(
-                "Status",
-                data_pinjaman['status'].value
-            )
+                )}"),
+            buat_baris("Bunga", f"{data_pinjaman['bunga'] * 100:.1f}% / tahun"),
+            buat_baris("Tenor", f"{data_pinjaman['tenor']} bulan"),
+            buat_baris("Status", data_pinjaman["status"].value),
         ]
 
-        if data_pinjaman['status'] == StatusPinjaman.DIAJUKAN:
+        if data_pinjaman["status"] == StatusPinjaman.DIAJUKAN:
             baris_informasi.append(
-                buat_baris(
-                    "Keterangan",
-                    "Menunggu pemeriksaan admin"
-                )
+                buat_baris("Keterangan", "Menunggu pemeriksaan admin")
             )
 
-        elif data_pinjaman['status'] == StatusPinjaman.DISETUJUI:
+        elif data_pinjaman["status"] == StatusPinjaman.DISETUJUI:
+            baris_informasi.append(buat_baris("Keterangan", "Pinjaman siap dicairkan"))
+
+        elif data_pinjaman["status"] == StatusPinjaman.DITOLAK:
             baris_informasi.append(
-                buat_baris(
-                    "Keterangan",
-                    "Pinjaman siap dicairkan"
-                )
+                buat_baris("Keterangan", "Pengajuan pinjaman ditolak")
             )
 
-        elif data_pinjaman['status'] == StatusPinjaman.DITOLAK:
-            baris_informasi.append(
-                buat_baris(
-                    "Keterangan",
-                    "Pengajuan pinjaman ditolak"
-                )
-            )
-
-        elif data_pinjaman['status'] == StatusPinjaman.AKTIF:
-            baris_informasi.extend([
-                buat_baris(
-                    "Cicilan tetap",
-                    f"Rp{Utilitas.format_rupiah(
+        elif data_pinjaman["status"] == StatusPinjaman.AKTIF:
+            baris_informasi.extend(
+                [
+                    buat_baris("Cicilan tetap", f"Rp{Utilitas.format_rupiah(
                     data_pinjaman['cicilan_tetap']
-                    )}"
-                ),
-                buat_baris(
-                    "Cicilan dibayar",
-                    f"{data_pinjaman['cicilan_terbayar']}/{data_pinjaman['tenor']}"
-                ),
-                buat_baris(
-                    "Sisa pokok",
-                    f"Rp{Utilitas.format_rupiah(
+                    )}"),
+                    buat_baris(
+                        "Cicilan dibayar",
+                        f"{data_pinjaman['cicilan_terbayar']}/{data_pinjaman['tenor']}",
+                    ),
+                    buat_baris("Sisa pokok", f"Rp{Utilitas.format_rupiah(
                         data_pinjaman['sisa_pokok']
-                    )}"
-                ),
-                buat_baris(
-                    "Tanggal cair",
-                    Utilitas.format_tanggal_indonesia(
-                        data_pinjaman['tanggal_pencairan'])
+                    )}"),
+                    buat_baris(
+                        "Tanggal cair",
+                        Utilitas.format_tanggal_indonesia(
+                            data_pinjaman["tanggal_pencairan"]
+                        ),
+                    ),
+                    buat_baris(
+                        "Jatuh tempo",
+                        Utilitas.format_tanggal_indonesia(
+                            data_pinjaman["tanggal_jatuh_tempo"]
+                        ),
+                    ),
+                ]
+            )
 
-                ),
-                buat_baris(
-                    "Jatuh tempo",
-                    Utilitas.format_tanggal_indonesia(
-                        data_pinjaman['tanggal_jatuh_tempo']
-                    )
-                )
-            ])
-
-        elif data_pinjaman['status'] == StatusPinjaman.LUNAS:
-            baris_informasi.extend([
-                buat_baris(
-                    "Cicilan tetap",
-                    f"Rp{Utilitas.format_rupiah(
+        elif data_pinjaman["status"] == StatusPinjaman.LUNAS:
+            baris_informasi.extend(
+                [
+                    buat_baris("Cicilan tetap", f"Rp{Utilitas.format_rupiah(
                         data_pinjaman['cicilan_tetap']
-                    )}"
-                ),
-                buat_baris(
-                    "Cicilan dibayar",
-                    f"{data_pinjaman['cicilan_terbayar']}/{data_pinjaman['tenor']}"
-                ),
-                buat_baris(
-                    "Sisa pokok",
-                    f"Rp{Utilitas.format_rupiah(
+                    )}"),
+                    buat_baris(
+                        "Cicilan dibayar",
+                        f"{data_pinjaman['cicilan_terbayar']}/{data_pinjaman['tenor']}",
+                    ),
+                    buat_baris("Sisa pokok", f"Rp{Utilitas.format_rupiah(
                         data_pinjaman['sisa_pokok']
-                    )}"
-                ),
-                buat_baris(
-                    "Tanggal cair",
-                    Utilitas.format_tanggal_indonesia(
-                        data_pinjaman['tanggal_pencairan'])
+                    )}"),
+                    buat_baris(
+                        "Tanggal cair",
+                        Utilitas.format_tanggal_indonesia(
+                            data_pinjaman["tanggal_pencairan"]
+                        ),
+                    ),
+                    buat_baris("Keterangan", "Seluruh cicilan telah dibayar"),
+                ]
+            )
 
-                ),
-                buat_baris(
-                    "Keterangan",
-                    "Seluruh cicilan telah dibayar"
-                )
-            ])
-
-        lebar_isi = max(
-            len(baris)
-            for baris in baris_informasi
-        )
+        lebar_isi = max(len(baris) for baris in baris_informasi)
 
         print()
         print("╔" + "═" * (lebar_isi + 2) + "╗")
@@ -398,12 +311,3 @@ class PinjamanUI:
             print(f"║ {baris:<{lebar_isi}} ║")
 
         print("╚" + "═" * (lebar_isi + 2) + "╝")
-
-
-
-
-
-
-
-
-

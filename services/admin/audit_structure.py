@@ -1,9 +1,6 @@
 STRUKTUR_AUDIT = {
     "administratif": {
-        "nasabah": [
-            "pendaftaran_nasabah",
-            "penggantian_alamat"
-        ],
+        "nasabah": ["pendaftaran_nasabah", "penggantian_alamat"],
         "rekening": [
             "pembukaan_rekening",
             "peningkatan_level_rekening",
@@ -13,15 +10,15 @@ STRUKTUR_AUDIT = {
             "penolakan_penutupan_rekening",
             "pemblokiran_rekening",
             "pembukaan_blokir_rekening",
-            "penggantian_pin_rekening"
+            "penggantian_pin_rekening",
         ],
         "pinjaman": [
             "pengajuan_pinjaman",
             "persetujuan_pinjaman",
-            "penolakan_pinjaman"
-        ]
+            "penolakan_pinjaman",
+        ],
+        "deposito": ["penghentian_aro_deposito"],
     },
-
     "finansial": {
         "rekening": [
             "setor_tunai",
@@ -32,16 +29,13 @@ STRUKTUR_AUDIT = {
             "pemotongan_biaya_admin",
             "penarikan_saldo_penutupan",
             "pemindahan_saldo_penutupan",
-            "penerimaan_saldo_penutupan"
+            "penerimaan_saldo_penutupan",
         ],
         "deposito": [
             "pembukaan_deposito",
             "pencairan_deposito",
-            "perpanjangan_deposito_aro"
+            "perpanjangan_deposito_aro",
         ],
-        "pinjaman": [
-            "pencairan_pinjaman",
-            "pembayaran_cicilan_pinjaman"
-        ]
-    }
+        "pinjaman": ["pencairan_pinjaman", "pembayaran_cicilan_pinjaman"],
+    },
 }

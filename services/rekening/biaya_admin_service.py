@@ -4,167 +4,135 @@ from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatReposi
 from bank_djago.services.admin.audit_service import AuditService
 import datetime
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
-from bank_djago.services.exceptions import RekeningTidakDitemukan, StatusTidakValid, LevelRekeningTidakValid, \
-    PenguranganSaldoGagal, OperasiGagal
+from bank_djago.services.exceptions import (
+    RekeningTidakDitemukan,
+    StatusTidakValid,
+    LevelRekeningTidakValid,
+    PenguranganSaldoGagal,
+)
 from bank_djago.utils.utility import JenisTransaksi
 from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.utils.utility import Utilitas
 
 
-
 class BiayaAdminService:
 
     @staticmethod
-    def cari_periode_admin(
-            waktu_bayar_admin,
-            hari_ini
-    ):
+    def cari_periode_admin(waktu_bayar_admin, hari_ini):
         daftar_periode = []
 
-        tanggal_berikutnya = Utilitas.tambah_bulan(
-            waktu_bayar_admin,
-            1
-        )
+        tanggal_berikutnya = Utilitas.tambah_bulan(waktu_bayar_admin, 1)
 
         while tanggal_berikutnya <= hari_ini:
             daftar_periode.append(tanggal_berikutnya)
 
-            tanggal_berikutnya = Utilitas.tambah_bulan(
-                tanggal_berikutnya,
-                1
-            )
+            tanggal_berikutnya = Utilitas.tambah_bulan(tanggal_berikutnya, 1)
 
         return daftar_periode
 
-
     @staticmethod
-    def potong_admin(rekening,koneksi,hari_ini=None):
-            if hari_ini is None:
-                hari_ini = datetime.date.today()
+    def potong_admin(rekening, koneksi, hari_ini=None):
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
 
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
-                norek=rekening.norek,
-                koneksi=koneksi
+        data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+            norek=rekening.norek, koneksi=koneksi
+        )
+
+        if data_rekening is None:
+            raise RekeningTidakDitemukan("Rekening tidak ditemukan")
+
+        if data_rekening["level"] != rekening.level:
+            raise LevelRekeningTidakValid(
+                "Level rekening database dan objek python tidak sama"
             )
 
-            if data_rekening is None:
-                raise RekeningTidakDitemukan(
-                    "Rekening tidak ditemukan"
-                )
+        if data_rekening["status"] == "tutup":
+            raise StatusTidakValid("Tidak dapat memotong saldo dari rekening tutup")
 
-            if data_rekening['level'] != rekening.level:
-                raise LevelRekeningTidakValid(
-                    "Level rekening database dan objek python tidak sama"
-                )
+        saldo_sebelum = data_rekening["saldo"]
+        waktu_bayar_admin = datetime.date.fromisoformat(
+            data_rekening["waktu_bayar_admin"]
+        )
 
-            if data_rekening["status"] == "tutup":
-                raise StatusTidakValid(
-                    "Tidak dapat memotong saldo dari rekening tutup"
-                )
+        biaya_admin = rekening.biaya_admin
 
+        if biaya_admin <= 0:
+            raise StatusTidakValid("Biaya admin rekening tidak valid")
 
-            saldo_sebelum = data_rekening['saldo']
-            waktu_bayar_admin = (
-                datetime.date.fromisoformat(data_rekening['waktu_bayar_admin'])
-                )
+        daftar_periode = BiayaAdminService.cari_periode_admin(
+            waktu_bayar_admin=waktu_bayar_admin, hari_ini=hari_ini
+        )
+        jumlah_periode_tertunggak = len(daftar_periode)
+        if jumlah_periode_tertunggak == 0:
+            return 0
+        jumlah_periode_mampu = saldo_sebelum // biaya_admin
+        jumlah_periode_dibayar = min(jumlah_periode_tertunggak, jumlah_periode_mampu)
 
-            biaya_admin = rekening.biaya_admin
+        if jumlah_periode_dibayar == 0:
+            return 0
 
-            if biaya_admin <= 0:
-                raise StatusTidakValid("Biaya admin rekening tidak valid")
+        total_bayar = biaya_admin * jumlah_periode_dibayar
+        saldo_baru = saldo_sebelum - total_bayar
+        waktu_bayar_admin_baru = daftar_periode[jumlah_periode_dibayar - 1]
 
-            daftar_periode = BiayaAdminService.cari_periode_admin(
-                waktu_bayar_admin=waktu_bayar_admin,
-                hari_ini=hari_ini
-            )
-            jumlah_periode_tertunggak = len(daftar_periode)
-            if jumlah_periode_tertunggak == 0:
-                return 0
-            jumlah_periode_mampu = (saldo_sebelum//biaya_admin)
-            jumlah_periode_dibayar = min(jumlah_periode_tertunggak,jumlah_periode_mampu)
+        waktu_bayar_admin_lama = waktu_bayar_admin
 
-            if jumlah_periode_dibayar == 0:
-                return 0
+        jumlah_baris = RekeningRepository.perbarui_setelah_bayar_admin(
+            norek=rekening.norek,
+            nominal=total_bayar,
+            waktu_bayar_admin_lama=waktu_bayar_admin_lama,
+            waktu_bayar_admin_baru=waktu_bayar_admin_baru,
+            koneksi=koneksi,
+        )
 
-            total_bayar = biaya_admin * jumlah_periode_dibayar
-            saldo_baru = saldo_sebelum - total_bayar
-            waktu_bayar_admin_baru = daftar_periode[jumlah_periode_dibayar - 1]
+        if jumlah_baris != 1:
+            raise PenguranganSaldoGagal("Gagal melakukan pembayaran biaya admin")
 
-            waktu_bayar_admin_lama = waktu_bayar_admin
+        transaksi = {
+            "jenis": JenisTransaksi.BIAYA_ADMIN,
+            "norek_sumber": rekening.norek,
+            "nominal": total_bayar,
+            "saldo_sumber_sebelum": saldo_sebelum,
+            "saldo_sumber_sesudah": saldo_baru,
+            "waktu": datetime.datetime.now(),
+        }
 
-            jumlah_baris = (
-                RekeningRepository.perbarui_setelah_bayar_admin(
-                    norek=rekening.norek,
-                    nominal=total_bayar,
-                    waktu_bayar_admin_lama=waktu_bayar_admin_lama,
-                    waktu_bayar_admin_baru=waktu_bayar_admin_baru,
-                    koneksi=koneksi
-                )
-            )
+        id_transaksi = TransaksiRepository.tambah_transaksi(
+            transaksi=transaksi, koneksi=koneksi
+        )
 
+        riwayat = RiwayatTemplate.template(
+            kategori="transaksi",
+            jenis="biaya admin",
+            log=(
+                f"BIAYA ADMIN | "
+                f"{jumlah_periode_dibayar} bulan | "
+                f"-Rp{Utilitas.format_rupiah(total_bayar)}"
+            ),
+        )
+        audit = AuditService.tambah_audit(
+            kategori="finansial",
+            objek="rekening",
+            aksi="pemotongan_biaya_admin",
+            log=(
+                f"Pembayaran biaya admin "
+                f"{jumlah_periode_dibayar} bulan sebesar "
+                f"Rp{Utilitas.format_rupiah(total_bayar)}"
+            ),
+            nama=rekening.pemilik.nama,
+            nik=rekening.pemilik.NIK,
+            norek=rekening.norek,
+        )
+        RiwayatRepository.tambah_riwayat(
+            norek=rekening.norek,
+            riwayat=riwayat,
+            id_transaksi=id_transaksi,
+            koneksi=koneksi,
+        )
 
-            if jumlah_baris != 1:
-                raise PenguranganSaldoGagal(
-                    "Gagal melakukan pembayaran biaya admin"
-                )
+        AuditRepository.tambah_audit(
+            audit=audit, id_transaksi=id_transaksi, koneksi=koneksi
+        )
 
-            transaksi = {
-                "jenis": JenisTransaksi.BIAYA_ADMIN,
-                "norek_sumber": rekening.norek,
-                "nominal": total_bayar,
-                "saldo_sumber_sebelum": saldo_sebelum,
-                "saldo_sumber_sesudah": saldo_baru,
-                "waktu": datetime.datetime.now()
-            }
-
-            id_transaksi = TransaksiRepository.tambah_transaksi(
-                transaksi=transaksi,
-                koneksi=koneksi
-            )
-
-            riwayat = RiwayatTemplate.template(
-                kategori="transaksi",
-                jenis="biaya admin",
-                log=(
-                    f"BIAYA ADMIN | "
-                    f"{jumlah_periode_dibayar} bulan | "
-                    f"-Rp{Utilitas.format_rupiah(total_bayar)}"
-                )
-            )
-            audit = AuditService.tambah_audit(
-                kategori="finansial",
-                objek="rekening",
-                aksi="pemotongan_biaya_admin",
-                log=(
-                    f"Pembayaran biaya admin "
-                    f"{jumlah_periode_dibayar} bulan sebesar "
-                    f"Rp{Utilitas.format_rupiah(total_bayar)}"
-                ),
-                nama=rekening.pemilik.nama,
-                nik=rekening.pemilik.NIK,
-                norek=rekening.norek
-            )
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek,
-                riwayat=riwayat,
-                id_transaksi=id_transaksi,
-                koneksi=koneksi
-            )
-            
-            AuditRepository.tambah_audit(
-                audit=audit,
-                id_transaksi=id_transaksi
-                ,koneksi=koneksi
-            )
-
-
-            return total_bayar
-
-
-
-
-
-
-
-
-
+        return total_bayar

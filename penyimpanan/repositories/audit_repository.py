@@ -38,14 +38,11 @@ class AuditRepository:
                 audit.get("nama"),
                 audit.get("nik"),
                 audit.get("norek"),
-                id_transaksi
-            )
+                id_transaksi,
+            ),
         )
 
         return cursor.lastrowid
-
-
-
 
     @staticmethod
     def cari_audit_dengan_nik(nik):
@@ -59,7 +56,7 @@ class AuditRepository:
                 WHERE nik = ?
                 ORDER BY id DESC
                 """,
-                (nik,)
+                (nik,),
             )
 
             return cursor.fetchall()
@@ -79,7 +76,7 @@ class AuditRepository:
                 WHERE norek = ?
                 ORDER BY id DESC
                 """,
-                (norek,)
+                (norek,),
             )
 
             return cursor.fetchall()
@@ -88,12 +85,7 @@ class AuditRepository:
             koneksi.close()
 
     @staticmethod
-    def cari_audit(
-            koneksi,
-            kategori=None,
-            objek=None,
-            aksi=None
-    ):
+    def cari_audit(koneksi, kategori=None, objek=None, aksi=None):
         query = """
             SELECT
                 id,
@@ -130,12 +122,8 @@ class AuditRepository:
 
         query += " ORDER BY waktu DESC, id DESC"
 
-        cursor = koneksi.execute(
-            query,
-            parameter
-        )
+        cursor = koneksi.execute(query, parameter)
 
         hasil = cursor.fetchall()
 
         return hasil
-

@@ -1,12 +1,9 @@
-from colorama import Fore,init,Style
-
-
-
+from colorama import Fore, init, Style
 
 init(autoreset=True)
+
+
 class UI:
-
-
 
     SIMBOL = {
         "bank": "🏦",
@@ -18,41 +15,38 @@ class UI:
         "berhasil": "✔",
         "gagal": "✘",
         "peringatan": "⚠",
-        "kunci": "🔒"
+        "kunci": "🔒",
     }
 
-    BIRU   = "\033[94m"
-    CYAN   = "\033[96m"
-    PUTIH  = "\033[97m"
-    HIJAU  = "\033[92m"
+    BIRU = "\033[94m"
+    CYAN = "\033[96m"
+    PUTIH = "\033[97m"
+    HIJAU = "\033[92m"
     KUNING = "\033[93m"
-    MERAH  = "\033[91m"
+    MERAH = "\033[91m"
 
     RESET = "\033[0m"
 
-
     @staticmethod
-    def header(judul,warna=None):
+    def header(judul, warna=None):
         if warna is None:
             warna = UI.BIRU
 
-
         print(warna + "╔" + "═" * 50 + "╗")
         print(f"║{judul.center(50)}║")
-        print( warna + "╚" + "═" * 50 + "╝")
+        print(warna + "╚" + "═" * 50 + "╝")
         print(UI.RESET)
+
     @staticmethod
     def garis():
         print("─" * 40)
-
 
     @staticmethod
     def info(teks):
         return Fore.CYAN + teks + Style.RESET_ALL
 
-
     @staticmethod
-    def wadah_info(nama,norek,saldo=None):
+    def wadah_info(nama, norek, saldo=None):
         if saldo is None:
             print("╔" + "═" * 37 + "╗")
             print(f"  {UI.SIMBOL["nasabah"]} Nama   : {nama}")
@@ -66,9 +60,17 @@ class UI:
         print(f"  {UI.SIMBOL["uang"]} Saldo  : Rp{saldo}")
         print("╚" + "═" * 37 + "╝")
 
-
     @staticmethod
-    def kotak_status_pinjaman(status,nominal,bunga,tenor,cicilan_tetap=None,sisa_cicilan=None,terbayar=None,bunga_bulanan=None):
+    def kotak_status_pinjaman(
+        status,
+        nominal,
+        bunga,
+        tenor,
+        cicilan_tetap=None,
+        sisa_cicilan=None,
+        terbayar=None,
+        bunga_bulanan=None,
+    ):
         if sisa_cicilan or terbayar or bunga_bulanan or cicilan_tetap is None:
             print("╔" + "═" * 30 + "╗")
             print(f"  STATUS  : {status}")
@@ -88,11 +90,9 @@ class UI:
 
         print("╚" + "═" * 37 + "╝")
 
-
-
     @staticmethod
     def sukses(pesan):
-        print(Fore.GREEN + f'✔{pesan}!')
+        print(Fore.GREEN + f"✔{pesan}!")
 
     @staticmethod
     def gagal(pesan):
@@ -102,10 +102,7 @@ class UI:
     def peringatan(pesan):
         print(Fore.YELLOW + f"⚠ {pesan}")
 
-    kelas = {1:"🥉",
-             2:"🥈",
-             3:"🥇",
-             4:"💎"}
+    kelas = {1: "🥉", 2: "🥈", 3: "🥇", 4: "💎"}
 
     @staticmethod
     def kotak_info(judul, data, warna=None):
@@ -124,17 +121,24 @@ class UI:
 
         print("╚" + "═" * lebar + "╝" + UI.RESET)
 
+    @staticmethod
+    def info_deposito(data_deposito):
+        from .utility import Utilitas
 
+        UI.kotak_info(
+            "INFORMASI DEPOSITO",
+            {
+                "Nominal": f"Rp{Utilitas.format_rupiah(data_deposito['nominal'])}",
+                "Bunga": f"{data_deposito['bunga']:.1%} per tahun",
+                "Jangka waktu": f"{data_deposito['lama_bulan']} bulan",
+                "Tanggal pembukaan": f"{data_deposito['tanggal_buka']}",
+                "Tanggal jatuh tempo": f"{data_deposito['jatuh_tempo']}",
+                "Total pencairan": f"Rp{Utilitas.format_rupiah(data_deposito['total_pencairan'])}",
+                "Status": data_deposito["status"],
+            },
+            warna=UI.HIJAU,
+        )
 
     @staticmethod
-    def info_deposito(deposito):
-        from .utility import Utilitas
-        UI.kotak_info("INFORMASI DEPOSITO",{
-        "Nominal": f"Rp{Utilitas.format_rupiah(deposito.nominal)}",
-        "Bunga": f"{deposito.bunga:.1%} per tahun",
-        "Jangka waktu": f"{deposito.lama_bulan} bulan",
-        "Tanggal pembukaan": deposito.tanggal_buka,
-        "Tanggal jatuh tempo": deposito.jatuh_tempo,
-        "Total pencairan": f"Rp{Utilitas.format_rupiah(deposito.total_pencairan)}",
-        "Status": deposito.status
-    },warna=UI.HIJAU)
+    def info_rekening(norek):
+        print(f"💳 Rekening Aktif : {norek}")

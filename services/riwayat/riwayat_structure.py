@@ -1,5 +1,4 @@
 RIWAYAT_MAP = {
-
     "transaksi": [
         "setor awal",
         "setor uang",
@@ -8,9 +7,7 @@ RIWAYAT_MAP = {
         "terima saldo",
         "bunga bulanan",
         "biaya admin",
-
     ],
-
     "rekening": [
         "pembukaan rekening",
         "upgrade rekening",
@@ -20,7 +17,6 @@ RIWAYAT_MAP = {
         "penutupan rekening",
         "reset limit",
     ],
-
     "deposito": [
         "pembukaan deposito",
         "pencairan deposito",
@@ -28,16 +24,14 @@ RIWAYAT_MAP = {
         "penghentian aro deposito",
         "jatuh tempo deposito",
         "bunga deposito",
-        "kapitalisasi bunga deposito"
+        "kapitalisasi bunga deposito",
     ],
-
     "pinjaman": [
         "pinjaman",
-
         "pencairan pinjaman",
         "pembayaran cicilan",
         "keterlambatan pinjaman",
         "denda pinjaman",
         "pelunasan pinjaman",
-    ]
+    ],
 }

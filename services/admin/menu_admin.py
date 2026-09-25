@@ -2,8 +2,9 @@ from bank_djago.services.admin.admin_service import AdminService
 from bank_djago.services.admin.menu_pinjaman import AdminPinjaman
 from bank_djago.services.admin.pengajuan_admin_ui import PengajuanAdminUI
 from bank_djago.utils.utility import UI
-from bank_djago.services.admin.audit_ui  import AuditUI
-from bank_djago.services.admin.rekap_ui  import RekapUI
+from bank_djago.services.admin.audit_ui import AuditUI
+from bank_djago.services.admin.rekap_ui import RekapUI
+
 
 class MenuAdmin:
 

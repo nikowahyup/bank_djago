@@ -3,7 +3,6 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi
 
 class NotifikasiRepository:
 
-
     # method simpan data notifikasi ke database
     @staticmethod
     def tambah_notifikasi(nik_pemilik, notifikasi, koneksi):
@@ -31,8 +30,8 @@ class NotifikasiRepository:
                 notifikasi.pesan,
                 jenis_referensi,
                 notifikasi.id_objek,
-                notifikasi.sudah_dibaca
-            )
+                notifikasi.sudah_dibaca,
+            ),
         )
 
         return cursor.lastrowid
@@ -60,7 +59,7 @@ class NotifikasiRepository:
                 WHERE nik_pemilik = ?
                 ORDER BY id DESC
                 """,
-                (nik_pemilik,)
+                (nik_pemilik,),
             )
 
             return cursor.fetchall()
@@ -71,10 +70,7 @@ class NotifikasiRepository:
 
     @staticmethod
     def cari_notifikasi_dengan_referensi(
-        nik_pemilik,
-        jenis_referensi,
-        id_objek,
-        koneksi=None
+        nik_pemilik, jenis_referensi, id_objek, koneksi=None
     ):
         kelola_koneksi = koneksi is None
 
@@ -98,11 +94,7 @@ class NotifikasiRepository:
                 ORDER BY id DESC
                 LIMIT 1
                 """,
-                (
-                    nik_pemilik,
-                    jenis_referensi.value,
-                    id_objek
-                )
+                (nik_pemilik, jenis_referensi.value, id_objek),
             )
 
             return cursor.fetchone()
@@ -113,10 +105,7 @@ class NotifikasiRepository:
 
     @staticmethod
     def hapus_notifikasi_dengan_referensi(
-        nik_pemilik,
-        jenis_referensi,
-        id_objek,
-        koneksi
+        nik_pemilik, jenis_referensi, id_objek, koneksi
     ):
         cursor = koneksi.execute(
             """
@@ -125,30 +114,22 @@ class NotifikasiRepository:
               AND jenis_referensi = ?
               AND id_objek = ?
             """,
-            (
-                nik_pemilik,
-                jenis_referensi.value,
-                id_objek
-            )
+            (nik_pemilik, jenis_referensi.value, id_objek),
         )
 
         return cursor.rowcount
 
     @staticmethod
-    def hapus_semua_notifikasi_nasabah(
-        nik_pemilik,
-        koneksi
-    ):
+    def hapus_semua_notifikasi_nasabah(nik_pemilik, koneksi):
         cursor = koneksi.execute(
             """
             DELETE FROM notifikasi
             WHERE nik_pemilik = ?
             """,
-            (nik_pemilik,)
+            (nik_pemilik,),
         )
 
         return cursor.rowcount
-
 
     @staticmethod
     def tandai_sudah_dibaca(id_notifikasi, koneksi):
@@ -160,13 +141,10 @@ class NotifikasiRepository:
                 SET sudah_dibaca = 1
                 WHERE id = ?
                 """,
-            (id_notifikasi,))
+            (id_notifikasi,),
+        )
 
         return cursor.rowcount
-
-
-
-
 
     @staticmethod
     def cari_notifikasi_belum_dibaca(nik, koneksi):
@@ -188,7 +166,6 @@ class NotifikasiRepository:
         WHERE n.nik_pemilik = ?
         AND n.sudah_dibaca = 0
         """
-
 
         cursor = koneksi.execute(sql, (nik,))
 

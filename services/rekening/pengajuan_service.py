@@ -5,11 +5,19 @@ from bank_djago.penyimpanan.repositories.deposito_repository import DepositoRepo
 from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
-from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import PengajuanRepository
+from bank_djago.penyimpanan.repositories.pengajuan_rekening_repository import (
+    PengajuanRepository,
+)
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.services.admin.audit_service import AuditService
-from bank_djago.services.exceptions import InputTidakValid, PengajuanTidakDitemukan, StatusTidakValid, \
-    RekeningTidakDitemukan, PerbaruiStatusGagal, NasabahTidakDitemukan
+from bank_djago.services.exceptions import (
+    InputTidakValid,
+    PengajuanTidakDitemukan,
+    StatusTidakValid,
+    RekeningTidakDitemukan,
+    PerbaruiStatusGagal,
+    NasabahTidakDitemukan,
+)
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 
 from bank_djago.utils.validator import Validator
@@ -20,8 +28,6 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis, buat_kone
 
 
 class PengajuanService:
-
-
 
     @staticmethod
     def ajukan_penutupan(nik, norek, alasan):
@@ -35,22 +41,16 @@ class PengajuanService:
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
             if rekening is None:
-                raise ValueError(
-                    "Rekening tidak ditemukan"
-                )
+                raise ValueError("Rekening tidak ditemukan")
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise ValueError(
-                    "NIK ini tidak terdaftar sebagai pemilik rekening"
-                )
+                raise ValueError("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             Validator.amankan_rekening(rekening=rekening)
 
             pengajuan_sebelumnya = PengajuanRepository.cari_pengajuan_aktif(
-                norek=norek,
-                jenis="tutup",
-                koneksi=koneksi
+                norek=norek, jenis="tutup", koneksi=koneksi
             )
 
             if pengajuan_sebelumnya is not None:
@@ -63,7 +63,7 @@ class PengajuanService:
                 jenis="tutup",
                 alasan=alasan,
                 waktu_pengajuan=datetime.datetime.now(),
-                koneksi=koneksi
+                koneksi=koneksi,
             )
             audit = AuditService.tambah_audit(
                 kategori="administratif",
@@ -72,63 +72,46 @@ class PengajuanService:
                 log=f"{rekening.pemilik.nama} mengajukan penutupan rekening {id_pengajuan}",
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
-                norek=rekening.norek
+                norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(
-                audit=audit,
-                koneksi=koneksi
-            )
-
-
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
         return id_pengajuan
 
-
     @staticmethod
-    def tolak_pengajuan(id_pengajuan,catatan_admin):
+    def tolak_pengajuan(id_pengajuan, catatan_admin):
 
         catatan_admin = catatan_admin.strip()
         if not catatan_admin:
-            raise InputTidakValid(
-                "Catatan tidak boleh kosong"
-            )
+            raise InputTidakValid("Catatan tidak boleh kosong")
 
         with buat_koneksi_tulis() as koneksi:
 
             cari_pengajuan = PengajuanRepository.cari_pengajuan_dengan_id(
-                id_pengajuan,
-                koneksi
+                id_pengajuan, koneksi
             )
 
             if cari_pengajuan is None:
-                raise PengajuanTidakDitemukan(
-                    "Pengajuan tidak ditemukan"
-                )
+                raise PengajuanTidakDitemukan("Pengajuan tidak ditemukan")
 
             if cari_pengajuan["status"] != "diajukan":
                 raise StatusTidakValid(
                     f"Status pengajuan sudah {cari_pengajuan['status']}"
                 )
 
-            rekening = RekeningLoader.muat_rekening(
-                cari_pengajuan["norek"],
-                koneksi
-            )
-
+            rekening = RekeningLoader.muat_rekening(cari_pengajuan["norek"], koneksi)
 
             jumlah_baris = PengajuanRepository.perbarui_pengajuan(
                 id_pengajuan=id_pengajuan,
                 status_baru="ditolak",
                 waktu_proses=datetime.datetime.now(),
                 catatan=catatan_admin,
-                koneksi=koneksi
+                koneksi=koneksi,
             )
 
             if jumlah_baris != 1:
-                raise PerbaruiStatusGagal(
-                    "Gagal memperbarui status pengajuan"
-                )
+                raise PerbaruiStatusGagal("Gagal memperbarui status pengajuan")
 
             audit = AuditService.tambah_audit(
                 kategori="administratif",
@@ -137,12 +120,9 @@ class PengajuanService:
                 log=f"Pengajuan {cari_pengajuan['jenis']} rekening ditolak",
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
-                norek=rekening.norek
+                norek=rekening.norek,
             )
-            AuditRepository.tambah_audit(
-                audit=audit,
-                koneksi=koneksi
-            )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
         return True
 
@@ -151,108 +131,68 @@ class PengajuanService:
         catatan_admin = catatan_admin.strip()
 
         if not catatan_admin:
-            raise ValueError(
-                "Catatan tidak boleh kosong"
-            )
+            raise ValueError("Catatan tidak boleh kosong")
 
         with buat_koneksi_tulis() as koneksi:
 
             pengajuan = PengajuanRepository.cari_pengajuan_dengan_id(
-                id_pengajuan=id_pengajuan,
-                koneksi=koneksi
+                id_pengajuan=id_pengajuan, koneksi=koneksi
             )
 
             if pengajuan is None:
-                raise PengajuanTidakDitemukan(
-                    "Pengajuan tidak ditemukan"
-                )
+                raise PengajuanTidakDitemukan("Pengajuan tidak ditemukan")
 
             if pengajuan["status"] != "diajukan":
-                raise StatusTidakValid(
-                    f"Status pengajuan sudah {pengajuan['status']}"
-                )
+                raise StatusTidakValid(f"Status pengajuan sudah {pengajuan['status']}")
 
-            rekening = RekeningLoader.muat_rekening(
-                pengajuan["norek"],
-                koneksi
-            )
-
+            rekening = RekeningLoader.muat_rekening(pengajuan["norek"], koneksi)
 
             # Untuk sementara, jenis pengajuan yang sudah dapat
             # disetujui baru penutupan rekening.
             if pengajuan["jenis"] != "tutup":
-                raise StatusTidakValid(
-                    "Jenis pengajuan ini belum dapat diproses"
-                )
-
-
+                raise StatusTidakValid("Jenis pengajuan ini belum dapat diproses")
 
             jumlah_baris = PengajuanRepository.perbarui_pengajuan(
                 id_pengajuan=id_pengajuan,
                 status_baru="disetujui",
                 waktu_proses=datetime.datetime.now(),
                 catatan=catatan_admin,
-                koneksi=koneksi
+                koneksi=koneksi,
             )
 
             if jumlah_baris != 1:
-                raise PerbaruiStatusGagal(
-                    "Gagal memperbarui status pengajuan"
-                )
+                raise PerbaruiStatusGagal("Gagal memperbarui status pengajuan")
 
             audit = AuditService.tambah_audit(
                 kategori="administratif",
                 objek="rekening",
                 aksi="persetujuan_penutupan_rekening",
-                log=(
-                    f"Pengajuan {pengajuan['jenis']} "
-                    f"rekening disetujui"
-                ),
+                log=(f"Pengajuan {pengajuan['jenis']} " f"rekening disetujui"),
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
-                norek=rekening.norek
+                norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(
-                audit,
-                koneksi
-            )
+            AuditRepository.tambah_audit(audit, koneksi)
 
         return True
 
     @staticmethod
-    def selesaikan_penutupan(
-            nik,
-            norek,
-            metode,
-            norek_penerima=None
-    ):
-
+    def selesaikan_penutupan(nik, norek, metode, norek_penerima=None):
 
         if metode not in ("tarik", "transfer"):
-            raise InputTidakValid(
-                "Metode penyelesaian saldo tidak tersedia"
-            )
+            raise InputTidakValid("Metode penyelesaian saldo tidak tersedia")
 
         if metode == "transfer" and not norek_penerima:
-            raise InputTidakValid(
-                "Nomor rekening penerima wajib diisi"
-            )
-
-
+            raise InputTidakValid("Nomor rekening penerima wajib diisi")
 
         penerima = None
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningLoader.muat_rekening(
-                norek=norek,
-                koneksi=koneksi
-            )
+            rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
             if rekening is None:
-                raise RekeningTidakDitemukan(
-                    "Rekening tidak terdaftar"
-                )
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
             nasabah = rekening.pemilik
 
@@ -261,52 +201,35 @@ class PengajuanService:
                     "NIK ini tidak terdaftar sebagai pemilik rekening"
                 )
 
-            pengajuan = (
-                PengajuanRepository.cari_penutupan_disetujui(
-                    norek=rekening.norek,
-                    koneksi=koneksi
-                )
+            pengajuan = PengajuanRepository.cari_penutupan_disetujui(
+                norek=rekening.norek, koneksi=koneksi
             )
 
             if pengajuan is None:
                 raise PengajuanTidakDitemukan(
-                    "Belum ada persetujuan penutupan "
-                    "untuk rekening ini"
+                    "Belum ada persetujuan penutupan " "untuk rekening ini"
                 )
 
             Validator.amankan_rekening(rekening=rekening)
 
-            deposito_aktif = (
-                DepositoRepository.cari_deposito_aktif(
-                    norek=rekening.norek,
-                    koneksi=koneksi
-                )
+            deposito_aktif = DepositoRepository.cari_deposito_aktif(
+                norek=rekening.norek, koneksi=koneksi
             )
 
-            pinjaman_aktif = (
-                PinjamanRepository.cari_pinjaman_aktif(
-                    norek=rekening.norek,
-                    koneksi=koneksi
-                )
+            pinjaman_aktif = PinjamanRepository.cari_pinjaman_aktif(
+                norek=rekening.norek, koneksi=koneksi
             )
 
             if deposito_aktif is not None:
-                raise StatusTidakValid(
-                    "Rekening masih mempunyai deposito berjalan"
-                )
+                raise StatusTidakValid("Rekening masih mempunyai deposito berjalan")
 
             if pinjaman_aktif is not None:
-                raise StatusTidakValid(
-                    "Rekening masih mempunyai pinjaman berjalan"
-                )
-
+                raise StatusTidakValid("Rekening masih mempunyai pinjaman berjalan")
 
             nominal_penyelesaian = rekening.saldo
 
             if nominal_penyelesaian <= 0:
-                raise StatusTidakValid(
-                    "Tidak ada saldo yang bisa dikosongkan"
-                )
+                raise StatusTidakValid("Tidak ada saldo yang bisa dikosongkan")
 
             waktu_transaksi = datetime.datetime.now()
             status_lama = rekening.status
@@ -317,7 +240,7 @@ class PengajuanService:
                 saldo_baru=0,
                 status_lama=status_lama,
                 status_baru=status_baru,
-                koneksi=koneksi
+                koneksi=koneksi,
             )
 
             if jumlah_baris != 1:
@@ -325,20 +248,15 @@ class PengajuanService:
                     "Terjadi kesalahan saat memproses penutupan rekening"
                 )
 
-
             if metode == "tarik":
 
-
                 transaksi = {
-                    "jenis": (
-                        JenisTransaksi
-                        .PENARIKAN_SALDO_PENUTUPAN
-                    ),
+                    "jenis": (JenisTransaksi.PENARIKAN_SALDO_PENUTUPAN),
                     "norek_sumber": rekening.norek,
                     "nominal": nominal_penyelesaian,
                     "saldo_sumber_sebelum": rekening.saldo,
                     "saldo_sumber_sesudah": 0,
-                    "waktu": waktu_transaksi
+                    "waktu": waktu_transaksi,
                 }
 
                 log_riwayat = (
@@ -358,25 +276,16 @@ class PengajuanService:
 
             else:
 
-                (
-                    penerima,
-                    nominal_penyelesaian,
-                    saldo_baru_penerima
-
-                ) = TransaksiService.transfer_semua_saldo(
-                    rekening_asal=rekening,
-                    norek_penerima=norek_penerima,
-                    koneksi=koneksi
+                penerima, nominal_penyelesaian, saldo_baru_penerima = (
+                    TransaksiService.transfer_semua_saldo(
+                        rekening_asal=rekening,
+                        norek_penerima=norek_penerima,
+                        koneksi=koneksi,
+                    )
                 )
 
-
-
-
                 transaksi = {
-                    "jenis": (
-                        JenisTransaksi
-                        .PEMINDAHAN_SALDO_PENUTUPAN
-                    ),
+                    "jenis": (JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN),
                     "norek_sumber": rekening.norek,
                     "norek_tujuan": penerima.norek,
                     "nominal": nominal_penyelesaian,
@@ -384,7 +293,7 @@ class PengajuanService:
                     "saldo_sumber_sesudah": 0,
                     "saldo_tujuan_sebelum": penerima.saldo,
                     "saldo_tujuan_sesudah": saldo_baru_penerima,
-                    "waktu": waktu_transaksi
+                    "waktu": waktu_transaksi,
                 }
 
                 log_riwayat = (
@@ -403,13 +312,8 @@ class PengajuanService:
 
                 aksi_audit = "pemindahan_saldo_penutupan"
 
-
-
-            id_transaksi = (
-                TransaksiRepository.tambah_transaksi(
-                    transaksi=transaksi,
-                    koneksi=koneksi
-                )
+            id_transaksi = TransaksiRepository.tambah_transaksi(
+                transaksi=transaksi, koneksi=koneksi
             )
 
             if penerima is not None:
@@ -424,39 +328,36 @@ class PengajuanService:
                     ),
                     nama=penerima.pemilik.nama,
                     nik=penerima.pemilik.NIK,
-                    norek=penerima.norek
+                    norek=penerima.norek,
                 )
 
                 AuditRepository.tambah_audit(
-                    audit=audit_penerima,
-                    koneksi=koneksi,
-                    id_transaksi=id_transaksi
+                    audit=audit_penerima, koneksi=koneksi, id_transaksi=id_transaksi
                 )
 
-                riwayat_penerima = (RiwayatTemplate.template(
+                riwayat_penerima = RiwayatTemplate.template(
                     kategori="transaksi",
                     jenis="terima saldo",
                     log=f"TERIMA SALDO PENUTUPAN REKENING | +Rp{Utilitas.format_rupiah(nominal_penyelesaian)} |"
-                        f" Dari Nomor Rekening{rekening.norek}"))
+                    f" Dari Nomor Rekening{rekening.norek}",
+                )
 
                 RiwayatRepository.tambah_riwayat(
                     norek=penerima.norek,
                     riwayat=riwayat_penerima,
                     koneksi=koneksi,
-                    id_transaksi=id_transaksi
+                    id_transaksi=id_transaksi,
                 )
 
             riwayat = RiwayatTemplate.template(
-                kategori="rekening",
-                jenis="penutupan rekening",
-                log=log_riwayat
+                kategori="rekening", jenis="penutupan rekening", log=log_riwayat
             )
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek,
                 riwayat=riwayat,
                 koneksi=koneksi,
-                id_transaksi=id_transaksi
+                id_transaksi=id_transaksi,
             )
 
             audit = AuditService.tambah_audit(
@@ -466,22 +367,16 @@ class PengajuanService:
                 log=log_audit,
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
-                norek=rekening.norek
+                norek=rekening.norek,
             )
 
             AuditRepository.tambah_audit(
-                audit=audit,
-                koneksi=koneksi,
-                id_transaksi=id_transaksi
+                audit=audit, koneksi=koneksi, id_transaksi=id_transaksi
             )
 
-
-
         return nominal_penyelesaian
-
 
     @staticmethod
     def cari_semua_pengajuan_diajukan():
         with buat_koneksi_baca() as koneksi:
             return PengajuanRepository.cari_semua_pengajuan_diajukan(koneksi=koneksi)
-
