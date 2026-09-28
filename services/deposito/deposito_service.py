@@ -155,7 +155,7 @@ class DepositoService:
                 kategori="finansial",
                 objek="deposito",
                 aksi="pembukaan_deposito",
-                log=(f"{nasabah.nama} membuka deposito " f"dengan ID {id_deposito}"),
+                log=f"{nasabah.nama} membuka deposito " f"dengan ID {id_deposito}",
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
                 norek=rekening.norek,
@@ -244,12 +244,10 @@ class DepositoService:
                 )
 
             total_pencairan = deposito.total_pencairan
-            saldo_lama = rekening.saldo
 
             jumlah_baris_saldo = RekeningRepository.tambah_saldo(
                 norek=rekening.norek,
                 nominal=total_pencairan,
-                saldo_lama=saldo_lama,
                 koneksi=koneksi,
             )
             if jumlah_baris_saldo != 1:
@@ -284,7 +282,7 @@ class DepositoService:
                 kategori="finansial",
                 objek="deposito",
                 aksi="pencairan_deposito",
-                log=(f"{nasabah.nama} mencairkan " f"deposito dengan ID {id_deposito}"),
+                log=f"{nasabah.nama} mencairkandeposito dengan ID {id_deposito}",
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
                 norek=rekening.norek,
@@ -351,7 +349,7 @@ class DepositoService:
         if deposito.jenis_aro not in (JenisAro.POKOK, JenisAro.POKOK_BUNGA):
             raise JenisAroTidakValid("Jenis ARO tidak valid")
 
-        if deposito.lama_aro not in (DepositoService.JANGKA_WAKTU):
+        if deposito.lama_aro not in DepositoService.JANGKA_WAKTU:
             raise StatusTidakValid("Lama perpanjangan deposito tidak tersedia")
 
         total = deposito.total_pencairan
@@ -430,7 +428,7 @@ class DepositoService:
         else:
 
             transaksi = {
-                "jenis": (JenisTransaksi.KAPITALISASI_BUNGA_DEPOSITO),
+                "jenis": JenisTransaksi.KAPITALISASI_BUNGA_DEPOSITO,
                 "nominal": bunga_periode_ini,
                 "jenis_referensi": JenisReferensi.DEPOSITO,
                 "id_referensi": deposito.ID,
@@ -473,7 +471,7 @@ class DepositoService:
             kategori="finansial",
             objek="deposito",
             aksi="perpanjangan_deposito_aro",
-            log=(f"Deposito dengan ID {deposito.ID} " f"diperpanjang otomatis"),
+            log=f"Deposito dengan ID {deposito.ID} " f"diperpanjang otomatis",
             nama=nasabah.nama,
             nik=nasabah.NIK,
             norek=rekening.norek,

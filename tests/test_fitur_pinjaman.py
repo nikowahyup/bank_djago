@@ -4,7 +4,9 @@ from bank_djago import JenisReferensi
 from bank_djago.conftest import koneksi_test
 from bank_djago.core.pinjaman import Pinjaman
 
-from bank_djago.penyimpanan.repositories.notifikasi_repository import NotifikasiRepository
+from bank_djago.penyimpanan.repositories.notifikasi_repository import (
+    NotifikasiRepository,
+)
 from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepository
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.services.exceptions import (
@@ -13,7 +15,8 @@ from bank_djago.services.exceptions import (
     InputTidakValid,
     StatusTidakValid,
     PinjamanTidakDitemukan,
-    RekeningTidakDitemukan, PerbaruiStatusGagal,
+    RekeningTidakDitemukan,
+    PerbaruiStatusGagal,
 )
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 import bank_djago.penyimpanan.repositories.riwayat_repository as riwayat_repo_module
@@ -762,8 +765,6 @@ class TestBayarCicilan:
         assert cicilan_terbayar == 6
 
 
-
-
 class TestAjukanPinjaman:
 
     def test_ajukan_pinjaman_happy_path(
@@ -937,59 +938,81 @@ class TestAjukanPinjaman:
         assert data_pinjaman is None
 
 
-
-
-
 class TestSetujuiAtauTolakPinjaman:
-
 
     @pytest.fixture
     def pinjaman_siap_diputuskan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
 
-
         koneksi_test.execute(
             """INSERT INTO pinjaman (
         id,norek, nominal_pinjaman, bunga,tenor,sisa_pokok,status) VALUES (?,?,?,?,?,?,?)""",
-            (1, siapkan_data_rekening_dan_nasabah['norek'], 2_000_000, 0.12, 6, 0, "diajukan"),
+            (
+                1,
+                siapkan_data_rekening_dan_nasabah["norek"],
+                2_000_000,
+                0.12,
+                6,
+                0,
+                "diajukan",
+            ),
         )
         koneksi_test.commit()
 
-
-        return {"id_pinjaman":1}
+        return {"id_pinjaman": 1}
 
     @pytest.mark.parametrize(
         "fungsi_service, kwargs_tambahan, status_pinjaman, catatan_diharapkan,aksi_diharapkan",
         [
-            (PinjamanService.setujui_pinjaman, {}, StatusPinjaman.DISETUJUI.value, None, "persetujuan_pinjaman"),
             (
-                    PinjamanService.tolak_pinjaman,
-                    {"catatan_admin": "Pinjaman ditolak untuk tes"},
-                    StatusPinjaman.DITOLAK.value,
-                    "Pinjaman ditolak untuk tes",
-                    "penolakan_pinjaman"
+                PinjamanService.setujui_pinjaman,
+                {},
+                StatusPinjaman.DISETUJUI.value,
+                None,
+                "persetujuan_pinjaman",
+            ),
+            (
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "Pinjaman ditolak untuk tes"},
+                StatusPinjaman.DITOLAK.value,
+                "Pinjaman ditolak untuk tes",
+                "penolakan_pinjaman",
             ),
         ],
     )
     def test_setujui_dan_tolak_pinjaman_happy_path(
-            self, koneksi_test, fungsi_service, kwargs_tambahan,
-            pinjaman_siap_diputuskan, status_pinjaman, catatan_diharapkan, siapkan_data_rekening_dan_nasabah,aksi_diharapkan
+        self,
+        koneksi_test,
+        fungsi_service,
+        kwargs_tambahan,
+        pinjaman_siap_diputuskan,
+        status_pinjaman,
+        catatan_diharapkan,
+        siapkan_data_rekening_dan_nasabah,
+        aksi_diharapkan,
     ):
         id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
         fungsi_service(id_pinjaman=id_pinjaman, **kwargs_tambahan)
 
         data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
             id_pinjaman=id_pinjaman, koneksi=koneksi_test
         )
 
-        notifikasi = NotifikasiRepository.cari_notifikasi_dengan_referensi(nik_pemilik=nik, jenis_referensi=JenisReferensi.PINJAMAN, id_objek=id_pinjaman, koneksi=koneksi_test)
-        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ?",(norek,)).fetchone()
+        notifikasi = NotifikasiRepository.cari_notifikasi_dengan_referensi(
+            nik_pemilik=nik,
+            jenis_referensi=JenisReferensi.PINJAMAN,
+            id_objek=id_pinjaman,
+            koneksi=koneksi_test,
+        )
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ?", (norek,)
+        ).fetchone()
 
         assert data_pinjaman["status"] == status_pinjaman
         assert notifikasi is not None
         assert audit is not None
-        assert audit['aksi'] == aksi_diharapkan
+        assert audit["aksi"] == aksi_diharapkan
         if catatan_diharapkan is not None:
             assert data_pinjaman["catatan_admin"] == catatan_diharapkan
 
@@ -998,40 +1021,72 @@ class TestSetujuiAtauTolakPinjaman:
         [
             (PinjamanService.setujui_pinjaman, "abc", {}, "berupa angka"),
             (PinjamanService.setujui_pinjaman, -1, {}, "tidak valid"),
-            (PinjamanService.tolak_pinjaman, "abc", {"catatan_admin": "penolakan untuk pengujian"}, "berupa angka"),
-            (PinjamanService.tolak_pinjaman, -1, {"catatan_admin": "penolakan untuk pengujian"}, "tidak valid"),
+            (
+                PinjamanService.tolak_pinjaman,
+                "abc",
+                {"catatan_admin": "penolakan untuk pengujian"},
+                "berupa angka",
+            ),
+            (
+                PinjamanService.tolak_pinjaman,
+                -1,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                "tidak valid",
+            ),
         ],
     )
     def test_setujui_atau_tolak_pinjaman_dengan_id_invalid(
-            self, fungsi_service, id_invalid, kwargs_tambahan, pesan_diharapkan
+        self, fungsi_service, id_invalid, kwargs_tambahan, pesan_diharapkan
     ):
         with pytest.raises(InputTidakValid) as info_error:
             fungsi_service(id_pinjaman=id_invalid, **kwargs_tambahan)
 
         assert pesan_diharapkan in str(info_error.value)
 
-
-
-
-
-    @pytest.mark.parametrize("fungsi_service, kwargs_tambahan, status_salah",[
-        (PinjamanService.setujui_pinjaman,{},"aktif"),
-        (PinjamanService.setujui_pinjaman,{}, "disetujui"),
-        (PinjamanService.setujui_pinjaman,{}, "ditolak"),
-        (PinjamanService.tolak_pinjaman,{"catatan_admin": "penolakan untuk pengujian"},"aktif"),
-        (PinjamanService.tolak_pinjaman,{"catatan_admin": "penolakan untuk pengujian"},"disetujui"),
-        (PinjamanService.tolak_pinjaman, {"catatan_admin": "penolakan untuk pengujian"}, "ditolak"),
-
-    ])
-
-
+    @pytest.mark.parametrize(
+        "fungsi_service, kwargs_tambahan, status_salah",
+        [
+            (PinjamanService.setujui_pinjaman, {}, "aktif"),
+            (PinjamanService.setujui_pinjaman, {}, "disetujui"),
+            (PinjamanService.setujui_pinjaman, {}, "ditolak"),
+            (
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                "aktif",
+            ),
+            (
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                "disetujui",
+            ),
+            (
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                "ditolak",
+            ),
+        ],
+    )
     def test_setujui_atau_tolak_pinjaman_dengan_status_salah(
-            self, koneksi_test,fungsi_service, kwargs_tambahan, status_salah,siapkan_data_rekening_dan_nasabah):
+        self,
+        koneksi_test,
+        fungsi_service,
+        kwargs_tambahan,
+        status_salah,
+        siapkan_data_rekening_dan_nasabah,
+    ):
 
         koneksi_test.execute(
             """INSERT INTO pinjaman (
         id,norek, nominal_pinjaman, bunga,tenor,sisa_pokok,status) VALUES (?,?,?,?,?,?,?)""",
-            (1, siapkan_data_rekening_dan_nasabah['norek'], 2_000_000, 0.12, 6, 0, status_salah),
+            (
+                1,
+                siapkan_data_rekening_dan_nasabah["norek"],
+                2_000_000,
+                0.12,
+                6,
+                0,
+                status_salah,
+            ),
         )
         koneksi_test.commit()
 
@@ -1040,85 +1095,92 @@ class TestSetujuiAtauTolakPinjaman:
         with pytest.raises(StatusTidakValid) as info_error:
             fungsi_service(id_pinjaman=id_pinjaman, **kwargs_tambahan)
 
-        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman, koneksi=koneksi_test)
+        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
+            id_pinjaman=id_pinjaman, koneksi=koneksi_test
+        )
 
         print(f"pesan errof : {info_error.value}")
-        assert data_pinjaman['status'] == status_salah
+        assert data_pinjaman["status"] == status_salah
         assert "Pinjaman tidak dapat" in str(info_error.value)
 
+    def test_setujui_atau_tolak_pinjaman_race_condition(
+        self, koneksi_test, pinjaman_siap_diputuskan, monkeypatch
+    ):
 
-
-
-
-
-    def test_setujui_atau_tolak_pinjaman_race_condition(self, koneksi_test, pinjaman_siap_diputuskan, monkeypatch):
-
-
-        id_pinjaman = pinjaman_siap_diputuskan['id_pinjaman']
+        id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
         method_asli = pinjaman_repo_module.PinjamanRepository.perbarui_status_pinjaman
 
-
         def penggagal_pengubah_keputusan(**kwargs):
-            koneksi_test.execute("UPDATE pinjaman SET status = 'disetujui' WHERE id = ?",(id_pinjaman,))
+            koneksi_test.execute(
+                "UPDATE pinjaman SET status = 'disetujui' WHERE id = ?", (id_pinjaman,)
+            )
 
             koneksi_test.commit()
 
             return method_asli(**kwargs)
 
-        monkeypatch.setattr(pinjaman_repo_module.PinjamanRepository,"perbarui_status_pinjaman",penggagal_pengubah_keputusan)
-
+        monkeypatch.setattr(
+            pinjaman_repo_module.PinjamanRepository,
+            "perbarui_status_pinjaman",
+            penggagal_pengubah_keputusan,
+        )
 
         with pytest.raises(PerbaruiStatusGagal) as info_error:
 
             PinjamanService.setujui_pinjaman(id_pinjaman=id_pinjaman)
 
-
         assert "memperbarui status pinjaman" in str(info_error.value)
 
-
-
-    @pytest.mark.parametrize("fungsi_service, kwargs_tambahan",[
-        (PinjamanService.setujui_pinjaman, {}),
-        (PinjamanService.tolak_pinjaman, {"catatan_admin":"penolakan untuk pengujian"})
-    ])
+    @pytest.mark.parametrize(
+        "fungsi_service, kwargs_tambahan",
+        [
+            (PinjamanService.setujui_pinjaman, {}),
+            (
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+            ),
+        ],
+    )
     def test_rollback_setujui_atau_tolak_pinjaman(
-            self, koneksi_test, pinjaman_siap_diputuskan, monkeypatch, fungsi_service, kwargs_tambahan,siapkan_data_rekening_dan_nasabah
+        self,
+        koneksi_test,
+        pinjaman_siap_diputuskan,
+        monkeypatch,
+        fungsi_service,
+        kwargs_tambahan,
+        siapkan_data_rekening_dan_nasabah,
     ):
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        id_pinjaman = pinjaman_siap_diputuskan['id_pinjaman']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
         method_asli = audit_repo_module.AuditRepository.tambah_audit
-
 
         def uji_rollback(**kwargs):
             method_asli(**kwargs)
 
             raise RuntimeError("Uji rollback keputusan untuk pinjaman")
 
-
-        monkeypatch.setattr(audit_repo_module.AuditRepository,"tambah_audit", uji_rollback)
-
+        monkeypatch.setattr(
+            audit_repo_module.AuditRepository, "tambah_audit", uji_rollback
+        )
 
         with pytest.raises(RuntimeError):
             fungsi_service(id_pinjaman=id_pinjaman, **kwargs_tambahan)
 
+        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
+            id_pinjaman=id_pinjaman, koneksi=koneksi_test
+        )
+        notifikasi = NotifikasiRepository.cari_notifikasi_dengan_referensi(
+            nik_pemilik=nik,
+            jenis_referensi=JenisReferensi.PINJAMAN,
+            id_objek=id_pinjaman,
+            koneksi=koneksi_test,
+        )
 
-        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman, koneksi=koneksi_test)
-        notifikasi = NotifikasiRepository.cari_notifikasi_dengan_referensi(nik_pemilik=nik, jenis_referensi=JenisReferensi.PINJAMAN, id_objek=id_pinjaman, koneksi=koneksi_test)
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ?", (norek,)
+        ).fetchone()
 
-        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ?",(norek,)).fetchone()
-
-
-
-        assert data_pinjaman['status'] == StatusPinjaman.DIAJUKAN.value
+        assert data_pinjaman["status"] == StatusPinjaman.DIAJUKAN.value
         assert notifikasi is None
         assert audit is None
-
-
-
-
-
-
-
-
-

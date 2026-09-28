@@ -150,7 +150,9 @@ class PinjamanService:
 
         if id_pinjaman <= 0:
             raise InputTidakValid("ID pinjaman tidak valid")
+
         with buat_koneksi_tulis() as koneksi:
+
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
                 id_pinjaman=id_pinjaman, koneksi=koneksi
             )
@@ -168,6 +170,11 @@ class PinjamanService:
             norek = data_pinjaman["norek"]
 
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
+
+            if rekening is None:
+                raise RekeningTidakDitemukan(
+                    f"Rekening untuk pinjaman ber-ID " f"{id_pinjaman} tidak ditemukan"
+                )
 
             nasabah = rekening.pemilik
 
@@ -193,11 +200,10 @@ class PinjamanService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
-
             NotifikasiService.buat_notifikasi_persetujuan_pinjaman(
                 id_pinjaman=id_pinjaman, nik_pemilik=nasabah.NIK, koneksi=koneksi
             )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
         return True
 
@@ -630,14 +636,13 @@ class PinjamanService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
-
             NotifikasiService.buat_notifikasi_penolakan_pinjaman(
                 id_pinjaman=id_pinjaman,
                 nik_pemilik=nasabah.NIK,
                 koneksi=koneksi,
                 catatan_admin=catatan_admin,
             )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
         return True
 
