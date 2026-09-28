@@ -65,8 +65,11 @@ class AuditRepository:
             koneksi.close()
 
     @staticmethod
-    def cari_audit_dengan_norek(norek):
-        koneksi = buat_koneksi()
+    def cari_audit_dengan_norek(norek, koneksi=None):
+
+        kelola_koneksi = koneksi is None
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
 
         try:
             cursor = koneksi.execute(
