@@ -1,0 +1,53 @@
+# conftest.py
+import pytest
+import sqlite3
+import uuid
+import bank_djago.penyimpanan.sqlite.database as db_module
+from bank_djago.penyimpanan.sqlite.buat_database import inisialisasi_database
+
+
+@pytest.fixture
+def koneksi_test(monkeypatch):
+    nama_db = f"file:testdb_{uuid.uuid4().hex}?mode=memory&cache=shared"
+
+    def buat_koneksi_versi_test():
+        koneksi = sqlite3.connect(nama_db, uri=True)
+        koneksi.execute("PRAGMA foreign_keys = ON")
+        koneksi.row_factory = sqlite3.Row
+        return koneksi
+
+    monkeypatch.setattr(db_module, "buat_koneksi", buat_koneksi_versi_test)
+
+    koneksi_jangkar = buat_koneksi_versi_test()
+    inisialisasi_database()
+
+    yield koneksi_jangkar
+    koneksi_jangkar.close()
+
+
+@pytest.fixture
+def siapkan_data_rekening_dan_nasabah(koneksi_test):
+
+    koneksi_test.execute(
+        """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
+        ("Pengujian", "jln.ninjaku", "987654321"),
+    )
+
+    koneksi_test.execute(
+        """INSERT INTO rekening
+        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
+        VALUES(?,?,?,?,?,?,?,?)""",
+        (
+            "123456",
+            "987654321",
+            10_000_000,
+            "1234",
+            "2026-01-19",
+            "2026-01-20",
+            "2026-02-23",
+            "2026-02-23",
+        ),
+    )
+    koneksi_test.commit()
+
+    return {"norek": "123456", "nik": "987654321"}
