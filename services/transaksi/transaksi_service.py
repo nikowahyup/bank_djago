@@ -9,7 +9,8 @@ from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
+import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 
 from bank_djago.services.exceptions import (
@@ -35,7 +36,7 @@ class TransaksiService:
 
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
             if rekening is None:
-                raise RekeningTidakDitemukan("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
             nasabah = rekening.pemilik
 
@@ -44,9 +45,8 @@ class TransaksiService:
 
             Validator.amankan_rekening(rekening=rekening)
 
-            saldo_lama = rekening.saldo
             jumlah_baris = RekeningRepository.tambah_saldo(
-                norek=norek, nominal=nominal, saldo_lama=saldo_lama, koneksi=koneksi
+                norek=norek, nominal=nominal, koneksi=koneksi
             )
 
             if jumlah_baris != 1:
@@ -182,7 +182,10 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def transfer(nik_masuk, norek_pengirim, norek_penerima, nominal):
+    def transfer(nik_masuk, norek_pengirim, norek_penerima, nominal, hari_ini=None):
+
+        if hari_ini is None:
+            hari_ini = datetime.date.today()
 
         if nominal < 10000:
             raise InputTidakValid("Minimal transfer adalah Rp10.000")
@@ -209,7 +212,7 @@ class TransaksiService:
             )
 
             limit_sisa, reset_baru, is_reset = LimitService.hitung_limit_saat_ini(
-                pengirim
+                rekening=pengirim, hari_ini=hari_ini
             )
 
             total = nominal + pengirim.pajak
@@ -222,9 +225,11 @@ class TransaksiService:
             if limit_sisa is None:
                 limit_baru = None
             else:
-                limit_baru = limit_sisa - total
+                limit_baru = limit_sisa - nominal
                 if limit_baru < 0:
-                    raise StatusTidakValid("Limit harian telah habis")
+                    raise StatusTidakValid(
+                        f"Limit harian tidak cukup untuk melakukan transfer Rp{Utilitas.format_rupiah(nominal)}"
+                    )
 
             pengurangan_saldo_pengirim = total
             penambahan_saldo_penerima = nominal
@@ -248,11 +253,9 @@ class TransaksiService:
                 koneksi=koneksi,
             )
 
-            saldo_lama = penerima.saldo
             jumlah_baris_penerima = RekeningRepository.tambah_saldo(
                 norek=penerima.norek,
                 nominal=penambahan_saldo_penerima,
-                saldo_lama=saldo_lama,
                 koneksi=koneksi,
             )
 
@@ -299,7 +302,7 @@ class TransaksiService:
 
             riwayat_pengirim = RiwayatTemplate.template(
                 kategori="transaksi",
-                jenis="transer saldo",
+                jenis="transfer saldo",
                 log=f"TRANSFER UANG | -Rp{Utilitas.format_rupiah(nominal)} | Penerima {penerima.pemilik.nama} ",
             )
             riwayat_penerima = RiwayatTemplate.template(
@@ -362,10 +365,9 @@ class TransaksiService:
         kelola_koneksi = koneksi is None
 
         if kelola_koneksi:
-            koneksi = buat_koneksi()
+            koneksi = db_module.buat_koneksi()
 
         try:
-
             penerima = RekeningLoader.muat_rekening(
                 norek=norek_penerima, koneksi=koneksi
             )
@@ -393,11 +395,9 @@ class TransaksiService:
 
         nominal_transfer = rekening_asal.saldo
 
-        saldo_lama = penerima.saldo
         jumlah_baris_penerima = RekeningRepository.tambah_saldo(
             norek=penerima.norek,
             nominal=nominal_transfer,
-            saldo_lama=saldo_lama,
             koneksi=koneksi,
         )
 

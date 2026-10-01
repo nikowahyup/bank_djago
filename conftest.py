@@ -1,4 +1,6 @@
 # conftest.py
+import datetime
+
 import pytest
 import sqlite3
 import uuid
@@ -35,15 +37,16 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
 
     koneksi_test.execute(
         """INSERT INTO rekening
-        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
-        VALUES(?,?,?,?,?,?,?,?)""",
+        (norek, nik_pemilik, saldo, pin, limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
+        VALUES(?,?,?,?,?,?,?,?,?)""",
         (
             "123456",
             "987654321",
             10_000_000,
             "1234",
+            5_000_000,
             "2026-01-19",
-            "2026-01-20",
+            datetime.date.today().isoformat(),
             "2026-02-23",
             "2026-02-23",
         ),
@@ -51,3 +54,31 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
     koneksi_test.commit()
 
     return {"norek": "123456", "nik": "987654321"}
+
+
+@pytest.fixture
+def siapkan_data_rekening_penerima(koneksi_test):
+    koneksi_test.execute(
+        """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
+        ("Pengujian", "jln.ninjaku", "123456789"),
+    )
+
+    koneksi_test.execute(
+        """INSERT INTO rekening
+        (norek, nik_pemilik, saldo, pin,limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
+        VALUES(?,?,?,?,?,?,?,?,?)""",
+        (
+            "000111222333",
+            "123456789",
+            10_000_000,
+            "1234",
+            5_000_000,
+            "2026-01-19",
+            datetime.date.today().isoformat(),
+            "2026-02-23",
+            "2026-02-23",
+        ),
+    )
+    koneksi_test.commit()
+
+    return {"nik": "123456789", "norek": "000111222333"}
