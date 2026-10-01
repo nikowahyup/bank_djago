@@ -13,8 +13,10 @@ from bank_djago.services.exceptions import (
     NikTidakSesuai,
     RekeningTidakDitemukan,
     StatusTidakValid,
+    PenguranganSaldoGagal, PenambahanSaldoGagal,
 )
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
+import bank_djago.penyimpanan.repositories.rekening_repository as rekening_repo_module
 
 
 class TestSetortunai:
@@ -1130,11 +1132,22 @@ class TestTransfer:
             norek=norek_penerima, koneksi=koneksi_test
         )
 
-        riwayat_pengirim_sebelum = koneksi_test.execute("SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",(norek_pengirim,)).fetchone()[0]
-        riwayat_penerima_sebelum = koneksi_test.execute("SELECT COUNT (*) FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",(norek_penerima,)).fetchone()[0]
-        limit_sisa_sebelum = koneksi_test.execute("SELECT limit_sisa FROM rekening WHERE norek = ?",(norek_pengirim,)).fetchone()['limit_sisa']
-        audit_pengirim_sebelum = koneksi_test.execute("SELECT COUNT (*) FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",(norek_pengirim,)).fetchone()[0]
-        with pytest.raises(RuntimeError,match="Simulasi rollback proses transfer"):
+        riwayat_pengirim_sebelum = koneksi_test.execute(
+            "SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",
+            (norek_pengirim,),
+        ).fetchone()[0]
+        riwayat_penerima_sebelum = koneksi_test.execute(
+            "SELECT COUNT (*) FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",
+            (norek_penerima,),
+        ).fetchone()[0]
+        limit_sisa_sebelum = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()["limit_sisa"]
+        audit_pengirim_sebelum = koneksi_test.execute(
+            "SELECT COUNT (*) FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",
+            (norek_pengirim,),
+        ).fetchone()[0]
+        with pytest.raises(RuntimeError, match="Simulasi rollback proses transfer"):
             TransaksiService.transfer(
                 nik_masuk=nik,
                 norek_pengirim=norek_pengirim,
@@ -1148,15 +1161,22 @@ class TestTransfer:
         saldo_penerima_sesudah = RekeningRepository.ambil_saldo(
             norek=norek_penerima, koneksi=koneksi_test
         )
-        riwayat_pengirim_sesudah = koneksi_test.execute("SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",
-                             (norek_pengirim,)).fetchone()[0]
-        riwayat_penerima_sesudah = koneksi_test.execute("SELECT COUNT (*) FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'", (norek_penerima,)).fetchone()[
-            0]
-        limit_sisa_sesudah = koneksi_test.execute("SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)).fetchone()[
-            'limit_sisa']
+        riwayat_pengirim_sesudah = koneksi_test.execute(
+            "SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",
+            (norek_pengirim,),
+        ).fetchone()[0]
+        riwayat_penerima_sesudah = koneksi_test.execute(
+            "SELECT COUNT (*) FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",
+            (norek_penerima,),
+        ).fetchone()[0]
+        limit_sisa_sesudah = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()["limit_sisa"]
 
-        audit_pengirim = koneksi_test.execute("SELECT COUNT (*) FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",(norek_pengirim,)).fetchone()[0]
-
+        audit_pengirim = koneksi_test.execute(
+            "SELECT COUNT (*) FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",
+            (norek_pengirim,),
+        ).fetchone()[0]
 
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_sumber = ? AND norek_tujuan = ?",
@@ -1355,3 +1375,110 @@ class TestTransfer:
         assert saldo_pengirim == saldo_pengirim_sebelum - (
             nominal_pertama + nominal_kedua + nominal_ketiga + pajak * 3
         )
+
+    def test_transfer_race_condition(
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        siapkan_data_rekening_penerima,
+        monkeypatch,
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
+        norek_penerima = siapkan_data_rekening_penerima["norek"]
+
+        rekening_pengirim = RekeningLoader.muat_rekening(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        pajak = rekening_pengirim.pajak
+        nominal_update = 5_000_000
+        saldo_perubahan = rekening_pengirim.saldo - nominal_update
+        nominal_transfer = (
+            (rekening_pengirim.saldo - nominal_update)
+            - (rekening_pengirim.saldosetor_min + pajak)
+        ) + 1
+        assert (
+            rekening_pengirim.saldo - (nominal_transfer + pajak)
+            >= rekening_pengirim.saldosetor_min
+        )
+        assert (
+            saldo_perubahan - (nominal_transfer + pajak)
+            == rekening_pengirim.saldosetor_min - 1
+        )
+        assert nominal_transfer >= 10_000
+        assert nominal_transfer <= rekening_pengirim.limit_sisa
+        method_asli = rekening_repo_module.RekeningRepository.kurangi_saldo
+
+        def uji_race_condition(**kwargs):
+            koneksi_test.execute(
+                "UPDATE rekening SET saldo = ? WHERE norek = ?",
+                (saldo_perubahan, norek_pengirim),
+            )
+            koneksi_test.commit()
+            return method_asli(**kwargs)
+
+        monkeypatch.setattr(
+            rekening_repo_module.RekeningRepository, "kurangi_saldo", uji_race_condition
+        )
+
+        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
+
+        limit_sisa_sebelum = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()["limit_sisa"]
+        with pytest.raises(PenguranganSaldoGagal) as info_error:
+            TransaksiService.transfer(
+                nik_masuk=nik,
+                norek_pengirim=norek_pengirim,
+                norek_penerima=norek_penerima,
+                nominal=nominal_transfer,
+            )
+
+        saldo_penerima_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
+        saldo_sesudah_pengirim = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        limit_sisa_setelah = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()["limit_sisa"]
+
+        assert limit_sisa_setelah == limit_sisa_sebelum
+        assert saldo_penerima_sesudah == saldo_penerima_sebelum
+        assert saldo_sesudah_pengirim == saldo_perubahan
+        assert "dapat melakukan transfer" in str(info_error.value)
+
+
+    @pytest.mark.skip(reason="mengubah status di tengah koneksi transfer berjalan tidak sesuai dengan aturan sqlite")
+    def test_race_condition_penambahan_saldo_pada_rekening_penerima(self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima, monkeypatch):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek_pengirim = siapkan_data_rekening_dan_nasabah['norek']
+        norek_penerima = siapkan_data_rekening_penerima['norek']
+        nominal = 1_000_000
+        method_asli = rekening_repo_module.RekeningRepository.tambah_saldo
+
+        def uji_race_condition(**kwargs):
+            koneksi_test.execute("UPDATE rekening SET status = 'blokir' WHERE norek = ?",(norek_penerima,))
+            koneksi_test.commit()
+
+            return method_asli(**kwargs)
+
+        monkeypatch.setattr(rekening_repo_module.RekeningRepository,"tambah_saldo",uji_race_condition)
+
+        with pytest.raises(PenambahanSaldoGagal) as info_error:
+            TransaksiService.transfer(nik_masuk=nik, norek_pengirim=norek_pengirim, norek_penerima=norek_penerima, nominal=nominal)
+
+
+        print(f"pesan error : {info_error.value}")
+        assert "melakukan transfer" in str(info_error.value)
+
+
+
+
+
+

@@ -396,7 +396,7 @@ class DepositoService:
         if deposito.jenis_aro == JenisAro.POKOK:
 
             jumlah_baris_rekening = RekeningRepository.tambah_saldo(
-                norek=rekening.norek, nominal=bunga_periode_ini, koneksi=koneksi
+                norek=rekening.norek, nominal=bunga_periode_ini, koneksi=koneksi, status_diizinkan=['aktif','blokir']
             )
 
             if jumlah_baris_rekening != 1:
