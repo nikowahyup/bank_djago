@@ -13,7 +13,8 @@ from bank_djago.services.exceptions import (
     NikTidakSesuai,
     RekeningTidakDitemukan,
     StatusTidakValid,
-    PenguranganSaldoGagal, PenambahanSaldoGagal,
+    PenguranganSaldoGagal,
+    PenambahanSaldoGagal,
 )
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
 import bank_djago.penyimpanan.repositories.rekening_repository as rekening_repo_module
@@ -1452,33 +1453,43 @@ class TestTransfer:
         assert saldo_sesudah_pengirim == saldo_perubahan
         assert "dapat melakukan transfer" in str(info_error.value)
 
+    @pytest.mark.skip(
+        reason="mengubah status di tengah koneksi transfer berjalan tidak sesuai dengan aturan sqlite"
+    )
+    def test_race_condition_penambahan_saldo_pada_rekening_penerima(
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        siapkan_data_rekening_penerima,
+        monkeypatch,
+    ):
 
-    @pytest.mark.skip(reason="mengubah status di tengah koneksi transfer berjalan tidak sesuai dengan aturan sqlite")
-    def test_race_condition_penambahan_saldo_pada_rekening_penerima(self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima, monkeypatch):
-
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek_pengirim = siapkan_data_rekening_dan_nasabah['norek']
-        norek_penerima = siapkan_data_rekening_penerima['norek']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
+        norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
         method_asli = rekening_repo_module.RekeningRepository.tambah_saldo
 
         def uji_race_condition(**kwargs):
-            koneksi_test.execute("UPDATE rekening SET status = 'blokir' WHERE norek = ?",(norek_penerima,))
+            koneksi_test.execute(
+                "UPDATE rekening SET status = 'blokir' WHERE norek = ?",
+                (norek_penerima,),
+            )
             koneksi_test.commit()
 
             return method_asli(**kwargs)
 
-        monkeypatch.setattr(rekening_repo_module.RekeningRepository,"tambah_saldo",uji_race_condition)
+        monkeypatch.setattr(
+            rekening_repo_module.RekeningRepository, "tambah_saldo", uji_race_condition
+        )
 
         with pytest.raises(PenambahanSaldoGagal) as info_error:
-            TransaksiService.transfer(nik_masuk=nik, norek_pengirim=norek_pengirim, norek_penerima=norek_penerima, nominal=nominal)
-
+            TransaksiService.transfer(
+                nik_masuk=nik,
+                norek_pengirim=norek_pengirim,
+                norek_penerima=norek_penerima,
+                nominal=nominal,
+            )
 
         print(f"pesan error : {info_error.value}")
         assert "melakukan transfer" in str(info_error.value)
-
-
-
-
-
-

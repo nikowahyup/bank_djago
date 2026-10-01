@@ -102,20 +102,16 @@ class RekeningRepository:
     def tambah_saldo(norek, nominal, koneksi, status_diizinkan=None):
 
         if status_diizinkan is None:
-            status_diizinkan = ['aktif']
+            status_diizinkan = ["aktif"]
 
-        placeholders = ','.join("?" for _ in status_diizinkan)
+        placeholders = ",".join("?" for _ in status_diizinkan)
         sql = f"""UPDATE rekening
         SET saldo = saldo + ?
         WHERE norek = ? AND status IN ({placeholders}) """
 
         cursor = koneksi.execute(
             sql,
-            (
-                nominal,
-                norek,
-                *status_diizinkan
-            ),
+            (nominal, norek, *status_diizinkan),
         )
 
         return cursor.rowcount
