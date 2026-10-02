@@ -267,13 +267,13 @@ class TransaksiService:
             )
 
             if jumlah_baris_pengirim != 1:
-                raise PenguranganSaldoGagal("Tidak dapat melakukan transfer")
+                raise PenguranganSaldoGagal("Gagal melakukan transfer. Silahkan coba lagi")
 
             if jumlah_baris_limit != 1:
                 raise PerbaruiStatusGagal("Terjadi kesalahan saat memperbarui limit")
 
             if jumlah_baris_penerima != 1:
-                raise PenambahanSaldoGagal("Tidak dapat melakukan transfer")
+                raise PenambahanSaldoGagal("Gagal mengirim saldo ke rekening penerima")
 
             saldo_setelah_pengirim = RekeningRepository.ambil_saldo(
                 norek=pengirim.norek, koneksi=koneksi
