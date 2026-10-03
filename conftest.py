@@ -82,3 +82,34 @@ def siapkan_data_rekening_penerima(koneksi_test):
     koneksi_test.commit()
 
     return {"nik": "123456789", "norek": "000111222333"}
+
+
+@pytest.fixture
+def siapkan_rekening_siap_diturunkan(koneksi_test):
+    koneksi_test.execute(
+        """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
+        ("Pengujian", "jln.ninjaku", "123456789"),
+    )
+
+    koneksi_test.execute(
+        """INSERT INTO rekening
+        (norek, nik_pemilik, saldo, pin,limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin,level)
+        VALUES(?,?,?,?,?,?,?,?,?,?)""",
+        (
+            "000111222333",
+            "123456789",
+            100_000_000,
+            "1234",
+            200_000_000,
+            "2026-01-19",
+            datetime.date.today().isoformat(),
+            "2026-02-23",
+            "2026-02-23",
+            3
+        ),
+    )
+    koneksi_test.commit()
+
+    return {'nik':"123456789",
+            "norek":"000111222333"}
+

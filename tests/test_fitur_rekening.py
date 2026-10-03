@@ -529,9 +529,46 @@ class TestTingkatkanRekening:
         assert terakhir_ubah_sesudah == datetime.date.today()
 
 
+class TestTurunkanRekening:
 
 
+    @pytest.mark.parametrize("target_level",[2,1])
+    def test_turunkan_rekening_happy_path(self, koneksi_test, siapkan_rekening_siap_diturunkan, target_level):
 
+        nik = siapkan_rekening_siap_diturunkan['nik']
+        norek = siapkan_rekening_siap_diturunkan['norek']
+
+        data_rekening = koneksi_test.execute("SELECT * FROM rekening WHERE norek = ?",(norek,)).fetchone()
+
+        level = data_rekening['level']
+        terakhir_ubah = konversi_waktu(data_rekening['terakhir_ubah_rekening'])
+        limit_sisa = data_rekening['limit_sisa']
+        limit_sisa_target = jenis_rekening[target_level]['limit_sisa']
+        saldo = data_rekening['saldo']
+
+
+        assert level == 3
+        assert terakhir_ubah is None
+        assert limit_sisa != limit_sisa_target
+
+        RekeningService.downgrade_rekening(nik=nik, norek=norek, target_level=target_level)
+
+        data_rekening_sesudah = koneksi_test.execute("SELECT * FROM rekening WHERE norek = ?",(norek,)).fetchone()
+
+        level_sesudah = data_rekening_sesudah['level']
+        limit_sisa_sesudah = data_rekening_sesudah['limit_sisa']
+        saldo_sesudah = data_rekening_sesudah['saldo']
+        terakhir_ubah_sesudah = konversi_waktu(data_rekening_sesudah['terakhir_ubah_rekening'])
+
+        riwayat = koneksi_test.execute("SELECT COUNT (*) FROM riwayat WHERE norek = ? AND jenis = 'penurunan rekening'",(norek,)).fetchone()[0]
+        audit = koneksi_test.execute("SELECT COUNT (*) FROM audit WHERE norek = ? AND aksi  = 'penurunan_level_rekening'",(norek,)).fetchone()[0]
+
+        assert riwayat == 1
+        assert audit == 1
+        assert limit_sisa_sesudah == limit_sisa_target
+        assert level_sesudah == target_level
+        assert saldo == saldo_sesudah
+        assert terakhir_ubah_sesudah == datetime.date.today()
 
 
 
