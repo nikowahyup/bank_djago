@@ -67,6 +67,9 @@ class RekeningService:
         if not isinstance(target_level, int):
             raise InputTidakValid("Level rekening harus berupa angka")
 
+        if target_level <= 0:
+            raise InputTidakValid('Level rekening harus di antara 1 - 4')
+
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
 
@@ -75,7 +78,7 @@ class RekeningService:
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
             if rekening is None:
-                raise RekeningTidakDitemukan("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
             nasabah = rekening.pemilik
 
@@ -155,6 +158,9 @@ class RekeningService:
         if not isinstance(target_level, int):
             raise InputTidakValid("Level rekening harus berupa angka")
 
+        if target_level <= 0:
+            raise InputTidakValid('Level rekening harus di antara 1 - 4')
+
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
 
@@ -163,7 +169,7 @@ class RekeningService:
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
             if rekening is None:
-                raise RekeningTidakDitemukan("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
             nasabah = rekening.pemilik
 
@@ -340,13 +346,13 @@ class RekeningService:
             riwayat = RiwayatTemplate.template(
                 kategori="rekening",
                 jenis="pembukaan blokir rekening",
-                log=("PEMBUKAAN BLOKIR REKENING | " "Rekening kembali diaktifkan"),
+                log="PEMBUKAAN BLOKIR REKENING | " "Rekening kembali diaktifkan",
             )
             audit = AuditService.tambah_audit(
                 kategori="administratif",
                 objek="rekening",
                 aksi="pembukaan_blokir_rekening",
-                log=(f"{rekening.pemilik.nama} membuka kembali blokir rekening"),
+                log=f"{rekening.pemilik.nama} membuka kembali blokir rekening",
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
@@ -398,7 +404,6 @@ class RekeningService:
             jumlah_baris = RekeningRepository.tambah_saldo(
                 norek=rekening_baru.norek,
                 nominal=setor_awal,
-                saldo_lama=0,
                 koneksi=koneksi,
             )
 
@@ -504,14 +509,14 @@ class RekeningService:
             riwayat = RiwayatTemplate.template(
                 kategori="sistem",
                 jenis="penggantian_pin_rekening",
-                log=("GANTI PIN REKENING | " "PIN rekening berhasil diperbarui"),
+                log="GANTI PIN REKENING | " "PIN rekening berhasil diperbarui",
             )
 
             audit = AuditService.tambah_audit(
                 kategori="administratif",
                 objek="rekening",
                 aksi="penggantian_pin_rekening",
-                log=(f"{rekening.pemilik.nama} melakukan pergantian PIN rekening"),
+                log=f"{rekening.pemilik.nama} melakukan pergantian PIN rekening",
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,

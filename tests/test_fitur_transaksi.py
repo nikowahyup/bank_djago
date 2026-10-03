@@ -1452,7 +1452,7 @@ class TestTransfer:
         assert limit_sisa_setelah == limit_sisa_sebelum
         assert saldo_penerima_sesudah == saldo_penerima_sebelum
         assert saldo_sesudah_pengirim == saldo_perubahan
-        assert "dapat melakukan transfer" in str(info_error.value)
+        assert "Gagal melakukan transfer" in str(info_error.value)
 
 
 
@@ -1506,5 +1506,4 @@ class TestTransfer:
         assert status_rekening_penerima == 'blokir'
         assert saldo_pengirim_sesudah == saldo_pengirim_sebelum
         assert saldo_penerima_sesudah == saldo_penerima_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "mengirim saldo ke rekening" in str(info_error.value)
+        assert "Gagal mengirim saldo" in str(info_error.value)
