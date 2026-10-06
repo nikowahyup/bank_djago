@@ -1,5 +1,6 @@
-from bank_djago.services.exceptions import StatusTidakValid
+from bank_djago.services.exceptions import StatusTidakValid, PinTidakCocok
 import bcrypt
+
 
 class Validator:
 
@@ -35,29 +36,27 @@ class Validator:
         if rekening.status != "aktif":
             raise StatusTidakValid(f"Rekening Anda saat ini sedang di{rekening.status}")
 
-
-
     @staticmethod
     def buat_hash(pin):
 
-
-        bytes_pin = pin.encode('utf-8')
+        bytes_pin = pin.encode("utf-8")
         salt = bcrypt.gensalt(rounds=12)
-        bytes_hash = bcrypt.hashpw(bytes_pin,salt)
+        bytes_hash = bcrypt.hashpw(bytes_pin, salt)
 
-        hash_str = bytes_hash.decode('utf-8')
+        hash_str = bytes_hash.decode("utf-8")
 
         return hash_str
-
 
     @staticmethod
     def verifikasi_pin(pin_input, pin_database):
 
-        pin_input_encode = pin_input.encode('utf-8')
-        pin_database_hash = pin_database.encode('utf-8')
+        pin_input_encode = pin_input.encode("utf-8")
+        pin_database_hash = pin_database.encode("utf-8")
 
         is_sama = bcrypt.checkpw(pin_input_encode, pin_database_hash)
 
-        return is_sama
+        if not is_sama:
+            raise PinTidakCocok("PIN yang dimasukkan salah")
+
 
 

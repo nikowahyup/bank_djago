@@ -1,3 +1,4 @@
+from bank_djago.services.exceptions import PinTidakCocok
 from bank_djago.utils.validator import Validator
 import pytest
 
@@ -11,7 +12,7 @@ def test_tipe_data_pin_setelah_diolah():
     assert hash_pin != pin, "seharusnya setelah diolah,pin berbeda dengan hash pin"
 
 
-def test_dua_pin_harus_memiliki_hash_berbeda_dan_lolos_verifikasi():
+def test_dua_pin_harus_memiliki_hash_berbeda():
 
     pin_1 = "123456"
     pin_2 = "123456"
@@ -19,39 +20,31 @@ def test_dua_pin_harus_memiliki_hash_berbeda_dan_lolos_verifikasi():
     hash_pin_1 = Validator.buat_hash(pin_1)
     hash_pin_2 = Validator.buat_hash(pin_2)
 
-    verifikasi_pin_1 = Validator.verifikasi_pin(
-        pin_input=pin_1, pin_database=hash_pin_1
-    )
-    verifikasi_pin_2 = Validator.verifikasi_pin(
-        pin_input=pin_2, pin_database=hash_pin_2
-    )
 
     assert hash_pin_1 != hash_pin_2, "seharusnya hash berbeda"
-    assert verifikasi_pin_1 is True
-    assert verifikasi_pin_2 is True
 
 
-def test_verifikasi_pin_dengan_pin_yang_benar_mengembalikan_true():
+
+def test_verifikasi_pin_happy_path():
 
     pin = "123456"
     hash_pin = Validator.buat_hash(pin)
 
-    verifikasi = Validator.verifikasi_pin(pin_input=pin, pin_database=hash_pin)
+    hasil =  Validator.verifikasi_pin(pin_input=pin, pin_database=hash_pin)
 
-    assert verifikasi is True, "seharusnya mengembalikan True"
-
+    assert hasil is None ,'seharusnya fungsi ini tidak mengembalikan apapun'
 
 @pytest.mark.parametrize("pin_salah", ["12345", " ", "1 2 3 4 5", "", "123457"])
-def test_verifikasi_pin_berbeda_mengembalikan_false(pin_salah):
+def test_verifikasi_pin_berbeda_menangkap_exception(pin_salah):
 
     pin_benar = "123456"
     hash_pin = Validator.buat_hash(pin_benar)
 
-    verifikasi = Validator.verifikasi_pin(pin_input=pin_salah, pin_database=hash_pin)
+    with pytest.raises(PinTidakCocok) as info_error:
 
-    assert (
-        verifikasi is False
-    ), "seharusnya hash pin input berbeda dengan hash tersimpan"
+        Validator.verifikasi_pin(pin_input=pin_salah, pin_database=hash_pin)
+
+    assert "yang dimasukkan salah" in str(info_error.value)
 
 
 def test_panjang_format_hash():
