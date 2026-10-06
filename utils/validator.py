@@ -1,4 +1,4 @@
-from bank_djago.services.exceptions import StatusTidakValid, InputTidakValid
+from bank_djago.services.exceptions import StatusTidakValid
 import bcrypt
 
 class Validator:
@@ -40,8 +40,6 @@ class Validator:
     @staticmethod
     def buat_hash(pin):
 
-        if len(pin) != 6 or not pin.isdigit():
-            raise InputTidakValid("PIN harus berupa 6 digit angka")
 
         bytes_pin = pin.encode('utf-8')
         salt = bcrypt.gensalt(rounds=12)
