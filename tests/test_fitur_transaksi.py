@@ -1454,9 +1454,6 @@ class TestTransfer:
         assert saldo_sesudah_pengirim == saldo_perubahan
         assert "Gagal melakukan transfer" in str(info_error.value)
 
-
-
-
     def test_race_condition_penambahan_saldo_pada_rekening_penerima(
         self,
         koneksi_test,
@@ -1470,24 +1467,41 @@ class TestTransfer:
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
         method_asli = transaksi_service_module.TransaksiService.cari_penerima
-        rekening_pengirim = RekeningLoader.muat_rekening(norek=norek_pengirim, koneksi=koneksi_test)
+        rekening_pengirim = RekeningLoader.muat_rekening(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
         pajak = rekening_pengirim.pajak
+
         def uji_race_condition(**kwargs):
             rekening_penerima = method_asli(**kwargs)
-            koneksi_test.execute("UPDATE rekening SET status = 'blokir' WHERE norek = ?",(norek_penerima,))
+            koneksi_test.execute(
+                "UPDATE rekening SET status = 'blokir' WHERE norek = ?",
+                (norek_penerima,),
+            )
             koneksi_test.commit()
             return rekening_penerima
 
         monkeypatch.setattr(
-            transaksi_service_module.TransaksiService, "cari_penerima", uji_race_condition
+            transaksi_service_module.TransaksiService,
+            "cari_penerima",
+            uji_race_condition,
         )
 
-        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
-        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
 
-        limit_sisa_pengirim_sebelum = koneksi_test.execute("SELECT limit_sisa FROM rekening WHERE norek = ?",(norek_pengirim,)).fetchone()[0]
+        limit_sisa_pengirim_sebelum = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()[0]
         assert nominal <= limit_sisa_pengirim_sebelum
-        assert  rekening_pengirim.saldo - (nominal + pajak) >= rekening_pengirim.saldosetor_min
+        assert (
+            rekening_pengirim.saldo - (nominal + pajak)
+            >= rekening_pengirim.saldosetor_min
+        )
 
         with pytest.raises(PenambahanSaldoGagal) as info_error:
             TransaksiService.transfer(
@@ -1496,14 +1510,22 @@ class TestTransfer:
                 norek_penerima=norek_penerima,
                 nominal=nominal,
             )
-        limit_sisa_pengirim_sesudah = koneksi_test.execute("SELECT limit_sisa FROM rekening WHERE norek = ?",(norek_pengirim,)).fetchone()[0]
+        limit_sisa_pengirim_sesudah = koneksi_test.execute(
+            "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
+        ).fetchone()[0]
 
-        saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
-        saldo_penerima_sesudah = RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
-        status_rekening_penerima = koneksi_test.execute("SELECT status FROM rekening WHERE norek = ?",(norek_penerima,)).fetchone()[0]
+        saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        saldo_penerima_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
+        status_rekening_penerima = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek_penerima,)
+        ).fetchone()[0]
 
         assert limit_sisa_pengirim_sesudah == limit_sisa_pengirim_sebelum
-        assert status_rekening_penerima == 'blokir'
+        assert status_rekening_penerima == "blokir"
         assert saldo_pengirim_sesudah == saldo_pengirim_sebelum
         assert saldo_penerima_sesudah == saldo_penerima_sebelum
         assert "Gagal mengirim saldo" in str(info_error.value)

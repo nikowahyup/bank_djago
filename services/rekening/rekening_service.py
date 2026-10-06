@@ -2,7 +2,6 @@ import datetime
 import random
 
 
-
 from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
@@ -71,8 +70,7 @@ class RekeningService:
             raise InputTidakValid("Level rekening harus berupa angka")
 
         if target_level <= 0:
-            raise InputTidakValid('Level rekening harus di antara 1 - 4')
-
+            raise InputTidakValid("Level rekening harus di antara 1 - 4")
 
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
@@ -166,7 +164,7 @@ class RekeningService:
             raise InputTidakValid("Level rekening harus berupa angka")
 
         if target_level <= 0:
-            raise InputTidakValid('Level rekening harus di antara 1 - 4')
+            raise InputTidakValid("Level rekening harus di antara 1 - 4")
 
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
@@ -376,8 +374,6 @@ class RekeningService:
     @staticmethod
     def buka_rekening(nik, pilihan, pin, setor_awal, koneksi=None):
 
-
-
         if pilihan <= 0:
             raise InputTidakValid("Pilihan rekening harus di antara 1 - 4")
 
@@ -385,7 +381,7 @@ class RekeningService:
             raise InputTidakValid("Pilihan level tidak tersedia")
 
         if not len(pin) == 6 or not pin.isdigit():
-            raise  InputTidakValid("PIN harus berupa 6 digit angka")
+            raise InputTidakValid("PIN harus berupa 6 digit angka")
 
         if not isinstance(setor_awal, int):
             raise InputTidakValid("Setor awal harus berupa berupa angka")
@@ -405,7 +401,6 @@ class RekeningService:
 
             if data_nasabah is None:
                 raise NasabahTidakDitemukan("NIK tidak terdaftar")
-
 
             nasabah = NasabahLoader.rangkai_nasabah(data_nasabah=data_nasabah)
 

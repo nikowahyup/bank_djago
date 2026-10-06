@@ -105,11 +105,9 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
             datetime.date.today().isoformat(),
             "2026-02-23",
             "2026-02-23",
-            3
+            3,
         ),
     )
     koneksi_test.commit()
 
-    return {'nik':"123456789",
-            "norek":"000111222333"}
-
+    return {"nik": "123456789", "norek": "000111222333"}
