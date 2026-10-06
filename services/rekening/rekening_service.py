@@ -1,6 +1,7 @@
 import datetime
 import random
 
+
 from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
@@ -24,12 +25,13 @@ from bank_djago.core.rekening import (
     RekeningGold,
     RekeningPlatinum,
 )
+
 from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi, buat_koneksi_tulis
+import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
-from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca
+from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca, buat_koneksi_tulis
 
 
 class RekeningService:
@@ -68,7 +70,7 @@ class RekeningService:
             raise InputTidakValid("Level rekening harus berupa angka")
 
         if target_level <= 0:
-            raise InputTidakValid('Level rekening harus di antara 1 - 4')
+            raise InputTidakValid("Level rekening harus di antara 1 - 4")
 
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
@@ -88,6 +90,9 @@ class RekeningService:
                 raise StatusTidakValid(
                     "Perubahan rekening hanya bisa dilakukan 1 kali sehari"
                 )
+            if rekening.level == 4:
+                raise StatusTidakValid("Level rekening ini sudah level tertinggi")
+
             if target_level <= rekening.level:
                 raise LevelRekeningTidakValid(
                     "Level upgrade rekening harus lebih tinggi dari level saat ini"
@@ -159,7 +164,7 @@ class RekeningService:
             raise InputTidakValid("Level rekening harus berupa angka")
 
         if target_level <= 0:
-            raise InputTidakValid('Level rekening harus di antara 1 - 4')
+            raise InputTidakValid("Level rekening harus di antara 1 - 4")
 
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
@@ -180,6 +185,8 @@ class RekeningService:
                 raise StatusTidakValid(
                     "Perubahan rekening hanya bisa dilakukan 1 kali sehari"
                 )
+            if rekening.level == 1:
+                raise StatusTidakValid("Level rekening ini sudah level terendah")
 
             if target_level >= rekening.level:
                 raise LevelRekeningTidakValid(
@@ -367,10 +374,25 @@ class RekeningService:
     @staticmethod
     def buka_rekening(nik, pilihan, pin, setor_awal, koneksi=None):
 
+        if pilihan <= 0:
+            raise InputTidakValid("Pilihan rekening harus di antara 1 - 4")
+
+        if pilihan not in RekeningService.jenis_rekening:
+            raise InputTidakValid("Pilihan level tidak tersedia")
+
+        if not len(pin) == 6 or not pin.isdigit():
+            raise InputTidakValid("PIN harus berupa 6 digit angka")
+
+        if not isinstance(setor_awal, int):
+            raise InputTidakValid("Setor awal harus berupa berupa angka")
+
+        if not nik.isdigit():
+            raise InputTidakValid("NIK tidak bolah mengandung huruf")
+
         buat_baru_diluar_daftar = koneksi is None
 
         if buat_baru_diluar_daftar:
-            koneksi = buat_koneksi()
+            koneksi = db_module.buat_koneksi()
 
         try:
             data_nasabah = NasabahRepository.cari_nasabah_dengan_nik(
@@ -379,9 +401,6 @@ class RekeningService:
 
             if data_nasabah is None:
                 raise NasabahTidakDitemukan("NIK tidak terdaftar")
-
-            if pilihan not in RekeningService.jenis_rekening:
-                raise LevelRekeningTidakValid("Pilihan jenis rekening tidak tersadia")
 
             nasabah = NasabahLoader.rangkai_nasabah(data_nasabah=data_nasabah)
 

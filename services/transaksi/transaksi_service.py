@@ -267,7 +267,9 @@ class TransaksiService:
             )
 
             if jumlah_baris_pengirim != 1:
-                raise PenguranganSaldoGagal("Gagal melakukan transfer. Silahkan coba lagi")
+                raise PenguranganSaldoGagal(
+                    "Gagal melakukan transfer. Silahkan coba lagi"
+                )
 
             if jumlah_baris_limit != 1:
                 raise PerbaruiStatusGagal("Terjadi kesalahan saat memperbarui limit")
