@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+
 from bank_djago import RekeningService
 from bank_djago.conftest import siapkan_data_rekening_dan_nasabah, koneksi_test
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
@@ -16,22 +17,34 @@ from bank_djago.services.exceptions import (
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
 import bank_djago.penyimpanan.repositories.rekening_repository as rekening_repo_module
 
+from bank_djago.core.rekening import RekeningReguler,RekeningPrioritas, RekeningGold, RekeningPlatinum
+
+reguler = RekeningReguler(norek="1234",pin='1234',pemilik=None)
+prioritas = RekeningPrioritas(norek="1234",pin='1234',pemilik=None)
+gold = RekeningGold(norek="1234",pin='1234',pemilik=None)
+platinum = RekeningPlatinum(norek="1234",pin='1234',pemilik=None)
+
+
 jenis_rekening = {
     1: {
         "minimal_upgrade": 0,
-        "limit_sisa" :5_000_000
+        "limit_sisa" :reguler.limit_sisa,
+        "minimal_setor":reguler.saldosetor_min
     },
     2: {
         "minimal_upgrade": 3_000_000,
-        "limit_sisa" : 15_000_000
+        "limit_sisa" : prioritas.limit_sisa,
+        "minimal_setor":prioritas.saldosetor_min
     },
     3: {
         "minimal_upgrade": 50_000_000,
-        "limit_sisa" : 200_000_000
+        "limit_sisa" : gold.limit_sisa,
+        "minimal_setor":gold.saldosetor_min
     },
     4: {
         "minimal_upgrade": 200_000_000,
-        "limit_sisa" : None
+        "limit_sisa" : platinum.limit_sisa,
+        "minimal_setor":platinum.saldosetor_min
     },
 }
 
@@ -915,7 +928,7 @@ class TestBukaRekening:
 
         limit_sisa_level_ini = jenis_rekening[level_rekening]['limit_sisa']
 
-        RekeningService.buka_rekening(nik=nik,pilihan=level_rekening,pin=pin, setor_awal=setor_awal,koneksi=koneksi_test)
+        RekeningService.buka_rekening(nik=nik,pilihan=level_rekening,pin=pin, setor_awal=setor_awal)
 
         data_rekening = koneksi_test.execute("SELECT * FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()
         assert data_rekening is not None
@@ -998,3 +1011,78 @@ class TestBukaRekening:
 
         assert rekening == 0
         assert 'tidak terdaftar' in str(info_error.value)
+
+
+    @pytest.mark.parametrize("level_rekening",[1,2,3,4])
+    def test_buka_rekening_dengan_setor_awal_tidak_memenuhi(self, koneksi_test, siapkan_data_nasabah,level_rekening):
+
+        nik = siapkan_data_nasabah['nik']
+        setor_awal = jenis_rekening[level_rekening]['minimal_setor'] - 1
+        pin = '123456'
+
+        punya_rekening = koneksi_test.execute("SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()[0]
+        assert punya_rekening == 0
+
+        with pytest.raises(InputTidakValid) as info_error:
+            RekeningService.buka_rekening(nik=nik,pilihan=level_rekening,pin=pin, setor_awal=setor_awal,koneksi=koneksi_test)
+
+
+        rekening = koneksi_test.execute("SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()[0]
+        riwayat = koneksi_test.execute("SELECT COUNT(*) FROM riwayat WHERE jenis = 'pembukaan rekening'").fetchone()[0]
+        riwayat_setor = koneksi_test.execute("SELECT COUNT(*) FROM riwayat WHERE jenis = 'setor awal'").fetchone()[0]
+        audit = koneksi_test.execute("SELECT COUNT(*) FROM audit WHERE aksi = 'pembukaan_rekening' AND nik = ?",(nik,)).fetchone()[0]
+
+        assert rekening == 0
+        assert riwayat == 0
+        assert riwayat_setor == 0
+        assert audit == 0
+        assert "saldo minimal setoran awal" in str(info_error.value)
+
+
+    @pytest.mark.parametrize("level_rekening",[1,2,3,4])
+    def test_buka_rekening_dengan_setor_awal_tepat_memenuhi_persyaratan(self, koneksi_test, siapkan_data_nasabah, level_rekening):
+
+        nik = siapkan_data_nasabah['nik']
+        setor_awal = jenis_rekening[level_rekening]['minimal_setor']
+        pin = '123456'
+        limit_sisa_level_ini = jenis_rekening[level_rekening]['limit_sisa']
+        punya_rekening = koneksi_test.execute("SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()[0]
+
+        assert punya_rekening == 0
+
+
+        RekeningService.buka_rekening(nik=nik,pilihan=level_rekening,pin=pin, setor_awal=setor_awal)
+
+        data_rekening = koneksi_test.execute("SELECT * FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()
+        assert data_rekening is not None
+
+        level = data_rekening['level']
+        waktu_dibuat = datetime.datetime.fromisoformat(data_rekening['waktu_dibuat'])
+        saldo = data_rekening['saldo']
+        norek = data_rekening['norek']
+        pin_rekening = data_rekening['pin']
+        waktu_bayar_admin = konversi_waktu(data_rekening['waktu_bayar_admin'])
+        waktu_dapat_bunga = konversi_waktu(data_rekening['dapat_bunga'])
+        reset = konversi_waktu(data_rekening['reset'])
+        status = data_rekening['status']
+        limit_sisa = data_rekening['limit_sisa']
+
+
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan rekening'",(norek,)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_rekening'",(norek,)).fetchone()
+        riwayat_setor = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'",(norek,)).fetchone()
+
+        assert riwayat is not None
+        assert riwayat_setor is not None
+        assert audit is not None
+        assert waktu_dibuat is not None
+        assert level == level_rekening
+        assert saldo == setor_awal
+        assert status == 'aktif'
+        assert pin_rekening == pin
+        assert limit_sisa == limit_sisa_level_ini
+        assert reset == datetime.date.today()
+        assert waktu_bayar_admin == datetime.date.today()
+        assert waktu_dapat_bunga == datetime.date.today()
+
+
