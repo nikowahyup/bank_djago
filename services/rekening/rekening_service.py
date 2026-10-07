@@ -407,10 +407,12 @@ class RekeningService:
             info = RekeningService.jenis_rekening[pilihan]
             kelas_rek = info["kelas"]
             norek = RekeningService.buat_norek(pilihan, koneksi)
+            pin_hash = Validator.buat_hash(pin=pin)
+
 
             waktu_dibuat = datetime.datetime.now()
             rekening_baru = kelas_rek(
-                norek=norek, pin=pin, pemilik=nasabah, waktu_dibuat=waktu_dibuat
+                norek=norek, pin=pin_hash, pemilik=nasabah, waktu_dibuat=waktu_dibuat
             )
 
             if setor_awal < rekening_baru.saldosetor_min:
@@ -493,6 +495,8 @@ class RekeningService:
     @staticmethod
     def ganti_pin(nik, norek, pin_lama, pin_baru):
 
+
+
         with buat_koneksi_tulis() as koneksi:
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
@@ -507,18 +511,21 @@ class RekeningService:
 
             Validator.amankan_rekening(rekening=rekening)
 
-            if not rekening.cek_pin(pin_lama):
-                raise InputTidakValid("PIN lama salah")
+            hash_pin_lama = rekening.pin
+            Validator.verifikasi_pin(pin_input=pin_lama, pin_database=hash_pin_lama)
 
-            Validator.validasi_pin(pin_baru)
+            if len(pin_baru) != 6 or not pin_baru.isdigit():
+                raise InputTidakValid("PIN baru harus berupa 6 digit angka")
 
-            if rekening.cek_pin(pin_baru):
+            if pin_lama == pin_baru:
                 raise InputTidakValid("PIN baru tidak boleh sama dengan PIN lama")
+
+            hash_pin_baru = Validator.buat_hash(pin=pin_baru)
 
             jumlah_baris = RekeningRepository.perbarui_pin(
                 norek=rekening.norek,
-                pin_lama=pin_lama,
-                pin_baru=pin_baru,
+                pin_lama=hash_pin_lama,
+                pin_baru=hash_pin_baru,
                 koneksi=koneksi,
             )
 
@@ -541,11 +548,11 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
             )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
     # method untuk membuat nomor rekening sesuai prefix yang tersedia
     @staticmethod

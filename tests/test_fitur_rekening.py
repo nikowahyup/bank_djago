@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 
-from bank_djago import RekeningService
+from bank_djago import RekeningService, Validator
 from bank_djago.conftest import siapkan_data_rekening_dan_nasabah, koneksi_test
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.services.exceptions import (
@@ -1109,7 +1109,7 @@ class TestBukaRekening:
         nik = siapkan_data_nasabah["nik"]
         level_rekening = 3
         setor_awal = 100_000_000
-        pin = "123456"
+        pin = '123456'
 
         limit_sisa_level_ini = jenis_rekening[level_rekening]["limit_sisa"]
 
@@ -1145,6 +1145,8 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
+        assert pin_rekening != pin,'pin yang tersimpan sam dengan pin asli'
+        Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
         assert riwayat is not None
         assert riwayat_setor is not None
         assert audit is not None
@@ -1152,7 +1154,6 @@ class TestBukaRekening:
         assert level == level_rekening
         assert saldo == setor_awal
         assert status == "aktif"
-        assert pin_rekening == pin
         assert limit_sisa == limit_sisa_level_ini
         assert reset == datetime.date.today()
         assert waktu_bayar_admin == datetime.date.today()
@@ -1312,6 +1313,9 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
+        assert pin_rekening != pin,'pin yang tersimpan sam dengan pin asli'
+        Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
+
         assert riwayat is not None
         assert riwayat_setor is not None
         assert audit is not None
@@ -1319,8 +1323,47 @@ class TestBukaRekening:
         assert level == level_rekening
         assert saldo == setor_awal
         assert status == "aktif"
-        assert pin_rekening == pin
         assert limit_sisa == limit_sisa_level_ini
         assert reset == datetime.date.today()
         assert waktu_bayar_admin == datetime.date.today()
         assert waktu_dapat_bunga == datetime.date.today()
+
+
+    def test_rollback_buka_rekening(self, koneksi_test, siapkan_data_nasabah, monkeypatch):
+
+        nik = siapkan_data_nasabah['nik']
+        pin = '123456'
+        target_level = 3
+        setor_awal = jenis_rekening[target_level]['minimal_setor']
+
+        method_asli = audit_repo_module.AuditRepository.tambah_audit
+
+        def uji_rollback(**kwargs):
+            method_asli(**kwargs)
+
+            raise RuntimeError("Simulasi rollback buka rekening")
+
+        monkeypatch.setattr(audit_repo_module.AuditRepository,"tambah_audit",uji_rollback)
+
+        punya_rekening = koneksi_test.execute("SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()[0]
+
+        assert punya_rekening == 0
+
+        with pytest.raises(RuntimeError,match="Simulasi rollback buka rekening"):
+
+            RekeningService.buka_rekening(nik=nik, pilihan=target_level, setor_awal=setor_awal, pin=pin)
+
+        data_rekening = koneksi_test.execute("SELECT * FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()
+        assert data_rekening is None
+
+
+class TestGantiPin:
+    pass
+
+
+
+
+
+
+
+

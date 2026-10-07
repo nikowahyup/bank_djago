@@ -37,10 +37,10 @@ class Validator:
             raise StatusTidakValid(f"Rekening Anda saat ini sedang di{rekening.status}")
 
     @staticmethod
-    def buat_hash(pin):
+    def buat_hash(pin,rounds=12):
 
         bytes_pin = pin.encode("utf-8")
-        salt = bcrypt.gensalt(rounds=12)
+        salt = bcrypt.gensalt(rounds=rounds)
         bytes_hash = bcrypt.hashpw(bytes_pin, salt)
 
         hash_str = bytes_hash.decode("utf-8")
