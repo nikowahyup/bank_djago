@@ -8,11 +8,10 @@ import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.sqlite.buat_database import inisialisasi_database
 from bank_djago.utils.validator import Validator
 
-PIN_UJI = '123456'
-HASH_PIN_UJI = Validator.buat_hash(PIN_UJI,rounds=4)
-PIN_PENERIMA = '654321'
-HASH_PIN_PENERIMA = Validator.buat_hash(PIN_PENERIMA,rounds=4)
-
+PIN_UJI = "123456"
+HASH_PIN_UJI = Validator.buat_hash(PIN_UJI, rounds=4)
+PIN_PENERIMA = "654321"
+HASH_PIN_PENERIMA = Validator.buat_hash(PIN_PENERIMA, rounds=4)
 
 
 @pytest.fixture
@@ -60,7 +59,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"norek": "123456", "nik": "987654321",'pin':PIN_UJI}
+    return {"norek": "123456", "nik": "987654321", "pin": PIN_UJI}
 
 
 @pytest.fixture
@@ -88,7 +87,7 @@ def siapkan_data_rekening_penerima(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333",'pin':PIN_PENERIMA}
+    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_PENERIMA}
 
 
 @pytest.fixture
@@ -117,4 +116,4 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333",'pin':PIN_UJI}
+    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_UJI}

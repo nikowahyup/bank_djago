@@ -409,7 +409,6 @@ class RekeningService:
             norek = RekeningService.buat_norek(pilihan, koneksi)
             pin_hash = Validator.buat_hash(pin=pin)
 
-
             waktu_dibuat = datetime.datetime.now()
             rekening_baru = kelas_rek(
                 norek=norek, pin=pin_hash, pemilik=nasabah, waktu_dibuat=waktu_dibuat
@@ -495,8 +494,6 @@ class RekeningService:
     @staticmethod
     def ganti_pin(nik, norek, pin_lama, pin_baru):
 
-
-
         with buat_koneksi_tulis() as koneksi:
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
@@ -533,8 +530,8 @@ class RekeningService:
                 raise PerbaruiStatusGagal("Gagal mengganti PIN rekening")
 
             riwayat = RiwayatTemplate.template(
-                kategori="sistem",
-                jenis="penggantian_pin_rekening",
+                kategori="rekening",
+                jenis="penggantian pin rekening",
                 log="GANTI PIN REKENING | " "PIN rekening berhasil diperbarui",
             )
 
@@ -547,7 +544,6 @@ class RekeningService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
             )
-
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi

@@ -48,6 +48,7 @@ class InputTidakValid(KondisiTidakValid):
 class JenisAroTidakValid(KondisiTidakValid):
     pass
 
+
 class PinTidakCocok(KondisiTidakValid):
     pass
 

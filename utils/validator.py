@@ -37,7 +37,7 @@ class Validator:
             raise StatusTidakValid(f"Rekening Anda saat ini sedang di{rekening.status}")
 
     @staticmethod
-    def buat_hash(pin,rounds=12):
+    def buat_hash(pin, rounds=12):
 
         bytes_pin = pin.encode("utf-8")
         salt = bcrypt.gensalt(rounds=rounds)
@@ -57,6 +57,3 @@ class Validator:
 
         if not is_sama:
             raise PinTidakCocok("PIN yang dimasukkan salah")
-
-
-

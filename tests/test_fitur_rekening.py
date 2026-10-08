@@ -1,4 +1,5 @@
 import datetime
+from logging import info
 
 import pytest
 
@@ -14,6 +15,7 @@ from bank_djago.services.exceptions import (
     LevelRekeningTidakValid,
     PerbaruiStatusGagal,
     NasabahTidakDitemukan,
+    PinTidakCocok,
 )
 
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
@@ -1109,7 +1111,7 @@ class TestBukaRekening:
         nik = siapkan_data_nasabah["nik"]
         level_rekening = 3
         setor_awal = 100_000_000
-        pin = '123456'
+        pin = "123456"
 
         limit_sisa_level_ini = jenis_rekening[level_rekening]["limit_sisa"]
 
@@ -1145,7 +1147,7 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
-        assert pin_rekening != pin,'pin yang tersimpan sam dengan pin asli'
+        assert pin_rekening != pin, "pin yang tersimpan sam dengan pin asli"
         Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
         assert riwayat is not None
         assert riwayat_setor is not None
@@ -1313,7 +1315,7 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
-        assert pin_rekening != pin,'pin yang tersimpan sam dengan pin asli'
+        assert pin_rekening != pin, "pin yang tersimpan sam dengan pin asli"
         Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
 
         assert riwayat is not None
@@ -1328,13 +1330,14 @@ class TestBukaRekening:
         assert waktu_bayar_admin == datetime.date.today()
         assert waktu_dapat_bunga == datetime.date.today()
 
+    def test_rollback_buka_rekening(
+        self, koneksi_test, siapkan_data_nasabah, monkeypatch
+    ):
 
-    def test_rollback_buka_rekening(self, koneksi_test, siapkan_data_nasabah, monkeypatch):
-
-        nik = siapkan_data_nasabah['nik']
-        pin = '123456'
+        nik = siapkan_data_nasabah["nik"]
+        pin = "123456"
         target_level = 3
-        setor_awal = jenis_rekening[target_level]['minimal_setor']
+        setor_awal = jenis_rekening[target_level]["minimal_setor"]
 
         method_asli = audit_repo_module.AuditRepository.tambah_audit
 
@@ -1343,27 +1346,128 @@ class TestBukaRekening:
 
             raise RuntimeError("Simulasi rollback buka rekening")
 
-        monkeypatch.setattr(audit_repo_module.AuditRepository,"tambah_audit",uji_rollback)
+        monkeypatch.setattr(
+            audit_repo_module.AuditRepository, "tambah_audit", uji_rollback
+        )
 
-        punya_rekening = koneksi_test.execute("SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()[0]
+        punya_rekening = koneksi_test.execute(
+            "SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?", (nik,)
+        ).fetchone()[0]
 
         assert punya_rekening == 0
 
-        with pytest.raises(RuntimeError,match="Simulasi rollback buka rekening"):
+        with pytest.raises(RuntimeError, match="Simulasi rollback buka rekening"):
 
-            RekeningService.buka_rekening(nik=nik, pilihan=target_level, setor_awal=setor_awal, pin=pin)
+            RekeningService.buka_rekening(
+                nik=nik, pilihan=target_level, setor_awal=setor_awal, pin=pin
+            )
 
-        data_rekening = koneksi_test.execute("SELECT * FROM rekening WHERE nik_pemilik = ?",(nik,)).fetchone()
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE nik_pemilik = ?", (nik,)
+        ).fetchone()
         assert data_rekening is None
 
 
 class TestGantiPin:
-    pass
 
+    def test_ganti_pin_happy_path(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
 
+        pin_baru = "654321"
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_lama = siapkan_data_rekening_dan_nasabah["pin"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        RekeningService.ganti_pin(
+            nik=nik, norek=norek, pin_lama=pin_lama, pin_baru=pin_baru
+        )
 
+        hash_baru = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
 
+        assert hash_baru != pin_baru
+        Validator.verifikasi_pin(pin_input=pin_baru, pin_database=hash_baru)
+        with pytest.raises(PinTidakCocok):
+            Validator.verifikasi_pin(pin_input=pin_lama, pin_database=hash_baru)
+        assert hash_lama != hash_baru
+        assert riwayat is not None
+        assert audit is not None
 
+    def test_ganti_pin_dengan_pin_lama_salah(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
 
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        pin_lama_salah = "123457"
+        pin_baru = "654321"
 
+        with pytest.raises(PinTidakCocok) as info_error:
+            RekeningService.ganti_pin(
+                nik=nik, norek=norek, pin_lama=pin_lama_salah, pin_baru=pin_baru
+            )
 
+        hash_sesudah = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert hash_sesudah == hash_lama
+        assert riwayat is None
+        assert audit is None
+        assert "PIN yang dimasukkan" in str(info_error.value)
+
+    def test_ganti_pin_dengan_pin_baru_sama_dengan_pin_lama(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_lama = siapkan_data_rekening_dan_nasabah["pin"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+
+        with pytest.raises(InputTidakValid) as info_error:
+            RekeningService.ganti_pin(
+                nik=nik, norek=norek, pin_lama=pin_lama, pin_baru=pin_lama
+            )
+
+        hash_sesudah = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert hash_sesudah == hash_lama
+        assert riwayat is None
+        assert audit is None
+        assert "PIN baru tidak boleh sama" in str(info_error.value)
