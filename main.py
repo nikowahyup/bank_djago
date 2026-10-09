@@ -9,8 +9,8 @@ from bank_djago.services.nasabah.nasabah_ui import NasabahUI
 
 def menu():
 
-    hari_ini = datetime.date(2026, 10, 24)
-    Scheduler.jalankan(hari_ini)
+
+    Scheduler.jalankan()
 
     while True:
         print()

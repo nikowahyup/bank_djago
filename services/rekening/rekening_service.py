@@ -244,7 +244,7 @@ class RekeningService:
             AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
     @staticmethod
-    def blokir_rekening(nik, norek, alasan):
+    def blokir_rekening(nik, norek, pin, alasan):
 
         alasan_blokir = alasan.strip()
 
@@ -257,10 +257,14 @@ class RekeningService:
 
             if rekening is None:
                 raise RekeningTidakDitemukan("Rekening tidak terdaftar")
+
+            hash_database = rekening.pin
+            Validator.verifikasi_pin(pin_input=pin,pin_database=hash_database)
+
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise NasabahTidakDitemukan(
+                raise NikTidakSesuai(
                     "NIK ini tidak terdaftar sebagai pemilik rekening"
                 )
 
@@ -304,11 +308,11 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
             )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
     @staticmethod
     def buka_blokir(nik, norek, pin):
@@ -319,14 +323,18 @@ class RekeningService:
 
             if rekening is None:
                 raise RekeningTidakDitemukan("Rekening tidak terdaftar")
+
+            hash_database = rekening.pin
+            Validator.verifikasi_pin(pin_input=pin, pin_database=hash_database)
+
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise NasabahTidakDitemukan(
+                raise NikTidakSesuai(
                     "NIK ini tidak terdaftar sebagai pemilik rekening"
                 )
-            if not rekening.cek_pin(pin):
-                raise InputTidakValid("PIN rekening salah")
+
+
             if rekening.status == "tutup":
                 raise StatusTidakValid("Rekening ini telah ditutup!")
 
@@ -365,11 +373,11 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
             )
+            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
 
     @staticmethod
     def buka_rekening(nik, pilihan, pin, setor_awal, koneksi=None):
