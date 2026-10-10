@@ -28,6 +28,8 @@ from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatReposi
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis, buat_koneksi_baca
 
 
+
+
 class PengajuanService:
 
     @staticmethod
@@ -185,7 +187,7 @@ class PengajuanService:
     @staticmethod
     def selesaikan_penutupan(nik, norek, pin, metode, norek_penerima=None):
 
-        if metode not in ("tarik", "transfer"):
+        if metode not in ("tarik", "transfer",'langsung tutup'):
             raise InputTidakValid("Metode penyelesaian saldo tidak tersedia")
 
         if metode == "transfer" and not norek_penerima:
@@ -233,128 +235,155 @@ class PengajuanService:
                 raise StatusTidakValid("Rekening masih mempunyai pinjaman berjalan")
 
             nominal_penyelesaian = rekening.saldo
-
-            if nominal_penyelesaian <= 0:
-                raise StatusTidakValid("Tidak ada saldo yang bisa dikosongkan")
-
-            waktu_transaksi = datetime.datetime.now()
             status_lama = rekening.status
             status_baru = "tutup"
+            waktu_transaksi = datetime.datetime.now()
+            id_transaksi = None
 
-            jumlah_baris = RekeningRepository.perbarui_saldo_dan_status_untuk_penutupan(
-                norek=rekening.norek,
-                saldo_baru=0,
-                status_lama=status_lama,
-                status_baru=status_baru,
-                koneksi=koneksi,
-            )
+            if nominal_penyelesaian < 0:
+                raise StatusTidakValid("Saldo rekening tidak valid")
+            if nominal_penyelesaian == 0:
 
-            if jumlah_baris != 1:
-                raise PerbaruiStatusGagal(
-                    "Terjadi kesalahan saat memproses penutupan rekening"
+                if metode != 'langsung tutup':
+                    raise StatusTidakValid("Saldo rekening Anda sudah kosong. Silahkan pilih metode langsung tutup")
+
+
+                jumlah_baris = RekeningRepository.perbarui_saldo_dan_status_untuk_penutupan(
+                    norek=rekening.norek,
+                    saldo_baru=0,
+                    status_lama=status_lama,
+                    status_baru=status_baru,
+                    koneksi=koneksi
                 )
 
-            if metode == "tarik":
-
-                transaksi = {
-                    "jenis": JenisTransaksi.PENARIKAN_SALDO_PENUTUPAN,
-                    "norek_sumber": rekening.norek,
-                    "nominal": nominal_penyelesaian,
-                    "saldo_sumber_sebelum": rekening.saldo,
-                    "saldo_sumber_sesudah": 0,
-                    "waktu": waktu_transaksi,
-                }
+                if jumlah_baris != 1:
+                    raise PerbaruiStatusGagal("Gagal menutup rekening dengan metode langsung tutup")
 
                 log_riwayat = (
-                    "PENUTUPAN REKENING | "
-                    f"Seluruh saldo Rp"
-                    f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
-                    "ditarik"
-                )
+                    "PENUTUPAN REKENING | Rekening ditutup langsung karena saldo kosong")
 
-                log_audit = (
-                    "Rekening ditutup dengan penarikan "
-                    f"seluruh saldo sebesar Rp"
-                    f"{Utilitas.format_rupiah(nominal_penyelesaian)}"
-                )
+                log_audit = "Rekening ditutup langsung tanpa penarikan atau pemindahan saldo karena saldo sudah kosong"
 
-                aksi_audit = "penarikan_saldo_penutupan"
+                aksi_audit = "penutupan_saldo_kosong"
 
             else:
+                if metode == 'langsung tutup':
+                    raise StatusTidakValid("Metode langsung tutup hanya untuk rekening yang saldonya sudah kosong. Silahkan pilih metode tarik atau transfer")
 
-                penerima, nominal_penyelesaian, saldo_baru_penerima = (
-                    TransaksiService.transfer_semua_saldo(
-                        norek_pengirim=rekening.norek,
-                        norek_penerima=norek_penerima,
-                        koneksi=koneksi,
-                        nominal=nominal_penyelesaian,
-                    )
-                )
-
-                transaksi = {
-                    "jenis": JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN,
-                    "norek_sumber": rekening.norek,
-                    "norek_tujuan": penerima.norek,
-                    "nominal": nominal_penyelesaian,
-                    "saldo_sumber_sebelum": rekening.saldo,
-                    "saldo_sumber_sesudah": 0,
-                    "saldo_tujuan_sebelum": penerima.saldo,
-                    "saldo_tujuan_sesudah": saldo_baru_penerima,
-                    "waktu": waktu_transaksi,
-                }
-
-                log_riwayat = (
-                    "PENUTUPAN REKENING | "
-                    f"Seluruh saldo Rp"
-                    f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
-                    f"dipindahkan ke rekening {penerima.norek}"
-                )
-
-                log_audit = (
-                    "Rekening ditutup dengan pemindahan "
-                    f"seluruh saldo sebesar Rp"
-                    f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
-                    f"ke rekening {penerima.norek}"
-                )
-
-                aksi_audit = "pemindahan_saldo_penutupan"
-
-            id_transaksi = TransaksiRepository.tambah_transaksi(
-                transaksi=transaksi, koneksi=koneksi
-            )
-
-            if penerima is not None:
-                audit_penerima = AuditService.tambah_audit(
-                    kategori="finansial",
-                    objek="rekening",
-                    aksi="penerimaan_saldo_penutupan",
-                    log=(
-                        f"Menerima saldo Rp"
-                        f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
-                        f"dari penutupan rekening {rekening.norek}"
-                    ),
-                    nama=penerima.pemilik.nama,
-                    nik=penerima.pemilik.NIK,
-                    norek=penerima.norek,
-                )
-
-                AuditRepository.tambah_audit(
-                    audit=audit_penerima, koneksi=koneksi, id_transaksi=id_transaksi
-                )
-
-                riwayat_penerima = RiwayatTemplate.template(
-                    kategori="transaksi",
-                    jenis="terima saldo",
-                    log=f"TERIMA SALDO PENUTUPAN REKENING | +Rp{Utilitas.format_rupiah(nominal_penyelesaian)} |"
-                    f" Dari Nomor Rekening{rekening.norek}",
-                )
-
-                RiwayatRepository.tambah_riwayat(
-                    norek=penerima.norek,
-                    riwayat=riwayat_penerima,
+                jumlah_baris = RekeningRepository.perbarui_saldo_dan_status_untuk_penutupan(
+                    norek=rekening.norek,
+                    saldo_baru=0,
+                    status_lama=status_lama,
+                    status_baru=status_baru,
                     koneksi=koneksi,
-                    id_transaksi=id_transaksi,
                 )
+
+                if jumlah_baris != 1:
+                    raise PerbaruiStatusGagal(
+                        "Terjadi kesalahan saat memproses penutupan rekening"
+                    )
+
+                if metode == "tarik":
+
+                    transaksi = {
+                        "jenis": JenisTransaksi.PENARIKAN_SALDO_PENUTUPAN,
+                        "norek_sumber": rekening.norek,
+                        "nominal": nominal_penyelesaian,
+                        "saldo_sumber_sebelum": rekening.saldo,
+                        "saldo_sumber_sesudah": 0,
+                        "waktu": waktu_transaksi,
+                    }
+
+                    log_riwayat = (
+                        "PENUTUPAN REKENING | "
+                        f"Seluruh saldo Rp"
+                        f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
+                        "ditarik"
+                    )
+
+                    log_audit = (
+                        "Rekening ditutup dengan penarikan "
+                        f"seluruh saldo sebesar Rp"
+                        f"{Utilitas.format_rupiah(nominal_penyelesaian)}"
+                    )
+
+                    aksi_audit = "penarikan_saldo_penutupan"
+
+                else:
+
+                    penerima, nominal_penyelesaian, saldo_baru_penerima = (
+                        TransaksiService.transfer_semua_saldo(
+                            norek_pengirim=rekening.norek,
+                            norek_penerima=norek_penerima,
+                            koneksi=koneksi,
+                            nominal=nominal_penyelesaian,
+                        )
+                    )
+
+                    transaksi = {
+                        "jenis": JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN,
+                        "norek_sumber": rekening.norek,
+                        "norek_tujuan": penerima.norek,
+                        "nominal": nominal_penyelesaian,
+                        "saldo_sumber_sebelum": rekening.saldo,
+                        "saldo_sumber_sesudah": 0,
+                        "saldo_tujuan_sebelum": penerima.saldo,
+                        "saldo_tujuan_sesudah": saldo_baru_penerima,
+                        "waktu": waktu_transaksi,
+                    }
+
+                    log_riwayat = (
+                        "PENUTUPAN REKENING | "
+                        f"Seluruh saldo Rp"
+                        f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
+                        f"dipindahkan ke rekening {penerima.norek}"
+                    )
+
+                    log_audit = (
+                        "Rekening ditutup dengan pemindahan "
+                        f"seluruh saldo sebesar Rp"
+                        f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
+                        f"ke rekening {penerima.norek}"
+                    )
+
+                    aksi_audit = "pemindahan_saldo_penutupan"
+
+                id_transaksi = TransaksiRepository.tambah_transaksi(
+                    transaksi=transaksi, koneksi=koneksi
+                )
+
+                if penerima is not None:
+                    audit_penerima = AuditService.tambah_audit(
+                        kategori="finansial",
+                        objek="rekening",
+                        aksi="penerimaan_saldo_penutupan",
+                        log=(
+                            f"Menerima saldo Rp"
+                            f"{Utilitas.format_rupiah(nominal_penyelesaian)} "
+                            f"dari penutupan rekening {rekening.norek}"
+                        ),
+                        nama=penerima.pemilik.nama,
+                        nik=penerima.pemilik.NIK,
+                        norek=penerima.norek,
+                    )
+
+                    AuditRepository.tambah_audit(
+                        audit=audit_penerima, koneksi=koneksi, id_transaksi=id_transaksi
+                    )
+
+                    riwayat_penerima = RiwayatTemplate.template(
+                        kategori="transaksi",
+                        jenis="terima saldo",
+                        log=f"TERIMA SALDO PENUTUPAN REKENING | +Rp{Utilitas.format_rupiah(nominal_penyelesaian)} |"
+                        f" Dari Nomor Rekening{rekening.norek}",
+                    )
+
+                    RiwayatRepository.tambah_riwayat(
+                        norek=penerima.norek,
+                        riwayat=riwayat_penerima,
+                        koneksi=koneksi,
+                        id_transaksi=id_transaksi,
+                    )
 
             riwayat = RiwayatTemplate.template(
                 kategori="rekening", jenis="penutupan rekening", log=log_riwayat
