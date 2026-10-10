@@ -1,9 +1,10 @@
 import datetime
 
+
 import pytest
+from pytest_cov.plugin import pytest_addoption
 
-
-from bank_djago import RekeningService
+from bank_djago import RekeningService, Validator
 from bank_djago.conftest import siapkan_data_rekening_dan_nasabah, koneksi_test
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.services.exceptions import (
@@ -14,6 +15,7 @@ from bank_djago.services.exceptions import (
     LevelRekeningTidakValid,
     PerbaruiStatusGagal,
     NasabahTidakDitemukan,
+    PinTidakCocok,
 )
 
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
@@ -1145,6 +1147,8 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
+        assert pin_rekening != pin, "pin yang tersimpan sam dengan pin asli"
+        Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
         assert riwayat is not None
         assert riwayat_setor is not None
         assert audit is not None
@@ -1152,7 +1156,6 @@ class TestBukaRekening:
         assert level == level_rekening
         assert saldo == setor_awal
         assert status == "aktif"
-        assert pin_rekening == pin
         assert limit_sisa == limit_sisa_level_ini
         assert reset == datetime.date.today()
         assert waktu_bayar_admin == datetime.date.today()
@@ -1312,6 +1315,9 @@ class TestBukaRekening:
             "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal'", (norek,)
         ).fetchone()
 
+        assert pin_rekening != pin, "pin yang tersimpan sam dengan pin asli"
+        Validator.verifikasi_pin(pin_input=pin, pin_database=pin_rekening)
+
         assert riwayat is not None
         assert riwayat_setor is not None
         assert audit is not None
@@ -1319,8 +1325,600 @@ class TestBukaRekening:
         assert level == level_rekening
         assert saldo == setor_awal
         assert status == "aktif"
-        assert pin_rekening == pin
         assert limit_sisa == limit_sisa_level_ini
         assert reset == datetime.date.today()
         assert waktu_bayar_admin == datetime.date.today()
         assert waktu_dapat_bunga == datetime.date.today()
+
+    def test_rollback_buka_rekening(
+        self, koneksi_test, siapkan_data_nasabah, monkeypatch
+    ):
+
+        nik = siapkan_data_nasabah["nik"]
+        pin = "123456"
+        target_level = 3
+        setor_awal = jenis_rekening[target_level]["minimal_setor"]
+
+        method_asli = audit_repo_module.AuditRepository.tambah_audit
+
+        def uji_rollback(**kwargs):
+            method_asli(**kwargs)
+
+            raise RuntimeError("Simulasi rollback buka rekening")
+
+        monkeypatch.setattr(
+            audit_repo_module.AuditRepository, "tambah_audit", uji_rollback
+        )
+
+        punya_rekening = koneksi_test.execute(
+            "SELECT COUNT(*) FROM rekening WHERE nik_pemilik = ?", (nik,)
+        ).fetchone()[0]
+
+        assert punya_rekening == 0
+
+        with pytest.raises(RuntimeError, match="Simulasi rollback buka rekening"):
+
+            RekeningService.buka_rekening(
+                nik=nik, pilihan=target_level, setor_awal=setor_awal, pin=pin
+            )
+
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE nik_pemilik = ?", (nik,)
+        ).fetchone()
+        assert data_rekening is None
+
+
+class TestGantiPin:
+
+    def test_ganti_pin_happy_path(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        pin_baru = "654321"
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_lama = siapkan_data_rekening_dan_nasabah["pin"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        RekeningService.ganti_pin(
+            nik=nik, norek=norek, pin_lama=pin_lama, pin_baru=pin_baru
+        )
+
+        hash_baru = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert hash_baru != pin_baru
+        Validator.verifikasi_pin(pin_input=pin_baru, pin_database=hash_baru)
+        with pytest.raises(PinTidakCocok):
+            Validator.verifikasi_pin(pin_input=pin_lama, pin_database=hash_baru)
+        assert hash_lama != hash_baru
+        assert riwayat is not None
+        assert audit is not None
+
+    def test_ganti_pin_dengan_pin_lama_salah(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        pin_lama_salah = "123457"
+        pin_baru = "654321"
+
+        with pytest.raises(PinTidakCocok) as info_error:
+            RekeningService.ganti_pin(
+                nik=nik, norek=norek, pin_lama=pin_lama_salah, pin_baru=pin_baru
+            )
+
+        hash_sesudah = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert hash_sesudah == hash_lama
+        assert riwayat is None
+        assert audit is None
+        assert "PIN yang dimasukkan" in str(info_error.value)
+
+    def test_ganti_pin_dengan_pin_baru_sama_dengan_pin_lama(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_lama = siapkan_data_rekening_dan_nasabah["pin"]
+        hash_lama = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+
+        with pytest.raises(InputTidakValid) as info_error:
+            RekeningService.ganti_pin(
+                nik=nik, norek=norek, pin_lama=pin_lama, pin_baru=pin_lama
+            )
+
+        hash_sesudah = koneksi_test.execute(
+            "SELECT pin FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["pin"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penggantian pin rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penggantian_pin_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert hash_sesudah == hash_lama
+        assert riwayat is None
+        assert audit is None
+        assert "PIN baru tidak boleh sama" in str(info_error.value)
+
+
+class TestBlokirRekening:
+
+    def test_blokir_rekening_happy_path(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+        alasan = "Blokir rekening untuk pengujian"
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "aktif"
+        RekeningService.blokir_rekening(nik=nik, norek=norek, alasan=alasan, pin=pin)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pemblokiran rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pemblokiran_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == "blokir"
+        assert riwayat is not None
+        assert audit is not None
+
+    @pytest.mark.parametrize(
+        "kwargs_salah,pesan_error,exception",
+        [
+            ({"alasan": ""}, "Alasan blokir tidak boleh kosong", InputTidakValid),
+            ({"nik": "654321"}, "tidak terdaftar sebagai pemilik", NikTidakSesuai),
+            ({"norek": "88888"}, "Rekening tidak terdaftar", RekeningTidakDitemukan),
+            ({"pin": "123457"}, "PIN yang dimasukkan", PinTidakCocok),
+        ],
+    )
+    def test_blokir_rekening_dengan_input_tidak_valid(
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        kwargs_salah,
+        pesan_error,
+        exception,
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+        alasan = "Blokir rekening untuk pengujian"
+        kwargs = {"nik": nik, "norek": norek, "pin": pin, "alasan": alasan}
+        kwargs.update(kwargs_salah)
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "aktif"
+        with pytest.raises(exception) as info_error:
+            RekeningService.blokir_rekening(**kwargs)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pemblokiran rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pemblokiran_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert pesan_error in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+
+    @pytest.mark.parametrize("status_salah", ["blokir", "tutup"])
+    def test_blokir_rekening_dengan_status_rekening_tidak_valid(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, status_salah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+        alasan = "Blokir rekening untuk pengujian"
+        koneksi_test.execute(
+            "UPDATE rekening SET status = ? WHERE norek = ?", (status_salah, norek)
+        )
+        koneksi_test.commit()
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == status_salah
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            RekeningService.blokir_rekening(
+                nik=nik, norek=norek, pin=pin, alasan=alasan
+            )
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pemblokiran rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pemblokiran_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert "Rekening Anda saat ini sedang di" in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+
+    def test_rollback_blokir_rekening(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+        alasan = "Blokir rekening untuk pengujian"
+
+        method_asli = audit_repo_module.AuditRepository.tambah_audit
+
+        def uji_rollback(**kwargs):
+            method_asli(**kwargs)
+            raise RuntimeError("Simulasi rollback blokir rekening")
+
+        monkeypatch.setattr(
+            audit_repo_module.AuditRepository, "tambah_audit", uji_rollback
+        )
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "aktif"
+
+        with pytest.raises(RuntimeError, match="Simulasi rollback blokir rekening"):
+            RekeningService.blokir_rekening(
+                nik=nik, norek=norek, pin=pin, alasan=alasan
+            )
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pemblokiran rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pemblokiran_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert riwayat is None
+        assert audit is None
+
+    def test_blokir_rekening_race_condition(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+        alasan = "Blokir rekening untuk pengujian"
+
+        method_asli = rekening_repo_module.RekeningRepository.perbarui_status_blokir
+
+        def uji_race_condition(**kwargs):
+            koneksi_test.execute(
+                "UPDATE rekening SET status = 'blokir' WHERE norek = ?", (norek,)
+            )
+            koneksi_test.commit()
+
+            return method_asli(**kwargs)
+
+        monkeypatch.setattr(
+            rekening_repo_module.RekeningRepository,
+            "perbarui_status_blokir",
+            uji_race_condition,
+        )
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "aktif"
+        with pytest.raises(PerbaruiStatusGagal) as info_error:
+
+            RekeningService.blokir_rekening(
+                nik=nik, norek=norek, pin=pin, alasan=alasan
+            )
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pemblokiran rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pemblokiran_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == "blokir"
+        assert "Gagal memblokir rekening" in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+
+
+class TestBukaBlokir:
+
+    def test_buka_blokir_happy_path(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+
+        koneksi_test.execute(
+            "UPDATE rekening SET status = 'blokir' WHERE norek = ?", (norek,)
+        )
+        koneksi_test.commit()
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "blokir"
+
+        RekeningService.buka_blokir(nik=nik, norek=norek, pin=pin)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan blokir rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_blokir_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == "aktif"
+        assert riwayat is not None
+        assert audit is not None
+
+    @pytest.mark.parametrize(
+        "kwargs_salah,exception,pesan_error",
+        [
+            (
+                {"nik": "8876"},
+                NikTidakSesuai,
+                "tidak terdaftar sebagai pemilik rekening",
+            ),
+            ({"norek": "1231"}, RekeningTidakDitemukan, "Rekening tidak terdaftar"),
+            ({"pin": "123457"}, PinTidakCocok, "PIN yang dimasukkan"),
+        ],
+    )
+    def test_buka_blokir_dengan_input_tidak_valid(
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        kwargs_salah,
+        pesan_error,
+        exception,
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+
+        kwargs = {"nik": nik, "norek": norek, "pin": pin}
+        kwargs.update(kwargs_salah)
+
+        koneksi_test.execute(
+            "UPDATE rekening SET status = 'blokir' WHERE norek = ?", (norek,)
+        )
+        koneksi_test.commit()
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "blokir"
+
+        with pytest.raises(exception) as info_error:
+            RekeningService.buka_blokir(**kwargs)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan blokir rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_blokir_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert riwayat is None
+        assert audit is None
+        assert pesan_error in str(info_error.value)
+
+    @pytest.mark.parametrize(
+        "status_salah, pesan_error",
+        [("aktif", "sudah dalam status aktif"), ("tutup", "telah ditutup!")],
+    )
+    def test_buka_blokir_dengan_status_rekening_tidak_valid(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, status_salah, pesan_error
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+
+        koneksi_test.execute(
+            "UPDATE rekening SET status = ? WHERE norek = ?", (status_salah, norek)
+        )
+        koneksi_test.commit()
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == status_salah
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            RekeningService.buka_blokir(nik=nik, norek=norek, pin=pin)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan blokir rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_blokir_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert riwayat is None
+        assert audit is None
+        assert pesan_error in str(info_error.value)
+
+    def test_rollback_buka_blokir(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+
+        koneksi_test.execute(
+            "UPDATE rekening SET status = 'blokir' WHERE norek = ?", (norek,)
+        )
+        koneksi_test.commit()
+        method_asli = audit_repo_module.AuditRepository.tambah_audit
+
+        def uji_rollback(**kwargs):
+            method_asli(**kwargs)
+            raise RuntimeError("Simulasi rollback buka blokir")
+
+        monkeypatch.setattr(
+            audit_repo_module.AuditRepository, "tambah_audit", uji_rollback
+        )
+
+        status_sebelum = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        assert status_sebelum == "blokir"
+
+        with pytest.raises(RuntimeError, match="Simulasi rollback buka blokir"):
+            RekeningService.buka_blokir(nik=nik, norek=norek, pin=pin)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan blokir rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_blokir_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == status_sebelum
+        assert riwayat is None
+        assert audit is None
+
+    def test_race_condition_buka_blokir(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
+    ):
+
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
+
+        koneksi_test.execute(
+            "UPDATE rekening SET status = 'blokir' WHERE norek = ?", (norek,)
+        )
+        koneksi_test.commit()
+
+        method_asli = rekening_repo_module.RekeningRepository.perbarui_status_blokir
+
+        def uji_race_condition(**kwargs):
+            koneksi_test.execute(
+                "UPDATE rekening SET status = 'aktif' WHERE norek = ?", (norek,)
+            )
+            koneksi_test.commit()
+            return method_asli(**kwargs)
+
+        monkeypatch.setattr(
+            rekening_repo_module.RekeningRepository,
+            "perbarui_status_blokir",
+            uji_race_condition,
+        )
+
+        with pytest.raises(PerbaruiStatusGagal) as info_error:
+            RekeningService.buka_blokir(nik=nik, norek=norek, pin=pin)
+
+        status_sesudah = koneksi_test.execute(
+            "SELECT status FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["status"]
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan blokir rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'pembukaan_blokir_rekening'",
+            (norek,),
+        ).fetchone()
+
+        assert status_sesudah == "aktif"
+        assert riwayat is None
+        assert audit is None
+        assert "Gagal membuka blokir" in str(info_error.value)

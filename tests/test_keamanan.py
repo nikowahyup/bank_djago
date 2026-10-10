@@ -20,9 +20,7 @@ def test_dua_pin_harus_memiliki_hash_berbeda():
     hash_pin_1 = Validator.buat_hash(pin_1)
     hash_pin_2 = Validator.buat_hash(pin_2)
 
-
     assert hash_pin_1 != hash_pin_2, "seharusnya hash berbeda"
-
 
 
 def test_verifikasi_pin_happy_path():
@@ -30,9 +28,10 @@ def test_verifikasi_pin_happy_path():
     pin = "123456"
     hash_pin = Validator.buat_hash(pin)
 
-    hasil =  Validator.verifikasi_pin(pin_input=pin, pin_database=hash_pin)
+    hasil = Validator.verifikasi_pin(pin_input=pin, pin_database=hash_pin)
 
-    assert hasil is None ,'seharusnya fungsi ini tidak mengembalikan apapun'
+    assert hasil is None, "seharusnya fungsi ini tidak mengembalikan apapun"
+
 
 @pytest.mark.parametrize("pin_salah", ["12345", " ", "1 2 3 4 5", "", "123457"])
 def test_verifikasi_pin_berbeda_menangkap_exception(pin_salah):
@@ -61,3 +60,10 @@ def test_tujuh_karakter_pertama_hash():
     hash_pin = Validator.buat_hash(pin)
 
     assert hash_pin.startswith("$2b$12$")
+
+
+def test_parameter_rounds_fungsi_buat_hash():
+    pin = "123456"
+    hash_pin = Validator.buat_hash(pin=pin, rounds=4)
+
+    assert hash_pin.startswith("$2b$04$"), "seharusnya costnya 4, bukan 12"

@@ -389,13 +389,15 @@ class TransaksiService:
                 koneksi.close()
 
     @staticmethod
-    def transfer_semua_saldo(rekening_asal, norek_penerima, koneksi):
+    def transfer_semua_saldo(norek_pengirim, norek_penerima, nominal, koneksi):
 
         penerima = TransaksiService.cari_penerima(
-            norek_penerima=norek_penerima, norek_pengirim=rekening_asal, koneksi=koneksi
+            norek_penerima=norek_penerima,
+            norek_pengirim=norek_pengirim,
+            koneksi=koneksi,
         )
 
-        nominal_transfer = rekening_asal.saldo
+        nominal_transfer = nominal
 
         jumlah_baris_penerima = RekeningRepository.tambah_saldo(
             norek=penerima.norek,

@@ -6,6 +6,12 @@ import sqlite3
 import uuid
 import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.sqlite.buat_database import inisialisasi_database
+from bank_djago.utils.validator import Validator
+
+PIN_UJI = "123456"
+HASH_PIN_UJI = Validator.buat_hash(PIN_UJI, rounds=4)
+PIN_PENERIMA = "654321"
+HASH_PIN_PENERIMA = Validator.buat_hash(PIN_PENERIMA, rounds=4)
 
 
 @pytest.fixture
@@ -43,7 +49,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
             "123456",
             "987654321",
             10_000_000,
-            "1234",
+            HASH_PIN_UJI,
             5_000_000,
             "2026-01-19",
             datetime.date.today().isoformat(),
@@ -53,7 +59,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"norek": "123456", "nik": "987654321"}
+    return {"norek": "123456", "nik": "987654321", "pin": PIN_UJI}
 
 
 @pytest.fixture
@@ -71,7 +77,7 @@ def siapkan_data_rekening_penerima(koneksi_test):
             "000111222333",
             "123456789",
             10_000_000,
-            "1234",
+            HASH_PIN_PENERIMA,
             5_000_000,
             "2026-01-19",
             datetime.date.today().isoformat(),
@@ -81,7 +87,7 @@ def siapkan_data_rekening_penerima(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333"}
+    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_PENERIMA}
 
 
 @pytest.fixture
@@ -99,7 +105,7 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
             "000111222333",
             "123456789",
             100_000_000,
-            "1234",
+            HASH_PIN_UJI,
             200_000_000,
             "2026-01-19",
             datetime.date.today().isoformat(),
@@ -110,4 +116,4 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333"}
+    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_UJI}
