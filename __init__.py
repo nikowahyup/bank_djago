@@ -23,6 +23,7 @@ from .services.notifikasi.notifikasi_service import NotifikasiService
 from .services.admin.admin_service import AdminService
 from .services.admin.rekap_bank_service import RekapService
 from .services.riwayat.riwayat_service import RiwayatService
+from .services.rekening.pengajuan_service import PengajuanService
 
 from .utils.validator import Validator
 

@@ -259,14 +259,12 @@ class RekeningService:
                 raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
             hash_database = rekening.pin
-            Validator.verifikasi_pin(pin_input=pin,pin_database=hash_database)
+            Validator.verifikasi_pin(pin_input=pin, pin_database=hash_database)
 
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise NikTidakSesuai(
-                    "NIK ini tidak terdaftar sebagai pemilik rekening"
-                )
+                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             Validator.amankan_rekening(rekening=rekening)
 
@@ -308,7 +306,6 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
             )
@@ -330,10 +327,7 @@ class RekeningService:
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise NikTidakSesuai(
-                    "NIK ini tidak terdaftar sebagai pemilik rekening"
-                )
-
+                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             if rekening.status == "tutup":
                 raise StatusTidakValid("Rekening ini telah ditutup!")
@@ -372,7 +366,6 @@ class RekeningService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
             )
-
 
             RiwayatRepository.tambah_riwayat(
                 norek=rekening.norek, riwayat=riwayat, koneksi=koneksi

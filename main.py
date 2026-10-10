@@ -9,7 +9,6 @@ from bank_djago.services.nasabah.nasabah_ui import NasabahUI
 
 def menu():
 
-
     Scheduler.jalankan()
 
     while True:

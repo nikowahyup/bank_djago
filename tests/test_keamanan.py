@@ -61,8 +61,9 @@ def test_tujuh_karakter_pertama_hash():
 
     assert hash_pin.startswith("$2b$12$")
 
-def test_parameter_rounds_fungsi_buat_hash():
-    pin = '123456'
-    hash_pin = Validator.buat_hash(pin=pin,rounds=4)
 
-    assert hash_pin.startswith("$2b$04$") ,'seharusnya costnya 4, bukan 12'
+def test_parameter_rounds_fungsi_buat_hash():
+    pin = "123456"
+    hash_pin = Validator.buat_hash(pin=pin, rounds=4)
+
+    assert hash_pin.startswith("$2b$04$"), "seharusnya costnya 4, bukan 12"
