@@ -172,7 +172,7 @@ class PengajuanService:
                 kategori="administratif",
                 objek="rekening",
                 aksi="persetujuan_penutupan_rekening",
-                log=(f"Pengajuan {pengajuan['jenis']} " f"rekening disetujui"),
+                log=f"Pengajuan {pengajuan['jenis']} " f"rekening disetujui",
                 nama=rekening.pemilik.nama,
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
@@ -213,7 +213,7 @@ class PengajuanService:
 
             if pengajuan is None:
                 raise PengajuanTidakDitemukan(
-                    "Belum ada persetujuan penutupan " "untuk rekening ini"
+                    "Belum ada persetujuan penutupan untuk rekening ini"
                 )
 
             Validator.amankan_rekening(rekening=rekening)
