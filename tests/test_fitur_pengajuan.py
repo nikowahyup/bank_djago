@@ -14,7 +14,7 @@ from bank_djago.services.exceptions import (
     SudahAdaPengajuan,
 PengajuanTidakDitemukan
 )
-
+NOREK_PENERIMA_TIDAK_DIPAKAI = '88547'
 
 class TestAjukanPenutupanRekening:
 
@@ -561,3 +561,107 @@ class TestSelesaikanPenutupanRekening:
         assert "Rekening masih mempunyai pinjaman berjalan" in str(info_error.value)
 
 
+    def test_penutupan_rekening_dengan_metode_langsung_tutup_happy_path(self, koneksi_test, siapkan_data_rekening_dan_nasabah, pengajuan_penutupan_siap_diselesaikan):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        metode = "langsung tutup"
+
+        koneksi_test.execute("UPDATE rekening SET saldo = 0 WHERE norek = ?",(norek,))
+        koneksi_test.commit()
+
+
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+        saldo_sebelum = data_rekening["saldo"]
+        status_sebelum = data_rekening["status"]
+
+        assert status_sebelum == "aktif"
+        assert saldo_sebelum == 0
+
+        hasil = PengajuanService.selesaikan_penutupan(
+            nik=nik, norek=norek, pin=pin, metode=metode
+        )
+
+        data_rekening_sesudah = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+
+        saldo_sesudah = data_rekening_sesudah["saldo"]
+        status_sesudah = data_rekening_sesudah["status"]
+
+        jumlah_transaksi = koneksi_test.execute(
+            "SELECT COUNT(*) FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()[0]
+
+        assert jumlah_transaksi == 0
+
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penutupan rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penutupan_saldo_kosong'",
+            (norek,),
+        ).fetchone()
+        assert hasil == saldo_sebelum
+
+        assert saldo_sesudah == 0
+        assert status_sesudah == "tutup"
+        assert riwayat is not None
+        assert audit is not None
+
+
+    @pytest.mark.parametrize("metode, norek_penerima, aksi_audit,pesan_error, saldo_mutasi",[('tarik',None,"penarikan_saldo_penutupan","Silahkan pilih metode langsung tutup",0),
+                                                       ('transfer',NOREK_PENERIMA_TIDAK_DIPAKAI,"pemindahan_saldo_penutupan","Silahkan pilih metode langsung tutup",0),
+                                                                                            ("langsung tutup",None,"penutupan_saldo_kosong","Silahkan pilih metode tarik atau transfer",1_000_000)])
+    def test_penutupan_rekening_dengan_metode_saldo_tidak_sesuai(self, koneksi_test, siapkan_data_rekening_dan_nasabah, pengajuan_penutupan_siap_diselesaikan,metode, norek_penerima,aksi_audit,saldo_mutasi,pesan_error):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+
+        koneksi_test.execute("UPDATE rekening SET saldo = ? WHERE norek = ?",(saldo_mutasi,norek))
+        koneksi_test.commit()
+
+
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+        saldo_sebelum = data_rekening["saldo"]
+        status_sebelum = data_rekening["status"]
+
+        assert status_sebelum == "aktif"
+        assert saldo_sebelum == saldo_mutasi
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            PengajuanService.selesaikan_penutupan(nik=nik, norek=norek, pin=pin, metode=metode, norek_penerima=norek_penerima)
+
+        data_rekening_sesudah = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+
+        saldo_sesudah = data_rekening_sesudah["saldo"]
+        status_sesudah = data_rekening_sesudah["status"]
+
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ? AND saldo_sumber_sebelum = ? AND nominal = ?",
+            (norek, saldo_sebelum, saldo_sebelum),
+        ).fetchone()
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penutupan rekening'",
+            (norek,),
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = ?",
+            (norek,aksi_audit),
+        ).fetchone()
+
+        assert transaksi is None
+        assert saldo_sesudah == saldo_sebelum
+        assert status_sesudah == status_sebelum
+        assert riwayat is None
+        assert audit is None
+        assert pesan_error in str(info_error.value)
