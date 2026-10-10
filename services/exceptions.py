@@ -53,6 +53,10 @@ class PinTidakCocok(KondisiTidakValid):
     pass
 
 
+class SudahAdaPengajuan(KondisiTidakValid):
+    pass
+
+
 # ---------------------------------------------------------------------
 
 

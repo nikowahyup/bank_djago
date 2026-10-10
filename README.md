@@ -655,3 +655,6 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 - Menambahkan menu informasi untuk nasabah
 - Memisahkan logika transaksi dari inputan data nasabah
 - Memisahkan UI nasabah dan admin
+
+# Catatn Desain
+- pemeriksaan pengajuan ganda belum atomik; solusi: indeks UNIQUE parsial atau BEGIN IMMEDIATE.

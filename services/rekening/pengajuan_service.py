@@ -16,7 +16,8 @@ from bank_djago.services.exceptions import (
     StatusTidakValid,
     RekeningTidakDitemukan,
     PerbaruiStatusGagal,
-    NasabahTidakDitemukan,
+    NikTidakSesuai,
+    SudahAdaPengajuan,
 )
 from bank_djago.services.transaksi.transaksi_service import TransaksiService
 
@@ -30,22 +31,26 @@ from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis, buat_kone
 class PengajuanService:
 
     @staticmethod
-    def ajukan_penutupan(nik, norek, alasan):
+    def ajukan_penutupan(nik, norek, alasan, pin):
 
         alasan = alasan.strip()
         if not alasan:
-            raise ValueError("Mohon isi alasan penutupan")
+            raise InputTidakValid("Alasan penutupan tidak boleh kosong")
 
         with buat_koneksi_tulis() as koneksi:
 
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
             if rekening is None:
-                raise ValueError("Rekening tidak ditemukan")
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
+
+            hash_database = rekening.pin
+            Validator.verifikasi_pin(pin_input=pin, pin_database=hash_database)
+
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise ValueError("NIK ini tidak terdaftar sebagai pemilik rekening")
+                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             Validator.amankan_rekening(rekening=rekening)
 
@@ -54,7 +59,7 @@ class PengajuanService:
             )
 
             if pengajuan_sebelumnya is not None:
-                raise ValueError(
+                raise SudahAdaPengajuan(
                     "Anda sudah mengajukan penutupan sebelumnya. Mohon tunggu konfirmasi admin"
                 )
 
@@ -178,7 +183,7 @@ class PengajuanService:
         return True
 
     @staticmethod
-    def selesaikan_penutupan(nik, norek, metode, norek_penerima=None):
+    def selesaikan_penutupan(nik, norek, pin, metode, norek_penerima=None):
 
         if metode not in ("tarik", "transfer"):
             raise InputTidakValid("Metode penyelesaian saldo tidak tersedia")
@@ -194,12 +199,13 @@ class PengajuanService:
             if rekening is None:
                 raise RekeningTidakDitemukan("Rekening tidak terdaftar")
 
+            hash_database = rekening.pin
+            Validator.verifikasi_pin(pin_input=pin, pin_database=hash_database)
+
             nasabah = rekening.pemilik
 
             if nasabah.NIK != nik:
-                raise NasabahTidakDitemukan(
-                    "NIK ini tidak terdaftar sebagai pemilik rekening"
-                )
+                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             pengajuan = PengajuanRepository.cari_penutupan_disetujui(
                 norek=rekening.norek, koneksi=koneksi
@@ -251,7 +257,7 @@ class PengajuanService:
             if metode == "tarik":
 
                 transaksi = {
-                    "jenis": (JenisTransaksi.PENARIKAN_SALDO_PENUTUPAN),
+                    "jenis": JenisTransaksi.PENARIKAN_SALDO_PENUTUPAN,
                     "norek_sumber": rekening.norek,
                     "nominal": nominal_penyelesaian,
                     "saldo_sumber_sebelum": rekening.saldo,
@@ -278,14 +284,15 @@ class PengajuanService:
 
                 penerima, nominal_penyelesaian, saldo_baru_penerima = (
                     TransaksiService.transfer_semua_saldo(
-                        rekening_asal=rekening,
+                        norek_pengirim=rekening.norek,
                         norek_penerima=norek_penerima,
                         koneksi=koneksi,
+                        nominal=nominal_penyelesaian,
                     )
                 )
 
                 transaksi = {
-                    "jenis": (JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN),
+                    "jenis": JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN,
                     "norek_sumber": rekening.norek,
                     "norek_tujuan": penerima.norek,
                     "nominal": nominal_penyelesaian,
