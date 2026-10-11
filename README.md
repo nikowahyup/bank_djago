@@ -658,3 +658,22 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 
 # Catatn Desain
 - pemeriksaan pengajuan ganda belum atomik; solusi: indeks UNIQUE parsial atau BEGIN IMMEDIATE.
+- ## Catatan Pengujian
+
+### Pendekatan
+Setiap tes diuji dengan mutasi sengaja: kode sengaja dirusak, hasilnya
+diprediksi lebih dulu, lalu kode dikembalikan. Tujuannya memastikan tes
+benar-benar gagal saat ada yang salah, bukan sekadar hijau.
+
+### Rollback
+- **Teruji:** kegagalan yang terjadi setelah data mulai ditulis (misalnya
+  transfer penutupan ke rekening sendiri, penerima tidak terdaftar, atau
+  penerima terblokir). Saldo dan status pengirim kembali seperti semula.
+- **Belum teruji:** kegagalan di tengah penulisan akibat error internal
+  (misalnya penulisan audit gagal). Memicunya membutuhkan mocking.
+- Sebagian besar tes kasus gagal hanya membuktikan bahwa tidak ada data
+  yang tertulis, karena penolakan terjadi sebelum penulisan dimulai.
+
+### Keterbatasan yang Diketahui
+- **Race condition:** pemeriksaan pengajuan ganda dan pembaruan saldo belum
+  atomik. Solusi yang
