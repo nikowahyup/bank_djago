@@ -667,7 +667,7 @@ class TestSelesaikanPenutupanRekening:
         assert pesan_error in str(info_error.value)
 
 
-    def test_penutupan_rekening_dengan_metode_tranfer_happy_path(self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima, pengajuan_penutupan_siap_diselesaikan):
+    def test_penutupan_rekening_dengan_metode_transfer_happy_path(self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima, pengajuan_penutupan_siap_diselesaikan):
 
         nik = siapkan_data_rekening_dan_nasabah['nik']
         norek = siapkan_data_rekening_dan_nasabah['norek']
@@ -707,13 +707,111 @@ class TestSelesaikanPenutupanRekening:
         riwayat_penerima = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'terima saldo' AND transaksi_id = ?",(norek_penerima, id_transaksi)).fetchone()
 
         audit_pengirim = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pemindahan_saldo_penutupan' AND transaksi_id = ?",(norek, id_transaksi)).fetchone()
-        audit_penerima = koneksi_test.execute("SELECT * FROm audit WHERE norek = ? AND aksi = 'penerimaan_saldo_penutupan' AND transaksi_id = ?",(norek_penerima,id_transaksi)).fetchone()
+        audit_penerima = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'penerimaan_saldo_penutupan' AND transaksi_id = ?",(norek_penerima,id_transaksi)).fetchone()
 
         assert status_pengirim_sesudah == 'tutup'
+        assert hasil == saldo_pengirim_sebelum
         assert saldo_pengirim_sesudah == 0
         assert saldo_penerima_sesudah == saldo_penerima_sebelum + hasil
         assert riwayat_pengirim is not None
         assert riwayat_penerima is not None
         assert audit_pengirim is not None
         assert audit_penerima is not None
+        assert transaksi['saldo_sumber_sebelum'] == saldo_pengirim_sebelum
+        assert transaksi['saldo_tujuan_sebelum'] == saldo_penerima_sebelum
+        assert transaksi['saldo_sumber_sesudah'] == saldo_pengirim_sesudah
+        assert transaksi['saldo_tujuan_sesudah'] == saldo_penerima_sesudah
 
+
+
+    def test_penutupan_rekening_dengan_metode_transfer_norek_penerima_adalah_norek_sendiri(self, koneksi_test, siapkan_data_rekening_dan_nasabah, pengajuan_penutupan_siap_diselesaikan):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        metode = 'transfer'
+
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+        saldo_sebelum = data_rekening["saldo"]
+        status_sebelum = data_rekening["status"]
+
+        assert status_sebelum == "aktif"
+        assert saldo_sebelum != 0
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            PengajuanService.selesaikan_penutupan(nik=nik, norek=norek, pin=pin, metode=metode, norek_penerima=norek)
+
+
+        data_rekening_sesudah = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()
+        saldo_sesudah = data_rekening_sesudah["saldo"]
+        status_sesudah = data_rekening_sesudah["status"]
+
+
+        transaksi = koneksi_test.execute("SELECT * FROM transaksi WHERE norek_sumber = ? AND jenis = ?",(norek, JenisTransaksi.PEMINDAHAN_SALDO_PENUTUPAN.value)).fetchone()
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penutupan rekening'",(norek,)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pemindahan_saldo_penutupan'",(norek,)).fetchone()
+
+        assert transaksi is None
+        assert status_sesudah == status_sebelum
+        assert saldo_sesudah == saldo_sebelum
+        assert riwayat is None
+        assert audit is None
+        assert "Tidak dapat transfer ke nomor rekening sendiri" in str(info_error.value)
+
+    @pytest.mark.parametrize("status_salah",['blokir','tutup'])
+    def test_penutupan_rekening_dengan_metode_transfer_dengan_status_rekening_penerima_tidak_valid(self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima,pengajuan_penutupan_siap_diselesaikan, status_salah):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        metode = 'transfer'
+        norek_penerima = siapkan_data_rekening_penerima['norek']
+
+        koneksi_test.execute("UPDATE rekening SET status = ? WHERE norek = ?",(status_salah, norek_penerima))
+        koneksi_test.commit()
+
+        data_rekening_pengirim = koneksi_test.execute("SELECT * FROM rekening WHERE norek = ?",(norek,)).fetchone()
+        saldo_pengirim_sebelum = data_rekening_pengirim['saldo']
+        status_pengirim_sebelum = data_rekening_pengirim['status']
+
+        assert saldo_pengirim_sebelum != 0
+        assert status_pengirim_sebelum == 'aktif'
+
+        data_rekening_penerima = koneksi_test.execute("SELECT * FROM rekening WHERE norek = ?",(norek_penerima,)).fetchone()
+        saldo_penerima_sebelum = data_rekening_penerima['saldo']
+        status_penerima = data_rekening_penerima['status']
+
+        assert status_penerima == status_salah
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            PengajuanService.selesaikan_penutupan(nik=nik, norek=norek, pin=pin,metode=metode, norek_penerima=norek_penerima)
+
+        data_pengirim_sesudah = koneksi_test.execute("SELECT * FROM rekening WHERE norek = ?",(norek,)).fetchone()
+        status_pengirim_sesudah = data_pengirim_sesudah['status']
+        saldo_pengirim_sesudah = data_pengirim_sesudah['saldo']
+
+        saldo_penerima_sesudah = koneksi_test.execute("SELECT saldo FROM rekening WHERE norek = ?",(norek_penerima,)).fetchone()['saldo']
+        jumlah_transaksi = koneksi_test.execute(
+            "SELECT COUNT(*) FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()[0]
+        assert jumlah_transaksi == 0
+
+        riwayat_pengirim = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'penutupan rekening'",(norek,)).fetchone()
+        riwayat_penerima = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",(norek_penerima,)).fetchone()
+
+        audit_pengirim = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pemindahan_saldo_penutupan'",(norek,)).fetchone()
+        audit_penerima = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'penerimaan_saldo_penutupan'",(norek_penerima,)).fetchone()
+
+
+        assert status_pengirim_sesudah == status_pengirim_sebelum
+        assert saldo_penerima_sesudah == saldo_penerima_sebelum
+        assert saldo_pengirim_sesudah == saldo_pengirim_sebelum
+        assert riwayat_penerima is None
+        assert riwayat_pengirim is None
+        assert audit_penerima is None
+        assert audit_pengirim is None
+        assert f"Rekening penerima saat ini sedang di{status_penerima}" in str(info_error.value)
