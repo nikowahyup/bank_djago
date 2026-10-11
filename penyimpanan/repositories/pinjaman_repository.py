@@ -236,7 +236,7 @@ class PinjamanRepository:
                 """SELECT * 
             FROM pinjaman 
             WHERE norek = ?
-            AND status In('diajukan','aktif')
+            AND status IN ('diajukan','disetujui','aktif')
             ORDER BY id DESC
             LIMIT 1""",
                 (norek,),
