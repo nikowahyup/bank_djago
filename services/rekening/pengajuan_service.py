@@ -311,7 +311,7 @@ class PengajuanService:
 
                 else:
 
-                    penerima, nominal_penyelesaian, saldo_baru_penerima = (
+                    penerima, saldo_baru_penerima = (
                         TransaksiService.transfer_semua_saldo(
                             norek_pengirim=rekening.norek,
                             norek_penerima=norek_penerima,
