@@ -658,6 +658,9 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 
 # Catatn Desain
 - pemeriksaan pengajuan ganda belum atomik; solusi: indeks UNIQUE parsial atau BEGIN IMMEDIATE.
+- Login nasabah saat ini hanya meminta NIK dan memilih rekening tanpa meminta PIN rekening
+- 'mutasi yang selamat",pengecekan ganda PIN pada pendaftaran nasabah,di bagian service nasabah dan service rekening
+- Ganti alamat masih belum dibuatkan pengujiannya
 - ## Catatan Pengujian
 
 ### Pendekatan
@@ -673,6 +676,7 @@ benar-benar gagal saat ada yang salah, bukan sekadar hijau.
   (misalnya penulisan audit gagal). Memicunya membutuhkan mocking.
 - Sebagian besar tes kasus gagal hanya membuktikan bahwa tidak ada data
   yang tertulis, karena penolakan terjadi sebelum penulisan dimulai.
+
 
 ### Keterbatasan yang Diketahui
 - **Race condition:** pemeriksaan pengajuan ganda dan pembaruan saldo belum

@@ -33,6 +33,11 @@ from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRe
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca, buat_koneksi_tulis
 
+reguler = RekeningReguler(norek="1234", pin="1234", pemilik=None)
+prioritas = RekeningPrioritas(norek="1234", pin="1234", pemilik=None)
+gold = RekeningGold(norek="1234", pin="1234", pemilik=None)
+platinum = RekeningPlatinum(norek="1234", pin="1234", pemilik=None)
+
 
 class RekeningService:
     level = {1: "Reguler", 2: "Prioritas", 3: "Gold", 4: "Platinum"}
@@ -42,24 +47,28 @@ class RekeningService:
             "kelas": RekeningReguler,
             "nama": "Reguler",
             "minimal_upgrade": 0,
+            "minimal_setor": reguler.saldosetor_min,
         },
         2: {
             "prefix": "3001",
             "kelas": RekeningPrioritas,
             "nama": "Prioritas",
             "minimal_upgrade": 3_000_000,
+            "minimal_setor": prioritas.saldosetor_min,
         },
         3: {
             "prefix": "2001",
             "kelas": RekeningGold,
             "nama": "Gold",
             "minimal_upgrade": 50_000_000,
+            "minimal_setor": gold.saldosetor_min,
         },
         4: {
             "prefix": "1001",
             "kelas": RekeningPlatinum,
             "nama": "Platinum",
             "minimal_upgrade": 200_000_000,
+            "minimal_setor": platinum.saldosetor_min,
         },
     }
 
@@ -385,7 +394,7 @@ class RekeningService:
             raise InputTidakValid("PIN harus berupa 6 digit angka")
 
         if not isinstance(setor_awal, int):
-            raise InputTidakValid("Setor awal harus berupa berupa angka")
+            raise InputTidakValid("Setor awal harus berupa angka")
 
         if not nik.isdigit():
             raise InputTidakValid("NIK tidak bolah mengandung huruf")

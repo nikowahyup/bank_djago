@@ -50,8 +50,10 @@ class BiayaAdminService:
         if data_rekening["status"] == "tutup":
             raise StatusTidakValid("Tidak dapat memotong saldo dari rekening tutup")
 
-        if data_rekening['saldo'] <= 0:
-            raise StatusTidakValid("Saldo rekening sudah kosong. Tidak dapat menagih biaya admin")
+        if data_rekening["saldo"] <= 0:
+            raise StatusTidakValid(
+                "Saldo rekening sudah kosong. Tidak dapat menagih biaya admin"
+            )
 
         saldo_sebelum = data_rekening["saldo"]
         waktu_bayar_admin = datetime.date.fromisoformat(
