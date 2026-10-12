@@ -11,7 +11,7 @@ STRUKTUR_AUDIT = {
             "pemblokiran_rekening",
             "pembukaan_blokir_rekening",
             "penggantian_pin_rekening",
-            "penutupan_saldo_kosong"
+            "penutupan_saldo_kosong",
         ],
         "pinjaman": [
             "pengajuan_pinjaman",

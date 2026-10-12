@@ -35,8 +35,6 @@ class NasabahService:
         if not isinstance(setor_awal, int):
             raise InputTidakValid("Setor awal harus berupa angka")
 
-
-
         with buat_koneksi_tulis() as koneksi:
             validasi_nik = NasabahRepository.cari_nasabah_dengan_nik(
                 nik=nik, koneksi=koneksi

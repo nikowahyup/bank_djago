@@ -397,7 +397,6 @@ class TransaksiService:
             koneksi=koneksi,
         )
 
-
         jumlah_baris_penerima = RekeningRepository.tambah_saldo(
             norek=penerima.norek,
             nominal=nominal,
