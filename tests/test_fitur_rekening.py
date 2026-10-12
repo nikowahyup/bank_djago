@@ -1168,7 +1168,7 @@ class TestBukaRekening:
             ({"pilihan": 5}, "tidak tersedia"),
             ({"pin": "1234"}, "berupa 6 digit"),
             ({"pin": "abc"}, "berupa 6 digit"),
-            ({"setor_awal": "abc"}, "berupa berupa angka"),
+            ({"setor_awal": "abc"}, "Setor awal harus berupa angka"),
         ],
     )
     def test_buka_rekening_dengan_input_tidak_valid(
