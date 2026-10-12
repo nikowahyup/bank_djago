@@ -208,7 +208,6 @@ class TestDaftarNasabah:
         [
             ({"nama": " "}, "Nama tidak boleh kosong"),
             ({"nik": " "}, "NIK tidak boleh kosong"),
-            ({"nik": "1234098"}, "Jumlah digit NIK tidak valid"),
             ({"nik": "123ew"}, "NIK tidak boleh mengandung huruf"),
             ({"alamat": " "}, "Alamat tidak boleh kosong"),
             ({"pin": "1234"}, "PIN harus berupa 6 digit angka"),
@@ -216,6 +215,10 @@ class TestDaftarNasabah:
             ({"level": 0}, "Pilihan level rekening tidak tersedia"),
             ({"level": 5}, "Pilihan level rekening tidak tersedia"),
             ({"setor_awal": "10000000"}, "Setor awal harus berupa angka"),
+            ({'nik':'1'*15},"Jumlah digit NIK tidak valid"),
+            ({'nik':'1'*17},"Jumlah digit NIK tidak valid"),
+            ({'nama':''},"Nama tidak boleh kosong"), # perwakilan untuk NIK,PIN,dan alamat(tidak boleh kosong,spasi pun tidak boleh)
+
         ],
     )
     def test_pendaftaran_dengan_input_tidak_valid(
@@ -263,3 +266,68 @@ class TestDaftarNasabah:
         assert jumlah_audit_pendaftaran_sesudah == jumlah_audit_pendaftaran_sebelum
         assert jumlah_riwayat_sesudah == jumlah_riwayat_sebelum
         assert pesan_error in str(info_error.value)
+
+    @pytest.mark.parametrize("level_valid",[1,4])
+    def test_pendaftaran_dengan_memilih_level_rekening_batas_bawah_dan_atas(self, koneksi_test, level_valid,data_nasabah_siap_digunakan_untuk_pendaftaran):
+
+        data_persiapan = data_nasabah_siap_digunakan_untuk_pendaftaran
+        data_persiapan['level'] = level_valid
+        data_persiapan['setor_awal'] = RekeningService.jenis_rekening[data_persiapan['level']]['minimal_setor']
+
+        nasabah_baru, rekening_baru = NasabahService.daftar_dan_buka_rekening(
+            **data_persiapan
+        )
+        norek = rekening_baru.norek
+        nik = nasabah_baru.NIK
+
+        assert nik == data_persiapan["nik"]
+
+        data_nasabah = koneksi_test.execute(
+            "SELECT * FROM nasabah WHERE nik = ?", (nik,)
+        ).fetchone()
+        assert data_nasabah is not None
+
+        assert data_nasabah["nama"] == data_persiapan["nama"]
+        assert data_nasabah["alamat"] == data_persiapan["alamat"]
+
+        data_rekening = koneksi_test.execute(
+            "SELECT * FROM rekening WHERE nik_pemilik = ? AND norek = ?", (nik, norek)
+        ).fetchone()
+        assert data_rekening is not None
+        assert data_rekening["saldo"] == data_persiapan["setor_awal"]
+        assert data_rekening["level"] == level_valid
+        assert data_rekening["pin"] != data_persiapan["pin"]
+        assert data_rekening["status"] == "aktif"
+
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_tujuan = ?", (norek,)
+        ).fetchone()
+        assert transaksi is not None
+
+        id_transaksi = transaksi["id"]
+
+        assert transaksi["jenis"] == JenisTransaksi.SETOR_AWAL.value
+        assert transaksi["nominal"] == data_persiapan["setor_awal"]
+        assert transaksi["saldo_tujuan_sebelum"] == 0
+        assert transaksi["saldo_tujuan_sesudah"] == data_persiapan["setor_awal"]
+
+        audit_pendaftaran = koneksi_test.execute(
+            "SELECT * FROM audit WHERE nik = ? AND aksi = 'pendaftaran_nasabah' AND norek = ?",
+            (nik, norek),
+        ).fetchone()
+        riwayat_pembukaan = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan rekening'",
+            (norek,),
+        ).fetchone()
+        riwayat_setor_awal = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor awal' AND transaksi_id = ?",
+            (norek, id_transaksi),
+        ).fetchone()
+        audit_pembukaan_rekening = koneksi_test.execute(
+            "SELECT * FROM audit WHERE nik = ? AND aksi = 'pembukaan_rekening' AND norek = ? AND transaksi_id = ?",
+            (nik, norek, id_transaksi),
+        ).fetchone()
+        assert audit_pembukaan_rekening is not None
+        assert audit_pendaftaran is not None
+        assert riwayat_pembukaan is not None
+        assert riwayat_setor_awal is not None

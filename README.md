@@ -660,6 +660,7 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 - pemeriksaan pengajuan ganda belum atomik; solusi: indeks UNIQUE parsial atau BEGIN IMMEDIATE.
 - Login nasabah saat ini hanya meminta NIK dan memilih rekening tanpa meminta PIN rekening
 - 'mutasi yang selamat",pengecekan ganda PIN pada pendaftaran nasabah,di bagian service nasabah dan service rekening
+- Ganti alamat masih belum dibuatkan pengujiannya
 - ## Catatan Pengujian
 
 ### Pendekatan
