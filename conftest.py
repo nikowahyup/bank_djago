@@ -38,7 +38,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
 
     koneksi_test.execute(
         """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-        ("Pengujian", "jln.ninjaku", "987654321"),
+        ("Pengujian", "jln.ninjaku", "1000200030004000"),
     )
 
     koneksi_test.execute(
@@ -47,7 +47,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
         VALUES(?,?,?,?,?,?,?,?,?)""",
         (
             "123456",
-            "987654321",
+            "1000200030004000",
             10_000_000,
             HASH_PIN_UJI,
             5_000_000,
@@ -59,7 +59,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"norek": "123456", "nik": "987654321", "pin": PIN_UJI}
+    return {"norek": "123456", "nik": "1000200030004000", "pin": PIN_UJI}
 
 
 @pytest.fixture

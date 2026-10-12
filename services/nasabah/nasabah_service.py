@@ -17,6 +17,26 @@ class NasabahService:
     @staticmethod
     def daftar_dan_buka_rekening(nik, nama, alamat, pin, setor_awal, level):
 
+        if not nama.strip():
+            raise InputTidakValid("Nama tidak boleh kosong")
+        if not nik.strip():
+            raise InputTidakValid("NIK tidak boleh kosong")
+        if not nik.isdigit():
+            raise InputTidakValid("NIK tidak boleh mengandung huruf")
+        if not len(nik) == 16:
+            raise InputTidakValid("Jumlah digit NIK tidak valid")
+        if not alamat.strip():
+            raise InputTidakValid("Alamat tidak boleh kosong")
+        if level < 1 or level > 4:
+            raise InputTidakValid("Pilihan level rekening tidak tersedia")
+        if not len(pin) == 6 or not pin.isdigit():
+            raise InputTidakValid("PIN harus berupa 6 digit angka")
+
+        if not isinstance(setor_awal, int):
+            raise InputTidakValid("Setor awal harus berupa angka")
+
+
+
         with buat_koneksi_tulis() as koneksi:
             validasi_nik = NasabahRepository.cari_nasabah_dengan_nik(
                 nik=nik, koneksi=koneksi
