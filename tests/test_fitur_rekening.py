@@ -2,7 +2,6 @@ import datetime
 
 
 import pytest
-from pytest_cov.plugin import pytest_addoption
 
 from bank_djago import RekeningService, Validator
 from bank_djago.conftest import siapkan_data_rekening_dan_nasabah, koneksi_test
