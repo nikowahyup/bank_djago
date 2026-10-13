@@ -661,6 +661,10 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 - Login nasabah saat ini hanya meminta NIK dan memilih rekening tanpa meminta PIN rekening
 - 'mutasi yang selamat",pengecekan ganda PIN pada pendaftaran nasabah,di bagian service nasabah dan service rekening
 - Ganti alamat masih belum dibuatkan pengujiannya
+- PIN salah 3 kali berturut-turut mengunci rekening selama 1 menit. Setelah masa kuncian selesai,hitungan percobaan tidak direset.
+- Satu PIN salah lagi langsung mengunci kembali rekening. Hitungan percobaan dan waktu terkunci direset saat nasabah memasukkan PIN-nya dengan benar
+- Percobaan kegagalan dan waktu terkunci disimpan di dalam database per-rekening
+
 - ## Catatan Pengujian
 
 ### Pendekatan

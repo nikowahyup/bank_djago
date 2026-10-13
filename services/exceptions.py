@@ -56,6 +56,9 @@ class PinTidakCocok(KondisiTidakValid):
 class SudahAdaPengajuan(KondisiTidakValid):
     pass
 
+class RekeningTerkunci(KondisiTidakValid):
+    pass
+
 
 # ---------------------------------------------------------------------
 
