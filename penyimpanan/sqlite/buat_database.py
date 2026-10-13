@@ -41,8 +41,11 @@ def buat_tabel_rekening():
                 waktu_bayar_admin TEXT NOT NULL,
                 terakhir_ubah_rekening TEXT,
                 alasan_blokir TEXT,
+                percobaan_gagal INTEGER NOT NULL DEFAULT 0,
+                terkunci_sampai TEXT,
 
                 CHECK (saldo >= 0),
+                CHECK (percobaan_gagal >= 0 AND percobaan_gagal <= 3),
                 CHECK (level IN (1, 2, 3, 4)),
                 CHECK (status IN ('aktif', 'blokir', 'tutup')),
                 CHECK (limit_sisa IS NULL OR limit_sisa >= 0),

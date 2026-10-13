@@ -16,6 +16,7 @@ from bank_djago.services.exceptions import (
     LevelRekeningTidakValid,
     PerbaruiStatusGagal,
     PenambahanSaldoGagal,
+RekeningTerkunci,PinTidakCocok
 )
 from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
 from bank_djago.services.admin.audit_service import AuditService
@@ -32,6 +33,7 @@ import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca, buat_koneksi_tulis
+
 
 reguler = RekeningReguler(norek="1234", pin="1234", pemilik=None)
 prioritas = RekeningPrioritas(norek="1234", pin="1234", pemilik=None)
@@ -615,3 +617,60 @@ class RekeningService:
             return RekeningRepository.cari_rekening_dengan_norek(
                 norek=norek, koneksi=koneksi
             )
+
+    @staticmethod
+    def verifikasi_login_pin(nik_aktif,norek_aktif,pin_input):
+
+        with buat_koneksi_tulis() as koneksi:
+            data_rekening = RekeningRepository.ambil_data_rekening_dengan_nik_dan_norek(nik=nik_aktif, norek=norek_aktif, koneksi=koneksi)
+            if data_rekening is None:
+                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
+
+            hash_database = data_rekening['pin']
+            waktu_suspend = (datetime.datetime.fromisoformat(data_rekening['terkunci_sampai']) if data_rekening['terkunci_sampai'] is not None else None)
+
+            if waktu_suspend is None:
+                pass
+
+            else:
+                sekarang = datetime.datetime.now()
+                if sekarang < waktu_suspend:
+                    raise RekeningTerkunci("Anda tidak bisa login ke rekening ini sekarang. Coba beberapa saat lagi")
+
+                else:
+                    pass
+
+
+            gagal = False
+            try:
+                Validator.verifikasi_pin(pin_input=pin_input,pin_database=hash_database)
+
+            except PinTidakCocok:
+                gagal = True
+                jumlah_baris = RekeningRepository.tambahkan_percobaan_gagal(norek=norek_aktif, nik=nik_aktif, koneksi=koneksi)
+                if jumlah_baris != 1:
+                    raise PerbaruiStatusGagal("Gagal memperbarui data rekening")
+                percobaan = RekeningRepository.ambil_jumlah_percobaan_gagal(nik=nik_aktif, norek=norek_aktif, koneksi=koneksi)
+                percobaan = percobaan['percobaan_gagal']
+
+                if percobaan >= 3:
+                    sekarang = datetime.datetime.now()
+                    buat_waktu_suspend = (sekarang + datetime.timedelta(minutes=1)).isoformat()
+                    jumlah_baris = RekeningRepository.ubah_waktu_terkunci(nik=nik_aktif, norek=norek_aktif,koneksi=koneksi,waktu_terkunci_baru=buat_waktu_suspend)
+                    if jumlah_baris != 1:
+                        raise PerbaruiStatusGagal("Gagal memperbarui data rekening")
+
+            else:
+                jumlah_baris = RekeningRepository.reset_jumlah_percobaan_dan_waktu_terkunci(norek=norek_aktif, nik=nik_aktif, koneksi=koneksi)
+                if jumlah_baris != 1:
+                    raise PerbaruiStatusGagal("Gagal memperbarui data rekening")
+
+
+        if gagal:
+            raise PinTidakCocok("PIN yang dimasukkan salah")
+
+
+
+
+
+
