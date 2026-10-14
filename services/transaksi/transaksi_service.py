@@ -1,5 +1,6 @@
 import datetime
 
+from bank_djago import RekeningService
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 from bank_djago.services.transaksi.limit_service import LimitService
@@ -27,11 +28,13 @@ from bank_djago.services.exceptions import (
 class TransaksiService:
 
     @staticmethod
-    def setor_tunai(nik_masuk, norek, nominal):
+    def setor_tunai(nik_masuk, norek, pin, nominal):
 
         Validator.validasi_nominal(nominal=nominal)
 
-        Validator.validasi_format_identtitas(nik=nik_masuk, norek=norek)
+        Validator.verifikasi_format_identitas(nik=nik_masuk, norek=norek, pin=pin)
+
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 

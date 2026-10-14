@@ -30,7 +30,7 @@ class Validator:
     def validasi_format_pin(pin):
         if not isinstance(pin, str) or not pin.strip():
             raise InputTidakValid("PIN tidak boleh kosong")
-        if not len(pin) == 6 or not pin.isdigit():
+        if len(pin) != 6 or not pin.isdigit():
             raise InputTidakValid("PIN harus berupa 6 digit angka")
 
     @staticmethod
@@ -59,10 +59,11 @@ class Validator:
             raise InputTidakValid("Minimal transaksi adalah Rp10.000")
 
     @staticmethod
-    def validasi_format_identtitas(nik, norek):
+    def verifikasi_format_identitas(nik, norek, pin):
 
         Validator.validasi_format_nik(nik=nik)
         Validator.validasi_format_norek(norek=norek)
+        Validator.validasi_format_pin(pin=pin)
 
     @staticmethod
     def amankan_rekening(rekening):
