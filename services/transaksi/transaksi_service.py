@@ -104,10 +104,13 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def tarik_tunai(nik_masuk, norek, nominal):
+    def tarik_tunai(nik_masuk, norek, pin, nominal):
 
-        if nominal < 10000:
-            raise InputTidakValid("Minimal tarik adalah Rp10.000")
+        Validator.validasi_nominal(nominal=nominal)
+
+        Validator.verifikasi_format_identitas(nik=nik_masuk,norek=norek, pin=pin)
+
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 

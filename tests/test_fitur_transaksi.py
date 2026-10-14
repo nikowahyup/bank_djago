@@ -242,7 +242,7 @@ class TestSetortunai:
         assert audit is None
         assert "PIN yang dimasukkan salah" in str(info_error.value)
 
-    def test_rekening_terkunci_setelah_tiga_kali_percobaan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+    def test_setor_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
 
         nik = siapkan_data_rekening_dan_nasabah['nik']
         norek = siapkan_data_rekening_dan_nasabah['norek']
@@ -344,6 +344,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
         nominal = 1_000_000
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -351,7 +352,7 @@ class TestTarikTunai:
         )
 
         hasil = TransaksiService.tarik_tunai(
-            nik_masuk=nik, norek=norek, nominal=nominal
+            nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
         )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
@@ -383,87 +384,165 @@ class TestTarikTunai:
         assert transaksi["saldo_sumber_sebelum"] == saldo_sebelum
         assert transaksi["saldo_sumber_sesudah"] == saldo_sesudah
 
+
     @pytest.mark.parametrize(
-        "nominal, pesan_error, jenis_exception",
+        "kwargs_salah,pesan_error",
         [
-            (9999, "Minimal tarik", InputTidakValid),
-            (-9999, "Minimal tarik", InputTidakValid),
-            (10_000_000, "tidak memenuhi saldo minimum", StatusTidakValid),
+            pytest.param({"nik_masuk": None}, "NIK tidak boleh kosong", id="nik None"),
+            pytest.param({"nik_masuk": ""}, "NIK tidak boleh kosong", id="nik kosong"),
+            pytest.param({"nik_masuk": " "}, "NIK tidak boleh kosong", id="nik spasi"),
+            pytest.param(
+                {
+                    "nik_masuk": "12345ewdt",
+                },
+                "NIK tidak boleh mengandung huruf",
+                id="nik ada huruf",
+            ),
+            pytest.param(
+                {"nik_masuk": "3" * 15},
+                "Jumlah digit NIK tidak valid",
+                id="nik 15 digit",
+            ),
+            pytest.param(
+                {"nik_masuk": "3" * 17},
+                "Jumlah digit NIK tidak valid",
+                id="nik 17 digit",
+            ),
+            pytest.param(
+                {"norek": None}, "Nomor rekening tidak boleh kosong", id="norek None"
+            ),
+            pytest.param(
+                {"norek": "123456werqrq"},
+                "Nomor rekening tidak boleh mengandung huruf",
+                id="norek ada huruf",
+            ),
+            pytest.param(
+                {"norek": ""}, "Nomor rekening tidak boleh kosong", id="norek kosong"
+            ),
+            pytest.param(
+                {"norek": " "}, "Nomor rekening tidak boleh kosong", id="norek spasi"
+            ),
+            pytest.param(
+                {"norek": "2" * 15},
+                "Jumlah digit nomor rekening tidak valid",
+                id="norek 15 digit",
+            ),
+            pytest.param(
+                {"norek": "2" * 17},
+                "Jumlah digit nomor rekening tidak valid",
+                id="norek 17 digit",
+            ),
+            pytest.param({"nominal": "abc"}, "Nominal tidak valid", id="nominal huruf"),
+            pytest.param({"nominal": None}, "Nominal tidak valid", id="nominal None"),
+            pytest.param(
+                {"nominal": 0}, "Minimal transaksi adalah Rp10.000", id="nominal 0"
+            ),
+            pytest.param(
+                {"nominal": -9999},
+                "Minimal transaksi adalah Rp10.000",
+                id="nominal minus",
+            ),
+            pytest.param(
+                {"nominal": 9999},
+                "Minimal transaksi adalah Rp10.000",
+                id="nominal kurang",
+            ),
+            pytest.param({'pin':None},"PIN tidak boleh kosong",id='pin None'),
+            pytest.param({'pin':''},"PIN tidak boleh kosong",id='pin kosong'),
+            pytest.param({"pin":" "},"PIN tidak boleh kosong",id='pin spasi'),
+            pytest.param({'pin':'1234'},"PIN harus berupa 6 digit angka",id='pin kurang'),
+            pytest.param({'pin':'12345q'},"PIN harus berupa 6 digit angka",id='pin ada huruf')
         ],
     )
-    def test_tarik_tunai_dengan_nominal_tidak_valid(
+    def test_tarik_tunai_dengan_input_tidak_valid(
         self,
         koneksi_test,
         siapkan_data_rekening_dan_nasabah,
-        nominal,
-        pesan_error,
-        jenis_exception,
+        kwargs_salah,
+            pesan_error
     ):
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        nominal = 1_000_000
+
+        kwargs = {'nik_masuk':nik,
+                  'norek':norek,
+                  'pin':pin,
+                  'nominal':nominal
+                  }
+
+        kwargs.update(kwargs_salah)
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
 
-        with pytest.raises(jenis_exception) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+        with pytest.raises(InputTidakValid) as info_error:
+            TransaksiService.tarik_tunai(**kwargs)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
+        percobaan_gagal = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
 
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'tarik uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'tarik_tunai'", (norek,)
+        ).fetchone()
+
+        assert percobaan_gagal == 0
         assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
+        assert riwayat is None
+        assert audit is None
         assert pesan_error in str(info_error.value)
 
-    def test_tarik_tunai_dengan_nik_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
-    ):
 
-        nik = "12325"
-        norek = siapkan_data_rekening_dan_nasabah["norek"]
+    @pytest.mark.parametrize("status_salah",['blokir','tutup'])
+    def test_tarik_tunai_dengan_status_rekening_tidak_valid(self, koneksi_test, siapkan_data_rekening_dan_nasabah,status_salah):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
         nominal = 1_000_000
+        koneksi_test.execute("UPDATE rekening SET status = ? WHERE norek = ?",(status_salah, norek))
+        koneksi_test.commit()
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
 
-        with pytest.raises(NikTidakSesuai) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+        with pytest.raises(StatusTidakValid) as info_error:
+            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek,pin=pin, nominal=nominal)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_tujuan = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
+
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'setor_tunai'", (norek,)
+        ).fetchone()
 
         assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "sebagai pemilik rekening" in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+        assert f"Rekening Anda saat ini sedang di{status_salah}" in str(info_error.value)
 
-    def test_tarik_tunai_dengan_norek_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
-    ):
 
-        nik = siapkan_data_rekening_dan_nasabah["nik"]
-        norek = "12325"
-        nominal = 1_000_000
-        norek_asli = siapkan_data_rekening_dan_nasabah["norek"]
-
-        saldo_sebelum = RekeningRepository.ambil_saldo(
-            norek=norek_asli, koneksi=koneksi_test
-        )
-
-        with pytest.raises(RekeningTidakDitemukan) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
-
-        saldo_sesudah = RekeningRepository.ambil_saldo(
-            norek=norek_asli, koneksi=koneksi_test
-        )
-
-        assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "tidak terdaftar" in str(info_error.value)
 
     def test_tarik_tunai_hingga_saldo_menyentuh_batas_minimal(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah
@@ -471,7 +550,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-
+        pin = siapkan_data_rekening_dan_nasabah['pin']
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi_test)
 
         nominal = rekening.saldo - rekening.saldosetor_min
@@ -479,7 +558,7 @@ class TestTarikTunai:
             norek=norek, koneksi=koneksi_test
         )
 
-        TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+        TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -509,12 +588,13 @@ class TestTarikTunai:
         assert transaksi["saldo_sumber_sebelum"] == saldo_sebelum
         assert transaksi["saldo_sumber_sesudah"] == saldo_sesudah
 
-    def test_tarik_tunai_dengan_hingga_saldo_tidak_memenuhi_bata_minimal(
+    def test_tarik_tunai_dengan_hingga_saldo_tidak_memenuhi_batas_minimal(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah
     ):
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
 
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi_test)
 
@@ -524,15 +604,106 @@ class TestTarikTunai:
             norek=norek, koneksi=koneksi_test
         )
         with pytest.raises(StatusTidakValid) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
 
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'tarik uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'tarik_tunai'", (norek,)
+        ).fetchone()
+
+        assert riwayat is None
+        assert audit is None
         assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
         assert "saldo minimum jika Anda" in str(info_error.value)
+
+
+    def test_percobaan_pin_tarik_tunai(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin_salah = '123457'
+        nominal = 1_000_000
+
+        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+        percobaan_gagal_sebelum = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        assert percobaan_gagal_sebelum == 0
+        with pytest.raises(PinTidakCocok) as info_error:
+            TransaksiService.tarik_tunai(nik_masuk=nik,norek=norek,pin=pin_salah, nominal=nominal)
+
+        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+
+        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
+
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'tarik uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'tarik_tunai'", (norek,)
+        ).fetchone()
+
+        assert riwayat is None
+        assert audit is None
+        assert percobaan_gagal_sesudah == 1
+        assert saldo_sesudah == saldo_sebelum
+        assert "PIN yang dimasukkan salah" in str(info_error.value)
+
+    def test_tarik_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin_benar = siapkan_data_rekening_dan_nasabah['pin']
+        nominal = 1_000_000
+
+        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=1)).isoformat()
+        koneksi_test.execute("UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",(waktu_kunci, norek))
+        koneksi_test.commit()
+
+        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi_test)
+        jumlah_percobaan = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        terkunci_sampai = koneksi_test.execute("SELECT terkunci_sampai FROM rekening WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+
+        assert jumlah_percobaan == 3
+        assert terkunci_sampai == waktu_kunci
+
+        with pytest.raises(RekeningTerkunci) as info_error:
+            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, pin=pin_benar, nominal=nominal)
+
+        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+
+        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        waktu_kunci_sesudah = koneksi_test.execute("SELECT terkunci_sampai FROM rekening  WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
+
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'tarik uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'tarik_tunai'", (norek,)
+        ).fetchone()
+
+        assert percobaan_gagal_sesudah == 3
+        assert waktu_kunci_sesudah == waktu_kunci
+        assert saldo_sesudah == saldo_sebelum
+        assert riwayat is None
+        assert audit is None
+        assert "Anda tidak bisa login ke rekening ini sekarang" in str(info_error.value)
 
     def test_rollback_tarik_tunai(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
@@ -540,6 +711,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
         nominal = 1_000_000
 
         method_asli = audit_repo_module.AuditRepository.tambah_audit
@@ -557,7 +729,7 @@ class TestTarikTunai:
         )
 
         with pytest.raises(RuntimeError):
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal,pin=pin)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
