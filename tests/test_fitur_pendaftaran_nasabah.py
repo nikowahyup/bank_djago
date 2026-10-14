@@ -215,10 +215,12 @@ class TestDaftarNasabah:
             ({"level": 0}, "Pilihan level rekening tidak tersedia"),
             ({"level": 5}, "Pilihan level rekening tidak tersedia"),
             ({"setor_awal": "10000000"}, "Setor awal harus berupa angka"),
-            ({'nik':'1'*15},"Jumlah digit NIK tidak valid"),
-            ({'nik':'1'*17},"Jumlah digit NIK tidak valid"),
-            ({'nama':''},"Nama tidak boleh kosong"), # perwakilan untuk NIK,PIN,dan alamat(tidak boleh kosong,spasi pun tidak boleh)
-
+            ({"nik": "1" * 15}, "Jumlah digit NIK tidak valid"),
+            ({"nik": "1" * 17}, "Jumlah digit NIK tidak valid"),
+            (
+                {"nama": ""},
+                "Nama tidak boleh kosong",
+            ),  # perwakilan untuk NIK,PIN,dan alamat(tidak boleh kosong,spasi pun tidak boleh)
         ],
     )
     def test_pendaftaran_dengan_input_tidak_valid(
@@ -267,12 +269,16 @@ class TestDaftarNasabah:
         assert jumlah_riwayat_sesudah == jumlah_riwayat_sebelum
         assert pesan_error in str(info_error.value)
 
-    @pytest.mark.parametrize("level_valid",[1,4])
-    def test_pendaftaran_dengan_memilih_level_rekening_batas_bawah_dan_atas(self, koneksi_test, level_valid,data_nasabah_siap_digunakan_untuk_pendaftaran):
+    @pytest.mark.parametrize("level_valid", [1, 4])
+    def test_pendaftaran_dengan_memilih_level_rekening_batas_bawah_dan_atas(
+        self, koneksi_test, level_valid, data_nasabah_siap_digunakan_untuk_pendaftaran
+    ):
 
         data_persiapan = data_nasabah_siap_digunakan_untuk_pendaftaran
-        data_persiapan['level'] = level_valid
-        data_persiapan['setor_awal'] = RekeningService.jenis_rekening[data_persiapan['level']]['minimal_setor']
+        data_persiapan["level"] = level_valid
+        data_persiapan["setor_awal"] = RekeningService.jenis_rekening[
+            data_persiapan["level"]
+        ]["minimal_setor"]
 
         nasabah_baru, rekening_baru = NasabahService.daftar_dan_buka_rekening(
             **data_persiapan

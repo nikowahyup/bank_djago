@@ -298,19 +298,19 @@ class RekeningRepository:
 
         return cursor.rowcount
 
-
     @staticmethod
     def tambahkan_percobaan_gagal(norek, nik, koneksi):
 
         sql = """UPDATE rekening SET percobaan_gagal = MIN(percobaan_gagal + 1, 3) WHERE norek = ? AND nik_pemilik = ?"""
-        cursor = koneksi.execute(sql,(norek,nik))
+        cursor = koneksi.execute(sql, (norek, nik))
 
         return cursor.rowcount
+
     @staticmethod
-    def reset_jumlah_percobaan_dan_waktu_terkunci(norek,nik, koneksi):
+    def reset_jumlah_percobaan_dan_waktu_terkunci(norek, nik, koneksi):
         sql = "UPDATE rekening SET percobaan_gagal = 0, terkunci_sampai = NULL WHERE norek = ? AND nik_pemilik = ?"
 
-        cursor = koneksi.execute(sql,(norek,nik))
+        cursor = koneksi.execute(sql, (norek, nik))
 
         return cursor.rowcount
 
@@ -318,22 +318,21 @@ class RekeningRepository:
     def ambil_data_rekening_dengan_nik_dan_norek(nik, norek, koneksi):
 
         sql = "SELECT * FROM rekening WHERE norek = ? AND nik_pemilik = ?"
-        cursor = koneksi.execute(sql,(norek, nik))
+        cursor = koneksi.execute(sql, (norek, nik))
 
         return cursor.fetchone()
-
 
     @staticmethod
     def ubah_waktu_terkunci(nik, norek, waktu_terkunci_baru, koneksi):
 
         sql = "UPDATE rekening SET terkunci_sampai = ? WHERE norek = ? AND nik_pemilik = ?"
-        cursor = koneksi.execute(sql,(waktu_terkunci_baru,norek, nik))
+        cursor = koneksi.execute(sql, (waktu_terkunci_baru, norek, nik))
         return cursor.rowcount
 
     @staticmethod
     def ambil_jumlah_percobaan_gagal(nik, norek, koneksi):
 
         sql = "SELECT percobaan_gagal FROM rekening WHERE norek = ? AND nik_pemilik = ?"
-        cursor = koneksi.execute(sql,(norek, nik))
+        cursor = koneksi.execute(sql, (norek, nik))
 
         return cursor.fetchone()

@@ -1,6 +1,8 @@
 from bank_djago.services.exceptions import StatusTidakValid, PinTidakCocok
 import bcrypt
 
+from bank_djago.services.exceptions import InputTidakValid
+
 
 class Validator:
 
@@ -25,11 +27,42 @@ class Validator:
             raise ValueError(error)
 
     @staticmethod
-    def validasi_pin(pin):
-        if not len(pin) == 6:
-            raise ValueError("Jumlah PIN harus 6 digit")
-        if not pin.isdigit():
-            raise ValueError("PIN harus berupa angka semua")
+    def validasi_format_pin(pin):
+        if not isinstance(pin, str) or not pin.strip():
+            raise InputTidakValid("PIN tidak boleh kosong")
+        if not len(pin) == 6 or not pin.isdigit():
+            raise InputTidakValid("PIN harus berupa 6 digit angka")
+
+    @staticmethod
+    def validasi_format_nik(nik):
+        if not isinstance(nik, str) or not nik.strip():
+            raise InputTidakValid("NIK tidak boleh kosong")
+        if not nik.isdigit():
+            raise InputTidakValid("NIK tidak boleh mengandung huruf")
+        if len(nik) != 16:
+            raise InputTidakValid("Jumlah digit NIK tidak valid")
+
+    @staticmethod
+    def validasi_format_norek(norek):
+        if not isinstance(norek, str) or not norek.strip():
+            raise InputTidakValid("Nomor rekening tidak boleh kosong")
+        if not norek.isdigit():
+            raise InputTidakValid("Nomor rekening tidak boleh mengandung huruf")
+        if len(norek) != 16:
+            raise InputTidakValid("Jumlah digit nomor rekening tidak valid")
+
+    @staticmethod
+    def validasi_nominal(nominal):
+        if not isinstance(nominal, int):
+            raise InputTidakValid("Nominal tidak valid")
+        if nominal < 10_000:
+            raise InputTidakValid("Minimal transaksi adalah Rp10.000")
+
+    @staticmethod
+    def validasi_format_identtitas(nik, norek):
+
+        Validator.validasi_format_nik(nik=nik)
+        Validator.validasi_format_norek(norek=norek)
 
     @staticmethod
     def amankan_rekening(rekening):

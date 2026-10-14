@@ -195,8 +195,8 @@ class TestCairkanPinjaman:
     @pytest.fixture
     def pinjaman_siap_cair(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
 
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
         koneksi_test.execute(
             """INSERT INTO pinjaman (
         id,norek, nominal_pinjaman, bunga,tenor,sisa_pokok,status) VALUES (?,?,?,?,?,?,?)""",
@@ -772,8 +772,8 @@ class TestAjukanPinjaman:
     def test_ajukan_pinjaman_happy_path(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah
     ):
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
         id_pnjaman = PinjamanService.ajukan_pinjaman(
             nik=nik, norek=norek, nominal=1_000_000, tenor=6
         )
