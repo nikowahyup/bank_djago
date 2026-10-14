@@ -59,7 +59,18 @@ class Validator:
             raise InputTidakValid("Minimal transaksi adalah Rp10.000")
 
     @staticmethod
-    def verifikasi_format_identitas(nik, norek, pin):
+    def validasi_norek_penerima(norek_pengirim,norek_penerima):
+        if not isinstance(norek_penerima, str) or not norek_penerima.strip():
+            raise InputTidakValid("Nomor rekening penerima tidak boleh kosong")
+        if not norek_penerima.isdigit():
+            raise InputTidakValid("Nomor rekening penerima tidak boleh mengandung huruf")
+        if len(norek_penerima) != 16:
+            raise InputTidakValid("Jumlah digit nomor rekening penerima tidak valid")
+        if norek_penerima == norek_pengirim:
+            raise InputTidakValid("Tidak dapat transfer ke nomor rekening sendiri")
+
+    @staticmethod
+    def validasi_format_identitas(nik, norek, pin):
 
         Validator.validasi_format_nik(nik=nik)
         Validator.validasi_format_norek(norek=norek)

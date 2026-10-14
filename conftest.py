@@ -66,7 +66,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
 def siapkan_data_rekening_penerima(koneksi_test):
     koneksi_test.execute(
         """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-        ("Pengujian", "jln.ninjaku", "123456789"),
+        ("Pengujian", "jln.ninjaku", "7890098765433456"),
     )
 
     koneksi_test.execute(
@@ -74,8 +74,8 @@ def siapkan_data_rekening_penerima(koneksi_test):
         (norek, nik_pemilik, saldo, pin,limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
         VALUES(?,?,?,?,?,?,?,?,?)""",
         (
-            "000111222333",
-            "123456789",
+            "1111000099998888",
+            "7890098765433456",
             10_000_000,
             HASH_PIN_PENERIMA,
             5_000_000,
@@ -87,7 +87,7 @@ def siapkan_data_rekening_penerima(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_PENERIMA}
+    return {"nik": "7890098765433456", "norek": "1111000099998888", "pin": PIN_PENERIMA}
 
 
 @pytest.fixture
