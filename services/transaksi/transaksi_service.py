@@ -29,8 +29,9 @@ class TransaksiService:
     @staticmethod
     def setor_tunai(nik_masuk, norek, nominal):
 
-        if nominal < 10000:
-            raise InputTidakValid("Minimal setor adalah Rp10.000")
+        Validator.validasi_nominal(nominal=nominal)
+
+        Validator.validasi_format_identtitas(nik=nik_masuk, norek=norek)
 
         with buat_koneksi_tulis() as koneksi:
 

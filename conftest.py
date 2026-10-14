@@ -46,7 +46,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
         (norek, nik_pemilik, saldo, pin, limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
         VALUES(?,?,?,?,?,?,?,?,?)""",
         (
-            "123456",
+            "0011002200330044",
             "1000200030004000",
             10_000_000,
             HASH_PIN_UJI,
@@ -59,7 +59,7 @@ def siapkan_data_rekening_dan_nasabah(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"norek": "123456", "nik": "1000200030004000", "pin": PIN_UJI}
+    return {"norek": "0011002200330044", "nik": "1000200030004000", "pin": PIN_UJI}
 
 
 @pytest.fixture

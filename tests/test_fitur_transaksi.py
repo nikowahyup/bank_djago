@@ -68,75 +68,107 @@ class TestSetortunai:
         assert transaksi["saldo_tujuan_sebelum"] == saldo_sebelum
         assert transaksi["saldo_tujuan_sesudah"] == saldo_sesudah
 
-    @pytest.mark.parametrize("nominal", [9999, -9999])
-    def test_setor_tunai_dengan_nominal_tidak_sesuai(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah, nominal
+    @pytest.mark.parametrize(
+        "kwargs_salah,pesan_error",
+        [
+            pytest.param({"nik_masuk": None}, "NIK tidak boleh kosong", id="nik None"),
+            pytest.param({"nik_masuk": ""}, "NIK tidak boleh kosong", id="nik kosong"),
+            pytest.param({"nik_masuk": " "}, "NIK tidak boleh kosong", id="nik spasi"),
+            pytest.param(
+                {
+                    "nik_masuk": "12345ewdt",
+                },
+                "NIK tidak boleh mengandung huruf",
+                id="nik ada huruf",
+            ),
+            pytest.param(
+                {"nik_masuk": "3" * 15},
+                "Jumlah digit NIK tidak valid",
+                id="nik 15 digit",
+            ),
+            pytest.param(
+                {"nik_masuk": "3" * 17},
+                "Jumlah digit NIK tidak valid",
+                id="nik 17 digit",
+            ),
+            pytest.param(
+                {"norek": None}, "Nomor rekening tidak boleh kosong", id="norek None"
+            ),
+            pytest.param(
+                {"norek": "123456werqrq"},
+                "Nomor rekening tidak boleh mengandung huruf",
+                id="norek ada huruf",
+            ),
+            pytest.param(
+                {"norek": ""}, "Nomor rekening tidak boleh kosong", id="norek kosong"
+            ),
+            pytest.param(
+                {"norek": " "}, "Nomor rekening tidak boleh kosong", id="norek spasi"
+            ),
+            pytest.param(
+                {"norek": "2" * 15},
+                "Jumlah digit nomor rekening tidak valid",
+                id="norek 15 digit",
+            ),
+            pytest.param(
+                {"norek": "2" * 17},
+                "Jumlah digit nomor rekening tidak valid",
+                id="norek 17 digit",
+            ),
+            pytest.param({"nominal": "abc"}, "Nominal tidak valid", id="nominal huruf"),
+            pytest.param({"nominal": None}, "Nominal tidak valid", id="nominal None"),
+            pytest.param(
+                {"nominal": 0}, "Minimal transaksi adalah Rp10.000", id="nominal 0"
+            ),
+            pytest.param(
+                {"nominal": -9999},
+                "Minimal transaksi adalah Rp10.000",
+                id="nominal minus",
+            ),
+            pytest.param(
+                {"nominal": 9999},
+                "Minimal transaksi adalah Rp10.000",
+                id="nominal kurang",
+            ),
+        ],
+    )
+    def test_setor_tunai_dengan_input_tidak_valid(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, kwargs_salah, pesan_error
     ):
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        nominal = 1_000_000
+
+        kwargs = {"nik_masuk": nik, "norek": norek, "nominal": nominal}
+        kwargs.update(kwargs_salah)
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
 
         with pytest.raises(InputTidakValid) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
+            TransaksiService.setor_tunai(**kwargs)
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
+        transaksi = koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_tujuan = ?", (norek,)
+        ).fetchone()
+        assert transaksi is None
+
+        riwayat = koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'setor uang'", (norek,)
+        ).fetchone()
+        audit = koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'setor_tunai'", (norek,)
+        ).fetchone()
 
         assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "Minimal setor" in str(info_error.value)
-
-    def test_setor_tunai_dengan_nik_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
-    ):
-
-        nik = "12325"
-        norek = siapkan_data_rekening_dan_nasabah["norek"]
-        nominal = 1_000_000
-
-        saldo_sebelum = RekeningRepository.ambil_saldo(
-            norek=norek, koneksi=koneksi_test
-        )
-
-        with pytest.raises(NikTidakSesuai) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
-
-        saldo_sesudah = RekeningRepository.ambil_saldo(
-            norek=norek, koneksi=koneksi_test
-        )
-
-        assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "sebagai pemilik rekening" in str(info_error.value)
-
-    def test_setor_tunai_dengan_norek_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
-    ):
-
-        nik = siapkan_data_rekening_dan_nasabah["nik"]
-        norek = "12325"
-        nominal = 1_000_000
-        norek_asli = siapkan_data_rekening_dan_nasabah["norek"]
-
-        saldo_sebelum = RekeningRepository.ambil_saldo(
-            norek=norek_asli, koneksi=koneksi_test
-        )
-
-        with pytest.raises(RekeningTidakDitemukan) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, nominal=nominal)
-
-        saldo_sesudah = RekeningRepository.ambil_saldo(
-            norek=norek_asli, koneksi=koneksi_test
-        )
-
-        assert saldo_sesudah == saldo_sebelum
-        print(f"pesan error : {info_error.value}")
-        assert "tidak terdaftar" in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+        assert pesan_error in str(info_error.value)
 
     @pytest.mark.parametrize("status_salah", ["blokir", "tutup"])
     def test_setor_tunai_dengan_status_rekening_tidak_valid(

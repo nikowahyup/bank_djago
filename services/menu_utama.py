@@ -9,7 +9,11 @@ from bank_djago.services.riwayat.riwayat_ui import RiwayatUI
 from bank_djago.utils.ui import UI
 from bank_djago.services.pinjaman.pinjaman_ui import PinjamanUI
 from bank_djago.services.nasabah.nasabah_ui import NasabahUI
-from bank_djago.services.exceptions import PinTidakCocok, RekeningTerkunci, RekeningTidakDitemukan
+from bank_djago.services.exceptions import (
+    PinTidakCocok,
+    RekeningTerkunci,
+    RekeningTidakDitemukan,
+)
 
 
 class NasabahMenu:
@@ -40,12 +44,12 @@ class NasabahMenu:
         while True:
             pin = input("Masukkan PIN untuk rekening pilihan Anda: ")
             try:
-                RekeningService.verifikasi_login_pin(nik_aktif=nik_aktif,norek_aktif=norek_aktif, pin_input=pin)
+                RekeningService.verifikasi_pin_rekening(
+                    nik_aktif=nik_aktif, norek_aktif=norek_aktif, pin_input=pin
+                )
 
             except PinTidakCocok as e:
                 UI.gagal(str(e))
-
-
 
             except RekeningTerkunci as e:
                 UI.gagal(str(e))
@@ -55,9 +59,12 @@ class NasabahMenu:
                 UI.gagal(str(e))
                 return
 
-
             else:
-                sesi = {"nama": data_login["nama"], "nik": nik_aktif, "norek": norek_aktif}
+                sesi = {
+                    "nama": data_login["nama"],
+                    "nik": nik_aktif,
+                    "norek": norek_aktif,
+                }
 
                 NasabahMenu.menu_utama(sesi)
                 return
