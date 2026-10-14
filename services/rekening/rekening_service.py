@@ -642,7 +642,7 @@ class RekeningService:
                 sekarang = datetime.datetime.now()
                 if sekarang < waktu_suspend:
                     raise RekeningTerkunci(
-                        "Rekening sedang terkunci karena terlalu banyak percobaan PIN salah. Coba beberapa saat lagi"
+                        "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah. Coba beberapa saat lagi"
                     )
 
                 else:

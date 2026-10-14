@@ -1,6 +1,6 @@
 import datetime
 
-
+from bank_djago import RekeningService
 from bank_djago.core.pinjaman import Pinjaman
 
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
@@ -54,13 +54,10 @@ class PinjamanService:
     MAKSIMAL_PERSENTASE_DENDA = 0.1
 
     @staticmethod
-    def ajukan_pinjaman(nik, norek, nominal, tenor):
+    def ajukan_pinjaman(nik, norek,pin, nominal, tenor):
 
         if not isinstance(nominal, int):
             raise InputTidakValid("Nominal harus berupa angka")
-
-        if not isinstance(tenor, int):
-            raise InputTidakValid("Jangka waktu harus berupa angka")
 
         if nominal < PinjamanService.MIN_PINJAMAN:
             raise InputTidakValid("Nominal pinjaman di bawah batas minimal")
@@ -68,8 +65,14 @@ class PinjamanService:
         if nominal > PinjamanService.MAX_PINJAMAN:
             raise InputTidakValid("Nominal pinjaman melebihi batas maksimal")
 
+        if not isinstance(tenor, int):
+            raise InputTidakValid("Jangka waktu harus berupa angka")
+
         if tenor not in PinjamanService.TENOR:
             raise InputTidakValid("Pilihan tenor pinjaman tidak tersedia")
+
+        Validator.validasi_format_identitas(nik=nik, norek=norek,pin=pin)
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 

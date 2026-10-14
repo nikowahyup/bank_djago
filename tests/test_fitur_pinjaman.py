@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 
 from bank_djago import JenisReferensi
@@ -17,6 +18,8 @@ from bank_djago.services.exceptions import (
     PinjamanTidakDitemukan,
     RekeningTidakDitemukan,
     PerbaruiStatusGagal,
+PinTidakCocok,
+RekeningTerkunci
 )
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 import bank_djago.penyimpanan.repositories.riwayat_repository as riwayat_repo_module
@@ -769,13 +772,27 @@ class TestBayarCicilan:
 
 class TestAjukanPinjaman:
 
+
+    @staticmethod
+    def _hitung_jejak_pinjaman(koneksi, norek):
+        return (
+            koneksi.execute("SELECT COUNT(*) FROM pinjaman WHERE norek = ?", (norek,)).fetchone()[0],
+            koneksi.execute(
+                "SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'pembukaan pinjaman'", (norek,)
+            ).fetchone()[0],
+            koneksi.execute(
+                "SELECT COUNT(*) FROM audit WHERE norek = ? AND aksi = 'pengajuan_pinjaman'", (norek,)
+            ).fetchone()[0],
+        )
+
     def test_ajukan_pinjaman_happy_path(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah
     ):
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
         id_pnjaman = PinjamanService.ajukan_pinjaman(
-            nik=nik, norek=norek, nominal=1_000_000, tenor=6
+            nik=nik, norek=norek, nominal=1_000_000, tenor=6, pin=pin
         )
 
         data_pinjaman = koneksi_test.execute(
@@ -804,47 +821,102 @@ class TestAjukanPinjaman:
         assert data_pinjaman["tanggal_jatuh_tempo"] is None
         assert id_pnjaman is not None
 
-    def test_ajukan_pinjaman_dengan_nik_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+
+
+    @pytest.mark.parametrize(
+        "kwargs_salah, pesan_error",
+        [
+            # NIK
+            pytest.param({"nik": None}, "NIK tidak boleh kosong", id="nik None"),
+            pytest.param({"nik": ""}, "NIK tidak boleh kosong", id="nik kosong"),
+            pytest.param({"nik": " "}, "NIK tidak boleh kosong", id="nik spasi"),
+            pytest.param({"nik": "12345abcde123456"}, "NIK tidak boleh mengandung huruf", id="nik ada huruf"),
+            pytest.param({"nik": "3" * 15}, "Jumlah digit NIK tidak valid", id="nik 15 digit"),
+            pytest.param({"nik": "3" * 17}, "Jumlah digit NIK tidak valid", id="nik 17 digit"),
+            # norek
+            pytest.param({"norek": None}, "Nomor rekening tidak boleh kosong", id="norek None"),
+            pytest.param({"norek": ""}, "Nomor rekening tidak boleh kosong", id="norek kosong"),
+            pytest.param({"norek": " "}, "Nomor rekening tidak boleh kosong", id="norek spasi"),
+            pytest.param({"norek": "12345abcde123456"}, "Nomor rekening tidak boleh mengandung huruf",
+                         id="norek ada huruf"),
+            pytest.param({"norek": "2" * 15}, "Jumlah digit nomor rekening tidak valid", id="norek 15 digit"),
+            pytest.param({"norek": "2" * 17}, "Jumlah digit nomor rekening tidak valid", id="norek 17 digit"),
+            # PIN
+            pytest.param({"pin": None}, "PIN tidak boleh kosong", id="pin None"),
+            pytest.param({"pin": ""}, "PIN tidak boleh kosong", id="pin kosong"),
+            pytest.param({"pin": " "}, "PIN tidak boleh kosong", id="pin spasi"),
+            pytest.param({"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"),
+            pytest.param({"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"),
+            # tenor
+            pytest.param({"tenor": None}, "Jangka waktu harus berupa angka", id="tenor None"),
+            pytest.param({"tenor": "abc"}, "Jangka waktu harus berupa angka", id="tenor huruf"),
+            pytest.param({"tenor": 0}, "Pilihan tenor pinjaman tidak tersedia", id="tenor 0"),
+            pytest.param({"tenor": -6}, "Pilihan tenor pinjaman tidak tersedia", id="tenor minus"),
+            pytest.param({"tenor": 7}, "Pilihan tenor pinjaman tidak tersedia", id="tenor tidak tersedia"),
+            # nominal
+            pytest.param({"nominal": None}, "Nominal harus berupa angka", id="nominal None"),
+            pytest.param({"nominal": "abc"}, "Nominal harus berupa angka", id="nominal huruf"),
+            pytest.param({"nominal": 0}, "Nominal pinjaman di bawah batas minimal", id="nominal 0"),
+            pytest.param({"nominal": -1_000_000}, "Nominal pinjaman di bawah batas minimal", id="nominal minus"),
+            pytest.param({"nominal": 999_999}, "Nominal pinjaman di bawah batas minimal", id="nominal kurang"),
+            pytest.param({"nominal": 50_000_001}, "Nominal pinjaman melebihi batas maksimal", id="nominal lebih"),
+            # bukti urutan: cek murah sebelum PIN, jadi PIN salah tidak sempat dihitung
+            pytest.param({"nominal": 999_999, "pin": "123457"}, "Nominal pinjaman di bawah batas minimal",
+                         id="nominal cacat dan pin salah"),
+            pytest.param({"tenor": 7, "pin": "123457"}, "Pilihan tenor pinjaman tidak tersedia",
+                         id="tenor cacat dan pin salah"),
+            pytest.param({"norek": "2" * 15, "pin": "123457"}, "Jumlah digit nomor rekening tidak valid",
+                         id="norek cacat dan pin salah"),
+        ],
+    )
+    def test_ajukan_pinjaman_dengan_input_tidak_valid(
+            self, koneksi_test, siapkan_data_rekening_dan_nasabah, kwargs_salah, pesan_error
     ):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
 
-        nik = "87654321"
-        norek = "123456"
+        kwargs = {"nik": nik, "norek": norek, "pin": pin, "nominal": 1_000_000, "tenor": 6}
+        kwargs.update(kwargs_salah)
 
-        with pytest.raises(NikTidakSesuai) as info_error:
+        jejak_sebelum = self._hitung_jejak_pinjaman(koneksi_test, norek)
 
-            PinjamanService.ajukan_pinjaman(
-                nik=nik, norek=norek, nominal=1_000_000, tenor=6
-            )
+        with pytest.raises(InputTidakValid) as info_error:
+            PinjamanService.ajukan_pinjaman(**kwargs)
 
-        data_pinjaman = koneksi_test.execute(
-            "SELECT * FROM pinjaman WHERE norek = ?", (norek,)
-        ).fetchone()
+        percobaan_gagal = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
 
-        print(f"pesan error : {info_error.value}")
-        assert "tidak terdaftar sebagai" in str(info_error.value)
-        assert data_pinjaman is None
+        assert percobaan_gagal == 0
+        assert self._hitung_jejak_pinjaman(koneksi_test, norek) == jejak_sebelum
+        assert pesan_error in str(info_error.value)
 
-    def test_ajukan_pinjaman_dengan_norek_salah(
-        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    @pytest.mark.parametrize(
+        "kwargs_salah",
+        [
+            pytest.param({"nik": "2" * 16}, id="nik bukan pemilik"),
+            pytest.param({"norek": "4" * 16}, id="norek tidak ada"),
+        ],
+    )
+    def test_ajukan_pinjaman_dengan_identitas_tidak_ditemukan(
+            self, koneksi_test, siapkan_data_rekening_dan_nasabah, kwargs_salah
     ):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
 
-        nik = "87654321"
-        norek = "12345"
+        kwargs = {"nik": nik, "norek": norek, "pin": pin, "nominal": 1_000_000, "tenor": 6}
+        kwargs.update(kwargs_salah)
+
+        jejak_sebelum = self._hitung_jejak_pinjaman(koneksi_test, norek)
 
         with pytest.raises(RekeningTidakDitemukan) as info_error:
+            PinjamanService.ajukan_pinjaman(**kwargs)
 
-            PinjamanService.ajukan_pinjaman(
-                nik=nik, norek=norek, nominal=1_000_000, tenor=6
-            )
+        assert self._hitung_jejak_pinjaman(koneksi_test, norek) == jejak_sebelum
+        assert "Rekening tidak terdaftar" in str(info_error.value)
 
-        data_pinjaman = koneksi_test.execute(
-            "SELECT * FROM pinjaman WHERE norek = ?", (norek,)
-        ).fetchone()
-
-        print(f"pesan error : {info_error.value}")
-        assert "tidak ditemukan" in str(info_error.value)
-        assert data_pinjaman is None
 
     @pytest.mark.parametrize("status_rekening_salah", ["blokir", "tutup"])
     def test_ajukan_pinjaman_dengan_rekening_selain_aktif(
@@ -860,19 +932,23 @@ class TestAjukanPinjaman:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
 
         with pytest.raises(StatusTidakValid) as info_error:
             PinjamanService.ajukan_pinjaman(
-                nik=nik, norek=norek, nominal=1_000_000, tenor=6
+                nik=nik, norek=norek, nominal=1_000_000, tenor=6,pin=pin
             )
 
         data_pinjaman = koneksi_test.execute(
             "SELECT * FROM pinjaman WHERE norek = ?", (norek,)
         ).fetchone()
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan pinjaman'",(norek,)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pengajuan_pinjaman'",(norek,)).fetchone()
 
         assert data_pinjaman is None
-        print(f"pesan error : {info_error.value}")
-        assert "Anda saat ini " in str(info_error.value)
+        assert riwayat is None
+        assert audit is None
+        assert f"Rekening Anda saat ini sedang di{status_rekening_salah}" in str(info_error.value)
 
     @pytest.mark.parametrize("status_pinjaman_sebelumnya", ["diajukan", "disetujui"])
     def test_ajukan_pinjaman_saat_masih_ada_pinjaman_belum_disetujui_atau_masih_diajukan(
@@ -881,6 +957,7 @@ class TestAjukanPinjaman:
         siapkan_data_rekening_dan_nasabah,
         status_pinjaman_sebelumnya,
     ):
+
 
         koneksi_test.execute(
             """INSERT INTO pinjaman (id, norek, nominal_pinjaman, bunga, tenor, sisa_pokok,status) VALUES (?,?,?,?,?,?,?)""",
@@ -899,14 +976,81 @@ class TestAjukanPinjaman:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+
+        jumlah_pinjaman = koneksi_test.execute("SELECT COUNT(*) FROM pinjaman WHERE norek = ?",(norek,)).fetchone()[0]
 
         with pytest.raises(StatusTidakValid) as info_error:
             PinjamanService.ajukan_pinjaman(
-                nik=nik, norek=norek, nominal=1_000_000, tenor=6
+                nik=nik, norek=norek, nominal=1_000_000, tenor=6, pin=pin
             )
 
-        print(f"pesan error : {info_error.value}")
+
+        jumlah_pinjaman_sesudah = koneksi_test.execute("SELECT COUNT(*) FROM pinjaman WHERE norek = ?",(norek,)).fetchone()[0]
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan pinjaman'",(norek,)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pengajuan_pinjaman'",(norek,)).fetchone()
+
+        assert jumlah_pinjaman == jumlah_pinjaman_sesudah
+        assert riwayat is None
+        assert audit is None
+
         assert "masih memiliki pengajuan pinjaman" in str(info_error.value)
+
+    def test_ajukan_pinjaman_pin_salah_mencatat_percobaan_gagal(
+            self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_salah = "123457"
+
+        percobaan_sebelum = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        assert percobaan_sebelum == 0
+        jejak_sebelum = self._hitung_jejak_pinjaman(koneksi_test, norek)
+
+        with pytest.raises(PinTidakCocok) as info_error:
+            PinjamanService.ajukan_pinjaman(
+                nik=nik, norek=norek, pin=pin_salah, nominal=1_000_000, tenor=6
+            )
+
+        percobaan_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+
+        assert percobaan_sesudah == 1
+        assert self._hitung_jejak_pinjaman(koneksi_test, norek) == jejak_sebelum
+        assert "PIN yang dimasukkan salah" in str(info_error.value)
+
+    def test_ajukan_pinjaman_rekening_terkunci_dengan_pin_benar(
+            self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_benar = siapkan_data_rekening_dan_nasabah["pin"]
+
+        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=5)).isoformat()
+        koneksi_test.execute(
+            "UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",
+            (waktu_kunci, norek),
+        )
+        koneksi_test.commit()
+        jejak_sebelum = self._hitung_jejak_pinjaman(koneksi_test, norek)
+
+        with pytest.raises(RekeningTerkunci) as info_error:
+            PinjamanService.ajukan_pinjaman(
+                nik=nik, norek=norek, pin=pin_benar, nominal=1_000_000, tenor=6
+            )
+
+        waktu_kunci_sesudah = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
+
+        assert waktu_kunci_sesudah == waktu_kunci
+        assert self._hitung_jejak_pinjaman(koneksi_test, norek) == jejak_sebelum
+        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+
+
 
     def test_rollback_ajukan_pinjaman(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
@@ -927,17 +1071,23 @@ class TestAjukanPinjaman:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah['pin']
 
         with pytest.raises(RuntimeError):
             PinjamanService.ajukan_pinjaman(
-                nik=nik, norek=norek, nominal=1_000_000, tenor=6
+                nik=nik, norek=norek, nominal=1_000_000, tenor=6, pin=pin
             )
 
         data_pinjaman = koneksi_test.execute(
             "SELECT * FROM pinjaman WHERE norek = ?", (norek,)
         ).fetchone()
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembukaan pinjaman'",(norek,)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pengajuan_pinjaman'",(norek,)).fetchone()
 
         assert data_pinjaman is None
+        assert riwayat is None
+        assert audit is None
+
 
 
 class TestSetujuiAtauTolakPinjaman:
