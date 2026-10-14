@@ -1,5 +1,6 @@
 import datetime
 
+from bank_djago import RekeningService
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 from bank_djago.services.transaksi.limit_service import LimitService
@@ -14,7 +15,6 @@ import bank_djago.penyimpanan.sqlite.database as db_module
 from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 
 from bank_djago.services.exceptions import (
-    InputTidakValid,
     RekeningTidakDitemukan,
     PenambahanSaldoGagal,
     StatusTidakValid,
@@ -27,11 +27,13 @@ from bank_djago.services.exceptions import (
 class TransaksiService:
 
     @staticmethod
-    def setor_tunai(nik_masuk, norek, nominal):
+    def setor_tunai(nik_masuk, norek, pin, nominal):
 
         Validator.validasi_nominal(nominal=nominal)
 
-        Validator.validasi_format_identtitas(nik=nik_masuk, norek=norek)
+        Validator.validasi_format_identitas(nik=nik_masuk, norek=norek, pin=pin)
+
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -101,10 +103,13 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def tarik_tunai(nik_masuk, norek, nominal):
+    def tarik_tunai(nik_masuk, norek, pin, nominal):
 
-        if nominal < 10000:
-            raise InputTidakValid("Minimal tarik adalah Rp10.000")
+        Validator.validasi_nominal(nominal=nominal)
+
+        Validator.validasi_format_identitas(nik=nik_masuk, norek=norek, pin=pin)
+
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -183,13 +188,16 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def transfer(nik_masuk, norek_pengirim, norek_penerima, nominal, hari_ini=None):
+    def transfer(nik_masuk, norek_pengirim, norek_penerima, pin, nominal, hari_ini=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
-        if nominal < 10000:
-            raise InputTidakValid("Minimal transfer adalah Rp10.000")
+        Validator.validasi_nominal(nominal=nominal)
+        Validator.validasi_format_identitas(nik=nik_masuk, norek=norek_pengirim, pin=pin)
+        Validator.validasi_norek_penerima(norek_pengirim=norek_pengirim, norek_penerima=norek_penerima)
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk,norek_aktif=norek_pengirim, pin_input=pin)
+
         with buat_koneksi_tulis() as koneksi:
 
             pengirim = RekeningLoader.muat_rekening(
