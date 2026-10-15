@@ -351,16 +351,14 @@ class PinjamanService:
         return True
 
     @staticmethod
-    def bayar_cicilan(nik, norek_pembayaran, id_pinjaman, hari_ini=None):
+    def bayar_cicilan(nik, norek_pembayaran, id_pinjaman, pin, hari_ini=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
-        if not isinstance(id_pinjaman, int):
-            raise InputTidakValid("ID pinjaman harus berupa angka")
-
-        if id_pinjaman <= 0:
-            raise InputTidakValid("ID pinjaman tidak valid")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pembayaran, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pembayaran, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 

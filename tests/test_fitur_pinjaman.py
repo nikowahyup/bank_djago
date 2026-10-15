@@ -1,7 +1,7 @@
 import datetime
 from datetime import date
 
-from bank_djago import JenisReferensi
+from bank_djago import JenisReferensi, JenisTransaksi
 from bank_djago.conftest import koneksi_test, siapkan_data_rekening_dan_nasabah
 from bank_djago.core.pinjaman import Pinjaman
 
@@ -12,7 +12,6 @@ from bank_djago.penyimpanan.repositories.pinjaman_repository import PinjamanRepo
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.services.exceptions import (
     RekeningTidakSesuai,
-    NikTidakSesuai,
     InputTidakValid,
     StatusTidakValid,
     PinjamanTidakDitemukan,
@@ -313,7 +312,7 @@ class TestCairkanPinjaman:
         assert "Pinjaman tidak ditemukan" in str(info_error.value)
 
 
-    def test_cairkan_pinjaman_dengan_norek_pencairan_berbeda_dari_norek_terdaftar(self, koneksi_test, siapkan_data_rekening_penerima, pinjaman_siap_cair):
+    def test_cairkan_pinjaman_dengan_norek_pencairan_tidak_terdaftar_sebagai_pemilik_pinjaman(self, koneksi_test, siapkan_data_rekening_penerima, pinjaman_siap_cair):
         norek = siapkan_data_rekening_penerima['norek']
         nik = siapkan_data_rekening_penerima['nik']
         pin = siapkan_data_rekening_penerima['pin']
@@ -521,388 +520,428 @@ class TestCairkanPinjaman:
 
 
 class TestBayarCicilan:
-
-    def test_bayar_cicilan_pertama_happy_path(self, koneksi_test):
-        koneksi_test.execute(
-            """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-            ("Pengujian", "jln.ninjaku", "987654321"),
-        )
-
-        koneksi_test.execute(
-            """INSERT INTO rekening
-        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
-        VALUES(?,?,?,?,?,?,?,?)""",
-            (
-                "123456",
-                "987654321",
-                10_000_000,
-                "1234",
-                "2026-01-19",
-                "2026-01-20",
-                "2026-02-23",
-                "2026-02-23",
-            ),
-        )
-
+    @pytest.fixture
+    def pinjaman_siap_dibayar_cicilannya(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
         koneksi_test.execute(
             """INSERT INTO pinjaman (
-        id,
-        norek, 
-        nominal_pinjaman, 
-        bunga,
-        tenor,
-        sisa_pokok,
-        status,
-        tanggal_pencairan,
-        tanggal_jatuh_tempo,
-        cicilan_terbayar,
-        cicilan_tetap
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-            (
-                1,
-                "123456",
-                2_000_000,
-                0.12,
-                6,
-                2_000_000,
-                "aktif",
-                "2026-09-20",
-                "2026-10-20",
-                0,
-                345_103,
-            ),
+            id, norek, nominal_pinjaman, bunga, tenor, sisa_pokok, status,
+            tanggal_pencairan, tanggal_jatuh_tempo, cicilan_terbayar, cicilan_tetap
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (1, norek, 2_000_000, 0.12, 6, 2_000_000, "aktif",
+             datetime.date.today().isoformat(), (datetime.date.today() + datetime.timedelta(days=30)).isoformat(), 0, 345_103),
         )
-
         koneksi_test.commit()
+        return {"nik": nik, "norek": norek, "id_pinjaman": 1}
 
-        hari_ini = date(2026, 10, 21)
+    @staticmethod
+    def _ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman):
+        pinjaman = koneksi_test.execute(
+            "SELECT status, cicilan_terbayar, sisa_pokok, tanggal_jatuh_tempo FROM pinjaman WHERE id = ?",
+            (id_pinjaman,),
+        ).fetchone()
+        return {
+            "pinjaman": tuple(pinjaman) if pinjaman else None,
+            "saldo": RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi_test),
+            "transaksi": koneksi_test.execute(
+                "SELECT COUNT(*) FROM transaksi WHERE jenis_referensi = 'pinjaman' AND id_referensi = ?",
+                (id_pinjaman,),
+            ).fetchone()[0],
+            "riwayat": koneksi_test.execute(
+                "SELECT COUNT(*) FROM riwayat WHERE norek = ? AND jenis = 'pembayaran cicilan'",
+                (norek,),
+            ).fetchone()[0],
+            "audit": koneksi_test.execute(
+                "SELECT COUNT(*) FROM audit WHERE norek = ? AND aksi = 'pembayaran_cicilan_pinjaman'",
+                (norek,),
+            ).fetchone()[0],
+        }
 
-        PinjamanService.bayar_cicilan(
-            nik="987654321", norek_pembayaran="123456", id_pinjaman=1, hari_ini=hari_ini
-        )
 
-        cursor = koneksi_test.execute("""SELECT * FROM pinjaman WHERE id = ?""", (1,))
-        hasil = cursor.fetchone()
 
-        cicilan_tetap = hasil["cicilan_tetap"]
-        sisa_pokok = hasil["sisa_pokok"]
-        waktu_pencairan = hasil["tanggal_pencairan"]
-        waktu_jatuh_tempo = hasil["tanggal_jatuh_tempo"]
-        cicilan_terbayar = hasil["cicilan_terbayar"]
-        status = hasil["status"]
+    def test_bayar_cicilan_pertama_happy_path(self, koneksi_test, siapkan_data_rekening_dan_nasabah, pinjaman_siap_dibayar_cicilannya):
+
+        hari_ini = datetime.date.today()
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya['id_pinjaman']
+
+        PinjamanService.bayar_cicilan(nik=nik, norek_pembayaran=norek, pin=pin, id_pinjaman=id_pinjaman, hari_ini=hari_ini)
+        data_pinjaman = koneksi_test.execute("""SELECT * FROM pinjaman WHERE id = ?""", (id_pinjaman,)).fetchone()
+        transaksi = koneksi_test.execute("SELECT * FROM transaksi WHERE norek_sumber = ?",(norek,)).fetchone()
+        assert transaksi is not None
+        assert transaksi['jenis'] == JenisTransaksi.PEMBAYARAN_CICILAN.value
+        assert transaksi['nominal'] == data_pinjaman['cicilan_tetap']
+        id_transaksi = transaksi['id']
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembayaran cicilan' AND transaksi_id = ?",(norek,id_transaksi)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pembayaran_cicilan_pinjaman' AND transaksi_id = ?",(norek,id_transaksi)).fetchone()
+
+
+        cicilan_tetap = data_pinjaman["cicilan_tetap"]
+        sisa_pokok = data_pinjaman["sisa_pokok"]
+        waktu_pencairan = data_pinjaman["tanggal_pencairan"]
+        waktu_jatuh_tempo = data_pinjaman["tanggal_jatuh_tempo"]
+        cicilan_terbayar = data_pinjaman["cicilan_terbayar"]
+        status = data_pinjaman["status"]
 
         assert cicilan_tetap == 345_103
         assert sisa_pokok == 1_674_897
         assert waktu_pencairan is not None
         assert waktu_jatuh_tempo is not None
         assert status == "aktif"
-        assert cicilan_terbayar != 0
+        assert cicilan_terbayar == 1
+        assert riwayat is not None
+        assert audit is not None
 
-    @pytest.fixture
-    def pinjaman_siap_dibayar_cicilannya(self, koneksi_test):
-        koneksi_test.execute(
-            """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-            ("Pengujian", "jln.ninjaku", "987654321"),
-        )
-
-        koneksi_test.execute(
-            """INSERT INTO rekening
-        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
-        VALUES(?,?,?,?,?,?,?,?)""",
-            (
-                "123456",
-                "987654321",
-                10_000_000,
-                "1234",
-                "2026-01-19",
-                "2026-01-20",
-                "2026-02-23",
-                "2026-02-23",
-            ),
-        )
-
-        koneksi_test.execute(
-            """INSERT INTO pinjaman (
-        id,
-        norek, 
-        nominal_pinjaman, 
-        bunga,
-        tenor,
-        sisa_pokok,
-        status,
-        tanggal_pencairan,
-        tanggal_jatuh_tempo,
-        cicilan_terbayar,
-        cicilan_tetap
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-            (
-                1,
-                "123456",
-                2_000_000,
-                0.12,
-                6,
-                2_000_000,
-                "aktif",
-                "2026-09-20",
-                "2026-10-20",
-                0,
-                345_103,
-            ),
-        )
-
-        koneksi_test.commit()
-
-        return {"nik": "987654321", "norek": "123456", "id_pinjaman": 1}
 
     def test_bayar_cicilan_sebelum_jatuh_tempo(
         self,
         koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+            pinjaman_siap_dibayar_cicilannya,
+
+
     ):
-        koneksi_test.execute(
-            """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-            ("Pengujian", "jln.ninjaku", "987654321"),
-        )
 
-        koneksi_test.execute(
-            """INSERT INTO rekening
-        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
-        VALUES(?,?,?,?,?,?,?,?)""",
-            (
-                "123456",
-                "987654321",
-                10_000_000,
-                "1234",
-                "2026-01-19",
-                "2026-01-20",
-                "2026-02-23",
-                "2026-02-23",
-            ),
-        )
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya['id_pinjaman']
 
-        koneksi_test.execute(
-            """INSERT INTO pinjaman (
-        id,
-        norek, 
-        nominal_pinjaman, 
-        bunga,
-        tenor,
-        sisa_pokok,
-        status,
-        tanggal_pencairan,
-        tanggal_jatuh_tempo,
-        cicilan_terbayar,
-        cicilan_tetap
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-            (
-                1,
-                "123456",
-                2_000_000,
-                0.12,
-                6,
-                2_000_000,
-                "aktif",
-                "2026-09-20",
-                "2026-11-20",
-                1,
-                345_103,
-            ),
-        )
-
-        koneksi_test.commit()
-
-        hari_ini = date(2026, 10, 19)
-
+        hari_ini = datetime.date.today() - datetime.timedelta(days=1)
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test=koneksi_test,norek=norek, id_pinjaman=id_pinjaman)
         with pytest.raises(StatusTidakValid) as info_error:
             PinjamanService.bayar_cicilan(
-                nik="987654321",
-                norek_pembayaran="123456",
-                id_pinjaman=1,
+                nik=nik,
+                norek_pembayaran=norek,
+                id_pinjaman=id_pinjaman,
                 hari_ini=hari_ini,
+                pin=pin
             )
 
-        print(f"pesan error :{info_error.value}")
+        assert self._ambil_kondisi_cicilan(koneksi_test=koneksi_test, norek=norek, id_pinjaman=id_pinjaman) == kondisi_sebelum
         assert "baru boleh dibayar" in str(info_error.value)
 
-    def test_bayar_cicilan_dengan_norek_salah(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
+
+    @pytest.mark.parametrize(
+        "kwargs_salah, pesan_error",
+        [
+            # NIK
+            pytest.param({"nik": None}, "NIK tidak boleh kosong", id="nik None"),
+            pytest.param({"nik": ""}, "NIK tidak boleh kosong", id="nik kosong"),
+            pytest.param({"nik": " "}, "NIK tidak boleh kosong", id="nik spasi"),
+            pytest.param({"nik": "12345abcde123456"}, "NIK tidak boleh mengandung huruf", id="nik ada huruf"),
+            pytest.param({"nik": "3" * 15}, "Jumlah digit NIK tidak valid", id="nik 15 digit"),
+            pytest.param({"nik": "3" * 17}, "Jumlah digit NIK tidak valid", id="nik 17 digit"),
+            # norek pembayaran
+            pytest.param({"norek_pembayaran": None}, "Nomor rekening tidak boleh kosong", id="norek None"),
+            pytest.param({"norek_pembayaran": ""}, "Nomor rekening tidak boleh kosong", id="norek kosong"),
+            pytest.param({"norek_pembayaran": " "}, "Nomor rekening tidak boleh kosong", id="norek spasi"),
+            pytest.param({"norek_pembayaran": "12345abcde123456"}, "Nomor rekening tidak boleh mengandung huruf",
+                         id="norek ada huruf"),
+            pytest.param({"norek_pembayaran": "2" * 15}, "Jumlah digit nomor rekening tidak valid",
+                         id="norek 15 digit"),
+            pytest.param({"norek_pembayaran": "2" * 17}, "Jumlah digit nomor rekening tidak valid",
+                         id="norek 17 digit"),
+            # PIN
+            pytest.param({"pin": None}, "PIN tidak boleh kosong", id="pin None"),
+            pytest.param({"pin": ""}, "PIN tidak boleh kosong", id="pin kosong"),
+            pytest.param({"pin": " "}, "PIN tidak boleh kosong", id="pin spasi"),
+            pytest.param({"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"),
+            pytest.param({"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"),
+            # ID pinjaman
+            pytest.param({"id_pinjaman": None}, "ID pinjaman harus berupa angka", id="id None"),
+            pytest.param({"id_pinjaman": "abc"}, "ID pinjaman harus berupa angka", id="id huruf"),
+            pytest.param({"id_pinjaman": 1.5}, "ID pinjaman harus berupa angka", id="id desimal"),
+            pytest.param({"id_pinjaman": True}, "ID pinjaman harus berupa angka", id="id bool"),
+            pytest.param({"id_pinjaman": 0}, "ID pinjaman tidak valid", id="id nol"),
+            pytest.param({"id_pinjaman": -9}, "ID pinjaman tidak valid", id="id negatif"),
+            # bukti urutan: cek murah sebelum PIN
+            pytest.param({"id_pinjaman": -9, "pin": "123457"}, "ID pinjaman tidak valid", id="id cacat dan pin salah"),
+            pytest.param({"norek_pembayaran": "2" * 15, "pin": "123457"}, "Jumlah digit nomor rekening tidak valid",
+                         id="norek cacat dan pin salah"),
+        ],
+    )
+    def test_bayar_cicilan_dengan_input_tidak_valid(
+            self, koneksi_test, pinjaman_siap_dibayar_cicilannya,
+            siapkan_data_rekening_dan_nasabah, kwargs_salah, pesan_error,
     ):
+        norek = pinjaman_siap_dibayar_cicilannya["norek"]
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya["id_pinjaman"]
 
-        with pytest.raises(RekeningTidakSesuai) as norek_salah:
-            hari_ini = date(2026, 9, 18)
-            PinjamanService.bayar_cicilan(
-                nik=pinjaman_siap_dibayar_cicilannya["nik"],
-                norek_pembayaran="5554",
-                id_pinjaman=pinjaman_siap_dibayar_cicilannya["id_pinjaman"],
-                hari_ini=hari_ini,
-            )
+        kwargs = {
+            "nik": pinjaman_siap_dibayar_cicilannya["nik"],
+            "norek_pembayaran": norek,
+            "pin": siapkan_data_rekening_dan_nasabah["pin"],
+            "id_pinjaman": id_pinjaman,
+            "hari_ini": date(2026, 10, 21),
+        }
+        kwargs.update(kwargs_salah)
 
-        print(f"pesan error : {norek_salah.value}")
-        assert "pemilik pinjaman" in str(norek_salah.value)
-
-    def test_bayar_cicilan_dengan_nik_salah(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
-    ):
-
-        with pytest.raises(NikTidakSesuai) as nik_salah:
-            hari_ini = date(2026, 9, 18)
-            PinjamanService.bayar_cicilan(
-                nik="9990",
-                norek_pembayaran=pinjaman_siap_dibayar_cicilannya["norek"],
-                id_pinjaman=pinjaman_siap_dibayar_cicilannya["id_pinjaman"],
-                hari_ini=hari_ini,
-            )
-
-        print(f"pesan error : {nik_salah.value}")
-        assert "pemilik pinjaman" in str(nik_salah.value)
-
-    def test_bayar_cicilan_dengan_id_pinjaman_negatif(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
-    ):
-
-        with pytest.raises(InputTidakValid) as info_id:
-            hari_ini = date(2026, 9, 18)
-            PinjamanService.bayar_cicilan(
-                nik=pinjaman_siap_dibayar_cicilannya["nik"],
-                norek_pembayaran=pinjaman_siap_dibayar_cicilannya["norek"],
-                id_pinjaman=-9,
-                hari_ini=hari_ini,
-            )
-
-        print(f"pesan error : {info_id.value}")
-        assert "tidak valid" in str(info_id.value)
-
-    def test_bayar_cicilan_dengan_id_tidak_terdaftar(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
-    ):
-
-        with pytest.raises(PinjamanTidakDitemukan) as info_id:
-            hari_ini = date(2026, 9, 18)
-            PinjamanService.bayar_cicilan(
-                nik=pinjaman_siap_dibayar_cicilannya["nik"],
-                norek_pembayaran=pinjaman_siap_dibayar_cicilannya["norek"],
-                id_pinjaman=100,
-                hari_ini=hari_ini,
-            )
-
-        print(f"pesan error : {info_id.value}")
-        assert "tidak ditemukan" in str(info_id.value)
-
-    def test_bayar_cicilan_dengan_id_berupa_huruf(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
-    ):
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman)
 
         with pytest.raises(InputTidakValid) as info_error:
+            PinjamanService.bayar_cicilan(**kwargs)
 
-            PinjamanService.bayar_cicilan(
-                nik=pinjaman_siap_dibayar_cicilannya["nik"],
-                norek_pembayaran=pinjaman_siap_dibayar_cicilannya["norek"],
-                id_pinjaman="abc",
-                hari_ini=date(2026, 10, 19),
-            )
+        percobaan_gagal = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
 
-        print(f"pesan error : {info_error.value}")
+        assert percobaan_gagal == 0
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_sebelum
+        assert pesan_error in str(info_error.value)
 
-        assert "berupa angka" in str(info_error.value)
+
+
+    @pytest.mark.parametrize(
+        "kwargs_salah",
+        [
+            pytest.param({"nik": "2" * 16}, id="nik bukan pemilik"),
+            pytest.param({"norek_pembayaran": "4" * 16}, id="norek tidak ada"),
+        ],
+    )
+    def test_bayar_cicilan_dengan_identitas_tidak_ditemukan(
+            self, koneksi_test, pinjaman_siap_dibayar_cicilannya,
+            siapkan_data_rekening_dan_nasabah, kwargs_salah,
+    ):
+        norek = pinjaman_siap_dibayar_cicilannya["norek"]
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya["id_pinjaman"]
+
+        kwargs = {
+            "nik": pinjaman_siap_dibayar_cicilannya["nik"],
+            "norek_pembayaran": norek,
+            "pin": siapkan_data_rekening_dan_nasabah["pin"],
+            "id_pinjaman": id_pinjaman,
+            "hari_ini": date(2026, 10, 21),
+        }
+        kwargs.update(kwargs_salah)
+
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman)
+
+        with pytest.raises(RekeningTidakDitemukan) as info_error:
+            PinjamanService.bayar_cicilan(**kwargs)
+
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_sebelum
+        assert "Rekening tidak terdaftar" in str(info_error.value)
+
+
+    @pytest.mark.parametrize("status_salah",['blokir','tutup'])
+    def test_bayar_cicilan_dengan_status_rekening_tidak_valid(self, koneksi_test, pinjaman_siap_dibayar_cicilannya,siapkan_data_rekening_dan_nasabah, status_salah):
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya['id_pinjaman']
+
+        koneksi_test.execute("UPDATE rekening SET status = ? WHERE norek = ?",(status_salah, norek,))
+        koneksi_test.commit()
+
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test=koneksi_test, norek=norek, id_pinjaman=id_pinjaman)
+
+        with pytest.raises(StatusTidakValid) as info_error:
+            PinjamanService.bayar_cicilan(nik=nik, norek_pembayaran=norek, id_pinjaman=id_pinjaman, pin=pin)
+
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_sebelum
+        assert f"Rekening Anda saat ini sedang di{status_salah}" in str(info_error.value)
 
     def test_bayar_cicilan_setelah_8_hari(
-        self, koneksi_test, pinjaman_siap_dibayar_cicilannya
+        self, koneksi_test, pinjaman_siap_dibayar_cicilannya, siapkan_data_rekening_dan_nasabah
     ):
-        hari_ini = date(2026, 10, 28)
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya['id_pinjaman']
+        jatuh_tempo_pinjaman = koneksi_test.execute("SELECT tanggal_jatuh_tempo FROM pinjaman WHERE norek = ?",(norek,)).fetchone()['tanggal_jatuh_tempo']
+        jatuh_tempo_pinjaman = datetime.date.fromisoformat(jatuh_tempo_pinjaman)
+        hari_ini = jatuh_tempo_pinjaman + datetime.timedelta(days=8)
 
         denda = 345
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
-            norek="123456", koneksi=koneksi_test
+            norek=norek, koneksi=koneksi_test
         )
 
         PinjamanService.bayar_cicilan(
-            nik=pinjaman_siap_dibayar_cicilannya["nik"],
-            norek_pembayaran=pinjaman_siap_dibayar_cicilannya["norek"],
-            id_pinjaman=pinjaman_siap_dibayar_cicilannya["id_pinjaman"],
+            nik=nik,
+            norek_pembayaran=norek,
+            id_pinjaman=id_pinjaman,
             hari_ini=hari_ini,
+            pin=pin
         )
 
         total_bayar = 345_103 + denda
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
-            norek="123456", koneksi=koneksi_test
+            norek=norek, koneksi=koneksi_test
         )
+        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman, koneksi=koneksi_test)
+        transaksi = koneksi_test.execute("SELECT * FROM transaksi WHERE norek_sumber = ?",(norek,)).fetchone()
+        assert transaksi is not None
+        assert transaksi['jenis'] == JenisTransaksi.PEMBAYARAN_CICILAN.value
+        assert transaksi['nominal'] == data_pinjaman['cicilan_tetap']
+        assert transaksi['biaya'] == denda
 
         assert saldo_sesudah == saldo_sebelum - total_bayar
 
-    def test_bayar_cicilan_terakhir_untuk_pelunasan(self, koneksi_test):
+    def test_bayar_cicilan_terakhir_untuk_pelunasan(self, koneksi_test, pinjaman_siap_dibayar_cicilannya, siapkan_data_rekening_dan_nasabah):
 
-        koneksi_test.execute(
-            """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-            ("Pengujian", "jln.ninjaku", "987654321"),
-        )
 
-        koneksi_test.execute(
-            """INSERT INTO rekening
-        (norek, nik_pemilik, saldo, pin, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin)
-        VALUES(?,?,?,?,?,?,?,?)""",
-            (
-                "123456",
-                "987654321",
-                10_000_000,
-                "1234",
-                "2026-01-19",
-                "2026-01-20",
-                "2026-02-23",
-                "2026-02-23",
-            ),
-        )
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya['id_pinjaman']
 
-        koneksi_test.execute(
-            """INSERT INTO pinjaman (
-        id,
-        norek,
-         nominal_pinjaman, 
-         bunga,
-         tenor,
-         sisa_pokok,
-         status,
-         tanggal_pencairan,
-         tanggal_jatuh_tempo,
-         cicilan_terbayar,
-         cicilan_tetap
-         ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-            (
-                1,
-                "123456",
-                2_000_000,
-                0.12,
-                6,
-                341_648,
-                "aktif",
-                "2026-09-20",
-                "2026-10-20",
-                5,
-                345_103,
-            ),
-        )
+        tenor_pinjaman = koneksi_test.execute("SELECT tenor FROM pinjaman WHERE norek = ?",(norek,)).fetchone()['tenor']
+        hari_ini = datetime.date.today() + datetime.timedelta(days=30*tenor_pinjaman)
 
+        sisa_pokok_update = 341_648
+        koneksi_test.execute("UPDATE pinjaman SET cicilan_terbayar = 5,sisa_pokok = ? WHERE id = ? AND norek = ?",(sisa_pokok_update,id_pinjaman,norek))
         koneksi_test.commit()
 
+        data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman, koneksi=koneksi_test)
+        cicilan_terbayar_sebelum = data_pinjaman['cicilan_terbayar']
+        sisa_pokok_sebelum = data_pinjaman['sisa_pokok']
+
+        assert cicilan_terbayar_sebelum == 5
+        assert sisa_pokok_sebelum == sisa_pokok_update
+
         PinjamanService.bayar_cicilan(
-            nik="987654321",
-            norek_pembayaran="123456",
+            nik=nik,
+            norek_pembayaran=norek,
             id_pinjaman=1,
-            hari_ini=date(2027, 2, 21),
+            hari_ini=hari_ini,
+            pin=pin
         )
 
         data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
-            id_pinjaman=1, koneksi=koneksi_test
+            id_pinjaman=id_pinjaman, koneksi=koneksi_test
         )
 
         sisa_pokok = data_pinjaman["sisa_pokok"]
         status = data_pinjaman["status"]
         cicilan_terbayar = data_pinjaman["cicilan_terbayar"]
 
+        transaksi = koneksi_test.execute("SELECT * FROM transaksi WHERE norek_sumber = ?",(norek,)).fetchone()
+        assert transaksi is not None
+        assert transaksi['jenis'] == JenisTransaksi.PEMBAYARAN_CICILAN.value
+        assert transaksi['nominal'] == data_pinjaman['cicilan_tetap']
+        assert transaksi['id_referensi'] == id_pinjaman
+        id_transaksi = transaksi['id']
+
+        riwayat = koneksi_test.execute("SELECT * FROM riwayat WHERE norek = ? AND jenis = 'pembayaran cicilan' AND transaksi_id = ?",(norek,id_transaksi)).fetchone()
+        audit = koneksi_test.execute("SELECT * FROM audit WHERE norek = ? AND aksi = 'pembayaran_cicilan_pinjaman' AND transaksi_id = ?",(norek, id_transaksi)).fetchone()
+
+
         assert sisa_pokok == 0
         assert status == "lunas"
         assert cicilan_terbayar == 6
+        assert riwayat is not None
+        assert audit is not None
 
+    def test_bayar_cicilan_dengan_id_pinjaman_tidak_terdaftar(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+        pin = siapkan_data_rekening_dan_nasabah['pin']
+        id_pinjaman = 99
+
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test=koneksi_test, norek=norek,id_pinjaman=id_pinjaman)
+
+        with pytest.raises(PinjamanTidakDitemukan) as info_error:
+            PinjamanService.bayar_cicilan(nik=nik, norek_pembayaran=norek, id_pinjaman=id_pinjaman, pin=pin)
+
+        assert self._ambil_kondisi_cicilan(koneksi_test=koneksi_test, norek=norek, id_pinjaman=id_pinjaman) == kondisi_sebelum
+        assert "Pinjaman tidak ditemukan" in str(info_error.value)
+
+    def test_bayar_cicilan_dengan_norek_pembayaran_tidak_terdaftar_sebagai_pemilik_pinjaman(
+            self, koneksi_test, siapkan_data_rekening_dan_nasabah,
+            siapkan_data_rekening_penerima, pinjaman_siap_dibayar_cicilannya
+    ):
+        norek_pemilik = pinjaman_siap_dibayar_cicilannya["norek"]
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya["id_pinjaman"]
+
+        nik = siapkan_data_rekening_penerima["nik"]
+        norek = siapkan_data_rekening_penerima["norek"]
+        pin = siapkan_data_rekening_penerima["pin"]
+
+        kondisi_pemilik_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek_pemilik, id_pinjaman)
+        kondisi_pemanggil_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman)
+
+        with pytest.raises(RekeningTidakSesuai) as info_error:
+            PinjamanService.bayar_cicilan(
+                nik=nik, norek_pembayaran=norek, pin=pin,
+                id_pinjaman=id_pinjaman, hari_ini=datetime.date.today(),
+            )
+
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek_pemilik, id_pinjaman) == kondisi_pemilik_sebelum
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_pemanggil_sebelum
+        assert "Rekening ini tidak terdaftar sebagai pemilik pinjaman" in str(info_error.value)
+
+    def test_bayar_cicilan_pin_salah_mencatat_percobaan_gagal(
+            self, koneksi_test, pinjaman_siap_dibayar_cicilannya
+    ):
+        nik = pinjaman_siap_dibayar_cicilannya["nik"]
+        norek = pinjaman_siap_dibayar_cicilannya["norek"]
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya["id_pinjaman"]
+        pin_salah = "123457"
+
+        percobaan_sebelum = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        assert percobaan_sebelum == 0
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman)
+
+        with pytest.raises(PinTidakCocok) as info_error:
+            PinjamanService.bayar_cicilan(
+                nik=nik,
+                norek_pembayaran=norek,
+                pin=pin_salah,
+                id_pinjaman=id_pinjaman,
+                hari_ini=datetime.date.today(),
+            )
+
+        percobaan_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+
+        assert percobaan_sesudah == 1
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_sebelum
+        assert "PIN yang dimasukkan salah" in str(info_error.value)
+
+    def test_bayar_cicilan_rekening_terkunci_dengan_pin_benar(
+            self, koneksi_test, pinjaman_siap_dibayar_cicilannya, siapkan_data_rekening_dan_nasabah
+    ):
+        nik = pinjaman_siap_dibayar_cicilannya["nik"]
+        norek = pinjaman_siap_dibayar_cicilannya["norek"]
+        id_pinjaman = pinjaman_siap_dibayar_cicilannya["id_pinjaman"]
+        pin_benar = siapkan_data_rekening_dan_nasabah["pin"]
+
+        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=5)).isoformat()
+        koneksi_test.execute(
+            "UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",
+            (waktu_kunci, norek),
+        )
+        koneksi_test.commit()
+        kondisi_sebelum = self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman)
+
+        with pytest.raises(RekeningTerkunci) as info_error:
+            PinjamanService.bayar_cicilan(
+                nik=nik,
+                norek_pembayaran=norek,
+                pin=pin_benar,
+                id_pinjaman=id_pinjaman,
+                hari_ini=datetime.date.today(),
+            )
+
+        waktu_kunci_sesudah = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
+
+        assert waktu_kunci_sesudah == waktu_kunci
+        assert self._ambil_kondisi_cicilan(koneksi_test, norek, id_pinjaman) == kondisi_sebelum
+        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
 
 class TestAjukanPinjaman:
 
