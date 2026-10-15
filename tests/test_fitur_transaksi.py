@@ -284,7 +284,7 @@ class TestSetortunai:
         assert saldo_sesudah == saldo_sebelum
         assert riwayat is None
         assert audit is None
-        assert "Rekening sedang terkunci karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
 
 
 
@@ -703,7 +703,7 @@ class TestTarikTunai:
         assert saldo_sesudah == saldo_sebelum
         assert riwayat is None
         assert audit is None
-        assert "Rekening sedang terkunci karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
 
     def test_rollback_tarik_tunai(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
@@ -1949,7 +1949,7 @@ class TestTransfer:
         assert RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test) == saldo_pengirim_sebelum
         assert RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test) == saldo_penerima_sebelum
         assert all(v is None for v in jejak.values())
-        assert "Rekening sedang terkunci karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
 
     @pytest.mark.parametrize(
         "kwargs_salah, pesan_error",

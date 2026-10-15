@@ -666,6 +666,7 @@ Constraint SQLite menjamin nilai jenis_aro dan lama_aro yang tersimpan selalu va
 - Percobaan kegagalan dan waktu terkunci disimpan di dalam database per-rekening
 - pengecekan norek penerima dan pengirim saat ini masih ada di dua tempat,method cari_penerima dan pengecekan awal transfer
 - Saat ini(mulai dari tanggal 15 Oktober 2026) unit test pinjaman dan deposito tidak dapat digunakan karena belum penyesuaian dengan conftest terbaru
+- Otorisasi admin pinjaman hanya dijaga oleh menu
 
 - ## Catatan Pengujian
 
