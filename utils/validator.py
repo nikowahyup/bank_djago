@@ -70,6 +70,13 @@ class Validator:
             raise InputTidakValid("Tidak dapat transfer ke nomor rekening sendiri")
 
     @staticmethod
+    def validasi_id_objek(id_objek, nama):
+        if not isinstance(id_objek, int) or isinstance(id_objek, bool):
+            raise InputTidakValid(f"ID {nama} harus berupa angka")
+        if id_objek <= 0:
+            raise InputTidakValid(f"ID {nama} tidak valid")
+
+    @staticmethod
     def validasi_format_identitas(nik, norek, pin):
 
         Validator.validasi_format_nik(nik=nik)

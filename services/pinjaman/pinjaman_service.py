@@ -211,21 +211,15 @@ class PinjamanService:
         return True
 
     @staticmethod
-    def cairkan_pinjaman(nik, norek_pencairan, id_pinjaman, hari_ini=None):
+    def cairkan_pinjaman(nik, norek_pencairan, pin, id_pinjaman, hari_ini=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
-        if not isinstance(id_pinjaman, int):
-            raise InputTidakValid("ID pinjaman harus berupa angka")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pencairan, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_pinjaman,nama='pinjaman')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik,norek_aktif=norek_pencairan, pin_input=pin)
 
-        if id_pinjaman <= 0:
-            raise InputTidakValid("ID pinjaman tidak valid")
-
-        if not isinstance(nik, str):
-            raise InputTidakValid("NIK tidak valid")
-        if not isinstance(norek_pencairan, str):
-            raise InputTidakValid("Nomor rekening tidak valid")
 
         with buat_koneksi_tulis() as koneksi:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
