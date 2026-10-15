@@ -1285,6 +1285,24 @@ class TestSetujuiAtauTolakPinjaman:
 
         return {"id_pinjaman": 1}
 
+    @staticmethod
+    def _ambil_kondisi_keputusan(koneksi, id_pinjaman, norek, nik):
+        pinjaman = koneksi.execute(
+            "SELECT status, catatan_admin FROM pinjaman WHERE id = ?", (id_pinjaman,)
+        ).fetchone()
+        return {
+            "pinjaman": tuple(pinjaman) if pinjaman else None,
+            "audit": koneksi.execute(
+                "SELECT COUNT(*) FROM audit WHERE norek = ?", (norek,)
+            ).fetchone()[0],
+            "notifikasi": NotifikasiRepository.cari_notifikasi_dengan_referensi(
+                nik_pemilik=nik,
+                jenis_referensi=JenisReferensi.PINJAMAN,
+                id_objek=id_pinjaman,
+                koneksi=koneksi,
+            ),
+        }
+
     @pytest.mark.parametrize(
         "fungsi_service, kwargs_tambahan, status_pinjaman, catatan_diharapkan,aksi_diharapkan",
         [
@@ -1331,7 +1349,7 @@ class TestSetujuiAtauTolakPinjaman:
             koneksi=koneksi_test,
         )
         audit = koneksi_test.execute(
-            "SELECT * FROM audit WHERE norek = ?", (norek,)
+            "SELECT * FROM audit WHERE norek = ? AND aksi = ?", (norek,aksi_diharapkan)
         ).fetchone()
 
         assert data_pinjaman["status"] == status_pinjaman
@@ -1341,32 +1359,7 @@ class TestSetujuiAtauTolakPinjaman:
         if catatan_diharapkan is not None:
             assert data_pinjaman["catatan_admin"] == catatan_diharapkan
 
-    @pytest.mark.parametrize(
-        "fungsi_service, id_invalid, kwargs_tambahan, pesan_diharapkan",
-        [
-            (PinjamanService.setujui_pinjaman, "abc", {}, "berupa angka"),
-            (PinjamanService.setujui_pinjaman, -1, {}, "tidak valid"),
-            (
-                PinjamanService.tolak_pinjaman,
-                "abc",
-                {"catatan_admin": "penolakan untuk pengujian"},
-                "berupa angka",
-            ),
-            (
-                PinjamanService.tolak_pinjaman,
-                -1,
-                {"catatan_admin": "penolakan untuk pengujian"},
-                "tidak valid",
-            ),
-        ],
-    )
-    def test_setujui_atau_tolak_pinjaman_dengan_id_invalid(
-        self, fungsi_service, id_invalid, kwargs_tambahan, pesan_diharapkan
-    ):
-        with pytest.raises(InputTidakValid) as info_error:
-            fungsi_service(id_pinjaman=id_invalid, **kwargs_tambahan)
 
-        assert pesan_diharapkan in str(info_error.value)
 
     @pytest.mark.parametrize(
         "fungsi_service, kwargs_tambahan, status_salah",
@@ -1398,24 +1391,19 @@ class TestSetujuiAtauTolakPinjaman:
         kwargs_tambahan,
         status_salah,
         siapkan_data_rekening_dan_nasabah,
+            pinjaman_siap_diputuskan
     ):
 
-        koneksi_test.execute(
-            """INSERT INTO pinjaman (
-        id,norek, nominal_pinjaman, bunga,tenor,sisa_pokok,status) VALUES (?,?,?,?,?,?,?)""",
-            (
-                1,
-                siapkan_data_rekening_dan_nasabah["norek"],
-                2_000_000,
-                0.12,
-                6,
-                0,
-                status_salah,
-            ),
-        )
+
+        nik = siapkan_data_rekening_dan_nasabah['nik']
+        norek = siapkan_data_rekening_dan_nasabah['norek']
+
+        koneksi_test.execute("UPDATE pinjaman SET status = ? WHERE norek = ?",(status_salah, norek))
         koneksi_test.commit()
 
-        id_pinjaman = 1
+        id_pinjaman = pinjaman_siap_diputuskan['id_pinjaman']
+
+        kondisi_sebelum = self._ambil_kondisi_keputusan(koneksi=koneksi_test,id_pinjaman=id_pinjaman, norek=norek, nik=nik)
 
         with pytest.raises(StatusTidakValid) as info_error:
             fungsi_service(id_pinjaman=id_pinjaman, **kwargs_tambahan)
@@ -1424,9 +1412,95 @@ class TestSetujuiAtauTolakPinjaman:
             id_pinjaman=id_pinjaman, koneksi=koneksi_test
         )
 
-        print(f"pesan errof : {info_error.value}")
+        assert self._ambil_kondisi_keputusan(koneksi=koneksi_test, id_pinjaman=id_pinjaman, norek=norek, nik=nik) == kondisi_sebelum
         assert data_pinjaman["status"] == status_salah
         assert "Pinjaman tidak dapat" in str(info_error.value)
+
+    @pytest.mark.parametrize(
+        "fungsi_service, kwargs_tambahan",
+        [
+            pytest.param(PinjamanService.setujui_pinjaman, {}, id="setujui"),
+            pytest.param(
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                id="tolak",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "id_invalid, pesan_error",
+        [
+            pytest.param(None, "ID pinjaman harus berupa angka", id="id None"),
+            pytest.param("abc", "ID pinjaman harus berupa angka", id="id huruf"),
+            pytest.param(1.5, "ID pinjaman harus berupa angka", id="id desimal"),
+            pytest.param(True, "ID pinjaman harus berupa angka", id="id bool"),
+            pytest.param(0, "ID pinjaman tidak valid", id="id nol"),
+            pytest.param(-1, "ID pinjaman tidak valid", id="id negatif"),
+        ],
+    )
+    def test_setujui_atau_tolak_pinjaman_dengan_id_tidak_valid(
+            self, koneksi_test, pinjaman_siap_diputuskan, siapkan_data_rekening_dan_nasabah,
+            fungsi_service, kwargs_tambahan, id_invalid, pesan_error,
+    ):
+        id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        kondisi_sebelum = self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik)
+
+        with pytest.raises(InputTidakValid) as info_error:
+            fungsi_service(id_pinjaman=id_invalid, **kwargs_tambahan)
+
+        assert self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik) == kondisi_sebelum
+        assert pesan_error in str(info_error.value)
+
+    @pytest.mark.parametrize(
+        "catatan, pesan_error",
+        [
+            pytest.param(None, "Catatan tidak boleh kosong", id="catatan None"),
+            pytest.param("", "Catatan tidak boleh kosong", id="catatan kosong"),
+            pytest.param("   ", "Catatan tidak boleh kosong", id="catatan spasi"),
+        ],
+    )
+    def test_tolak_pinjaman_dengan_catatan_tidak_valid(
+            self, koneksi_test, pinjaman_siap_diputuskan, siapkan_data_rekening_dan_nasabah,
+            catatan, pesan_error,
+    ):
+        id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        kondisi_sebelum = self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik)
+
+        with pytest.raises(InputTidakValid) as info_error:
+            PinjamanService.tolak_pinjaman(id_pinjaman=id_pinjaman, catatan_admin=catatan)
+
+        assert self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik) == kondisi_sebelum
+        assert pesan_error in str(info_error.value)
+
+    @pytest.mark.parametrize(
+        "fungsi_service, kwargs_tambahan",
+        [
+            pytest.param(PinjamanService.setujui_pinjaman, {}, id="setujui"),
+            pytest.param(
+                PinjamanService.tolak_pinjaman,
+                {"catatan_admin": "penolakan untuk pengujian"},
+                id="tolak",
+            ),
+        ],
+    )
+    def test_setujui_atau_tolak_pinjaman_dengan_id_tidak_ditemukan(
+            self, koneksi_test, pinjaman_siap_diputuskan, siapkan_data_rekening_dan_nasabah,
+            fungsi_service, kwargs_tambahan,
+    ):
+        id_pinjaman = pinjaman_siap_diputuskan["id_pinjaman"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        kondisi_sebelum = self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik)
+
+        with pytest.raises(PinjamanTidakDitemukan) as info_error:
+            fungsi_service(id_pinjaman=999, **kwargs_tambahan)
+
+        assert self._ambil_kondisi_keputusan(koneksi_test, id_pinjaman, norek, nik) == kondisi_sebelum
+        assert "tidak ditemukan" in str(info_error.value)
 
     def test_setujui_atau_tolak_pinjaman_race_condition(
         self, koneksi_test, pinjaman_siap_diputuskan, monkeypatch

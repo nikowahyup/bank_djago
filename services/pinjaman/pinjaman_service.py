@@ -148,11 +148,7 @@ class PinjamanService:
     @staticmethod
     def setujui_pinjaman(id_pinjaman):
 
-        if not isinstance(id_pinjaman, int):
-            raise InputTidakValid("ID pinjaman harus berupa angka")
-
-        if id_pinjaman <= 0:
-            raise InputTidakValid("ID pinjaman tidak valid")
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -162,7 +158,7 @@ class PinjamanService:
 
             if data_pinjaman is None:
                 raise PinjamanTidakDitemukan(
-                    f"Pinjaman ber-ID {id_pinjaman} tidak ditemukan"
+                    f"Pinjaman dengan ID {id_pinjaman} tidak ditemukan"
                 )
 
             if data_pinjaman["status"] != StatusPinjaman.DIAJUKAN.value:
@@ -570,14 +566,16 @@ class PinjamanService:
 
     @staticmethod
     def tolak_pinjaman(id_pinjaman: int, catatan_admin: str):
+
+        if not isinstance(catatan_admin, str):
+            raise InputTidakValid('Catatan tidak boleh kosong')
+
         catatan_admin = catatan_admin.strip()
         if not catatan_admin:
             raise InputTidakValid("Catatan tidak boleh kosong")
 
-        if not isinstance(id_pinjaman, int):
-            raise InputTidakValid("ID pinjaman harus berupa angka")
-        if id_pinjaman <= 0:
-            raise InputTidakValid("ID pinjaman tidak valid")
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
+
 
         with buat_koneksi_tulis() as koneksi:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
