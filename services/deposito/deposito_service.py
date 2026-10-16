@@ -510,13 +510,12 @@ class DepositoService:
         return True
 
     @staticmethod
-    def hentikan_aro(nik, norek_pemberhentian, id_deposito):
+    def hentikan_aro(nik, norek_pemberhentian, pin, id_deposito):
 
-        if not isinstance(id_deposito, int):
-            raise InputTidakValid("ID deposito harus berupa angka")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pemberhentian, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pemberhentian,pin_input=pin)
 
-        if id_deposito <= 0:
-            raise InputTidakValid("ID deposito tidak valid")
 
         with buat_koneksi_tulis() as koneksi:
 
