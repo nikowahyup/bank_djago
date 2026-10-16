@@ -199,16 +199,14 @@ class DepositoService:
         return id_deposito
 
     @staticmethod
-    def cairkan_deposito(nik, norek_pencairan, id_deposito, hari_ini=None):
+    def cairkan_deposito(nik, norek_pencairan, pin, id_deposito, hari_ini=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
-        if not isinstance(id_deposito, int):
-            raise InputTidakValid("ID deposito harus berupa angka")
-
-        if id_deposito <= 0:
-            raise InputTidakValid("ID deposito tidak valid")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pencairan, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pencairan, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -223,7 +221,7 @@ class DepositoService:
 
             if norek != norek_pencairan:
                 raise RekeningTidakSesuai(
-                    f"Nomoe rekening ini tidak terdaftar sebagai pemilik deposito"
+                    f"Nomor rekening ini tidak terdaftar sebagai pemilik deposito"
                 )
 
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
@@ -301,7 +299,7 @@ class DepositoService:
                 kategori="finansial",
                 objek="deposito",
                 aksi="pencairan_deposito",
-                log=f"{nasabah.nama} mencairkandeposito dengan ID {id_deposito}",
+                log=f"{nasabah.nama} mencairkan deposito dengan ID {id_deposito}",
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
                 norek=rekening.norek,
