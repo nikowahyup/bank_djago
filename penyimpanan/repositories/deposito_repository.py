@@ -254,7 +254,9 @@ class DepositoRepository:
     def hentikan_aro(id_deposito, koneksi):
 
         sql = """UPDATE deposito
-            SET jenis_aro = 'tidak'
+            SET jenis_aro = 'tidak',
+            lama_aro = NULL
+            
             WHERE id = ? 
             AND status = 'aktif' 
             AND jenis_aro IN ('pokok', 'pokok_bunga')"""
