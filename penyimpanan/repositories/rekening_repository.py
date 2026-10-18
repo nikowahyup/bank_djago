@@ -57,18 +57,28 @@ class RekeningRepository:
         return True
 
     @staticmethod
-    def cari_rekening_dengan_norek(norek, koneksi):
+    def cari_rekening_dengan_norek(norek, koneksi=None):
 
-        cursor = koneksi.execute(
-            """
-                SELECT *
-                FROM rekening
-                WHERE norek = ?
-            """,
-            (norek,),
-        )
+        kelola_koneksi = koneksi is None
 
-        return cursor.fetchone()
+        if kelola_koneksi:
+            koneksi = buat_koneksi()
+
+        try:
+
+            cursor = koneksi.execute(
+                """
+                    SELECT *
+                    FROM rekening
+                    WHERE norek = ?
+                """,
+                (norek,),
+            )
+
+            return cursor.fetchone()
+        finally:
+            if kelola_koneksi:
+                koneksi.close()
 
     # method cari data rekening dengan nik
     @staticmethod
