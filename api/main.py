@@ -1,28 +1,15 @@
-from pydantic import Field
-
 from fastapi import FastAPI
-from fastapi import Request
-from pydantic import  BaseModel,StrictInt
-from fastapi.responses import JSONResponse
-
+from pydantic import  BaseModel,StrictInt, Field
 from bank_djago import TransaksiService
 from bank_djago.services.rekening.rekening_service import RekeningService
-from bank_djago.services.exceptions import RekeningTerkunci,PinTidakCocok,RekeningTidakDitemukan, InputTidakValid
-
-
-
-
+from .exception import tangani_semua_handler
 
 # inisiasi aplikasi fastapi
 app = FastAPI(title="API bank djago")
 
-PETA_EXCEPTIONS = {
-    PinTidakCocok : 423,
-    RekeningTerkunci : 402,
-    RekeningTidakDitemukan : 410,
-    InputTidakValid : 412
-}
-
+tangani_semua_handler(app=app)
+# 2001211321297690
+# 6767454567674545
 
 class ResponseProfil(BaseModel):
     saldo:int
@@ -64,10 +51,3 @@ def setor_tunai(data:RequestSetor):
 
 
 
-def daftarkan_handler(exc_class, kode):
-    @app.exception_handler(exc_class)
-    async def handler(request: Request, exc: exc_class):
-        return JSONResponse(status_code=kode, content={"pesan": str(exc)})
-
-for exc_class, kode in PETA_EXCEPTIONS.items():
-    daftarkan_handler(exc_class, kode)
