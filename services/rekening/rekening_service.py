@@ -42,6 +42,7 @@ platinum = RekeningPlatinum(norek="1234", pin="1234", pemilik=None)
 
 
 class RekeningService:
+    PESAN_REKENING_TERKUNCI = "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah. Coba beberapa saat lagi"
     level = {1: "Reguler", 2: "Prioritas", 3: "Gold", 4: "Platinum"}
     jenis_rekening = {
         1: {

@@ -1,10 +1,13 @@
 import datetime
+
+from bank_djago import RekeningService
 from bank_djago.core.deposito import Deposito
 from bank_djago.penyimpanan.loaders.deposito_loader import DepositoLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_tulis
 from bank_djago.services.admin.audit_service import AuditService
 from bank_djago.services.riwayat.riwayat_template import RiwayatTemplate
+
 
 from bank_djago.utils.validator import Validator
 from bank_djago.utils.utility import Utilitas
@@ -52,6 +55,7 @@ class DepositoService:
         nik,
         norek,
         nominal,
+            pin,
         lama_bulan,
         jenis_aro=JenisAro.TIDAK,
         lama_aro=None,
@@ -61,11 +65,19 @@ class DepositoService:
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
+        if not isinstance(nominal, int):
+            raise InputTidakValid("Nominal harus berupa angka")
+
         if nominal < DepositoService.MIN_DEPO:
             raise InputTidakValid("Nominal deposito tidak memenuhi syarat")
 
+        if not isinstance(lama_bulan, int):
+            raise InputTidakValid("Lama deposito harus berupa angka")
+
         if lama_bulan not in DepositoService.JANGKA_WAKTU:
             raise InputTidakValid("Jangka waktu deposito tidak tersedia")
+
+
 
         if jenis_aro == JenisAro.TIDAK:
             if lama_aro is not None:
@@ -74,11 +86,18 @@ class DepositoService:
                 )
 
         elif jenis_aro in (JenisAro.POKOK, JenisAro.POKOK_BUNGA):
+
+            if not isinstance(lama_aro, int):
+                raise InputTidakValid("Lama ARO harus berupa angka")
+
             if lama_aro not in DepositoService.JANGKA_WAKTU:
                 raise JenisAroTidakValid("Jangka waktu perpanjangan tidak tersedia")
 
         else:
             raise JenisAroTidakValid("Jenis ARO tidak tersedia")
+
+        Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -180,16 +199,14 @@ class DepositoService:
         return id_deposito
 
     @staticmethod
-    def cairkan_deposito(nik, norek_pencairan, id_deposito, hari_ini=None):
+    def cairkan_deposito(nik, norek_pencairan, pin, id_deposito, hari_ini=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
-        if not isinstance(id_deposito, int):
-            raise InputTidakValid("ID deposito harus berupa angka")
-
-        if id_deposito <= 0:
-            raise InputTidakValid("ID deposito tidak valid")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pencairan, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pencairan, pin_input=pin)
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -204,7 +221,7 @@ class DepositoService:
 
             if norek != norek_pencairan:
                 raise RekeningTidakSesuai(
-                    f"Nomoe rekening ini tidak terdaftar sebagai pemilik deposito"
+                    f"Nomor rekening ini tidak terdaftar sebagai pemilik deposito"
                 )
 
             rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
@@ -282,7 +299,7 @@ class DepositoService:
                 kategori="finansial",
                 objek="deposito",
                 aksi="pencairan_deposito",
-                log=f"{nasabah.nama} mencairkandeposito dengan ID {id_deposito}",
+                log=f"{nasabah.nama} mencairkan deposito dengan ID {id_deposito}",
                 nama=nasabah.nama,
                 nik=nasabah.NIK,
                 norek=rekening.norek,
@@ -493,13 +510,12 @@ class DepositoService:
         return True
 
     @staticmethod
-    def hentikan_aro(nik, norek_pemberhentian, id_deposito):
+    def hentikan_aro(nik, norek_pemberhentian, pin, id_deposito):
 
-        if not isinstance(id_deposito, int):
-            raise InputTidakValid("ID deposito harus berupa angka")
+        Validator.validasi_format_identitas(nik=nik, norek=norek_pemberhentian, pin=pin)
+        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pemberhentian,pin_input=pin)
 
-        if id_deposito <= 0:
-            raise InputTidakValid("ID deposito tidak valid")
 
         with buat_koneksi_tulis() as koneksi:
 
