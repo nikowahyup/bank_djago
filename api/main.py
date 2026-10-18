@@ -3,24 +3,16 @@ from fastapi import FastAPI
 from bank_djago import TransaksiService
 from bank_djago.services.rekening.rekening_service import RekeningService
 from .exception import tangani_semua_handler
-from .skema import RequestSetor, RequestProfil
-from .skema import ResponseSetor, ResponseProfil
+from .skema import RequestSetor
+from .skema import ResponseSetor
+from .rute import rekening
 
 # inisiasi aplikasi fastapi
 app = FastAPI(title="API bank djago")
 
 tangani_semua_handler(app=app)
+app.include_router(rekening.router)
 
-
-#response untuk melihat data rekening
-@app.post('/rekening/profil',response_model=ResponseProfil)
-def lihat_rekening(data:RequestProfil):
-    RekeningService.verifikasi_pin_rekening(nik_aktif=data.nik, norek_aktif=data.norek, pin_input=data.pin)
-    data_rekening = RekeningService.ambil_data_rekening(norek=data.norek)
-
-    return{"saldo":data_rekening['saldo'],
-           "norek":data_rekening['norek'],
-           "level":data_rekening['level']}
 
 
 
