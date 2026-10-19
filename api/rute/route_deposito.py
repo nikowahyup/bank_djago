@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..skema import RequestBukaDeposito, ResponseBukaDeposito
+from ..skema import RequestBukaDeposito, ResponseBukaDeposito, ResponseCairkanDeposito, RequestCairkanDeposito
 from bank_djago.services.deposito.deposito_service import DepositoService
 
 
@@ -13,3 +13,16 @@ def buka_deposito(data:RequestBukaDeposito):
             "norek":data.norek,
             "nominal":data.nominal}
 
+@router.post("/deposito/cairkan_deposito", response_model=ResponseCairkanDeposito)
+def cairkan_deposito(data: RequestCairkanDeposito):
+    total_pencairan = DepositoService.cairkan_deposito(
+        nik=data.nik,
+        norek_pencairan=data.norek,
+        pin=data.pin,
+        id_deposito=data.id_deposito,
+    )
+    return {
+        "total_pencairan": total_pencairan,
+        "norek": data.norek,
+        "id_deposito": data.id_deposito,
+    }
