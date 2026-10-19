@@ -1,5 +1,5 @@
 from pydantic import BaseModel,StrictInt, Field
-from datetime import date
+from datetime import date,datetime
 
 class ResponseProfil(BaseModel):
     norek:str
@@ -117,3 +117,12 @@ class RequestHentikanAro(BaseModel):
 
 class ResponseHentikanAro(BaseModel):
     id_deposito: int
+
+class RequestLogin(BaseModel):
+    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
+
+class ResponseLogin(BaseModel):
+    token:str
+    kedaluwarsa:datetime

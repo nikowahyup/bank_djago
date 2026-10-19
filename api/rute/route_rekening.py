@@ -1,15 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ..skema import RequestProfil, ResponseProfil
+from ..dependensi import ambil_sesi
 from bank_djago.services.rekening.rekening_service import RekeningService
 
 router = APIRouter()
 
-@router.post("/rekening/profil",response_model=ResponseProfil)
-def lihat_rekening(data:RequestProfil):
-    RekeningService.verifikasi_pin_rekening(nik_aktif=data.nik, norek_aktif=data.norek,pin_input=data.pin)
-    data_rekening = RekeningService.ambil_data_rekening(norek=data.norek)
-    return {"norek":data_rekening['norek'],
-            "saldo":data_rekening['saldo'],
-            "level":data_rekening['level']}
+@router.post("/rekening/profil")
+def lihat_rekening(sesi = Depends(ambil_sesi)):
+    return {'nik':sesi['nik'],
+            "norek":sesi['norek']}
 
 

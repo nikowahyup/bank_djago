@@ -360,6 +360,21 @@ def buat_tabel_pengajuan_rekening():
     finally:
         koneksi.close()
 
+def buat_tabel_sesi():
+    koneksi = db_module.buat_koneksi()
+
+    try:
+        koneksi.execute("""
+            CREATE TABLE IF NOT EXISTS sesi (
+                token TEXT NOT NULL PRIMARY KEY,
+                nik TEXT NOT NULL,
+                norek TEXT NOT NULL,
+                kadaluwarsa TEXT NOT NULL
+            )
+        """)
+        koneksi.commit()
+    finally:
+        koneksi.close()
 
 def buat_kolom_waktu_dibuat_rekening():
     koneksi = db_module.buat_koneksi()
@@ -512,6 +527,7 @@ def inisialisasi_database():
     buat_tabel_audit()
     buat_tabel_pengajuan_rekening()
     buat_tabel_transaksi()
+    buat_tabel_sesi()
 
 
 if __name__ == "__main__":
