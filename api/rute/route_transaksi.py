@@ -29,4 +29,3 @@ def transfer(data:RequestTransfer):
             "norek_penerima":data.norek_tujuan}
 
 
-feat: endpoint POST /transaksi/tarik dan /transaksi/transfer
