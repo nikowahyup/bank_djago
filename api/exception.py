@@ -6,7 +6,7 @@ from bank_djago.services.exceptions import (
 StatusTidakValid,
 NikTidakSesuai,
 PinjamanTidakDitemukan,
-RekeningTidakSesuai
+RekeningTidakSesuai,JenisAroTidakValid, DepositoTidakDitemukan
 )
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -21,7 +21,9 @@ PETA_EXCEPTIONS = {
     StatusTidakValid : 409,
     NikTidakSesuai : 411,
     PinjamanTidakDitemukan : 418,
-    RekeningTidakSesuai : 430
+    RekeningTidakSesuai : 430,
+    JenisAroTidakValid : 440,
+    DepositoTidakDitemukan : 439
 }
 
 
