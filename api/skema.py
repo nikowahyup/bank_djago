@@ -1,4 +1,5 @@
 from pydantic import BaseModel,StrictInt, Field
+from datetime import date
 
 class ResponseProfil(BaseModel):
     norek:str
@@ -65,7 +66,16 @@ class ResponseCairkanPinjaman(BaseModel):
     id_pinjaman:int
     norek:str
 
+class RequestCicilanPinjaman(BaseModel):
+    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
+    id_pinjaman:StrictInt = Field(gt=0)
 
 
-
+class ResponseBayarCicilan(BaseModel):
+    status:str
+    tanggal_bayar_selanjutnya:date | None = None
+    cicilan_selanjutnya:int
+    id_pinjaman:int
 

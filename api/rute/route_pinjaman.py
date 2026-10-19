@@ -1,5 +1,9 @@
 from fastapi import APIRouter
-from ..skema import RequestAjukanPinjaman, ResponseAjukanPinjaman, RequestCairkanPinjaman, ResponseCairkanPinjaman
+from ..skema import (
+    RequestAjukanPinjaman,
+    ResponseAjukanPinjaman,
+    RequestCairkanPinjaman,
+    ResponseCairkanPinjaman,RequestCicilanPinjaman,ResponseBayarCicilan)
 from bank_djago.services.pinjaman.pinjaman_service import PinjamanService
 
 
@@ -22,3 +26,12 @@ def cairkan_pinjaman(data:RequestCairkanPinjaman):
     return {'nominal':data_pinjaman['nominal_pinjaman'],
             "norek":data_pinjaman['norek'],
             "id_pinjaman":data_pinjaman['id']}
+
+
+@router.post("/pinjaman/bayar_cicilan",response_model=ResponseBayarCicilan)
+def bayar_cicilan(data:RequestCicilanPinjaman):
+    hasil = PinjamanService.bayar_cicilan(nik=data.nik, norek_pembayaran=data.norek, pin=data.pin, id_pinjaman=data.id_pinjaman)
+    return{"tanggal_bayar_selanjutnya":hasil['tanggal_bayar_selanjutnya'],
+           "status":hasil['status'].value,
+           "id_pinjaman":hasil['id_pinjaman'],
+           "cicilan_selanjutnya":hasil['cicilan_selanjutnya']}

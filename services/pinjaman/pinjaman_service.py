@@ -561,7 +561,7 @@ class PinjamanService:
             "tanggal_bayar_selanjutnya": (
                 None if pinjaman_lunas else tanggal_bayar_selanjutnya
             ),
-            "cicilan selanjutnya": cicilan_terbayar_baru + 1,
+            "cicilan_selanjutnya": cicilan_terbayar_baru + 1,
         }
 
     @staticmethod
