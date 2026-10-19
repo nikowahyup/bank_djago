@@ -413,7 +413,35 @@ Mengganti antarmuka terminal secara bertahap tanpa menulis ulang business logic.
   - Membuat dan mengaplikasikan custom Exception
   - Mulai membuat file test menggunakan pytest
 
+## API (FastAPI)
 
+Selain menu CLI, bank_djago menyediakan API lokal berbasis FastAPI. API hanya
+memanggil service yang sama dengan CLI, sehingga aturan bisnisnya identik.
+
+### Menjalankan
+
+Dari folder induk repo (`D:\Code`), bukan dari dalam `bank_djago`:
+
+    pip install -r requirements.txt
+    uvicorn bank_djago.api.main:app --host 127.0.0.1 --reload
+
+Dokumentasi interaktif tersedia di http://127.0.0.1:8000/docs.
+
+### Endpoint
+
+| Metode | Path               | Fungsi                                  |
+|--------|--------------------|-----------------------------------------|
+| POST   | /rekening/profil   | Melihat saldo dan level (NIK + PIN)     |
+| POST   | /rekening/setor    | Setor tunai (NIK, norek, PIN, nominal)  |
+
+NIK, nomor rekening, dan PIN dikirim lewat body request, bukan URL.
+Kesalahan dipetakan ke kode status HTTP lewat pemetaan exception di `api/main.py`.
+PIN salah tiga kali mengunci rekening selama 1 menit.
+
+### Batasan
+
+API ini hanya untuk pembelajaran dan berjalan di 127.0.0.1. Belum ada
+otentikasi berbasis token, jadi jangan dibuka ke jaringan publik.
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
