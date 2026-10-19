@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..skema import RequestBukaDeposito, ResponseBukaDeposito, ResponseCairkanDeposito, RequestCairkanDeposito
+from ..skema import RequestBukaDeposito, ResponseBukaDeposito, ResponseCairkanDeposito, RequestCairkanDeposito,RequestHentikanAro, ResponseHentikanAro
 from bank_djago.services.deposito.deposito_service import DepositoService
 
 
@@ -26,3 +26,13 @@ def cairkan_deposito(data: RequestCairkanDeposito):
         "norek": data.norek,
         "id_deposito": data.id_deposito,
     }
+
+@router.post("/deposito/hentikan_aro", response_model=ResponseHentikanAro)
+def hentikan_aro(data: RequestHentikanAro):
+    id_deposito = DepositoService.hentikan_aro(
+        nik=data.nik,
+        norek_pemberhentian=data.norek,
+        pin=data.pin,
+        id_deposito=data.id_deposito,
+    )
+    return {"id_deposito": id_deposito}
