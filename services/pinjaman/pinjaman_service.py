@@ -561,7 +561,7 @@ class PinjamanService:
             "tanggal_bayar_selanjutnya": (
                 None if pinjaman_lunas else tanggal_bayar_selanjutnya
             ),
-            "cicilan selanjutnya": cicilan_terbayar_baru + 1,
+            "cicilan_selanjutnya": cicilan_terbayar_baru + 1,
         }
 
     @staticmethod
@@ -792,3 +792,11 @@ class PinjamanService:
             PinjamanService._normalisasi_data_pinjaman(data_pinjaman)
             for data_pinjaman in daftar_pinjaman
         ]
+
+    @staticmethod
+    def cari_data_pinjaman_dengan_id(id_pinjaman):
+        from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca
+        with buat_koneksi_baca() as koneksi:
+            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman,koneksi=koneksi)
+
+        return data_pinjaman
