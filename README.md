@@ -429,10 +429,20 @@ Dokumentasi interaktif tersedia di http://127.0.0.1:8000/docs.
 
 ### Endpoint
 
-| Metode | Path               | Fungsi                                  |
-|--------|--------------------|-----------------------------------------|
-| POST   | /rekening/profil   | Melihat saldo dan level (NIK + PIN)     |
-| POST   | /rekening/setor    | Setor tunai (NIK, norek, PIN, nominal)  |
+| Metode | Path                        | Fungsi                                                  |
+|--------|-----------------------------|---------------------------------------------------------|
+| POST   | /rekening/profil            | Melihat saldo dan level (NIK, norek, PIN)               |
+| POST   | /transaksi/setor            | Setor tunai (NIK, norek, PIN, nominal)                  |
+| POST   | /transaksi/tarik            | Tarik tunai (NIK, norek, PIN, nominal)                  |
+| POST   | /transaksi/transfer         | Transfer (NIK, norek, PIN, nominal, norek_tujuan)       |
+| POST   | /pinjaman/ajukan            | Ajukan pinjaman (NIK, norek, PIN, nominal, tenor)       |
+| POST   | /pinjaman/cairkan           | Cairkan pinjaman (NIK, norek, PIN, id_pinjaman)         |
+| POST   | /pinjaman/bayar_cicilan     | Bayar cicilan (NIK, norek, PIN, id_pinjaman)            |
+| POST   | /deposito/buka_deposito     | Buka deposito (NIK, norek, PIN, nominal, lama_bulan, jenis_aro, lama_aro) |
+| POST   | /deposito/cairkan_deposito  | Cairkan deposito (NIK, norek, PIN, id_deposito)         |
+| POST   | /deposito/hentikan_aro      | Hentikan ARO (NIK, norek, PIN, id_deposito)             |
+
+Semua data dikirim lewat body request (JSON), bukan URL.
 
 NIK, nomor rekening, dan PIN dikirim lewat body request, bukan URL.
 Kesalahan dipetakan ke kode status HTTP lewat pemetaan exception di `api/main.py`.
@@ -442,6 +452,33 @@ PIN salah tiga kali mengunci rekening selama 1 menit.
 
 API ini hanya untuk pembelajaran dan berjalan di 127.0.0.1. Belum ada
 otentikasi berbasis token, jadi jangan dibuka ke jaringan publik.
+
+## Status API (per 19 Oktober 2026)
+
+### Sudah tersedia
+- POST /rekening/profil
+- POST /transaksi/setor, /transaksi/tarik, /transaksi/transfer
+- POST /pinjaman/ajukan, /pinjaman/cairkan, /pinjaman/bayar_cicilan
+- POST /deposito/buka_deposito, /deposito/cairkan_deposito, /deposito/hentikan_aro
+
+### Belum tersedia
+- Layanan rekening (ajukan/selesaikan penutupan, ganti PIN).
+- Endpoint admin (setujui/tolak pinjaman). Otorisasi admin hanya dijaga menu CLI,
+  jadi sengaja tidak dibuka lewat API.
+
+### Catatan keamanan
+- Fitur layanan rekening di service masih memakai Validator.verifikasi_pin tanpa
+  batas percobaan. Jangan dibuka lewat API sebelum diganti dengan
+  RekeningService.verifikasi_pin_rekening.
+- NIK dan PIN dikirim di body setiap request (belum ada token). API hanya untuk
+  pembelajaran dan dijalankan di 127.0.0.1; jangan dibuka ke jaringan publik.
+- Kode status exception dipilih sendiri (misalnya 402, 410, 423, 430, 440) dan
+  tidak semuanya standar HTTP.
+
+### Menjalankan
+Dari folder induk repo (D:\Code):
+
+    uvicorn bank_djago.api.main:app --host 127.0.0.1 --reload
 # Catatan Desain
 
 ### 1. Mengapa rekening dibuat sebagai objek baru saat di-upgrade atau downgrade?
