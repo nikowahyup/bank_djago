@@ -53,3 +53,19 @@ class ResponseAjukanPinjaman(BaseModel):
     nominal:int
     id_pinjaman:int
 
+class RequestCairkanPinjaman(BaseModel):
+    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+    pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
+    id_pinjaman:StrictInt = Field(gt=0)
+
+
+class ResponseCairkanPinjaman(BaseModel):
+    nominal:int
+    id_pinjaman:int
+    norek:str
+
+
+
+
+
