@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from .exception import tangani_semua_handler
-from .rute import route_rekening, route_transaksi, route_pinjaman,route_deposito,route_sesi
+from .rute import (
+    route_rekening,
+    route_transaksi,
+    route_pinjaman,
+    route_deposito,
+    route_sesi,
+)
 
 # inisiasi aplikasi fastapi
 app = FastAPI(title="API bank djago")
@@ -14,10 +20,3 @@ app.include_router(route_transaksi.router)
 app.include_router(route_pinjaman.router)
 app.include_router(route_deposito.router)
 app.include_router(route_sesi.router)
-
-
-
-
-
-
-

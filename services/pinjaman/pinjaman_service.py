@@ -54,7 +54,7 @@ class PinjamanService:
     MAKSIMAL_PERSENTASE_DENDA = 0.1
 
     @staticmethod
-    def ajukan_pinjaman(nik, norek,pin, nominal, tenor):
+    def ajukan_pinjaman(nik, norek, pin, nominal, tenor):
 
         if not isinstance(nominal, int):
             raise InputTidakValid("Nominal harus berupa angka")
@@ -71,8 +71,10 @@ class PinjamanService:
         if tenor not in PinjamanService.TENOR:
             raise InputTidakValid("Pilihan tenor pinjaman tidak tersedia")
 
-        Validator.validasi_format_identitas(nik=nik, norek=norek,pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -148,7 +150,7 @@ class PinjamanService:
     @staticmethod
     def setujui_pinjaman(id_pinjaman):
 
-        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama="pinjaman")
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -213,9 +215,10 @@ class PinjamanService:
             hari_ini = datetime.date.today()
 
         Validator.validasi_format_identitas(nik=nik, norek=norek_pencairan, pin=pin)
-        Validator.validasi_id_objek(id_objek=id_pinjaman,nama='pinjaman')
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik,norek_aktif=norek_pencairan, pin_input=pin)
-
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama="pinjaman")
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek_pencairan, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
@@ -353,8 +356,10 @@ class PinjamanService:
             hari_ini = datetime.date.today()
 
         Validator.validasi_format_identitas(nik=nik, norek=norek_pembayaran, pin=pin)
-        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pembayaran, pin_input=pin)
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama="pinjaman")
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek_pembayaran, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -568,14 +573,13 @@ class PinjamanService:
     def tolak_pinjaman(id_pinjaman: int, catatan_admin: str):
 
         if not isinstance(catatan_admin, str):
-            raise InputTidakValid('Catatan tidak boleh kosong')
+            raise InputTidakValid("Catatan tidak boleh kosong")
 
         catatan_admin = catatan_admin.strip()
         if not catatan_admin:
             raise InputTidakValid("Catatan tidak boleh kosong")
 
-        Validator.validasi_id_objek(id_objek=id_pinjaman, nama='pinjaman')
-
+        Validator.validasi_id_objek(id_objek=id_pinjaman, nama="pinjaman")
 
         with buat_koneksi_tulis() as koneksi:
             data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
@@ -796,7 +800,10 @@ class PinjamanService:
     @staticmethod
     def cari_data_pinjaman_dengan_id(id_pinjaman):
         from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca
+
         with buat_koneksi_baca() as koneksi:
-            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(id_pinjaman=id_pinjaman,koneksi=koneksi)
+            data_pinjaman = PinjamanRepository.cari_pinjaman_dengan_id(
+                id_pinjaman=id_pinjaman, koneksi=koneksi
+            )
 
         return data_pinjaman

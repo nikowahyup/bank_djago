@@ -26,8 +26,6 @@ class PengajuanTidakDitemukan(DataTidakDitemukan):
     pass
 
 
-
-
 # -------------------------------------------------------------------
 
 
@@ -61,11 +59,15 @@ class SudahAdaPengajuan(KondisiTidakValid):
 
 class RekeningTerkunci(KondisiTidakValid):
     pass
+
+
 class TokenTidakValid(KondisiTidakValid):
     pass
 
+
 class TokenKedaluwarsa(KondisiTidakValid):
     pass
+
 
 # ---------------------------------------------------------------------
 

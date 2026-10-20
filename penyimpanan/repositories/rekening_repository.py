@@ -347,10 +347,12 @@ class RekeningRepository:
 
         return cursor.fetchone()
 
-
     @staticmethod
     def ambil_status_rekening(nik, norek, koneksi):
 
-        cursor = koneksi.execute("SELECT status FROM rekening WHERE norek = ? AND nik_pemilik = ?",(norek, nik))
+        cursor = koneksi.execute(
+            "SELECT status FROM rekening WHERE norek = ? AND nik_pemilik = ?",
+            (norek, nik),
+        )
 
-        return cursor.fetchone()['status']
+        return cursor.fetchone()["status"]

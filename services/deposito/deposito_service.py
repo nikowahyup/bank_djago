@@ -55,7 +55,7 @@ class DepositoService:
         nik,
         norek,
         nominal,
-            pin,
+        pin,
         lama_bulan,
         jenis_aro=JenisAro.TIDAK,
         lama_aro=None,
@@ -77,8 +77,6 @@ class DepositoService:
         if lama_bulan not in DepositoService.JANGKA_WAKTU:
             raise InputTidakValid("Jangka waktu deposito tidak tersedia")
 
-
-
         if jenis_aro == JenisAro.TIDAK:
             if lama_aro is not None:
                 raise InputTidakValid(
@@ -97,7 +95,9 @@ class DepositoService:
             raise JenisAroTidakValid("Jenis ARO tidak tersedia")
 
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -205,8 +205,10 @@ class DepositoService:
             hari_ini = datetime.date.today()
 
         Validator.validasi_format_identitas(nik=nik, norek=norek_pencairan, pin=pin)
-        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pencairan, pin_input=pin)
+        Validator.validasi_id_objek(id_objek=id_deposito, nama="deposito")
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek_pencairan, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -513,9 +515,10 @@ class DepositoService:
     def hentikan_aro(nik, norek_pemberhentian, pin, id_deposito):
 
         Validator.validasi_format_identitas(nik=nik, norek=norek_pemberhentian, pin=pin)
-        Validator.validasi_id_objek(id_objek=id_deposito, nama='deposito')
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek_pemberhentian,pin_input=pin)
-
+        Validator.validasi_id_objek(id_objek=id_deposito, nama="deposito")
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek_pemberhentian, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 

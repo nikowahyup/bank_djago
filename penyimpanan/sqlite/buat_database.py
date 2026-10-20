@@ -360,6 +360,7 @@ def buat_tabel_pengajuan_rekening():
     finally:
         koneksi.close()
 
+
 def buat_tabel_sesi():
     koneksi = db_module.buat_koneksi()
 
@@ -375,6 +376,7 @@ def buat_tabel_sesi():
         koneksi.commit()
     finally:
         koneksi.close()
+
 
 def buat_kolom_waktu_dibuat_rekening():
     koneksi = db_module.buat_koneksi()
