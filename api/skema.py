@@ -74,8 +74,6 @@ class ResponseBayarCicilan(BaseModel):
 #--------------------------------------------------------------------------------------
 
 class RequestBukaDeposito(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     lama_bulan:StrictInt = Field(gt=0)
     jenis_aro:str
@@ -88,8 +86,6 @@ class ResponseBukaDeposito(BaseModel):
     nominal:int
 
 class RequestCairkanDeposito(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     id_deposito: StrictInt = Field(gt=0)
 
@@ -101,8 +97,6 @@ class ResponseCairkanDeposito(BaseModel):
 
 
 class RequestHentikanAro(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     id_deposito: StrictInt = Field(gt=0)
 
