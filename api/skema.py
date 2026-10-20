@@ -42,8 +42,6 @@ class ResponseTransfer(ResponseTransaksi):
 #-------------------------------------------------------------------------------------
 
 class RequestAjukanPinjaman(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     nominal: StrictInt = Field(gt=0)
     tenor:StrictInt = Field(gt=0)
@@ -53,8 +51,6 @@ class ResponseAjukanPinjaman(BaseModel):
     id_pinjaman:int
 
 class RequestCairkanPinjaman(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     id_pinjaman:StrictInt = Field(gt=0)
 
@@ -64,9 +60,7 @@ class ResponseCairkanPinjaman(BaseModel):
     id_pinjaman:int
     norek:str
 
-class RequestCicilanPinjaman(BaseModel):
-    nik: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
-    norek: str = Field(min_length=16, max_length=16, pattern=r"^\d+$")
+class RequestBayarCicilan(BaseModel):
     pin: str = Field(min_length=6, max_length=6, pattern=r"^\d+$")
     id_pinjaman:StrictInt = Field(gt=0)
 
