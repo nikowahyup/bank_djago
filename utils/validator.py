@@ -59,11 +59,13 @@ class Validator:
             raise InputTidakValid("Minimal transaksi adalah Rp10.000")
 
     @staticmethod
-    def validasi_norek_penerima(norek_pengirim,norek_penerima):
+    def validasi_norek_penerima(norek_pengirim, norek_penerima):
         if not isinstance(norek_penerima, str) or not norek_penerima.strip():
             raise InputTidakValid("Nomor rekening penerima tidak boleh kosong")
         if not norek_penerima.isdigit():
-            raise InputTidakValid("Nomor rekening penerima tidak boleh mengandung huruf")
+            raise InputTidakValid(
+                "Nomor rekening penerima tidak boleh mengandung huruf"
+            )
         if len(norek_penerima) != 16:
             raise InputTidakValid("Jumlah digit nomor rekening penerima tidak valid")
         if norek_penerima == norek_pengirim:

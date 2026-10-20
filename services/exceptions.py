@@ -61,6 +61,14 @@ class RekeningTerkunci(KondisiTidakValid):
     pass
 
 
+class TokenTidakValid(KondisiTidakValid):
+    pass
+
+
+class TokenKedaluwarsa(KondisiTidakValid):
+    pass
+
+
 # ---------------------------------------------------------------------
 
 

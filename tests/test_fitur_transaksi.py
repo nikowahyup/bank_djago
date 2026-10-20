@@ -9,18 +9,16 @@ from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 from bank_djago.services.exceptions import (
     InputTidakValid,
-
     RekeningTidakDitemukan,
     StatusTidakValid,
     PenguranganSaldoGagal,
     PenambahanSaldoGagal,
-PinTidakCocok,
-RekeningTerkunci
+    PinTidakCocok,
+    RekeningTerkunci,
 )
 import bank_djago.penyimpanan.repositories.audit_repository as audit_repo_module
 import bank_djago.penyimpanan.repositories.rekening_repository as rekening_repo_module
 import bank_djago.services.transaksi.transaksi_service as transaksi_service_module
-
 
 
 class TestSetortunai:
@@ -31,7 +29,7 @@ class TestSetortunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -133,11 +131,15 @@ class TestSetortunai:
                 "Minimal transaksi adalah Rp10.000",
                 id="nominal kurang",
             ),
-            pytest.param({'pin':None},"PIN tidak boleh kosong",id='pin None'),
-            pytest.param({'pin':''},"PIN tidak boleh kosong",id='pin kosong'),
-            pytest.param({"pin":" "},"PIN tidak boleh kosong",id='pin spasi'),
-            pytest.param({'pin':'1234'},"PIN harus berupa 6 digit angka",id='pin kurang'),
-            pytest.param({'pin':'12345q'},"PIN harus berupa 6 digit angka",id='pin ada huruf')
+            pytest.param({"pin": None}, "PIN tidak boleh kosong", id="pin None"),
+            pytest.param({"pin": ""}, "PIN tidak boleh kosong", id="pin kosong"),
+            pytest.param({"pin": " "}, "PIN tidak boleh kosong", id="pin spasi"),
+            pytest.param(
+                {"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"
+            ),
+            pytest.param(
+                {"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"
+            ),
         ],
     )
     def test_setor_tunai_dengan_input_tidak_valid(
@@ -146,10 +148,10 @@ class TestSetortunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
-        kwargs = {"nik_masuk": nik, "norek": norek, "nominal": nominal, 'pin':pin}
+        kwargs = {"nik_masuk": nik, "norek": norek, "nominal": nominal, "pin": pin}
         kwargs.update(kwargs_salah)
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -186,7 +188,7 @@ class TestSetortunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         koneksi_test.execute(
             "UPDATE rekening SET status = ? WHERE norek = ?", (status_salah, norek)
         )
@@ -199,7 +201,9 @@ class TestSetortunai:
             norek=norek, koneksi=koneksi_test
         )
         with pytest.raises(StatusTidakValid) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
+            TransaksiService.setor_tunai(
+                nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
+            )
 
         saldo_setelah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -209,21 +213,33 @@ class TestSetortunai:
         assert "nda saat ini sedang" in str(info_error.value)
         print(f"pesan error : {info_error.value}")
 
-    def test_percobaan_pin_dalam_setor_tunai(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        pin_salah = '123457'
+    def test_percobaan_pin_dalam_setor_tunai(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_salah = "123457"
         nominal = 1_000_000
 
-        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
-        percobaan_gagal_sebelum = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        saldo_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
+        percobaan_gagal_sebelum = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
         assert percobaan_gagal_sebelum == 0
         with pytest.raises(PinTidakCocok) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik,norek=norek,pin=pin_salah, nominal=nominal)
+            TransaksiService.setor_tunai(
+                nik_masuk=nik, norek=norek, pin=pin_salah, nominal=nominal
+            )
 
-        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+        saldo_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
 
-        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        percobaan_gagal_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_tujuan = ?", (norek,)
         ).fetchone()
@@ -242,31 +258,52 @@ class TestSetortunai:
         assert audit is None
         assert "PIN yang dimasukkan salah" in str(info_error.value)
 
-    def test_setor_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+    def test_setor_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
 
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        pin_benar = siapkan_data_rekening_dan_nasabah['pin']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_benar = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
-        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=1)).isoformat()
-        koneksi_test.execute("UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",(waktu_kunci, norek))
+        waktu_kunci = (
+            datetime.datetime.now() + datetime.timedelta(minutes=1)
+        ).isoformat()
+        koneksi_test.execute(
+            "UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",
+            (waktu_kunci, norek),
+        )
         koneksi_test.commit()
 
-        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi_test)
-        jumlah_percobaan = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
-        terkunci_sampai = koneksi_test.execute("SELECT terkunci_sampai FROM rekening WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+        saldo_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
+        jumlah_percobaan = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        terkunci_sampai = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
 
         assert jumlah_percobaan == 3
         assert terkunci_sampai == waktu_kunci
 
         with pytest.raises(RekeningTerkunci) as info_error:
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, pin=pin_benar, nominal=nominal)
+            TransaksiService.setor_tunai(
+                nik_masuk=nik, norek=norek, pin=pin_benar, nominal=nominal
+            )
 
-        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+        saldo_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
 
-        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
-        waktu_kunci_sesudah = koneksi_test.execute("SELECT terkunci_sampai FROM rekening  WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+        percobaan_gagal_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        waktu_kunci_sesudah = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening  WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_tujuan = ?", (norek,)
         ).fetchone()
@@ -284,9 +321,10 @@ class TestSetortunai:
         assert saldo_sesudah == saldo_sebelum
         assert riwayat is None
         assert audit is None
-        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
-
-
+        assert (
+            "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah"
+            in str(info_error.value)
+        )
 
     def test_rollback_setor_tunai(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
@@ -294,7 +332,7 @@ class TestSetortunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
         method_asli = audit_repo_module.AuditRepository.tambah_audit
@@ -312,7 +350,9 @@ class TestSetortunai:
         )
 
         with pytest.raises(RuntimeError):
-            TransaksiService.setor_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
+            TransaksiService.setor_tunai(
+                nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
+            )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -344,7 +384,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -383,7 +423,6 @@ class TestTarikTunai:
         assert transaksi["nominal"] == nominal
         assert transaksi["saldo_sumber_sebelum"] == saldo_sebelum
         assert transaksi["saldo_sumber_sesudah"] == saldo_sesudah
-
 
     @pytest.mark.parametrize(
         "kwargs_salah,pesan_error",
@@ -447,31 +486,27 @@ class TestTarikTunai:
                 "Minimal transaksi adalah Rp10.000",
                 id="nominal kurang",
             ),
-            pytest.param({'pin':None},"PIN tidak boleh kosong",id='pin None'),
-            pytest.param({'pin':''},"PIN tidak boleh kosong",id='pin kosong'),
-            pytest.param({"pin":" "},"PIN tidak boleh kosong",id='pin spasi'),
-            pytest.param({'pin':'1234'},"PIN harus berupa 6 digit angka",id='pin kurang'),
-            pytest.param({'pin':'12345q'},"PIN harus berupa 6 digit angka",id='pin ada huruf')
+            pytest.param({"pin": None}, "PIN tidak boleh kosong", id="pin None"),
+            pytest.param({"pin": ""}, "PIN tidak boleh kosong", id="pin kosong"),
+            pytest.param({"pin": " "}, "PIN tidak boleh kosong", id="pin spasi"),
+            pytest.param(
+                {"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"
+            ),
+            pytest.param(
+                {"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"
+            ),
         ],
     )
     def test_tarik_tunai_dengan_input_tidak_valid(
-        self,
-        koneksi_test,
-        siapkan_data_rekening_dan_nasabah,
-        kwargs_salah,
-            pesan_error
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, kwargs_salah, pesan_error
     ):
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
-        kwargs = {'nik_masuk':nik,
-                  'norek':norek,
-                  'pin':pin,
-                  'nominal':nominal
-                  }
+        kwargs = {"nik_masuk": nik, "norek": norek, "pin": pin, "nominal": nominal}
 
         kwargs.update(kwargs_salah)
 
@@ -485,7 +520,9 @@ class TestTarikTunai:
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
         )
-        percobaan_gagal = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        percobaan_gagal = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
         ).fetchone()
@@ -504,15 +541,18 @@ class TestTarikTunai:
         assert audit is None
         assert pesan_error in str(info_error.value)
 
+    @pytest.mark.parametrize("status_salah", ["blokir", "tutup"])
+    def test_tarik_tunai_dengan_status_rekening_tidak_valid(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah, status_salah
+    ):
 
-    @pytest.mark.parametrize("status_salah",['blokir','tutup'])
-    def test_tarik_tunai_dengan_status_rekening_tidak_valid(self, koneksi_test, siapkan_data_rekening_dan_nasabah,status_salah):
-
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
-        koneksi_test.execute("UPDATE rekening SET status = ? WHERE norek = ?",(status_salah, norek))
+        koneksi_test.execute(
+            "UPDATE rekening SET status = ? WHERE norek = ?", (status_salah, norek)
+        )
         koneksi_test.commit()
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -520,7 +560,9 @@ class TestTarikTunai:
         )
 
         with pytest.raises(StatusTidakValid) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek,pin=pin, nominal=nominal)
+            TransaksiService.tarik_tunai(
+                nik_masuk=nik, norek=norek, pin=pin, nominal=nominal
+            )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -540,9 +582,9 @@ class TestTarikTunai:
         assert saldo_sesudah == saldo_sebelum
         assert riwayat is None
         assert audit is None
-        assert f"Rekening Anda saat ini sedang di{status_salah}" in str(info_error.value)
-
-
+        assert f"Rekening Anda saat ini sedang di{status_salah}" in str(
+            info_error.value
+        )
 
     def test_tarik_tunai_hingga_saldo_menyentuh_batas_minimal(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah
@@ -550,7 +592,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi_test)
 
         nominal = rekening.saldo - rekening.saldosetor_min
@@ -558,7 +600,9 @@ class TestTarikTunai:
             norek=norek, koneksi=koneksi_test
         )
 
-        TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
+        TransaksiService.tarik_tunai(
+            nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
+        )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -594,7 +638,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
 
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi_test)
 
@@ -604,7 +648,9 @@ class TestTarikTunai:
             norek=norek, koneksi=koneksi_test
         )
         with pytest.raises(StatusTidakValid) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal, pin=pin)
+            TransaksiService.tarik_tunai(
+                nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
+            )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -626,23 +672,34 @@ class TestTarikTunai:
         assert saldo_sesudah == saldo_sebelum
         assert "saldo minimum jika Anda" in str(info_error.value)
 
+    def test_percobaan_pin_tarik_tunai(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
 
-    def test_percobaan_pin_tarik_tunai(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
-
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        pin_salah = '123457'
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_salah = "123457"
         nominal = 1_000_000
 
-        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
-        percobaan_gagal_sebelum = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        saldo_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
+        percobaan_gagal_sebelum = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
         assert percobaan_gagal_sebelum == 0
         with pytest.raises(PinTidakCocok) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik,norek=norek,pin=pin_salah, nominal=nominal)
+            TransaksiService.tarik_tunai(
+                nik_masuk=nik, norek=norek, pin=pin_salah, nominal=nominal
+            )
 
-        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+        saldo_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
 
-        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
+        percobaan_gagal_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
         ).fetchone()
@@ -661,31 +718,52 @@ class TestTarikTunai:
         assert saldo_sesudah == saldo_sebelum
         assert "PIN yang dimasukkan salah" in str(info_error.value)
 
-    def test_tarik_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(self, koneksi_test, siapkan_data_rekening_dan_nasabah):
+    def test_tarik_tunai_rekening_terkunci_setelah_tiga_kali_percobaan(
+        self, koneksi_test, siapkan_data_rekening_dan_nasabah
+    ):
 
-        nik = siapkan_data_rekening_dan_nasabah['nik']
-        norek = siapkan_data_rekening_dan_nasabah['norek']
-        pin_benar = siapkan_data_rekening_dan_nasabah['pin']
+        nik = siapkan_data_rekening_dan_nasabah["nik"]
+        norek = siapkan_data_rekening_dan_nasabah["norek"]
+        pin_benar = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
-        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=1)).isoformat()
-        koneksi_test.execute("UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",(waktu_kunci, norek))
+        waktu_kunci = (
+            datetime.datetime.now() + datetime.timedelta(minutes=1)
+        ).isoformat()
+        koneksi_test.execute(
+            "UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",
+            (waktu_kunci, norek),
+        )
         koneksi_test.commit()
 
-        saldo_sebelum = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi_test)
-        jumlah_percobaan = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
-        terkunci_sampai = koneksi_test.execute("SELECT terkunci_sampai FROM rekening WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+        saldo_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
+        jumlah_percobaan = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        terkunci_sampai = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
 
         assert jumlah_percobaan == 3
         assert terkunci_sampai == waktu_kunci
 
         with pytest.raises(RekeningTerkunci) as info_error:
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, pin=pin_benar, nominal=nominal)
+            TransaksiService.tarik_tunai(
+                nik_masuk=nik, norek=norek, pin=pin_benar, nominal=nominal
+            )
 
-        saldo_sesudah = RekeningRepository.ambil_saldo(norek=norek,koneksi=koneksi_test)
+        saldo_sesudah = RekeningRepository.ambil_saldo(
+            norek=norek, koneksi=koneksi_test
+        )
 
-        percobaan_gagal_sesudah = koneksi_test.execute("SELECT percobaan_gagal FROM rekening WHERE norek = ?",(norek,)).fetchone()['percobaan_gagal']
-        waktu_kunci_sesudah = koneksi_test.execute("SELECT terkunci_sampai FROM rekening  WHERE norek = ?",(norek,)).fetchone()['terkunci_sampai']
+        percobaan_gagal_sesudah = koneksi_test.execute(
+            "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek,)
+        ).fetchone()["percobaan_gagal"]
+        waktu_kunci_sesudah = koneksi_test.execute(
+            "SELECT terkunci_sampai FROM rekening  WHERE norek = ?", (norek,)
+        ).fetchone()["terkunci_sampai"]
         transaksi = koneksi_test.execute(
             "SELECT * FROM transaksi WHERE norek_sumber = ?", (norek,)
         ).fetchone()
@@ -703,7 +781,10 @@ class TestTarikTunai:
         assert saldo_sesudah == saldo_sebelum
         assert riwayat is None
         assert audit is None
-        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+        assert (
+            "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah"
+            in str(info_error.value)
+        )
 
     def test_rollback_tarik_tunai(
         self, koneksi_test, siapkan_data_rekening_dan_nasabah, monkeypatch
@@ -711,7 +792,7 @@ class TestTarikTunai:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
         method_asli = audit_repo_module.AuditRepository.tambah_audit
@@ -729,7 +810,9 @@ class TestTarikTunai:
         )
 
         with pytest.raises(RuntimeError):
-            TransaksiService.tarik_tunai(nik_masuk=nik, norek=norek, nominal=nominal,pin=pin)
+            TransaksiService.tarik_tunai(
+                nik_masuk=nik, norek=norek, nominal=nominal, pin=pin
+            )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
             norek=norek, koneksi=koneksi_test
@@ -786,33 +869,33 @@ def verifikasi_hasil_transfer(koneksi, norek_pengirim, norek_penerima):
         "audit_penerima": audit_penerima,
     }
 
-def _ambil_jejak_transfer( koneksi_test, norek_pengirim, norek_penerima):
-        return {
-            "transaksi": koneksi_test.execute(
-                "SELECT * FROM transaksi WHERE norek_sumber = ? AND norek_tujuan = ?",
-                (norek_pengirim, norek_penerima),
-            ).fetchone(),
-            "riwayat_pengirim": koneksi_test.execute(
-                "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",
-                (norek_pengirim,),
-            ).fetchone(),
-            "riwayat_penerima": koneksi_test.execute(
-                "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",
-                (norek_penerima,),
-            ).fetchone(),
-            "audit_pengirim": koneksi_test.execute(
-                "SELECT * FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",
-                (norek_pengirim,),
-            ).fetchone(),
-            "audit_penerima": koneksi_test.execute(
-                "SELECT * FROM audit WHERE norek = ? AND aksi = 'penerimaan_transfer'",
-                (norek_penerima,),
-            ).fetchone(),
-        }
+
+def _ambil_jejak_transfer(koneksi_test, norek_pengirim, norek_penerima):
+    return {
+        "transaksi": koneksi_test.execute(
+            "SELECT * FROM transaksi WHERE norek_sumber = ? AND norek_tujuan = ?",
+            (norek_pengirim, norek_penerima),
+        ).fetchone(),
+        "riwayat_pengirim": koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'transfer saldo'",
+            (norek_pengirim,),
+        ).fetchone(),
+        "riwayat_penerima": koneksi_test.execute(
+            "SELECT * FROM riwayat WHERE norek = ? AND jenis = 'terima saldo'",
+            (norek_penerima,),
+        ).fetchone(),
+        "audit_pengirim": koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'transfer_keluar'",
+            (norek_pengirim,),
+        ).fetchone(),
+        "audit_penerima": koneksi_test.execute(
+            "SELECT * FROM audit WHERE norek = ? AND aksi = 'penerimaan_transfer'",
+            (norek_penerima,),
+        ).fetchone(),
+    }
+
 
 class TestTransfer:
-
-
 
     def test_transfer_happy_path(
         self,
@@ -824,7 +907,7 @@ class TestTransfer:
         nik_pengirim = siapkan_data_rekening_dan_nasabah["nik"]
 
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
@@ -843,7 +926,7 @@ class TestTransfer:
             norek_pengirim=norek_pengirim,
             norek_penerima=norek_penerima,
             nominal=nominal,
-            pin=pin
+            pin=pin,
         )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -890,7 +973,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         rekening_pengirim = RekeningLoader.muat_rekening(
             norek=norek_pengirim, koneksi=koneksi_test
@@ -909,7 +992,7 @@ class TestTransfer:
             norek_pengirim=norek_pengirim,
             norek_penerima=norek_penerima,
             nominal=nominal,
-            pin=pin
+            pin=pin,
         )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -956,7 +1039,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         koneksi_test.execute(
@@ -983,7 +1066,7 @@ class TestTransfer:
             norek_pengirim=norek_pengirim,
             norek_penerima=norek_penerima,
             nominal=nominal,
-            pin=pin
+            pin=pin,
         )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -1030,7 +1113,11 @@ class TestTransfer:
         [
             (9999, "Minimal transaksi adalah Rp10.000", InputTidakValid),
             (-9999, "Minimal transaksi adalah Rp10.000", InputTidakValid),
-            (9_500_000, "Saldo Anda tidak cukup untuk melakukan transfer", StatusTidakValid),
+            (
+                9_500_000,
+                "Saldo Anda tidak cukup untuk melakukan transfer",
+                StatusTidakValid,
+            ),
         ],
     )
     def test_transfer_dengan_nominal_tidak_valid(
@@ -1045,7 +1132,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
@@ -1062,7 +1149,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -1086,9 +1173,21 @@ class TestTransfer:
     @pytest.mark.parametrize(
         "kwargs_salah, exception, potongan_pesan",
         [
-            ({"norek_pengirim": "4"*16}, RekeningTidakDitemukan, "Rekening tidak terdaftar"),
-            ({"nik_masuk": "2"*16}, RekeningTidakDitemukan, "Rekening tidak terdaftar"),
-            ({"norek_penerima": "0"*16}, RekeningTidakDitemukan, "Rekening penerima tidak terdaftar"),
+            (
+                {"norek_pengirim": "4" * 16},
+                RekeningTidakDitemukan,
+                "Rekening tidak terdaftar",
+            ),
+            (
+                {"nik_masuk": "2" * 16},
+                RekeningTidakDitemukan,
+                "Rekening tidak terdaftar",
+            ),
+            (
+                {"norek_penerima": "0" * 16},
+                RekeningTidakDitemukan,
+                "Rekening penerima tidak terdaftar",
+            ),
         ],
         ids=["pengirim_tidak_ada", "nik_salah", "penerima_tidak_ada"],
     )
@@ -1104,7 +1203,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
@@ -1119,7 +1218,7 @@ class TestTransfer:
             "norek_pengirim": norek_pengirim,
             "norek_penerima": norek_penerima,
             "nominal": 100_000,
-            'pin':pin
+            "pin": pin,
         }
 
         kwargs.update(kwargs_salah)
@@ -1166,7 +1265,7 @@ class TestTransfer:
 
         nik_pengirim = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
 
@@ -1194,7 +1293,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -1221,7 +1320,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         nominal = 1_000_000
 
         saldo_sebelum = RekeningRepository.ambil_saldo(
@@ -1234,7 +1333,7 @@ class TestTransfer:
                 norek_pengirim=norek,
                 norek_penerima=norek,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
@@ -1259,7 +1358,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         rekening_pengirim = RekeningLoader.muat_rekening(
@@ -1277,7 +1376,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
 
         saldo_sesudah = RekeningRepository.ambil_saldo(
@@ -1302,7 +1401,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         rekening_pengirim = RekeningLoader.muat_rekening(
@@ -1324,7 +1423,7 @@ class TestTransfer:
             norek_pengirim=norek_pengirim,
             norek_penerima=norek_penerima,
             nominal=nominal,
-            pin=pin
+            pin=pin,
         )
 
         limit_sisa_pengirim = koneksi_test.execute(
@@ -1375,7 +1474,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         koneksi_test.execute(
             "UPDATE rekening SET limit_sisa = ? WHERE norek = ?",
@@ -1401,7 +1500,7 @@ class TestTransfer:
             norek_pengirim=norek_pengirim,
             norek_penerima=norek_penerima,
             nominal=nominal,
-            pin=pin
+            pin=pin,
         )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -1449,7 +1548,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
 
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
@@ -1494,7 +1593,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
 
         saldo_pengirim_sesudah = RekeningRepository.ambil_saldo(
@@ -1542,7 +1641,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         hari_ini = datetime.date.today()
@@ -1566,7 +1665,7 @@ class TestTransfer:
             norek_penerima=norek_penerima,
             nominal=nominal,
             hari_ini=hari_ini,
-            pin=pin
+            pin=pin,
         )
 
         rekening_pengirim = RekeningLoader.muat_rekening(
@@ -1592,7 +1691,7 @@ class TestTransfer:
             norek_penerima=norek_penerima,
             nominal=nominal_hari_kedua,
             hari_ini=hari_esok,
-            pin=pin
+            pin=pin,
         )
         riwayat = koneksi_test.execute(
             "SELECT COUNT (*) FROM riwayat WHERE jenis = 'reset limit' AND norek = ?",
@@ -1630,7 +1729,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         rekening_pengirim = RekeningLoader.muat_rekening(
             norek=norek_pengirim, koneksi=koneksi_test
@@ -1654,7 +1753,7 @@ class TestTransfer:
             norek_penerima=norek_penerima,
             nominal=nominal_pertama,
             hari_ini=hari_ini,
-            pin=pin
+            pin=pin,
         )
         limit_putaran_pertama = koneksi_test.execute(
             "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
@@ -1669,7 +1768,7 @@ class TestTransfer:
             norek_penerima=norek_penerima,
             nominal=nominal_kedua,
             hari_ini=hari_ini,
-            pin=pin
+            pin=pin,
         )
 
         limit_putaran_kedua = koneksi_test.execute(
@@ -1686,7 +1785,7 @@ class TestTransfer:
             norek_penerima=norek_penerima,
             nominal=nominal_ketiga,
             hari_ini=hari_ini,
-            pin=pin
+            pin=pin,
         )
 
         limit_putaran_ketiga = koneksi_test.execute(
@@ -1703,7 +1802,7 @@ class TestTransfer:
                 norek_penerima=norek_penerima,
                 nominal=nominal_keempat,
                 hari_ini=hari_ini,
-                pin=pin
+                pin=pin,
             )
         limit_putaran_keempat = koneksi_test.execute(
             "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
@@ -1736,7 +1835,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin =  siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
 
         rekening_pengirim = RekeningLoader.muat_rekening(
@@ -1786,7 +1885,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal_transfer,
-                pin=pin
+                pin=pin,
             )
 
         saldo_penerima_sesudah = RekeningRepository.ambil_saldo(
@@ -1814,7 +1913,7 @@ class TestTransfer:
 
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
-        pin = siapkan_data_rekening_dan_nasabah['pin']
+        pin = siapkan_data_rekening_dan_nasabah["pin"]
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
         method_asli = transaksi_service_module.TransaksiService.cari_penerima
@@ -1860,7 +1959,7 @@ class TestTransfer:
                 norek_pengirim=norek_pengirim,
                 norek_penerima=norek_penerima,
                 nominal=nominal,
-                pin=pin
+                pin=pin,
             )
         limit_sisa_pengirim_sesudah = koneksi_test.execute(
             "SELECT limit_sisa FROM rekening WHERE norek = ?", (norek_pengirim,)
@@ -1883,7 +1982,10 @@ class TestTransfer:
         assert "Gagal mengirim saldo" in str(info_error.value)
 
     def test_percobaan_pin_transfer(
-            self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        siapkan_data_rekening_penerima,
     ):
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
@@ -1891,8 +1993,12 @@ class TestTransfer:
         pin_salah = "123457"
         nominal = 1_000_000
 
-        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
-        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
         percobaan_sebelum = koneksi_test.execute(
             "SELECT percobaan_gagal FROM rekening WHERE norek = ?", (norek_pengirim,)
         ).fetchone()["percobaan_gagal"]
@@ -1900,8 +2006,11 @@ class TestTransfer:
 
         with pytest.raises(PinTidakCocok) as info_error:
             TransaksiService.transfer(
-                nik_masuk=nik, norek_pengirim=norek_pengirim,
-                norek_penerima=norek_penerima, pin=pin_salah, nominal=nominal,
+                nik_masuk=nik,
+                norek_pengirim=norek_pengirim,
+                norek_penerima=norek_penerima,
+                pin=pin_salah,
+                nominal=nominal,
             )
 
         percobaan_sesudah = koneksi_test.execute(
@@ -1910,13 +2019,22 @@ class TestTransfer:
         jejak = _ambil_jejak_transfer(koneksi_test, norek_pengirim, norek_penerima)
 
         assert percobaan_sesudah == 1
-        assert RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test) == saldo_pengirim_sebelum
-        assert RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test) == saldo_penerima_sebelum
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
+            == saldo_pengirim_sebelum
+        )
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+            == saldo_penerima_sebelum
+        )
         assert all(v is None for v in jejak.values())
         assert "PIN yang dimasukkan salah" in str(info_error.value)
 
     def test_transfer_rekening_terkunci_dengan_pin_benar(
-            self, koneksi_test, siapkan_data_rekening_dan_nasabah, siapkan_data_rekening_penerima
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        siapkan_data_rekening_penerima,
     ):
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
@@ -1924,20 +2042,29 @@ class TestTransfer:
         norek_penerima = siapkan_data_rekening_penerima["norek"]
         nominal = 1_000_000
 
-        waktu_kunci = (datetime.datetime.now() + datetime.timedelta(minutes=5)).isoformat()
+        waktu_kunci = (
+            datetime.datetime.now() + datetime.timedelta(minutes=5)
+        ).isoformat()
         koneksi_test.execute(
             "UPDATE rekening SET percobaan_gagal = 3, terkunci_sampai = ? WHERE norek = ?",
             (waktu_kunci, norek_pengirim),
         )
         koneksi_test.commit()
 
-        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
-        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
 
         with pytest.raises(RekeningTerkunci) as info_error:
             TransaksiService.transfer(
-                nik_masuk=nik, norek_pengirim=norek_pengirim,
-                norek_penerima=norek_penerima, pin=pin_benar, nominal=nominal,
+                nik_masuk=nik,
+                norek_pengirim=norek_pengirim,
+                norek_penerima=norek_penerima,
+                pin=pin_benar,
+                nominal=nominal,
             )
 
         waktu_kunci_sesudah = koneksi_test.execute(
@@ -1946,36 +2073,80 @@ class TestTransfer:
         jejak = _ambil_jejak_transfer(koneksi_test, norek_pengirim, norek_penerima)
 
         assert waktu_kunci_sesudah == waktu_kunci
-        assert RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test) == saldo_pengirim_sebelum
-        assert RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test) == saldo_penerima_sebelum
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
+            == saldo_pengirim_sebelum
+        )
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+            == saldo_penerima_sebelum
+        )
         assert all(v is None for v in jejak.values())
-        assert "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah" in str(info_error.value)
+        assert (
+            "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah"
+            in str(info_error.value)
+        )
 
     @pytest.mark.parametrize(
         "kwargs_salah, pesan_error",
         [
-            pytest.param({"norek_penerima": None}, "Nomor rekening penerima tidak boleh kosong", id="penerima None"),
-            pytest.param({"norek_penerima": ""}, "Nomor rekening penerima tidak boleh kosong", id="penerima kosong"),
-            pytest.param({"norek_penerima": " "}, "Nomor rekening penerima tidak boleh kosong", id="penerima spasi"),
-            pytest.param({"norek_penerima": "12345abcde123456"}, "Nomor rekening penerima tidak boleh mengandung huruf",
-                         id="penerima ada huruf"),
-            pytest.param({"norek_penerima": "2" * 15}, "Jumlah digit nomor rekening penerima tidak valid",
-                         id="penerima 15 digit"),
-            pytest.param({"norek_penerima": "2" * 17}, "Jumlah digit nomor rekening penerima tidak valid",
-                         id="penerima 17 digit"),
-            pytest.param({"norek_penerima": "SAMA_DENGAN_PENGIRIM"}, "Tidak dapat transfer ke nomor rekening sendiri",
-                         id="penerima sama dengan pengirim"),
+            pytest.param(
+                {"norek_penerima": None},
+                "Nomor rekening penerima tidak boleh kosong",
+                id="penerima None",
+            ),
+            pytest.param(
+                {"norek_penerima": ""},
+                "Nomor rekening penerima tidak boleh kosong",
+                id="penerima kosong",
+            ),
+            pytest.param(
+                {"norek_penerima": " "},
+                "Nomor rekening penerima tidak boleh kosong",
+                id="penerima spasi",
+            ),
+            pytest.param(
+                {"norek_penerima": "12345abcde123456"},
+                "Nomor rekening penerima tidak boleh mengandung huruf",
+                id="penerima ada huruf",
+            ),
+            pytest.param(
+                {"norek_penerima": "2" * 15},
+                "Jumlah digit nomor rekening penerima tidak valid",
+                id="penerima 15 digit",
+            ),
+            pytest.param(
+                {"norek_penerima": "2" * 17},
+                "Jumlah digit nomor rekening penerima tidak valid",
+                id="penerima 17 digit",
+            ),
+            pytest.param(
+                {"norek_penerima": "SAMA_DENGAN_PENGIRIM"},
+                "Tidak dapat transfer ke nomor rekening sendiri",
+                id="penerima sama dengan pengirim",
+            ),
             pytest.param({"pin": None}, "PIN tidak boleh kosong", id="pin None"),
-            pytest.param({"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"),
-            pytest.param({"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"),
+            pytest.param(
+                {"pin": "1234"}, "PIN harus berupa 6 digit angka", id="pin kurang"
+            ),
+            pytest.param(
+                {"pin": "12345q"}, "PIN harus berupa 6 digit angka", id="pin ada huruf"
+            ),
             # membuktikan urutan: cek murah sebelum PIN, jadi PIN salah tidak sempat dihitung
-            pytest.param({"norek_penerima": "123", "pin": "123457"}, "Jumlah digit nomor rekening penerima tidak valid",
-                         id="penerima cacat dan pin salah"),
+            pytest.param(
+                {"norek_penerima": "123", "pin": "123457"},
+                "Jumlah digit nomor rekening penerima tidak valid",
+                id="penerima cacat dan pin salah",
+            ),
         ],
     )
     def test_transfer_dengan_input_tidak_valid(
-            self, koneksi_test, siapkan_data_rekening_dan_nasabah,
-            siapkan_data_rekening_penerima, kwargs_salah, pesan_error,
+        self,
+        koneksi_test,
+        siapkan_data_rekening_dan_nasabah,
+        siapkan_data_rekening_penerima,
+        kwargs_salah,
+        pesan_error,
     ):
         nik = siapkan_data_rekening_dan_nasabah["nik"]
         norek_pengirim = siapkan_data_rekening_dan_nasabah["norek"]
@@ -1993,8 +2164,12 @@ class TestTransfer:
         if kwargs["norek_penerima"] == "SAMA_DENGAN_PENGIRIM":
             kwargs["norek_penerima"] = norek_pengirim
 
-        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
-        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+        saldo_pengirim_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_pengirim, koneksi=koneksi_test
+        )
+        saldo_penerima_sebelum = RekeningRepository.ambil_saldo(
+            norek=norek_penerima, koneksi=koneksi_test
+        )
 
         with pytest.raises(InputTidakValid) as info_error:
             TransaksiService.transfer(**kwargs)
@@ -2005,7 +2180,13 @@ class TestTransfer:
         jejak = _ambil_jejak_transfer(koneksi_test, norek_pengirim, norek_penerima)
 
         assert percobaan_sesudah == 0
-        assert RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test) == saldo_pengirim_sebelum
-        assert RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test) == saldo_penerima_sebelum
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_pengirim, koneksi=koneksi_test)
+            == saldo_pengirim_sebelum
+        )
+        assert (
+            RekeningRepository.ambil_saldo(norek=norek_penerima, koneksi=koneksi_test)
+            == saldo_penerima_sebelum
+        )
         assert all(v is None for v in jejak.values())
         assert pesan_error in str(info_error.value)

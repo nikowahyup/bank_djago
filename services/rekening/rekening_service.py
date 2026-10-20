@@ -622,7 +622,9 @@ class RekeningService:
     @staticmethod
     def ambil_data_rekening(norek):
         with buat_koneksi_baca() as koneksi:
-           data_rekening =  RekeningRepository.cari_rekening_dengan_norek(norek=norek, koneksi=koneksi)
+            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+                norek=norek, koneksi=koneksi
+            )
         return data_rekening
 
     @staticmethod

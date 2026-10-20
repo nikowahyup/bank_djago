@@ -33,7 +33,9 @@ class TransaksiService:
 
         Validator.validasi_format_identitas(nik=nik_masuk, norek=norek, pin=pin)
 
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -109,7 +111,9 @@ class TransaksiService:
 
         Validator.validasi_format_identitas(nik=nik_masuk, norek=norek, pin=pin)
 
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik_masuk, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
@@ -188,15 +192,23 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def transfer(nik_masuk, norek_pengirim, norek_penerima, pin, nominal, hari_ini=None):
+    def transfer(
+        nik_masuk, norek_pengirim, norek_penerima, pin, nominal, hari_ini=None
+    ):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
         Validator.validasi_nominal(nominal=nominal)
-        Validator.validasi_format_identitas(nik=nik_masuk, norek=norek_pengirim, pin=pin)
-        Validator.validasi_norek_penerima(norek_pengirim=norek_pengirim, norek_penerima=norek_penerima)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik_masuk,norek_aktif=norek_pengirim, pin_input=pin)
+        Validator.validasi_format_identitas(
+            nik=nik_masuk, norek=norek_pengirim, pin=pin
+        )
+        Validator.validasi_norek_penerima(
+            norek_pengirim=norek_pengirim, norek_penerima=norek_penerima
+        )
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik_masuk, norek_aktif=norek_pengirim, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
