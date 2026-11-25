@@ -6,7 +6,6 @@ from bank_djago.penyimpanan.loaders.nasabah_loader import NasabahLoader
 from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.riwayat_repository import RiwayatRepository
-from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.services.exceptions import (
     NasabahTidakDitemukan,
     InputTidakValid,
@@ -28,11 +27,11 @@ from bank_djago.core.rekening import (
     RekeningGold,
     RekeningPlatinum,
 )
+from bank_djago.penyimpanan.pencatatan_helper import HelperPencatatan
 
 from bank_djago.utils.validator import Validator
 from bank_djago.penyimpanan.repositories.rekening_repository import RekeningRepository
 import bank_djago.penyimpanan.sqlite.database as db_module
-from bank_djago.penyimpanan.repositories.transaksi_repository import TransaksiRepository
 from bank_djago.utils.utility import JenisTransaksi, Utilitas
 from bank_djago.penyimpanan.sqlite.database import buat_koneksi_baca, buat_koneksi_tulis
 
@@ -45,7 +44,6 @@ platinum = RekeningPlatinum(norek="1234", pin="1234", pemilik=None)
 class RekeningService:
 
     PESAN_REKENING_TERKUNCI = "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah. Coba beberapa saat lagi"
-
 
     level = {1: "Reguler", 2: "Prioritas", 3: "Gold", 4: "Platinum"}
     jenis_rekening = {
@@ -80,7 +78,7 @@ class RekeningService:
     }
 
     @staticmethod
-    def _muat_rekening_dan_validasi_pemilik(nik : str, norek : str , koneksi: object) -> Rekening:
+    def muat_rekening_dan_validasi_pemilik(nik: str, norek: str, koneksi: object):
 
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
@@ -90,9 +88,9 @@ class RekeningService:
         nasabah = rekening.pemilik
 
         if nasabah.NIK != nik:
-            raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
+            raise NikTidakSesuai(f"NIK ini tidak terdaftar sebagai pemilik rekening")
 
-        return rekening
+        return rekening, nasabah
 
     @staticmethod
     def _validasi_target_level(target_level):
@@ -105,28 +103,28 @@ class RekeningService:
         if target_level not in RekeningService.jenis_rekening:
             raise InputTidakValid("Level rekening tidak tersedia")
 
-
-
     @staticmethod
-    def _buat_konfigurasi_rekening(rekening : Rekening, target_level : int) -> Rekening:
+    def _buat_konfigurasi_rekening(rekening: Rekening, target_level: int) -> Rekening:
         kelas_rekening = RekeningService.jenis_rekening[target_level]["kelas"]
 
         return kelas_rekening(
-            norek=rekening.norek,
-            pin=rekening.pin,
-            pemilik=rekening.pemilik
+            norek=rekening.norek, pin=rekening.pin, pemilik=rekening.pemilik
         )
+
     @staticmethod
-    def upgrade_rekening(nik : str, norek : str, target_level : int, pin : str):
+    def upgrade_rekening(nik: str, norek: str, target_level: int, pin: str) -> bool:
 
         RekeningService._validasi_target_level(target_level=target_level)
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningService._muat_rekening_dan_validasi_pemilik(nik=nik, norek=norek, koneksi=koneksi)
-            nasabah = rekening.pemilik
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik, norek=norek, koneksi=koneksi
+            )
 
             if not rekening.boleh_ubah_level:
                 raise StatusTidakValid(
@@ -149,11 +147,9 @@ class RekeningService:
                     "Saldo kini tidak memenuhi saldo minimum rekening tujuan"
                 )
 
-
-
             konfigurasi_target_rekening = RekeningService._buat_konfigurasi_rekening(
-                rekening=rekening,
-                target_level=target_level)
+                rekening=rekening, target_level=target_level
+            )
 
             jenis_rekening_awal = rekening.jenis
             jenis_rekening_tujuan = konfigurasi_target_rekening.jenis
@@ -180,10 +176,6 @@ class RekeningService:
                 log=f"PENINGKATAN REKENING | Rekening awal {jenis_rekening_awal} ke Rekening {jenis_rekening_tujuan}",
             )
 
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
-            )
-
             audit = AuditService.tambah_audit(
                 kategori="administratif",
                 objek="rekening",
@@ -196,21 +188,26 @@ class RekeningService:
                 nik=nasabah.NIK,
                 norek=konfigurasi_target_rekening.norek,
             )
+            HelperPencatatan.simpan(
+                koneksi=koneksi, norek=rekening.norek, audit=audit, riwayat=riwayat
+            )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
+            return True
 
     @staticmethod
-    def downgrade_rekening(nik : str, norek : str, target_level : int, pin : str):
+    def downgrade_rekening(nik: str, norek: str, target_level: int, pin: str) -> bool:
 
         RekeningService._validasi_target_level(target_level=target_level)
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningService._muat_rekening_dan_validasi_pemilik(nik=nik, norek=norek,koneksi=koneksi)
-
-            nasabah = rekening.pemilik
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik, norek=norek, koneksi=koneksi
+            )
 
             if not rekening.boleh_ubah_level:
                 raise StatusTidakValid(
@@ -226,14 +223,15 @@ class RekeningService:
 
             Validator.amankan_rekening(rekening=rekening)
 
-            konfigurasi_target_rekening = RekeningService._buat_konfigurasi_rekening(rekening=rekening, target_level=target_level)
-
+            konfigurasi_target_rekening = RekeningService._buat_konfigurasi_rekening(
+                rekening=rekening, target_level=target_level
+            )
+            jenis_rek_awal = rekening.jenis
+            jenis_rek_tujuan = konfigurasi_target_rekening.jenis
 
             limit_sisa_baru = konfigurasi_target_rekening.limit_harian
             terakhir_ubah_rekening_lama = rekening.terakhir_ubah_rekening
             terakhir_ubah_rekening_baru = datetime.date.today()
-            jenis_rek_awal = rekening.jenis
-            jenis_rek_tujuan = konfigurasi_target_rekening.jenis
 
             jumlah_baris = RekeningRepository.ubah_state_setelah_upgrade_atau_downgrade(
                 norek=rekening.norek,
@@ -246,15 +244,10 @@ class RekeningService:
             if jumlah_baris != 1:
                 raise PerbaruiStatusGagal("Gagal melakukan penurunan rekening")
 
-
             riwayat = RiwayatTemplate.template(
                 kategori="rekening",
                 jenis="penurunan rekening",
                 log=f" PENURUNAN REKENING | Rekening Awal {jenis_rek_awal} ke Rekening {jenis_rek_tujuan}",
-            )
-
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
             )
 
             audit = AuditService.tambah_audit(
@@ -270,10 +263,14 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
+            HelperPencatatan.simpan(
+                koneksi=koneksi, norek=rekening.norek, audit=audit, riwayat=riwayat
+            )
+
+            return True
 
     @staticmethod
-    def blokir_rekening(nik : str, norek : str, pin : str, alasan : str):
+    def blokir_rekening(nik: str, norek: str, pin: str, alasan: str) -> bool:
 
         if not isinstance(alasan, str):
             raise InputTidakValid("Alasan blokir harus berupa kalimat")
@@ -284,13 +281,15 @@ class RekeningService:
             raise InputTidakValid("Alasan blokir tidak boleh kosong")
 
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningService._muat_rekening_dan_validasi_pemilik(nik=nik, norek=norek, koneksi=koneksi)
-
-            nasabah = rekening.pemilik
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik, norek=norek, koneksi=koneksi
+            )
 
             Validator.amankan_rekening(rekening=rekening)
 
@@ -332,22 +331,25 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
+            HelperPencatatan.simpan(
+                koneksi=koneksi, norek=rekening.norek, audit=audit, riwayat=riwayat
             )
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
+
+            return True
 
     @staticmethod
-    def buka_blokir(nik : str, norek : str, pin : str):
+    def buka_blokir(nik: str, norek: str, pin: str) -> bool:
 
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
-        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin)
+        RekeningService.verifikasi_pin_rekening(
+            nik_aktif=nik, norek_aktif=norek, pin_input=pin
+        )
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningService._muat_rekening_dan_validasi_pemilik(nik=nik, norek=norek, koneksi=koneksi)
-
-            nasabah = rekening.pemilik
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik, norek=norek, koneksi=koneksi
+            )
 
             if rekening.status == "tutup":
                 raise StatusTidakValid("Rekening ini telah ditutup!")
@@ -387,13 +389,16 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
+            HelperPencatatan.simpan(
+                koneksi=koneksi, norek=rekening.norek, audit=audit, riwayat=riwayat
             )
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
+
+            return True
 
     @staticmethod
-    def buka_rekening(nik : str, pilihan : int, pin : str, setor_awal : int, koneksi : object | None=None) -> Rekening:
+    def buka_rekening(
+        nik: str, pilihan: int, pin: str, setor_awal: int, koneksi: object | None = None
+    ) -> Rekening:
 
         RekeningService._validasi_target_level(target_level=pilihan)
         Validator.validasi_format_nik(nik=nik)
@@ -401,7 +406,6 @@ class RekeningService:
 
         if not isinstance(setor_awal, int) or isinstance(setor_awal, bool):
             raise InputTidakValid("Setor awal harus berupa angka")
-
 
         buat_baru_diluar_daftar = koneksi is None
 
@@ -416,32 +420,28 @@ class RekeningService:
             if data_nasabah is None:
                 raise NasabahTidakDitemukan("NIK tidak terdaftar")
 
-            nasabah_obj = NasabahLoader.rangkai_nasabah(data_nasabah=data_nasabah)
-
+            nasabah = NasabahLoader.rangkai_nasabah(data_nasabah=data_nasabah)
 
             norek = RekeningService.buat_norek(pilihan, koneksi)
             pin_hash = Validator.buat_hash(pin=pin)
 
-            objek_rekening_baru = RekeningService.jenis_rekening[pilihan]['kelas']
+            objek_rekening_baru = RekeningService.jenis_rekening[pilihan]["kelas"]
 
             waktu_dibuat = datetime.datetime.now()
 
-            rekening_baru_obj = objek_rekening_baru(
-                norek=norek,
-                pin=pin_hash,
-                pemilik=nasabah_obj,
-                waktu_dibuat=waktu_dibuat
+            rekening_baru = objek_rekening_baru(
+                norek=norek, pin=pin_hash, pemilik=nasabah, waktu_dibuat=waktu_dibuat
             )
 
-            if setor_awal < rekening_baru_obj.saldosetor_min:
+            if setor_awal < rekening_baru.saldosetor_min:
                 raise InputTidakValid(
                     "Setor awal tidak memenuhi saldo minimal setoran awal"
                 )
 
-            RekeningRepository.tambah_rekening(rekening=rekening_baru_obj, koneksi=koneksi)
+            RekeningRepository.tambah_rekening(rekening=rekening_baru, koneksi=koneksi)
 
             jumlah_baris = RekeningRepository.tambah_saldo(
-                norek=rekening_baru_obj.norek,
+                norek=rekening_baru.norek,
                 nominal=setor_awal,
                 koneksi=koneksi,
             )
@@ -451,15 +451,12 @@ class RekeningService:
 
             transaksi = {
                 "jenis": JenisTransaksi.SETOR_AWAL,
-                "norek_tujuan": rekening_baru_obj.norek,
+                "norek_tujuan": rekening_baru.norek,
                 "nominal": setor_awal,
                 "saldo_tujuan_sebelum": 0,
                 "saldo_tujuan_sesudah": setor_awal,
-                "waktu": rekening_baru_obj.waktu_dibuat,
+                "waktu": rekening_baru.waktu_dibuat,
             }
-            id_transaksi = TransaksiRepository.tambah_transaksi(
-                transaksi=transaksi, koneksi=koneksi
-            )
 
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
@@ -471,10 +468,10 @@ class RekeningService:
                 kategori="administratif",
                 objek="rekening",
                 aksi="pembukaan_rekening",
-                log=f"{nasabah_obj.nama} membuka rekening baru",
-                nama=nasabah_obj.nama,
-                nik=nasabah_obj.NIK,
-                norek=rekening_baru_obj.norek,
+                log=f"{nasabah.nama} membuka rekening baru",
+                nama=nasabah.nama,
+                nik=nasabah.NIK,
+                norek=rekening_baru.norek,
             )
             riwayat_buka = RiwayatTemplate.template(
                 kategori="rekening",
@@ -482,23 +479,21 @@ class RekeningService:
                 log=f"BUKA REKENING | {norek}",
             )
             RiwayatRepository.tambah_riwayat(
-                norek=rekening_baru_obj.norek, riwayat=riwayat_buka, koneksi=koneksi
-            )
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening_baru_obj.norek,
-                riwayat=riwayat,
-                koneksi=koneksi,
-                id_transaksi=id_transaksi,
+                norek=rekening_baru.norek, riwayat=riwayat_buka, koneksi=koneksi
             )
 
-            AuditRepository.tambah_audit(
-                audit=audit, koneksi=koneksi, id_transaksi=id_transaksi
+            HelperPencatatan.simpan(
+                koneksi=koneksi,
+                norek=rekening_baru.norek,
+                audit=audit,
+                riwayat=riwayat,
+                transaksi=transaksi,
             )
 
             if buat_baru_diluar_daftar:
                 koneksi.commit()
 
-            return rekening_baru_obj
+            return rekening_baru
 
         except Exception:
             if buat_baru_diluar_daftar:
@@ -511,24 +506,21 @@ class RekeningService:
                 koneksi.close()
 
     @staticmethod
-    def ganti_pin(nik : str, norek : str, pin_lama : str, pin_baru : str):
+    def ganti_pin(nik: str, norek: str, pin_lama: str, pin_baru: str) -> bool:
 
-        Validator.validasi_format_identitas(nik=nik, norek=norek,pin=pin_lama)
+        Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin_lama)
         Validator.validasi_format_pin(pin=pin_baru)
-
 
         with buat_koneksi_tulis() as koneksi:
 
-
-            rekening = RekeningService._muat_rekening_dan_validasi_pemilik(nik=nik, norek=norek, koneksi=koneksi)
-
-            nasabah = rekening.pemilik
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik, norek=norek, koneksi=koneksi
+            )
 
             Validator.amankan_rekening(rekening=rekening)
 
             hash_pin_lama = rekening.pin
             Validator.verifikasi_pin(pin_input=pin_lama, pin_database=hash_pin_lama)
-
 
             hash_pin_baru = Validator.buat_hash(pin=pin_baru)
 
@@ -558,79 +550,14 @@ class RekeningService:
                 norek=rekening.norek,
             )
 
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek, riwayat=riwayat, koneksi=koneksi
-            )
-            AuditRepository.tambah_audit(audit=audit, koneksi=koneksi)
-
-
-    # method untuk membuat nomor rekening sesuai prefix yang tersedia
-    @staticmethod
-    def buat_norek(level : int, koneksi : object) -> str:
-
-        if level not in RekeningService.jenis_rekening:
-            raise InputTidakValid("Pilihan level rekening tidak tersedia")
-
-        prefix = RekeningService.jenis_rekening[level]["prefix"]
-
-        while True:
-            digit_sisa = random.randint(100_000_000_000, 999_999_999_999)
-            norek = prefix + str(digit_sisa)
-
-            is_norek_terdaftar = RekeningRepository.cari_rekening_dengan_norek(
-                norek, koneksi
+            HelperPencatatan.simpan(
+                koneksi=koneksi, norek=rekening.norek, audit=audit, riwayat=riwayat
             )
 
-            if is_norek_terdaftar is None:
-                return norek
-
-    # method pencari semua rekening milik nasabah
-    @staticmethod
-    def cari_semua_rekening(nik):
-
-        with buat_koneksi_baca() as koneksi:
-            return RekeningRepository.cari_rekening_dengan_nik(nik=nik, koneksi=koneksi)
-
-    # method filter status rekening selain tutup untuk pilihan login
-    @staticmethod
-    def cari_norek_tersedia(nik):
-
-        daftar_rekening = RekeningService.cari_semua_rekening(nik=nik)
-
-        daftar_norek_aktif = []
-        for data_rekening in daftar_rekening:
-            if data_rekening["status"] != "tutup":
-                daftar_norek_aktif.append(data_rekening["norek"])
-
-        return daftar_norek_aktif
-
-    # method untuk menampilkan semua rekening nasabah untuk menu riwayat
-    @staticmethod
-    def cari_semua_rekening_untuk_riwayat(nik):
-
-        daftar_rekening_nasabah = RekeningService.cari_semua_rekening(nik=nik)
-
-        return {data["norek"]: data["status"] for data in daftar_rekening_nasabah}
-
-    # method untuk menampilkan rekening untuk diupgrade/downgrade serta penutupan
-    @staticmethod
-    def cari_rekening_untuk_diubah_atau_untuk_pangajuan(norek):
-        with buat_koneksi_baca() as koneksi:
-
-            return RekeningRepository.cari_rekening_dengan_norek(
-                norek=norek, koneksi=koneksi
-            )
+            return True
 
     @staticmethod
-    def ambil_data_rekening(norek):
-        with buat_koneksi_baca() as koneksi:
-            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
-                norek=norek, koneksi=koneksi
-            )
-        return data_rekening
-
-    @staticmethod
-    def verifikasi_pin_rekening(nik_aktif, norek_aktif, pin_input):
+    def verifikasi_pin_rekening(nik_aktif: str, norek_aktif: str, pin_input: str):
 
         with buat_koneksi_tulis() as koneksi:
             data_rekening = RekeningRepository.ambil_data_rekening_dengan_nik_dan_norek(
@@ -653,7 +580,6 @@ class RekeningService:
                     raise RekeningTerkunci(
                         "Rekening terkunci sementara karena terlalu banyak percobaan PIN salah. Coba beberapa saat lagi"
                     )
-
 
             gagal = False
             try:
@@ -698,3 +624,68 @@ class RekeningService:
 
         if gagal:
             raise PinTidakCocok("PIN yang dimasukkan salah")
+
+    # method untuk membuat nomor rekening sesuai prefix yang tersedia
+    @staticmethod
+    def buat_norek(level: int, koneksi: object) -> str:
+
+        if level not in RekeningService.jenis_rekening:
+            raise InputTidakValid("Pilihan level rekening tidak tersedia")
+
+        prefix = RekeningService.jenis_rekening[level]["prefix"]
+
+        while True:
+            digit_sisa = random.randint(100_000_000_000, 999_999_999_999)
+            norek = prefix + str(digit_sisa)
+
+            is_norek_terdaftar = RekeningRepository.cari_rekening_dengan_norek(
+                norek, koneksi
+            )
+
+            if is_norek_terdaftar is None:
+                return norek
+
+    # method pencari semua rekening milik nasabah
+    @staticmethod
+    def cari_semua_rekening(nik: str) -> list:
+
+        with buat_koneksi_baca() as koneksi:
+            return RekeningRepository.cari_rekening_dengan_nik(nik=nik, koneksi=koneksi)
+
+    # method filter status rekening selain tutup untuk pilihan login
+    @staticmethod
+    def cari_norek_tersedia(nik: str) -> list:
+
+        daftar_rekening = RekeningService.cari_semua_rekening(nik=nik)
+
+        daftar_rekening_aktif = []
+        for data_rekening in daftar_rekening:
+            if data_rekening["status"] != "tutup":
+                daftar_rekening_aktif.append(data_rekening["norek"])
+
+        return daftar_rekening_aktif
+
+    # method untuk menampilkan semua rekening nasabah untuk menu riwayat
+    @staticmethod
+    def cari_semua_rekening_untuk_riwayat(nik: str) -> dict:
+
+        daftar_rekening_nasabah = RekeningService.cari_semua_rekening(nik=nik)
+
+        return {data["norek"]: data["status"] for data in daftar_rekening_nasabah}
+
+    # method untuk menampilkan rekening untuk diupgrade/downgrade serta penutupan
+    @staticmethod
+    def cari_rekening_untuk_diubah_atau_untuk_pangajuan(norek):
+        with buat_koneksi_baca() as koneksi:
+
+            return RekeningRepository.cari_rekening_dengan_norek(
+                norek=norek, koneksi=koneksi
+            )
+
+    @staticmethod
+    def ambil_data_rekening(norek):
+        with buat_koneksi_baca() as koneksi:
+            data_rekening = RekeningRepository.cari_rekening_dengan_norek(
+                norek=norek, koneksi=koneksi
+            )
+        return data_rekening
