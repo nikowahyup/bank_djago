@@ -449,6 +449,7 @@ class TestHentikanAro:
         siapkan_data_rekening_dan_nasabah,
     ):
         kwargs = self._kwargs_valid(siapkan_data_rekening_dan_nasabah)
+        kwargs['pin'] = '123457'
         norek = kwargs['norek_pemberhentian']
         id_deposito = kwargs['id_deposito']
 
