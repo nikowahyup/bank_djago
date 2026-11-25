@@ -1,7 +1,7 @@
 import datetime
 
+from bank_djago.core.rekening import Rekening
 from bank_djago import RekeningService
-from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 from bank_djago.utils.utility import Utilitas, JenisTransaksi
 from bank_djago.services.transaksi.limit_service import LimitService
 from bank_djago.services.admin.audit_service import AuditService
@@ -20,14 +20,14 @@ from bank_djago.services.exceptions import (
     StatusTidakValid,
     PerbaruiStatusGagal,
     PenguranganSaldoGagal,
-    NikTidakSesuai,
 )
+from bank_djago.penyimpanan.pencatatan_helper import HelperPencatatan
 
 
 class TransaksiService:
 
     @staticmethod
-    def setor_tunai(nik_masuk, norek, pin, nominal):
+    def setor_tunai(nik_masuk: str, norek: str, pin: str, nominal: int) -> bool:
 
         Validator.validasi_nominal(nominal=nominal)
 
@@ -39,14 +39,9 @@ class TransaksiService:
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
-            if rekening is None:
-                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
-
-            nasabah = rekening.pemilik
-
-            if nasabah.NIK != nik_masuk:
-                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik_masuk, koneksi=koneksi, norek=norek
+            )
 
             Validator.amankan_rekening(rekening=rekening)
 
@@ -70,21 +65,10 @@ class TransaksiService:
                 "waktu": datetime.datetime.now(),
             }
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(
-                transaksi=transaksi, koneksi=koneksi
-            )
-
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
                 jenis="setor uang",
                 log=f"SETOR UANG | +Rp{Utilitas.format_rupiah(nominal)}",
-            )
-
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek,
-                riwayat=riwayat,
-                koneksi=koneksi,
-                id_transaksi=id_transaksi,
             )
 
             audit = AuditService.tambah_audit(
@@ -96,8 +80,13 @@ class TransaksiService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
             )
-            AuditRepository.tambah_audit(
-                audit=audit, koneksi=koneksi, id_transaksi=id_transaksi
+
+            HelperPencatatan.simpan(
+                koneksi=koneksi,
+                norek=norek,
+                audit=audit,
+                riwayat=riwayat,
+                transaksi=transaksi,
             )
 
         return True
@@ -105,7 +94,7 @@ class TransaksiService:
     # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def tarik_tunai(nik_masuk, norek, pin, nominal):
+    def tarik_tunai(nik_masuk: str, norek: str, pin: str, nominal: int) -> bool:
 
         Validator.validasi_nominal(nominal=nominal)
 
@@ -117,15 +106,9 @@ class TransaksiService:
 
         with buat_koneksi_tulis() as koneksi:
 
-            rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
-
-            if rekening is None:
-                raise RekeningTidakDitemukan("Rekening tidak terdaftar")
-
-            nasabah = rekening.pemilik
-
-            if nasabah.NIK != nik_masuk:
-                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
+            rekening, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik_masuk, norek=norek, koneksi=koneksi
+            )
 
             Validator.amankan_rekening(rekening=rekening)
 
@@ -158,20 +141,10 @@ class TransaksiService:
                 "waktu": datetime.datetime.now(),
             }
 
-            id_transaksi = TransaksiRepository.tambah_transaksi(
-                transaksi=transaksi, koneksi=koneksi
-            )
             riwayat = RiwayatTemplate.template(
                 kategori="transaksi",
                 jenis="tarik uang",
                 log=f"TARIK UANG | -Rp{Utilitas.format_rupiah(nominal)}",
-            )
-
-            RiwayatRepository.tambah_riwayat(
-                norek=rekening.norek,
-                riwayat=riwayat,
-                koneksi=koneksi,
-                id_transaksi=id_transaksi,
             )
 
             audit = AuditService.tambah_audit(
@@ -183,8 +156,13 @@ class TransaksiService:
                 nik=rekening.pemilik.NIK,
                 norek=rekening.norek,
             )
-            AuditRepository.tambah_audit(
-                audit=audit, koneksi=koneksi, id_transaksi=id_transaksi
+
+            HelperPencatatan.simpan(
+                koneksi=koneksi,
+                norek=norek,
+                audit=audit,
+                riwayat=riwayat,
+                transaksi=transaksi,
             )
 
         return True
@@ -193,7 +171,12 @@ class TransaksiService:
 
     @staticmethod
     def transfer(
-        nik_masuk, norek_pengirim, norek_penerima, pin, nominal, hari_ini=None
+        nik_masuk: str,
+        norek_pengirim: str,
+        norek_penerima: str,
+        pin: str,
+        nominal: str,
+        hari_ini: datetime.date | None = None,
     ):
 
         if hari_ini is None:
@@ -212,17 +195,9 @@ class TransaksiService:
 
         with buat_koneksi_tulis() as koneksi:
 
-            pengirim = RekeningLoader.muat_rekening(
-                norek=norek_pengirim, koneksi=koneksi
+            pengirim, nasabah = RekeningService.muat_rekening_dan_validasi_pemilik(
+                nik=nik_masuk, norek=norek_pengirim, koneksi=koneksi
             )
-
-            if pengirim is None:
-                raise RekeningTidakDitemukan("Rekening pengirim tidak terdaftar")
-
-            nasabah = pengirim.pemilik
-
-            if nasabah.NIK != nik_masuk:
-                raise NikTidakSesuai("NIK ini tidak terdaftar sebagai pemilik rekening")
 
             Validator.amankan_rekening(pengirim)
 
@@ -378,7 +353,9 @@ class TransaksiService:
         return True
 
     @staticmethod
-    def cari_penerima(norek_penerima, norek_pengirim, koneksi=None):
+    def cari_penerima(
+        norek_penerima: str, norek_pengirim: str, koneksi=None
+    ) -> Rekening:
 
         from bank_djago.penyimpanan.loaders.rekening_loaders import RekeningLoader
 
@@ -410,7 +387,9 @@ class TransaksiService:
                 koneksi.close()
 
     @staticmethod
-    def transfer_semua_saldo(norek_pengirim, norek_penerima, nominal, koneksi):
+    def transfer_semua_saldo(
+        norek_pengirim: str, norek_penerima: str, nominal: int, koneksi
+    ):
 
         penerima = TransaksiService.cari_penerima(
             norek_penerima=norek_penerima,
