@@ -78,7 +78,7 @@ class RekeningService:
     }
 
     @staticmethod
-    def muat_rekening_dan_validasi_pemilik(nik: str, norek: str, koneksi: object):
+    def muat_rekening_dan_validasi_pemilik(nik: str, norek: str, koneksi):
 
         rekening = RekeningLoader.muat_rekening(norek=norek, koneksi=koneksi)
 
