@@ -136,7 +136,7 @@ class DepositoService:
             )
             if jumlah_baris != 1:
                 raise PenguranganSaldoGagal(
-                    "Terjadi kesalahan saat memotong saldo untuk deposito"
+                    "Terjadi kesalahan saat mengurangi saldo untuk deposito"
                 )
 
             saldo_baru = RekeningRepository.ambil_saldo(norek=norek, koneksi=koneksi)
@@ -576,7 +576,7 @@ class DepositoService:
 
     # method scheduler untuk mengubah status deposito menjadi jatuh tempo
     @staticmethod
-    def tandai_jatuh_tempo(deposito, koneksi, hari_ini=None):
+    def tandai_jatuh_tempo(deposito : Deposito, koneksi, hari_ini : datetime.date | None=None):
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
@@ -672,7 +672,7 @@ class DepositoService:
         ]
 
     @staticmethod
-    def buat_pesan_pengingat(deposito, hari_ini=None):
+    def buat_pesan_pengingat(deposito : Deposito, hari_ini : datetime.date | None=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()

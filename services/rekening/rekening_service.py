@@ -93,7 +93,7 @@ class RekeningService:
         return rekening, nasabah
 
     @staticmethod
-    def _validasi_target_level(target_level):
+    def validasi_target_level(target_level):
         if not isinstance(target_level, int) or isinstance(target_level, bool):
             raise InputTidakValid("Level rekening harus berupa angka")
 
@@ -114,7 +114,7 @@ class RekeningService:
     @staticmethod
     def upgrade_rekening(nik: str, norek: str, target_level: int, pin: str) -> bool:
 
-        RekeningService._validasi_target_level(target_level=target_level)
+        RekeningService.validasi_target_level(target_level=target_level)
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
         RekeningService.verifikasi_pin_rekening(
             nik_aktif=nik, norek_aktif=norek, pin_input=pin
@@ -197,7 +197,7 @@ class RekeningService:
     @staticmethod
     def downgrade_rekening(nik: str, norek: str, target_level: int, pin: str) -> bool:
 
-        RekeningService._validasi_target_level(target_level=target_level)
+        RekeningService.validasi_target_level(target_level=target_level)
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin)
         RekeningService.verifikasi_pin_rekening(
             nik_aktif=nik, norek_aktif=norek, pin_input=pin
@@ -400,7 +400,7 @@ class RekeningService:
         nik: str, pilihan: int, pin: str, setor_awal: int, koneksi: object | None = None
     ) -> Rekening:
 
-        RekeningService._validasi_target_level(target_level=pilihan)
+        RekeningService.validasi_target_level(target_level=pilihan)
         Validator.validasi_format_nik(nik=nik)
         Validator.validasi_format_pin(pin=pin)
 
