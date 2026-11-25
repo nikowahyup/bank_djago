@@ -10,30 +10,21 @@ from bank_djago.services.rekening.rekening_service import RekeningService
 from bank_djago.penyimpanan.repositories.nasabah_repository import NasabahRepository
 from bank_djago.penyimpanan.repositories.audit_repository import AuditRepository
 from bank_djago.services.admin.audit_service import AuditService
+from bank_djago.utils.validator import Validator
 
 
 class NasabahService:
 
     @staticmethod
-    def daftar_dan_buka_rekening(nik, nama, alamat, pin, setor_awal, level):
+    def daftar_dan_buka_rekening(
+        nik: str, nama: str, alamat: str, pin: str, setor_awal: int, level: int
+    ):
 
-        if not nama.strip():
+        if not isinstance(nama, str) or not nama.strip():
             raise InputTidakValid("Nama tidak boleh kosong")
-        if not nik.strip():
-            raise InputTidakValid("NIK tidak boleh kosong")
-        if not nik.isdigit():
-            raise InputTidakValid("NIK tidak boleh mengandung huruf")
-        if not len(nik) == 16:
-            raise InputTidakValid("Jumlah digit NIK tidak valid")
-        if not alamat.strip():
+        Validator.validasi_format_nik(nik=nik)
+        if not isinstance(alamat, str) or not alamat.strip():
             raise InputTidakValid("Alamat tidak boleh kosong")
-        if level < 1 or level > 4:
-            raise InputTidakValid("Pilihan level rekening tidak tersedia")
-        if not len(pin) == 6 or not pin.isdigit():
-            raise InputTidakValid("PIN harus berupa 6 digit angka")
-
-        if not isinstance(setor_awal, int):
-            raise InputTidakValid("Setor awal harus berupa angka")
 
         with buat_koneksi_tulis() as koneksi:
             validasi_nik = NasabahRepository.cari_nasabah_dengan_nik(
@@ -71,7 +62,7 @@ class NasabahService:
         return nasabah_baru, rekening_baru
 
     @staticmethod
-    def ganti_alamat(nik, alamat_baru):
+    def ganti_alamat(nik: str, alamat_baru: str):
 
         alamat_baru = alamat_baru.strip()
 
