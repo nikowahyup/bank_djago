@@ -94,7 +94,7 @@ def siapkan_data_rekening_penerima(koneksi_test):
 def siapkan_rekening_siap_diturunkan(koneksi_test):
     koneksi_test.execute(
         """INSERT INTO nasabah (nama,alamat,nik) VALUES (?,?,?)""",
-        ("Pengujian", "jln.ninjaku", "123456789"),
+        ("Pengujian", "jln.ninjaku", "1010202002020101"),
     )
 
     koneksi_test.execute(
@@ -102,8 +102,8 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
         (norek, nik_pemilik, saldo, pin,limit_sisa, waktu_dibuat, reset, dapat_bunga, waktu_bayar_admin,level)
         VALUES(?,?,?,?,?,?,?,?,?,?)""",
         (
-            "000111222333",
-            "123456789",
+            "1975197591759175",
+            "1010202002020101",
             100_000_000,
             HASH_PIN_UJI,
             200_000_000,
@@ -116,4 +116,4 @@ def siapkan_rekening_siap_diturunkan(koneksi_test):
     )
     koneksi_test.commit()
 
-    return {"nik": "123456789", "norek": "000111222333", "pin": PIN_UJI}
+    return {"nik": "1010202002020101", "norek": "1975197591759175", "pin": PIN_UJI}
