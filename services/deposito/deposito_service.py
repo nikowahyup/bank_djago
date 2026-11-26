@@ -317,14 +317,15 @@ class DepositoService:
 
     @staticmethod
     def perpanjangan(
-        deposito: Deposito, koneksi, hari_ini: datetime.date | None = None
+        id_deposito: int, koneksi, hari_ini: datetime.date | None = None
     ):
+
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
 
         data_deposito = DepositoRepository.cari_deposito_dengan_id(
-            id_deposito=deposito.ID, koneksi=koneksi
+            id_deposito=id_deposito, koneksi=koneksi
         )
 
         if data_deposito is None:

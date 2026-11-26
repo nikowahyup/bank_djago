@@ -70,7 +70,7 @@ class Scheduler:
                         if sisa_hari <= 0:
 
                             DepositoService.tandai_jatuh_tempo(
-                                deposito=deposito, koneksi=koneksi, hari_ini=hari_ini
+                                deposito=deposito.ID, koneksi=koneksi, hari_ini=hari_ini
                             )
                             jumlah_deposito_jatuh_tempo += 1
 
@@ -98,7 +98,7 @@ class Scheduler:
                     with buat_koneksi_tulis() as koneksi:
 
                         DepositoService.perpanjangan(
-                            deposito=deposito, koneksi=koneksi, hari_ini=hari_ini
+                            id_deposito=deposito.ID, koneksi=koneksi, hari_ini=hari_ini
                         )
                         pesan = DepositoService.buat_pesan_pengingat(
                             deposito=deposito, hari_ini=hari_ini
