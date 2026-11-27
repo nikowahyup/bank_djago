@@ -272,7 +272,7 @@ class RekeningService:
     @staticmethod
     def blokir_rekening(nik: str, norek: str, pin: str, alasan: str) -> bool:
 
-        if not isinstance(alasan, str):
+        if not isinstance(alasan, str) or alasan.isdigit():
             raise InputTidakValid("Alasan blokir harus berupa kalimat")
 
         alasan_blokir = alasan.strip()
@@ -508,8 +508,12 @@ class RekeningService:
     @staticmethod
     def ganti_pin(nik: str, norek: str, pin_lama: str, pin_baru: str) -> bool:
 
+        if pin_lama == pin_baru:
+            raise InputTidakValid("PiN baru tidak boleh sama dengan PIN lama")
+
         Validator.validasi_format_identitas(nik=nik, norek=norek, pin=pin_lama)
         Validator.validasi_format_pin(pin=pin_baru)
+        RekeningService.verifikasi_pin_rekening(nik_aktif=nik, norek_aktif=norek, pin_input=pin_lama)
 
         with buat_koneksi_tulis() as koneksi:
 
