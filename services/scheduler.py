@@ -97,11 +97,11 @@ class Scheduler:
                 try:
                     with buat_koneksi_tulis() as koneksi:
 
-                        DepositoService.perpanjangan(
+                        jatuh_tempo_baru = DepositoService.perpanjangan(
                             id_deposito=deposito.ID, koneksi=koneksi, hari_ini=hari_ini
                         )
                         pesan = DepositoService.buat_pesan_pengingat(
-                            deposito=deposito, hari_ini=hari_ini
+                            deposito=deposito, hari_ini=hari_ini, jatuh_tempo_baru=jatuh_tempo_baru
                         )
 
                         NotifikasiService.simpan_notifikasi_referensi(

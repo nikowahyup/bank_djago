@@ -82,7 +82,7 @@ class TestAroPokok:
         )
 
 
-        hasil = DepositoService.perpanjangan(
+        jatuh_tempo_baru = DepositoService.perpanjangan(
                 **kwargs
         )
 
@@ -93,14 +93,14 @@ class TestAroPokok:
         data_deposito = DepositoRepository.cari_deposito_dengan_id(
             id_deposito=id_deposito, koneksi=koneksi_test
         )
-        tanggal_buka = (kwargs['hari_ini'] - datetime.timedelta(days=30)).isoformat()
-        jatuh_tempo = (kwargs['hari_ini'] + datetime.timedelta(days=30)).isoformat()
-        assert hasil is True
+        tanggal_buka = (kwargs['hari_ini']).isoformat()
+        jatuh_tempo = (kwargs['hari_ini'] + datetime.timedelta(days=31))
+        assert jatuh_tempo_baru == jatuh_tempo
         assert saldo_setelah == saldo_sebelum + 2_500
         assert data_deposito["status"] == StatusDeposito.AKTIF
         assert data_deposito["nominal"] == 1_000_000
         assert data_deposito["tanggal_buka"] == tanggal_buka
-        assert data_deposito['jatuh_tempo'] == '2026-12-26'
+        assert data_deposito['jatuh_tempo'] == jatuh_tempo.isoformat()
 
 
 
@@ -287,7 +287,7 @@ class TestAroPokokBunga:
             (norek,),
         ).fetchone()[0]
 
-        hasil = DepositoService.perpanjangan(
+        jatuh_tempo_baru = DepositoService.perpanjangan(
             **kwargs
         )
 
@@ -304,17 +304,17 @@ class TestAroPokokBunga:
             "SELECT COUNT(*) FROM audit WHERE norek = ? AND aksi = 'perpanjangan_deposito_aro'",
             (norek,),
         ).fetchone()[0]
-        tanggal_buka = (kwargs['hari_ini'] - datetime.timedelta(days=30)).isoformat()
-        jatuh_tempo = (kwargs['hari_ini'] + datetime.timedelta(days=30)).isoformat()
+        tanggal_buka = (kwargs['hari_ini']).isoformat()
+        jatuh_tempo = (kwargs['hari_ini'] + datetime.timedelta(days=31))
 
         assert riwayat == riwayat_sebelum + 1
         assert audit == audit_sebelum + 1
-        assert hasil is True
+        assert jatuh_tempo_baru == jatuh_tempo
         assert saldo_setelah == saldo_sebelum
         assert data_deposito["status"] == StatusDeposito.AKTIF
         assert data_deposito["nominal"] != 1_000_000
         assert data_deposito["tanggal_buka"] == tanggal_buka
-        assert data_deposito['jatuh_tempo'] == jatuh_tempo
+        assert data_deposito['jatuh_tempo'] == jatuh_tempo.isoformat()
 
 
 

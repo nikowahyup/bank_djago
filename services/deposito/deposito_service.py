@@ -488,7 +488,7 @@ class DepositoService:
         HelperPencatatan.simpan(
             koneksi=koneksi, norek=rekening.norek, audit=audit_aro, riwayat=riwayat_aro
         )
-        return True
+        return jatuh_tempo_baru
 
     @staticmethod
     def hentikan_aro(
@@ -673,7 +673,7 @@ class DepositoService:
         ]
 
     @staticmethod
-    def buat_pesan_pengingat(deposito : Deposito, hari_ini : datetime.date | None=None):
+    def buat_pesan_pengingat(deposito : Deposito, hari_ini : datetime.date | None=None, jatuh_tempo_baru : datetime.date | None=None):
 
         if hari_ini is None:
             hari_ini = datetime.date.today()
@@ -705,7 +705,7 @@ class DepositoService:
                 return (
                     f"Deposito ARO ber-ID {deposito.ID} berhasil diperpanjang otomatis. "
                     f"Jatuh tempo berikutnya pada "
-                    f"{Utilitas.format_tanggal_indonesia(deposito.jatuh_tempo)}."
+                    f"{Utilitas.format_tanggal_indonesia(jatuh_tempo_baru)}."
                 )
             else:
                 return None
